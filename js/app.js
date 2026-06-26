@@ -40,8 +40,20 @@
   }
   function pollLive() {
     Q.live.fetchStories(Q.store.getWatched(), Q.store.getArmed())
-      .then(function (stories) { addLive(stories, true); renderCurrent(); })
+      .then(function (stories) { addLive(stories, true); renderCurrent(); refreshPrices(); })
       .catch(function () { /* transient feed error — keep showing what we have */ });
+  }
+
+  // ---------- real prices ----------
+  function feedTickers() {
+    var set = {};
+    Q.store.getWatched().forEach(function (t) { set[t] = 1; });
+    Q.store.allStories().slice(0, 40).forEach(function (s) { (s.tickers || []).forEach(function (t) { if (Q.data.TICKERS[t]) set[t] = 1; }); });
+    return Object.keys(set);
+  }
+  function refreshPrices() {
+    if (!window.Q.prices) return;
+    Q.prices.load(feedTickers()).then(function () { renderCurrent(); }).catch(function () {});
   }
 
   // "if revenue-impacting for a selected stock or topic → report the stock / fire the alert"
@@ -84,6 +96,7 @@
         setMode('live');
         addLive(stories, false);     // backfill silently (no alert storm on first load)
         renderCurrent();
+        refreshPrices();
         startLoop();
       })
       .catch(function () { setMode('demo'); startLoop(); });

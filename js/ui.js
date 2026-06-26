@@ -37,6 +37,28 @@
     }).join('') + '</div>';
   }
 
+  // ---------- real price helpers ----------
+  function priceChip(t) {
+    var p = window.Q.prices ? Q.prices.get(t) : null;
+    if (!p) return '';
+    var up = p.changePct >= 0;
+    return '<span class="px ' + (up ? 'up' : 'down') + '" title="' + esc(t) + ' latest daily close">$' + p.price.toFixed(2) + ' <b>' + (up ? '+' : '') + p.changePct.toFixed(2) + '%</b></span>';
+  }
+  function pxMovesHtml(t) {
+    var p = window.Q.prices ? Q.prices.get(t) : null;
+    if (!p || !p.moves || !p.moves.length) return '';
+    var up = p.changePct >= 0;
+    var rows = p.moves.map(function (m) {
+      var d = new Date(m.date);
+      return '<div class="tl"><span class="tl-date">' + (d.getMonth() + 1) + '/' + d.getDate() + '</span>' +
+        '<span class="tl-h">$' + m.close.toFixed(2) + '</span>' +
+        '<span class="move ' + (m.pct >= 0 ? 'up' : 'down') + '">' + signed(m.pct) + '</span></div>';
+    }).join('');
+    return '<div class="d-section"><h4>Recent price action — ' + esc(t) + ' <span class="muted" style="text-transform:none;letter-spacing:0">· real daily</span></h4>' +
+      '<div class="similar-stat" style="background:var(--bg-2);border-color:var(--border)">Latest close <b>$' + p.price.toFixed(2) + '</b> · today <b style="color:' + (up ? 'var(--bull)' : 'var(--bear)') + '">' + (up ? '+' : '') + p.changePct.toFixed(2) + '%</b></div>' +
+      '<div class="timeline">' + rows + '</div></div>';
+  }
+
   // ---------- story card ----------
   function storyCard(s) {
     var im = s.impact;
@@ -50,6 +72,7 @@
         '<div class="headline">' + esc(s.headline) + '</div>' +
         '<div class="story-bottom">' +
           tickerChips(s.tickers) +
+          priceChip(s.tickers[0]) +
           impactPill(im) +
           (im.revenue ? '<span class="rev-flag">Revenue</span>' : '') +
           '<div class="conf">' + im.conf + '%<div class="conf-bar"><div class="conf-fill" style="width:' + im.conf + '%;background:' + confColor(im.dir) + '"></div></div></div>' +
@@ -100,6 +123,7 @@
       '<div class="d-section"><h4>Affected stocks</h4><div class="d-affected">' +
         s.tickers.map(function (t) { return affectedRow(t, im); }).join('') +
       '</div></div>' +
+      pxMovesHtml(primary) +
       '<div class="d-section"><h4>Lookback — how past stories moved ' + esc(primary) + '</h4>' +
         (lb.length ? '<div class="timeline">' + lb.map(tlRow).join('') + '</div>' : '<div class="muted">No prior scored stories for ' + esc(primary) + ' yet.</div>') +
       '</div>' +

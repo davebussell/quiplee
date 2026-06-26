@@ -115,6 +115,10 @@ input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px #6c5cff22; }
 .tickers { display: flex; gap: 5px; flex-wrap: wrap; }
 .tk { font-size: 12px; font-weight: 600; background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
 .tk.watched { border-color: var(--violet); color: var(--violet-2); }
+.px { font-size: 12px; font-weight: 600; color: var(--text); background: var(--bg-2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px; font-variant-numeric: tabular-nums; }
+.px b { font-weight: 700; }
+.px.up b { color: var(--bull); }
+.px.down b { color: var(--bear); }
 
 /* impact pill */
 .impact { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); }
