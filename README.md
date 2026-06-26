@@ -53,14 +53,37 @@ fires the alert about the affected stock. Both land in **Alerts** + a toast.
 **Lookback & similar:** open any story → see how past stories moved that ticker and
 how comparable events (same type / shared topic) moved peers (median 5-day move).
 
-## Roadmap → real data
+## Live news ingestion (real data)
 
-The synthetic feed is swappable. Replace `Q.data.generate()` / seed with a real
-news source (Benzinga, Polygon news, Marketaux, or an RSS/news API via a Netlify
-Function that hides your key), keep the `story` shape, and `evaluate()` keeps
-scoring impact. For real realized outcomes, join story timestamps to price data
-(the ClickShift Equities desk's provider layer can supply the moves).
+A Netlify Function pulls **real headlines** and scores them with the same engine:
+
+```
+netlify/functions/news.js   server-side fetch of Google News RSS (per ticker +
+                            per topic) and recent SEC EDGAR 8-K filings; returns
+                            normalized stories. Zero npm deps; no browser CORS.
+js/live.js                  fetches /.netlify/functions/news, enriches each item
+                            via classifyType() -> topic map -> evaluate()
+```
+
+Flow: on load, `app.js` calls the function with your watched tickers + armed
+topics. If it answers → **LIVE** mode (real news, polled every 60s; new
+revenue-impacting hits fire alerts). If it's unreachable (e.g. local `serve`,
+which doesn't run functions) → **DEMO** mode (synthetic generator). The header
+pill shows which. Seed stories stay on as the historical *memory* for lookback /
+similar. No API key required (Google News + EDGAR are free); add a tagged-news
+API (Benzinga/Marketaux/Finnhub) next for cleaner ticker tags + lower latency.
+
+**Local dev:** `npx serve` shows DEMO mode (no functions). To run the function
+locally, use `netlify dev` instead.
+
+## Roadmap
+- Tagged-news API (Benzinga via Polygon / Marketaux / Finnhub) for reliable ticker
+  tags, sentiment, and real-time webhooks.
+- Real realized outcomes: join story timestamps to price data so lookback/similar
+  use actual returns.
+- Server-side `evaluate()` + a DB (Supabase) so verdicts are stored and pushed
+  via realtime instead of recomputed per client.
 
 ## Notes
-- Heuristic impact model for demo — **not financial advice**.
-- `node --check js/*.js` passes (plain ES5-compatible scripts).
+- Heuristic impact model — **not financial advice**.
+- `node --check js/*.js` and `netlify/functions/*.js` pass (plain ES5-ish, no build).

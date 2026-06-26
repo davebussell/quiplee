@@ -103,8 +103,8 @@
   SEED.forEach(function (s) { s.ts = Date.now() - s.ago * MIN; });
 
   // ----------------------------- impact engine -----------------------------
-  var BULL = /(rais|above|beat|tops|approv|surg|jump|record|wins?|expand|re-?accel|priority review|upgrade|strong|higher|hits? primary|acquir|merger|unveil|launch|deal)/;
-  var BEAR = /(cut|trim|miss|below|block|sues?|halt|recall|short(age)?|soft|weak|down(grade)?|delay|hold|probe|tariff|lawsuit|class action|antitrust|loses?|violat|disappoint)/;
+  var BULL = /(rais|above|beat|tops|approv|surg|jump|record|wins?|expand|re-?accel|priority review|upgrade|strong|higher|hits? primary|acquir|merger|unveil|launch|\bdeal\b|rall(y|ie)|soars?|gains?|rise|rises|rose|climbs?|pops?|rebound|outperform|\bup \d)/;
+  var BEAR = /(cut|trim|miss|below|block|sues?|halt|recall|short(age)?|soft|weak|down(grade)?|delay|\bhold\b|probe|tariff|lawsuit|class action|antitrust|loses?|violat|disappoint|fall|fell|slid|slump|plunge|tumble|sinks?|drops?|dropped|\bdown \d|sell-?off|underperform|warns?|warning)/;
 
   function mechFor(type, dir) {
     var up = dir === 'bullish';
@@ -243,7 +243,7 @@
     var t = (headline || '').toLowerCase();
     if (/\b8-?k\b|10-?q|10-?k|files? .*(sec|form)|material event/.test(t)) return 'Regulatory';
     if (/upgrade|downgrade|price target|\bpt\b|initiate|overweight|underweight|buy rating|sell rating|analyst|raises? target|cuts? target/.test(t)) return 'Analyst';
-    if (/acqui|merger|\bto buy\b|takeover|buyout|stake in/.test(t)) return 'M&A';
+    if (/acqui|merger|takeover|buyout|\bstake in\b/.test(t)) return 'M&A';
     if (/guidance|outlook|forecast|guides|raises? full-year|cuts? full-year|lowers? full-year/.test(t)) return 'Guidance';
     if (/earnings|beats?|misses?|\beps\b|quarterly results|q[1-4]\b|revenue (rose|fell|jump|beat|miss)/.test(t)) return 'Earnings';
     if (/fda|approv|clinical|trial|probe|antitrust|investigat|regulat|sanction|export control/.test(t)) return 'Regulatory';
