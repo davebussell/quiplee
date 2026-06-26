@@ -1,0 +1,12 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+
+# Netlify local link state (keep out of git)
+.netlify/
+
+# Node (not used, but just in case)
+node_modules/

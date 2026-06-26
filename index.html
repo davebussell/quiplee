@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiplee · News breaks. We tell you what it's worth.</title>
+  <meta name="description" content="Quiplee reads every market story in real time and tells you its revenue impact and anticipated move on the stock — with lookback and comparable-story evidence." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ===================== LOGIN ===================== -->
+  <section id="login-view" class="login-view" hidden>
+    <div class="login-card">
+      <div class="brand">
+        <span class="logo">quiplee<span class="logo-tick">▲</span></span>
+      </div>
+      <p class="login-tag">News breaks. We tell you what it's worth.</p>
+      <p class="login-blurb">Sign in to your real-time story-impact desk.</p>
+      <form id="login-form">
+        <label class="field"><span>Email</span>
+          <input id="login-email" type="email" placeholder="you@example.com" required /></label>
+        <label class="field"><span>Password</span>
+          <input id="login-password" type="password" placeholder="••••••••" required /></label>
+        <button type="submit" class="btn btn-primary btn-block">Open the desk</button>
+        <p id="login-error" class="login-error" role="alert"></p>
+      </form>
+      <p class="login-note">Demo build — auth is validated client-side and stored in a local session cookie. Not financial advice.</p>
+    </div>
+  </section>
+
+  <!-- ===================== APP ===================== -->
+  <section id="app-view" class="app-view" hidden>
+    <header class="topbar">
+      <span class="logo logo-sm">quiplee<span class="logo-tick">▲</span></span>
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-view="feed">Live Feed</button>
+        <button class="tab" data-view="screener">Screener</button>
+        <button class="tab" data-view="alerts">Alerts <span id="alert-badge" class="badge-count" hidden>0</span></button>
+        <button class="tab" data-view="watchlist">Watchlist</button>
+      </nav>
+      <div class="topbar-right">
+        <span class="live-dot" id="live-dot" title="Live"></span>
+        <span class="muted" id="live-clock"></span>
+        <span class="user-email muted" id="user-email"></span>
+        <button id="logout-btn" class="btn btn-ghost">Sign out</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- ---------- Filters rail ---------- -->
+      <aside class="rail-left">
+        <input id="search" class="search" type="text" placeholder="Search stories, tickers…" spellcheck="false" />
+
+        <div class="filter-group">
+          <div class="filter-head">Impact</div>
+          <label class="check"><input type="checkbox" id="f-revenue" /> Revenue-impacting only</label>
+          <div class="seg" id="f-direction">
+            <button data-dir="all" class="active">All</button>
+            <button data-dir="bullish">Bullish</button>
+            <button data-dir="bearish">Bearish</button>
+          </div>
+          <label class="check"><input type="checkbox" id="f-watched" /> Watched names/topics only</label>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-head">Story type <button id="types-clear" class="link">reset</button></div>
+          <div id="type-chips" class="type-chips"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-head">Watching</div>
+          <div id="watch-summary" class="watch-summary"></div>
+        </div>
+      </aside>
+
+      <!-- ---------- Main view ---------- -->
+      <main class="main">
+        <!-- FEED -->
+        <section id="view-feed" class="view">
+          <div class="view-head">
+            <h2 id="feed-title">Live Feed</h2>
+            <span class="muted" id="feed-count"></span>
+          </div>
+          <div id="feed" class="feed"></div>
+          <div id="feed-empty" class="empty" hidden>No stories match your filters.</div>
+        </section>
+
+        <!-- SCREENER -->
+        <section id="view-screener" class="view" hidden>
+          <div class="view-head">
+            <h2>Story Screener</h2>
+            <span class="muted">Arm a topic — get pinged the moment a revenue-impacting story hits it.</span>
+          </div>
+          <div id="topic-grid" class="topic-grid"></div>
+          <div class="view-head"><h2>Matching your armed topics</h2></div>
+          <div id="screener-feed" class="feed"></div>
+          <div id="screener-empty" class="empty" hidden>Arm a topic above to start screening.</div>
+        </section>
+
+        <!-- ALERTS -->
+        <section id="view-alerts" class="view" hidden>
+          <div class="view-head">
+            <h2>Alerts</h2>
+            <button id="alerts-clear" class="link">clear all</button>
+          </div>
+          <div id="alerts-list" class="alerts-list"></div>
+          <div id="alerts-empty" class="empty" hidden>No alerts yet. Watch a ticker or arm a topic — revenue-impacting hits will land here.</div>
+        </section>
+
+        <!-- WATCHLIST -->
+        <section id="view-watchlist" class="view" hidden>
+          <div class="view-head">
+            <h2>Watchlist</h2>
+            <form id="watch-add" class="watch-add">
+              <input id="watch-input" type="text" placeholder="Add ticker (e.g. NVDA)" maxlength="6" spellcheck="false" />
+              <button class="btn btn-ghost">＋ Add</button>
+            </form>
+          </div>
+          <div id="watch-tickers" class="watch-tickers"></div>
+        </section>
+      </main>
+
+      <!-- ---------- Live rail ---------- -->
+      <aside class="rail-right">
+        <div class="rail-card">
+          <div class="rail-head"><span class="live-dot"></span> Live impact</div>
+          <div id="live-mini" class="live-mini"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== STORY DETAIL ===================== -->
+  <div id="detail-modal" class="modal" hidden>
+    <div class="modal-card detail-card">
+      <button id="detail-close" class="modal-close" aria-label="Close">✕</button>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- toasts -->
+  <div id="toasts" class="toasts"></div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
