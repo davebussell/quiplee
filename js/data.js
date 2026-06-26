@@ -238,10 +238,27 @@
     return story;
   }
 
+  // classify a real headline into one of TYPES (used by the live-news path before evaluate)
+  function classifyType(headline) {
+    var t = (headline || '').toLowerCase();
+    if (/\b8-?k\b|10-?q|10-?k|files? .*(sec|form)|material event/.test(t)) return 'Regulatory';
+    if (/upgrade|downgrade|price target|\bpt\b|initiate|overweight|underweight|buy rating|sell rating|analyst|raises? target|cuts? target/.test(t)) return 'Analyst';
+    if (/acqui|merger|\bto buy\b|takeover|buyout|stake in/.test(t)) return 'M&A';
+    if (/guidance|outlook|forecast|guides|raises? full-year|cuts? full-year|lowers? full-year/.test(t)) return 'Guidance';
+    if (/earnings|beats?|misses?|\beps\b|quarterly results|q[1-4]\b|revenue (rose|fell|jump|beat|miss)/.test(t)) return 'Earnings';
+    if (/fda|approv|clinical|trial|probe|antitrust|investigat|regulat|sanction|export control/.test(t)) return 'Regulatory';
+    if (/recall|shortage|supplier|supply|order cuts|production|output|factory|foundry|wafer/.test(t)) return 'Supply Chain';
+    if (/launch|unveil|introduc|releases?|rolls out|new (chip|gpu|model|product|drug|platform)/.test(t)) return 'Product';
+    if (/tariff|\bfed\b|interest rate|inflation|opec|crude|jobs report|gdp|macro/.test(t)) return 'Macro';
+    if (/buyback|repurchase|dividend|stock split/.test(t)) return 'Buyback';
+    if (/lawsuit|class action|court|judge|verdict|settle|fine\b/.test(t)) return 'Legal';
+    return 'Product';
+  }
+
   Q.data = {
     TICKERS: TICKERS, TOPICS: TOPICS, TYPES: TYPES,
     seed: function () { return SEED.slice(); },
-    evaluate: evaluate, lookback: lookback, similar: similar, generate: generate,
+    evaluate: evaluate, classifyType: classifyType, lookback: lookback, similar: similar, generate: generate,
     tickerName: function (s) { return (TICKERS[s] && TICKERS[s].name) || s; },
     isValidTicker: function (s) { return !!TICKERS[String(s || '').toUpperCase()]; }
   };

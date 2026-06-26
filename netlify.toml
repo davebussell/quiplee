@@ -1,0 +1,11 @@
+# Static site published from the repo root (no build step), plus serverless
+# functions for real-news ingestion.
+[build]
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "20"   # ensures global fetch() is available in functions
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

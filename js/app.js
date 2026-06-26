@@ -1,8 +1,9 @@
 /* app.js — boot, the real-time story loop, alert logic, and event wiring. */
 (function () {
   var Q = window.Q, $ = function (s) { return document.querySelector(s); };
-  var TICK_MS = 7000;
-  var state = { view: 'feed', timer: null, clock: null };
+  var TICK_MS = 7000;       // synthetic demo cadence
+  var LIVE_MS = 60000;      // real-news poll cadence (gentle on free feeds)
+  var state = { view: 'feed', timer: null, clock: null, mode: 'demo', seen: {} };
 
   // ---------- render dispatch ----------
   function renderCurrent() {
@@ -19,12 +20,28 @@
     renderCurrent();
   }
 
-  // ---------- real-time loop ----------
-  function tick() {
+  // ---------- demo loop (synthetic) ----------
+  function tickDemo() {
     var story = Q.data.generate({ preferTickers: Q.store.getWatched(), preferTopics: Q.store.getArmed() });
     Q.store.addStory(story);
     maybeAlert(story);
     renderCurrent();
+  }
+
+  // ---------- live loop (real news) ----------
+  function addLive(stories, alertNew) {
+    // oldest-first so the newest ends up on top after unshift; dedupe by id
+    stories.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (s) {
+      if (state.seen[s.id] || Q.store.hasStory(s.id)) return;
+      state.seen[s.id] = 1;
+      Q.store.addStory(s);
+      if (alertNew) maybeAlert(s);
+    });
+  }
+  function pollLive() {
+    Q.live.fetchStories(Q.store.getWatched(), Q.store.getArmed())
+      .then(function (stories) { addLive(stories, true); renderCurrent(); })
+      .catch(function () { /* transient feed error — keep showing what we have */ });
   }
 
   // "if revenue-impacting for a selected stock or topic → report the stock / fire the alert"
@@ -38,8 +55,19 @@
     if (alert) { Q.store.addAlert(alert); Q.ui.toast(alert); }
   }
 
-  function startLoop() { stopLoop(); state.timer = setInterval(tick, TICK_MS); }
+  function startLoop() {
+    stopLoop();
+    state.timer = setInterval(state.mode === 'live' ? pollLive : tickDemo, state.mode === 'live' ? LIVE_MS : TICK_MS);
+  }
   function stopLoop() { if (state.timer) { clearInterval(state.timer); state.timer = null; } }
+
+  function setMode(mode) {
+    state.mode = mode;
+    Q.store.setLiveMode(mode === 'live');
+    var el = $('#data-mode');
+    if (el) { el.textContent = mode === 'live' ? 'LIVE' : 'DEMO'; el.className = 'mode-pill ' + mode; }
+    var dot = $('#live-dot'); if (dot) dot.title = mode === 'live' ? 'Live news feed' : 'Demo data (synthetic)';
+  }
 
   // ---------- lifecycle ----------
   function startApp(email) {
@@ -47,8 +75,18 @@
     Q.ui.renderTypeChips();
     Q.ui.setClock();
     state.clock = setInterval(Q.ui.setClock, 1000);
+    setMode('demo');                 // default; upgraded to live if the function answers
     gotoView('feed');
-    startLoop();
+    // try real news first; fall back to synthetic if the ingestion function isn't reachable
+    Q.live.fetchStories(Q.store.getWatched(), Q.store.getArmed())
+      .then(function (stories) {
+        if (!stories.length) throw new Error('no live stories');
+        setMode('live');
+        addLive(stories, false);     // backfill silently (no alert storm on first load)
+        renderCurrent();
+        startLoop();
+      })
+      .catch(function () { setMode('demo'); startLoop(); });
   }
   function signOut() {
     stopLoop(); if (state.clock) clearInterval(state.clock);
@@ -126,7 +164,7 @@
     // pause when tab hidden
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) stopLoop();
-      else if (Q.auth.getSession()) { renderCurrent(); startLoop(); }
+      else if (Q.auth.getSession()) { renderCurrent(); if (state.mode === 'live') pollLive(); startLoop(); }
     });
   }
 

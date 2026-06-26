@@ -11,11 +11,14 @@
     watched: read(LS.watched, ['NVDA', 'LLY', 'AAPL']),
     armed: read(LS.armed, ['AI / Data Center']),
     filters: { search: '', revenueOnly: false, direction: 'all', watchedOnly: false, types: [] },
-    stories: [],   // live-generated, newest first
-    alerts: []     // newest first
+    stories: [],     // live/synthetic, newest first
+    alerts: [],      // newest first
+    liveMode: false  // true once real news is flowing (seed stays for lookback/similar only)
   };
 
   Q.store = {
+    setLiveMode: function (b) { state.liveMode = !!b; },
+    isLive: function () { return state.liveMode; },
     // ---- watched tickers ----
     getWatched: function () { return state.watched.slice(); },
     isWatched: function (s) { return state.watched.indexOf(s) !== -1; },
@@ -47,7 +50,13 @@
     // ---- stories ----
     addStory: function (s) { state.stories.unshift(s); if (state.stories.length > 80) state.stories.pop(); },
     allStories: function () {
-      return state.stories.concat(Q.data.seed()).sort(function (a, b) { return b.ts - a.ts; });
+      // live mode: feed is real news only. demo mode: include seed for content.
+      var base = state.liveMode ? state.stories.slice() : state.stories.concat(Q.data.seed());
+      return base.sort(function (a, b) { return b.ts - a.ts; });
+    },
+    hasStory: function (id) {
+      for (var i = 0; i < state.stories.length; i++) if (state.stories[i].id === id) return true;
+      return false;
     },
     findStory: function (id) {
       var all = this.allStories();
