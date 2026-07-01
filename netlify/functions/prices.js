@@ -8,7 +8,7 @@
 
 var UA = 'Mozilla/5.0 (compatible; Quiplee/1.0; +https://quiplee.com)';
 function round2(n) { return Math.round(n * 100) / 100; }
-function chartUrl(sym) { return 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?range=3mo&interval=1d'; }
+function chartUrl(sym) { return 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?range=6mo&interval=1d'; }
 
 function fetchPrice(sym) {
   return fetch(chartUrl(sym), { headers: { 'User-Agent': UA, 'Accept': 'application/json' } })
@@ -35,7 +35,9 @@ function fetchPrice(sym) {
         changePct: prev ? round2((price - prev) / prev * 100) : 0,
         currency: meta.currency || 'USD',
         asOf: meta.regularMarketTime ? meta.regularMarketTime * 1000 : Date.now(),
-        moves: moves
+        moves: moves,
+        // full daily close series (ascending) — used to compute realized story outcomes
+        series: pairs.map(function (p) { return { t: p.t, c: round2(p.c) }; })
       };
     });
 }

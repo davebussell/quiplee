@@ -151,18 +151,21 @@
     return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
   }
 
-  // past stories for a ticker, with realized outcomes
-  function lookback(ticker) {
-    return SEED.filter(function (s) { return s.outcome && s.tickers.indexOf(ticker) !== -1; })
+  // past stories for a ticker, with outcomes. `extra` = real stories that have
+  // aged into realized outcomes (Q.store.realHistory()) — they rank first.
+  function lookback(ticker, extra) {
+    var pool = (extra || []).concat(SEED);
+    return pool.filter(function (s) { return s.outcome && s.tickers.indexOf(ticker) !== -1; })
       .sort(function (a, b) { return b.ts - a.ts; });
   }
 
   // comparable past events (same type or shared topic), preferring other tickers
-  function similar(story) {
-    var list = SEED.filter(function (s) {
+  function similar(story, extra) {
+    var pool = (extra || []).concat(SEED);
+    var list = pool.filter(function (s) {
       if (s.id === story.id || !s.outcome) return false;
       var sameType = s.type === story.type;
-      var sharedTopic = s.topics.some(function (tp) { return story.topics.indexOf(tp) !== -1; });
+      var sharedTopic = (s.topics || []).some(function (tp) { return (story.topics || []).indexOf(tp) !== -1; });
       return sameType || sharedTopic;
     });
     // prefer different tickers, then most recent
@@ -173,7 +176,8 @@
       return b.ts - a.ts;
     });
     var top = list.slice(0, 6);
-    var moves = top.map(function (s) { return s.outcome.d5; });
+    var moves = top.map(function (s) { return s.outcome.d5 != null ? s.outcome.d5 : s.outcome.d1; })
+      .filter(function (m) { return m != null; });
     return { list: top, medianD5: median(moves), n: top.length };
   }
 

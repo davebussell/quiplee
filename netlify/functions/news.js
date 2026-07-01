@@ -80,6 +80,36 @@ function googleTopic(topic) {
   });
 }
 
+// ---- optional tagged-news APIs (activate by setting env vars in Netlify) ----
+// FINNHUB_KEY  -> per-ticker company news (free tier: 60 calls/min)
+// MARKETAUX_KEY -> one multi-ticker call with entity tags (free tier: ~100/day)
+function ymd(offsetDays) { return new Date(Date.now() - offsetDays * 864e5).toISOString().slice(0, 10); }
+
+function finnhubTicker(sym, key) {
+  var url = 'https://finnhub.io/api/v1/company-news?symbol=' + encodeURIComponent(sym) +
+    '&from=' + ymd(3) + '&to=' + ymd(0) + '&token=' + encodeURIComponent(key);
+  return fetchText(url).then(function (txt) {
+    var arr = JSON.parse(txt);
+    if (!Array.isArray(arr)) return [];
+    return arr.slice(0, 6).map(function (a) {
+      return { headline: clean(a.headline), src: a.source || 'Finnhub', ts: (a.datetime || 0) * 1000 || Date.now(), link: a.url || '', tickers: [sym], topicHint: null, origin: 'api' };
+    });
+  });
+}
+
+function marketauxBatch(tickers, key) {
+  var url = 'https://api.marketaux.com/v1/news/all?symbols=' + encodeURIComponent(tickers.join(',')) +
+    '&filter_entities=true&language=en&limit=10&api_token=' + encodeURIComponent(key);
+  return fetchText(url).then(function (txt) {
+    var j = JSON.parse(txt);
+    if (!j || !Array.isArray(j.data)) return [];
+    return j.data.map(function (a) {
+      var syms = (a.entities || []).map(function (e) { return e.symbol; }).filter(Boolean);
+      return { headline: clean(a.title), src: a.source || 'Marketaux', ts: Date.parse(a.published_at) || Date.now(), link: a.url || '', tickers: syms.slice(0, 3), topicHint: null, origin: 'api' };
+    });
+  });
+}
+
 function loadCiks() {
   if (CIK_CACHE) return Promise.resolve(CIK_CACHE);
   return fetchText('https://www.sec.gov/files/company_tickers.json').then(function (txt) {
@@ -109,10 +139,13 @@ exports.handler = function (event) {
   (qs.names || '').split(';').forEach(function (p) { var i = p.indexOf(':'); if (i > 0) names[p.slice(0, i).toUpperCase()] = p.slice(i + 1); });
 
   var jobs = [];
+  var FINNHUB = process.env.FINNHUB_KEY, MARKETAUX = process.env.MARKETAUX_KEY;
   tickers.forEach(function (sym) {
     jobs.push(googleTicker(sym, names[sym] || sym).catch(function () { return []; }));
     if (wantEdgar) jobs.push(edgarTicker(sym, names[sym] || sym).catch(function () { return []; }));
+    if (FINNHUB) jobs.push(finnhubTicker(sym, FINNHUB).catch(function () { return []; }));
   });
+  if (MARKETAUX && tickers.length) jobs.push(marketauxBatch(tickers, MARKETAUX).catch(function () { return []; }));
   topics.forEach(function (tp) { jobs.push(googleTopic(tp).catch(function () { return []; })); });
 
   return Promise.all(jobs).then(function (results) {

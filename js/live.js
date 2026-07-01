@@ -8,7 +8,8 @@
   var ENDPOINT = '/.netlify/functions/news';
 
   function hash(str) { var h = 2166136261 >>> 0; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-  function keyOf(raw) { return (raw.link || '') + '|' + (raw.headline || '').toLowerCase().slice(0, 90); }
+  // key on the normalized headline so the same story from two sources dedupes
+  function keyOf(raw) { return (raw.headline || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 110); }
 
   function topicsFor(tickers, hint) {
     var set = {};
@@ -28,7 +29,7 @@
       topics: topicsFor(raw.tickers, raw.topicHint),
       headline: raw.headline,
       ts: raw.ts || Date.now(),
-      ago: 0, outcome: null, live: true, link: raw.link || null
+      ago: 0, outcome: null, live: true, real: true, link: raw.link || null
     };
     story.impact = Q.data.evaluate(story);
     return story;

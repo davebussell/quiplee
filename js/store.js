@@ -1,8 +1,11 @@
 /* store.js — app state: watched tickers, armed screener topics, filters,
- * the live story buffer, and fired alerts. Watched/armed persist to localStorage. */
+ * the live story buffer, and fired alerts. Watched/armed persist to localStorage;
+ * REAL stories + alerts persist too, so history accumulates across sessions and
+ * ages into realized outcomes (js/outcomes.js). */
 (function () {
   window.Q = window.Q || {};
-  var LS = { watched: 'q_watched', armed: 'q_armed' };
+  var LS = { watched: 'q_watched', armed: 'q_armed', stories: 'q_stories', alerts: 'q_alerts' };
+  var STORY_CAP = 200;
 
   function read(k, fb) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch (e) { return fb; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -10,11 +13,17 @@
   var state = {
     watched: read(LS.watched, ['NVDA', 'LLY', 'AAPL']),
     armed: read(LS.armed, ['AI / Data Center']),
-    filters: { search: '', revenueOnly: false, direction: 'all', watchedOnly: false, types: [] },
-    stories: [],     // live/synthetic, newest first
-    alerts: [],      // newest first
-    liveMode: false  // true once real news is flowing (seed stays for lookback/similar only)
+    filters: { search: '', revenueOnly: false, direction: 'all', watchedOnly: false, types: [], sort: 'latest' },
+    stories: read(LS.stories, []),  // persisted real stories from prior sessions, newest first
+    alerts: read(LS.alerts, []),    // newest first
+    liveMode: false                 // true once real news is flowing (seed stays for lookback/similar only)
   };
+  // persisted stories are real by definition; drop anything malformed
+  state.stories = (state.stories || []).filter(function (s) { return s && s.id && s.headline && s.impact; });
+  state.alerts = (state.alerts || []).filter(function (a) { return a && a.story && a.story.id; });
+
+  function persistStories() { write(LS.stories, state.stories.filter(function (s) { return s.real; }).slice(0, STORY_CAP)); }
+  function persistAlerts() { write(LS.alerts, state.alerts.slice(0, 60)); }
 
   Q.store = {
     setLiveMode: function (b) { state.liveMode = !!b; },
@@ -48,12 +57,22 @@
     clearTypes: function () { state.filters.types = []; },
 
     // ---- stories ----
-    addStory: function (s) { state.stories.unshift(s); if (state.stories.length > 80) state.stories.pop(); },
+    addStory: function (s) {
+      state.stories.unshift(s);
+      if (state.stories.length > STORY_CAP) state.stories.pop();
+      if (s.real) persistStories();
+    },
     allStories: function () {
       // live mode: feed is real news only. demo mode: include seed for content.
-      var base = state.liveMode ? state.stories.slice() : state.stories.concat(Q.data.seed());
+      var base = state.liveMode ? state.stories.filter(function (s) { return s.real; })
+        : state.stories.concat(Q.data.seed());
       return base.sort(function (a, b) { return b.ts - a.ts; });
     },
+    /** Real stories with realized outcomes — the evidence pool for lookback/similar. */
+    realHistory: function () {
+      return state.stories.filter(function (s) { return s.real && s.outcome && s.outcome.real; });
+    },
+    persistNow: function () { persistStories(); },
     hasStory: function (id) {
       for (var i = 0; i < state.stories.length; i++) if (state.stories[i].id === id) return true;
       return false;
@@ -67,10 +86,10 @@
     },
 
     // ---- alerts ----
-    addAlert: function (a) { a.seen = false; state.alerts.unshift(a); if (state.alerts.length > 60) state.alerts.pop(); },
+    addAlert: function (a) { a.seen = false; state.alerts.unshift(a); if (state.alerts.length > 60) state.alerts.pop(); persistAlerts(); },
     getAlerts: function () { return state.alerts.slice(); },
     unseenCount: function () { return state.alerts.filter(function (a) { return !a.seen; }).length; },
-    markAllSeen: function () { state.alerts.forEach(function (a) { a.seen = true; }); },
-    clearAlerts: function () { state.alerts = []; }
+    markAllSeen: function () { state.alerts.forEach(function (a) { a.seen = true; }); persistAlerts(); },
+    clearAlerts: function () { state.alerts = []; persistAlerts(); }
   };
 })();

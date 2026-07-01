@@ -62,11 +62,14 @@
   // ---------- story card ----------
   function storyCard(s) {
     var im = s.impact;
+    var dirCls = im.revenue && im.dir !== 'neutral' ? (im.dir === 'bullish' ? ' d-bull' : ' d-bear') : '';
+    var linkHtml = s.link ? '<a class="art-link" href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" title="Read the original article">↗</a>' : '';
     return '' +
-      '<div class="story' + (s.live ? ' fresh' : '') + '" data-id="' + esc(s.id) + '">' +
+      '<div class="story' + (s.live ? ' fresh' : '') + dirCls + '" data-id="' + esc(s.id) + '">' +
         '<div class="story-top">' +
           '<span class="src">' + esc(s.src) + '</span>' +
           '<span class="dot-sep"></span><span>' + timeAgo(s.ts) + '</span>' +
+          linkHtml +
           '<span class="type-tag">' + esc(s.type) + '</span>' +
         '</div>' +
         '<div class="headline">' + esc(s.headline) + '</div>' +
@@ -93,8 +96,16 @@
       '<span class="impact ' + dirClass(im.dir) + '" style="margin-left:auto"><span class="arrow">' + arrow(im.dir) + '</span>' + esc(impactText(im)) + '</span></div>';
   }
   function tlRow(s) {
-    var mv = s.outcome ? s.outcome.d5 : null;
-    var moveHtml = mv == null ? '<span class="muted">developing</span>' : '<span class="move ' + (mv >= 0 ? 'up' : 'down') + '">' + signed(mv) + '</span>';
+    var o = s.outcome;
+    var moveHtml;
+    if (!o || (o.d5 == null && o.d1 == null)) {
+      moveHtml = '<span class="muted">developing</span>';
+    } else {
+      var mv = o.d5 != null ? o.d5 : o.d1;
+      var span = o.d5 != null ? '5d' : '1d';
+      moveHtml = '<span class="move ' + (mv >= 0 ? 'up' : 'down') + '" title="' + span + ' move' + (o.real ? ', realized from real prices' : ', demo history') + '">' +
+        signed(mv) + (o.real ? ' <i class="real-tag">✓</i>' : '') + '</span>';
+    }
     return '<div class="tl" data-id="' + esc(s.id) + '">' +
       '<span class="tl-date">' + timeAgo(s.ts) + '</span>' +
       '<span class="tl-h">' + esc(s.headline) + '</span>' +
@@ -104,11 +115,13 @@
   function detailHtml(s) {
     var im = s.impact;
     var primary = s.tickers[0];
-    var lb = Q.data.lookback(primary);
-    var sim = Q.data.similar(s);
+    var realPool = store.realHistory ? store.realHistory() : [];
+    var lb = Q.data.lookback(primary, realPool);
+    var sim = Q.data.similar(s, realPool);
+    var artLink = s.link ? ' · <a class="d-art" href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer">Read the article ↗</a>' : '';
 
     var html = '' +
-      '<div class="d-source">' + esc(s.src) + ' · ' + timeAgo(s.ts) + ' · ' + esc(s.type) + '</div>' +
+      '<div class="d-source">' + esc(s.src) + ' · ' + timeAgo(s.ts) + ' · ' + esc(s.type) + artLink + '</div>' +
       '<div class="d-headline">' + esc(s.headline) + '</div>' +
       '<div class="d-verdict">' +
         (im.revenue ? '<span class="rev-flag">Revenue-impacting</span>' : '<span class="rev-flag" style="color:var(--muted);border-color:var(--border)">Sentiment</span>') +
@@ -120,6 +133,16 @@
         (im.dir === 'neutral' ? 'No clear directional read for the stock.' :
           'Anticipated move of <b>' + esc(impactText(im)) + '</b> over ' + im.horizon + ', at ' + im.conf + '% model confidence.') +
         '</div></div>' +
+      (s.outcome && s.outcome.real ?
+        '<div class="d-section"><h4>Realized so far <span class="muted" style="text-transform:none;letter-spacing:0">· from real prices</span></h4>' +
+          '<div class="realized-strip">' +
+            '<span>Next day <b class="move ' + (s.outcome.d1 >= 0 ? 'up' : 'down') + '">' + signed(s.outcome.d1) + '</b></span>' +
+            (s.outcome.d5 != null ? '<span>5 days <b class="move ' + (s.outcome.d5 >= 0 ? 'up' : 'down') + '">' + signed(s.outcome.d5) + '</b></span>' : '<span class="muted">5-day still developing</span>') +
+            (im.dir !== 'neutral' && im.revenue && s.outcome.d1 != null && s.outcome.d1 !== 0 ?
+              ((im.dir === 'bullish') === (s.outcome.d1 > 0)
+                ? '<span class="call-hit">✓ direction call correct</span>'
+                : '<span class="call-miss">✗ direction call missed</span>') : '') +
+          '</div></div>' : '') +
       '<div class="d-section"><h4>Affected stocks</h4><div class="d-affected">' +
         s.tickers.map(function (t) { return affectedRow(t, im); }).join('') +
       '</div></div>' +
@@ -204,8 +227,40 @@
         }
         return true;
       });
+      if (f.sort === 'impact') {
+        stories.sort(function (a, b) {
+          var ar = a.impact.revenue && a.impact.dir !== 'neutral' ? 1 : 0;
+          var br = b.impact.revenue && b.impact.dir !== 'neutral' ? 1 : 0;
+          if (ar !== br) return br - ar;
+          if (a.impact.conf !== b.impact.conf) return b.impact.conf - a.impact.conf;
+          return b.ts - a.ts;
+        });
+      }
       renderFeedInto($('#feed'), stories, $('#feed-empty'));
       $('#feed-count').textContent = stories.length + ' stories';
+    },
+
+    showFeedSkeleton: function () {
+      var sk = '';
+      for (var i = 0; i < 4; i++) {
+        sk += '<div class="story skel"><div class="skel-line w40"></div><div class="skel-line w90"></div><div class="skel-line w70"></div></div>';
+      }
+      $('#feed').hidden = false;
+      $('#feed').innerHTML = sk;
+      $('#feed-count').textContent = 'fetching live stories…';
+    },
+
+    renderScoreboard: function () {
+      var el = $('#scoreboard'); if (!el) return;
+      var sb = Q.outcomes.scoreboard(store.allStories());
+      if (!sb.n) {
+        el.innerHTML = '<div class="muted" style="line-height:1.5">Collecting evidence — directional calls are graded here against real next-day moves as stories age.</div>';
+        return;
+      }
+      var good = sb.rate >= 50;
+      el.innerHTML =
+        '<div class="sb-rate ' + (good ? 'up' : 'down') + '">' + sb.rate + '%</div>' +
+        '<div class="muted">direction calls correct · ' + sb.hits + ' of ' + sb.n + ' graded vs real next-day moves</div>';
     },
 
     renderScreener: function () {
@@ -244,7 +299,7 @@
     renderWatchlist: function () {
       var w = store.getWatched();
       $('#watch-tickers').innerHTML = w.map(function (sym) {
-        var lb = Q.data.lookback(sym);
+        var lb = Q.data.lookback(sym, store.realHistory ? store.realHistory() : []);
         var rows = lb.length ? lb.slice(0, 4).map(tlRow).join('') : '<div class="muted" style="padding:6px 0">No scored stories yet.</div>';
         return '<div class="wt-card">' +
           '<div class="wt-head"><span class="wt-sym">' + esc(sym) + '</span>' +
@@ -279,6 +334,7 @@
     refreshChrome: function () {
       this.renderWatchSummary();
       this.renderLiveMini();
+      this.renderScoreboard();
       this.setAlertBadge(store.unseenCount());
     }
   };

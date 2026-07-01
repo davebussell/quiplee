@@ -53,7 +53,25 @@
   }
   function refreshPrices() {
     if (!window.Q.prices) return;
-    Q.prices.load(feedTickers()).then(function () { renderCurrent(); }).catch(function () {});
+    Q.prices.load(feedTickers()).then(function () {
+      // join real prices to story timestamps -> realized outcomes -> scoreboard
+      var changed = Q.outcomes.apply(Q.store.allStories());
+      if (changed) Q.store.persistNow();
+      renderCurrent();
+    }).catch(function () {});
+  }
+
+  // ---------- browser notifications ----------
+  function notifEnabled() { try { return localStorage.getItem('q_notif') === '1'; } catch (e) { return false; } }
+  function setNotifEnabled(b) { try { localStorage.setItem('q_notif', b ? '1' : '0'); } catch (e) {} }
+  function osNotify(alert) {
+    if (!notifEnabled() || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    try {
+      new Notification('Quiplee — ' + (alert.trigger === 'stock' ? alert.match : alert.match), {
+        body: alert.story.headline,
+        tag: alert.story.id
+      });
+    } catch (e) { /* some browsers restrict constructor — ignore */ }
   }
 
   // "if revenue-impacting for a selected stock or topic → report the stock / fire the alert"
@@ -64,7 +82,7 @@
     var alert = null;
     if (stockHit.length) alert = { story: s, trigger: 'stock', match: stockHit[0], ts: Date.now() };
     else if (topicHit.length) alert = { story: s, trigger: 'topic', match: topicHit[0], ts: Date.now() };
-    if (alert) { Q.store.addAlert(alert); Q.ui.toast(alert); }
+    if (alert) { Q.store.addAlert(alert); Q.ui.toast(alert); osNotify(alert); }
   }
 
   function startLoop() {
@@ -87,8 +105,14 @@
     Q.ui.renderTypeChips();
     Q.ui.setClock();
     state.clock = setInterval(Q.ui.setClock, 1000);
+    // remember persisted stories so re-fetches don't duplicate or re-alert them
+    Q.store.allStories().forEach(function (s) { if (s.real) state.seen[s.id] = 1; });
+    // notifications toggle reflects saved preference (only if permission still granted)
+    var nt = $('#notif-toggle');
+    if (nt) nt.checked = notifEnabled() && typeof Notification !== 'undefined' && Notification.permission === 'granted';
     setMode('demo');                 // default; upgraded to live if the function answers
     gotoView('feed');
+    Q.ui.showFeedSkeleton();         // loading state while the first live fetch runs
     // try real news first; fall back to synthetic if the ingestion function isn't reachable
     Q.live.fetchStories(Q.store.getWatched(), Q.store.getArmed())
       .then(function (stories) {
@@ -99,7 +123,7 @@
         refreshPrices();
         startLoop();
       })
-      .catch(function () { setMode('demo'); startLoop(); });
+      .catch(function () { setMode('demo'); tickDemo(); startLoop(); });
   }
   function signOut() {
     stopLoop(); if (state.clock) clearInterval(state.clock);
@@ -139,10 +163,33 @@
     });
     $('#types-clear').addEventListener('click', function () { Q.store.clearTypes(); Q.ui.renderTypeChips(); renderCurrent(); });
 
+    // feed sort: Latest | Impact
+    $('#feed-sort').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-sort]'); if (!b) return;
+      Q.store.setFilter('sort', b.getAttribute('data-sort'));
+      [].forEach.call(this.children, function (c) { c.classList.toggle('active', c === b); });
+      Q.ui.renderFeed();
+    });
+
+    // browser notifications (permission requested on the user's gesture)
+    $('#notif-toggle').addEventListener('change', function () {
+      var box = this;
+      if (!box.checked) { setNotifEnabled(false); return; }
+      if (typeof Notification === 'undefined') { box.checked = false; return; }
+      Notification.requestPermission().then(function (p) {
+        if (p === 'granted') setNotifEnabled(true);
+        else { setNotifEnabled(false); box.checked = false; }
+      });
+    });
+
     // story clicks (feed, screener, live-mini, alerts) via delegation on document
     document.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return; // real links (read article) navigate, not modal
       var open = e.target.closest('[data-id]');
-      if (open && !e.target.closest('.modal')) { Q.ui.openDetail(open.getAttribute('data-id')); }
+      if (!open) return;
+      // inside the modal, only timeline rows re-open (jump between stories)
+      if (e.target.closest('.modal') && !open.classList.contains('tl')) return;
+      Q.ui.openDetail(open.getAttribute('data-id'));
     });
 
     // screener arm

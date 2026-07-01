@@ -67,22 +67,42 @@ js/live.js                  fetches /.netlify/functions/news, enriches each item
 
 Flow: on load, `app.js` calls the function with your watched tickers + armed
 topics. If it answers → **LIVE** mode (real news, polled every 60s; new
-revenue-impacting hits fire alerts). If it's unreachable (e.g. local `serve`,
-which doesn't run functions) → **DEMO** mode (synthetic generator). The header
-pill shows which. Seed stories stay on as the historical *memory* for lookback /
-similar. No API key required (Google News + EDGAR are free); add a tagged-news
-API (Benzinga/Marketaux/Finnhub) next for cleaner ticker tags + lower latency.
+revenue-impacting hits fire alerts + optional browser notifications). If it's
+unreachable (e.g. local `serve`, which doesn't run functions) → **DEMO** mode
+(synthetic generator). The header pill shows which.
 
-**Local dev:** `npx serve` shows DEMO mode (no functions). To run the function
+**Tagged-news APIs (optional, recommended):** the function also supports
+Finnhub and Marketaux — set either env var in Netlify (Site settings →
+Environment variables) and redeploy; no code change needed:
+
+- `FINNHUB_KEY` — per-ticker company news, free tier 60 calls/min (finnhub.io)
+- `MARKETAUX_KEY` — one multi-ticker call with entity tags, free ~100/day (marketaux.com)
+
+Stories from all sources are deduped client-side by normalized headline.
+
+**Local dev:** `npx serve` shows DEMO mode (no functions). To run the functions
 locally, use `netlify dev` instead.
 
+## Real outcomes & the scoreboard
+
+Real stories persist in `localStorage` (`q_stories`, cap 200) and **age into
+evidence**: `js/outcomes.js` joins each story's timestamp to the real daily
+close series (from `netlify/functions/prices.js`, 6-month range) — baseline =
+last close before publication, then realized **next-day** and **5-day** moves.
+
+- **Story detail** shows *Anticipated* vs **Realized so far** (with a
+  ✓ correct / ✗ missed direction grade).
+- **Lookback / Similar** rank real outcomes (marked ✓) above the demo seed set.
+- **Model scoreboard** (right rail) grades every real, revenue-impacting,
+  directional call against the actual next-day move — calibration in public,
+  per the brand's "honest by design" pillar.
+
 ## Roadmap
-- Tagged-news API (Benzinga via Polygon / Marketaux / Finnhub) for reliable ticker
-  tags, sentiment, and real-time webhooks.
-- Real realized outcomes: join story timestamps to price data so lookback/similar
-  use actual returns.
-- Server-side `evaluate()` + a DB (Supabase) so verdicts are stored and pushed
-  via realtime instead of recomputed per client.
+- Benzinga-via-Polygon WebSocket for trader-grade, low-latency tagged news.
+- Server-side `evaluate()` + a DB (Supabase) so verdicts/outcomes are stored
+  once and pushed via realtime — and history is shared across devices (today
+  it's per-browser via localStorage).
+- Real auth (Netlify Function → HttpOnly session cookie).
 
 ## Notes
 - Heuristic impact model — **not financial advice**.

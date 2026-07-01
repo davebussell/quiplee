@@ -5,26 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiplee · News breaks. We tell you what it's worth.</title>
   <meta name="description" content="Quiplee reads every market story in real time and tells you its revenue impact and anticipated move on the stock — with lookback and comparable-story evidence." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- ===================== LOGIN ===================== -->
+  <!-- ===================== LANDING + LOGIN ===================== -->
   <section id="login-view" class="login-view" hidden>
-    <div class="login-card">
-      <div class="brand">
-        <span class="logo">quiplee<span class="logo-tick">▲</span></span>
+    <div class="landing">
+      <div class="hero">
+        <span class="logo logo-xl">quiplee<span class="logo-tick">▲</span></span>
+        <h1 class="hero-tag">News breaks.<br />We tell you what it's worth.</h1>
+        <p class="hero-sub">Quiplee reads every market story the moment it lands and answers the only question that matters: <em>what does this do to the stock?</em></p>
+        <ul class="hero-pillars">
+          <li><b>Real-time impact</b><span>Revenue verdict, direction, expected move and confidence — on every headline.</span></li>
+          <li><b>Backed by history</b><span>Every story is checked against how it moved the stock last time, with realized returns.</span></li>
+          <li><b>Your themes, watched</b><span>Arm a topic in the Screener and get pinged when anything revenue-impacting hits it.</span></li>
+        </ul>
       </div>
-      <p class="login-tag">News breaks. We tell you what it's worth.</p>
-      <p class="login-blurb">Sign in to your real-time story-impact desk.</p>
-      <form id="login-form">
-        <label class="field"><span>Email</span>
-          <input id="login-email" type="email" placeholder="you@example.com" required /></label>
-        <label class="field"><span>Password</span>
-          <input id="login-password" type="password" placeholder="••••••••" required /></label>
-        <button type="submit" class="btn btn-primary btn-block">Open the desk</button>
-        <p id="login-error" class="login-error" role="alert"></p>
-      </form>
-      <p class="login-note">Demo build — auth is validated client-side and stored in a local session cookie. Not financial advice.</p>
+      <div class="login-card">
+        <p class="login-tag">Open your story-impact desk</p>
+        <form id="login-form">
+          <label class="field"><span>Email</span>
+            <input id="login-email" type="email" placeholder="you@example.com" required /></label>
+          <label class="field"><span>Password</span>
+            <input id="login-password" type="password" placeholder="••••••••" required /></label>
+          <button type="submit" class="btn btn-primary btn-block">Open the desk</button>
+          <p id="login-error" class="login-error" role="alert"></p>
+        </form>
+        <p class="login-note">Demo build — any email + password works; auth is validated client-side and stored in a local session cookie. Not financial advice.</p>
+      </div>
     </div>
   </section>
 
@@ -81,6 +90,10 @@
           <div class="view-head">
             <h2 id="feed-title">Live Feed</h2>
             <span class="muted" id="feed-count"></span>
+            <div class="seg seg-sm" id="feed-sort" style="margin-left:auto">
+              <button data-sort="latest" class="active">Latest</button>
+              <button data-sort="impact">Impact</button>
+            </div>
           </div>
           <div id="feed" class="feed"></div>
           <div id="feed-empty" class="empty" hidden>No stories match your filters.</div>
@@ -103,6 +116,7 @@
           <div class="view-head">
             <h2>Alerts</h2>
             <button id="alerts-clear" class="link">clear all</button>
+            <label class="check" style="margin-left:auto"><input type="checkbox" id="notif-toggle" /> Browser notifications</label>
           </div>
           <div id="alerts-list" class="alerts-list"></div>
           <div id="alerts-empty" class="empty" hidden>No alerts yet. Watch a ticker or arm a topic — revenue-impacting hits will land here.</div>
@@ -127,6 +141,11 @@
           <div class="rail-head"><span class="live-dot"></span> Live impact</div>
           <div id="live-mini" class="live-mini"></div>
         </div>
+        <div class="rail-card">
+          <div class="rail-head">Model scoreboard</div>
+          <div id="scoreboard"></div>
+        </div>
+        <p class="rail-note">Heuristic model · not financial advice. Calls are graded in public against real moves.</p>
       </aside>
     </div>
   </section>
@@ -148,6 +167,7 @@
   <script src="js/ui.js"></script>
   <script src="js/live.js"></script>
   <script src="js/prices.js"></script>
+  <script src="js/outcomes.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
