@@ -44,19 +44,60 @@
     var up = p.changePct >= 0;
     return '<span class="px ' + (up ? 'up' : 'down') + '" title="' + esc(t) + ' latest daily close">$' + p.price.toFixed(2) + ' <b>' + (up ? '+' : '') + p.changePct.toFixed(2) + '%</b></span>';
   }
-  function pxMovesHtml(t) {
+  /** SVG price line; optional storyTs draws a marker where the story landed. */
+  function priceChart(series, storyTs, stroke) {
+    if (!series || series.length < 2) return '';
+    var idx = -1;
+    if (storyTs) { for (var i = 0; i < series.length; i++) { if (series[i].t <= storyTs) idx = i; else break; } }
+    var win = idx >= 0 ? series.slice(Math.max(0, idx - 14), Math.min(series.length, idx + 15)) : series.slice(-30);
+    var mIdx = idx >= 0 ? Math.min(idx, 14, idx - Math.max(0, idx - 14)) : -1;
+    var w = 560, h = 84, pad = 6;
+    var lo = Infinity, hi = -Infinity;
+    win.forEach(function (p) { if (p.c < lo) lo = p.c; if (p.c > hi) hi = p.c; });
+    var span = (hi - lo) || 1;
+    var step = (w - pad * 2) / (win.length - 1);
+    function X(i) { return (pad + i * step).toFixed(1); }
+    function Y(c) { return (pad + (h - pad * 2) * (1 - (c - lo) / span)).toFixed(1); }
+    var pts = win.map(function (p, i) { return X(i) + ',' + Y(p.c); }).join(' ');
+    var marker = '';
+    if (mIdx >= 0 && win[mIdx]) {
+      marker = '<line x1="' + X(mIdx) + '" y1="' + pad + '" x2="' + X(mIdx) + '" y2="' + (h - pad) + '" stroke="var(--violet)" stroke-width="1" stroke-dasharray="3,3"/>' +
+        '<circle cx="' + X(mIdx) + '" cy="' + Y(win[mIdx].c) + '" r="4" fill="var(--violet)"/>';
+    }
+    return '<svg class="d-chart" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+      '<polyline points="' + pts + '" fill="none" stroke="' + stroke + '" stroke-width="1.8" stroke-linejoin="round"/>' + marker + '</svg>' +
+      (mIdx >= 0 ? '<div class="chart-cap muted">● story published — line shows real daily closes around it</div>' : '');
+  }
+
+  function pxMovesHtml(t, storyTs) {
     var p = window.Q.prices ? Q.prices.get(t) : null;
     if (!p || !p.moves || !p.moves.length) return '';
     var up = p.changePct >= 0;
-    var rows = p.moves.map(function (m) {
+    var stroke = up ? 'var(--bull)' : 'var(--bear)';
+    var rows = p.moves.slice(0, 5).map(function (m) {
       var d = new Date(m.date);
       return '<div class="tl"><span class="tl-date">' + (d.getMonth() + 1) + '/' + d.getDate() + '</span>' +
         '<span class="tl-h">$' + m.close.toFixed(2) + '</span>' +
         '<span class="move ' + (m.pct >= 0 ? 'up' : 'down') + '">' + signed(m.pct) + '</span></div>';
     }).join('');
-    return '<div class="d-section"><h4>Recent price action — ' + esc(t) + ' <span class="muted" style="text-transform:none;letter-spacing:0">· real daily</span></h4>' +
+    return '<div class="d-section"><h4>Price action — ' + esc(t) + ' <span class="muted" style="text-transform:none;letter-spacing:0">· real daily closes</span></h4>' +
       '<div class="similar-stat" style="background:var(--bg-2);border-color:var(--border)">Latest close <b>$' + p.price.toFixed(2) + '</b> · today <b style="color:' + (up ? 'var(--bull)' : 'var(--bear)') + '">' + (up ? '+' : '') + p.changePct.toFixed(2) + '%</b></div>' +
+      priceChart(p.series, storyTs, stroke) +
       '<div class="timeline">' + rows + '</div></div>';
+  }
+
+  function miniSpark(t) {
+    var p = window.Q.prices ? Q.prices.get(t) : null;
+    if (!p || !p.series || p.series.length < 2) return '';
+    var win = p.series.slice(-30), w = 120, h = 30, pad = 2;
+    var lo = Infinity, hi = -Infinity;
+    win.forEach(function (x) { if (x.c < lo) lo = x.c; if (x.c > hi) hi = x.c; });
+    var span = (hi - lo) || 1, step = (w - pad * 2) / (win.length - 1);
+    var pts = win.map(function (x, i) {
+      return (pad + i * step).toFixed(1) + ',' + (pad + (h - pad * 2) * (1 - (x.c - lo) / span)).toFixed(1);
+    }).join(' ');
+    var stroke = p.changePct >= 0 ? 'var(--bull)' : 'var(--bear)';
+    return '<svg class="wt-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="' + stroke + '" stroke-width="1.6"/></svg>';
   }
 
   // ---------- story card ----------
@@ -146,7 +187,7 @@
       '<div class="d-section"><h4>Affected stocks</h4><div class="d-affected">' +
         s.tickers.map(function (t) { return affectedRow(t, im); }).join('') +
       '</div></div>' +
-      pxMovesHtml(primary) +
+      pxMovesHtml(primary, s.ts) +
       '<div class="d-section"><h4>Lookback — how past stories moved ' + esc(primary) + '</h4>' +
         (lb.length ? '<div class="timeline">' + lb.map(tlRow).join('') + '</div>' : '<div class="muted">No prior scored stories for ' + esc(primary) + ' yet.</div>') +
       '</div>' +
@@ -178,6 +219,12 @@
     showApp: function (email) { $('#login-view').hidden = true; $('#app-view').hidden = false; $('#user-email').textContent = email || ''; },
     setLoginError: function (m) { $('#login-error').textContent = m || ''; },
     setClock: function () { $('#live-clock').textContent = new Date().toLocaleTimeString(); },
+    renderMarket: function () {
+      var el = $('#market-pill'); if (!el || !window.Q.market) return;
+      var st = Q.market.status();
+      el.className = 'market-pill ' + st.state;
+      el.innerHTML = '<span class="mdot"></span>' + st.label;
+    },
 
     setView: function (name) {
       ['feed', 'screener', 'alerts', 'watchlist'].forEach(function (v) {
@@ -265,10 +312,17 @@
 
     renderScreener: function () {
       var armed = store.getArmed();
+      var all = store.allStories();
       $('#topic-grid').innerHTML = Q.data.TOPICS.map(function (t) {
         var on = store.isArmed(t.name);
+        var matching = all.filter(function (s) { return (s.topics || []).indexOf(t.name) !== -1; });
+        var rev = matching.filter(function (s) { return s.impact.revenue; }).length;
+        var counts = matching.length
+          ? '<div class="topic-counts">' + matching.length + ' stories' + (rev ? ' · <b>' + rev + ' revenue</b>' : '') + '</div>'
+          : '<div class="topic-counts muted">quiet</div>';
         return '<div class="topic' + (on ? ' armed' : '') + '">' +
           '<h3>' + esc(t.name) + '</h3><div class="meta">' + esc(t.desc) + '</div>' +
+          counts +
           '<button class="btn btn-ghost arm" data-arm="' + esc(t.name) + '">' + (on ? '✓ Armed' : 'Arm topic') + '</button>' +
           '</div>';
       }).join('');
@@ -304,7 +358,8 @@
         return '<div class="wt-card">' +
           '<div class="wt-head"><span class="wt-sym">' + esc(sym) + '</span>' +
             '<span class="wt-mini">' + esc(Q.data.tickerName(sym)) + ' · ' + esc((Q.data.TICKERS[sym] ? Q.data.TICKERS[sym].topics.join(', ') : '')) + '</span>' +
-            '<button class="link" data-unwatch="' + esc(sym) + '" style="margin-left:auto">remove</button></div>' +
+            miniSpark(sym) + priceChip(sym) +
+            '<button class="link" data-unwatch="' + esc(sym) + '">remove</button></div>' +
           '<div class="wt-stories">' + rows + '</div>' +
         '</div>';
       }).join('');

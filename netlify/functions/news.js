@@ -62,7 +62,7 @@ function splitPublisher(it) {
 }
 
 function googleTicker(sym, name) {
-  var url = 'https://news.google.com/rss/search?q=' + encodeURIComponent('"' + name + '" stock') + '&hl=en-US&gl=US&ceid=US:en';
+  var url = 'https://news.google.com/rss/search?q=' + encodeURIComponent('"' + name + '" stock when:7d') + '&hl=en-US&gl=US&ceid=US:en';
   return fetchText(url).then(function (xml) {
     return parseRss(xml).slice(0, 6).map(function (it) {
       var p = splitPublisher(it);
@@ -71,7 +71,7 @@ function googleTicker(sym, name) {
   });
 }
 function googleTopic(topic) {
-  var url = 'https://news.google.com/rss/search?q=' + encodeURIComponent(topic.replace(' / ', ' ') + ' stocks') + '&hl=en-US&gl=US&ceid=US:en';
+  var url = 'https://news.google.com/rss/search?q=' + encodeURIComponent(topic.replace(' / ', ' ') + ' stocks when:7d') + '&hl=en-US&gl=US&ceid=US:en';
   return fetchText(url).then(function (xml) {
     return parseRss(xml).slice(0, 4).map(function (it) {
       var p = splitPublisher(it);
@@ -118,13 +118,55 @@ function loadCiks() {
     CIK_CACHE = map; return map;
   }).catch(function () { CIK_CACHE = {}; return CIK_CACHE; });
 }
+// 8-K item codes -> human label + Quiplee story type. Wording is chosen so the
+// client impact engine reads the right direction (e.g. "warns", "termination").
+var ITEM_MAP = {
+  '2.02': { label: 'reports quarterly results', type: 'Earnings' },
+  '1.01': { label: 'signs a material agreement', type: 'M&A' },
+  '1.02': { label: 'reports termination of a material agreement', type: 'M&A' },
+  '2.01': { label: 'completes an acquisition or disposition', type: 'M&A' },
+  '2.05': { label: 'announces restructuring and exit costs', type: 'Supply Chain' },
+  '2.06': { label: 'warns of a material impairment', type: 'Legal' },
+  '3.01': { label: 'receives a delisting notice', type: 'Regulatory' },
+  '4.02': { label: 'warns prior financials can no longer be relied on', type: 'Legal' },
+  '5.02': { label: 'reports an executive change', type: 'Regulatory' },
+  '7.01': { label: 'makes a Reg FD disclosure', type: 'Regulatory' },
+  '8.01': { label: 'reports other material events', type: 'Regulatory' }
+};
+
 function edgarTicker(sym, name) {
   return loadCiks().then(function (ciks) {
     var cik = ciks[sym]; if (!cik) return [];
-    var url = 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=' + cik + '&type=8-K&count=3&output=atom';
-    return fetchText(url).then(function (xml) {
-      return parseAtom(xml).slice(0, 3).map(function (it) {
-        return { headline: name + ' files ' + it.form + ' (SEC material event)', src: 'SEC EDGAR', ts: Date.parse(it.updated) || Date.now(), link: it.href, tickers: [sym], topicHint: null, origin: 'sec' };
+    var url = 'https://efts.sec.gov/LATEST/search-index?q=%22%22&forms=8-K&ciks=' + cik +
+      '&startdt=' + ymd(45) + '&enddt=' + ymd(0);
+    return fetchText(url, { 'Accept': 'application/json' }).then(function (txt) {
+      var j = JSON.parse(txt);
+      var hits = (j.hits && j.hits.hits) || [];
+      var seen = {}, out = [];
+      hits.forEach(function (h) {
+        var s = h._source || {};
+        if (!s.adsh || seen[s.adsh]) return;
+        seen[s.adsh] = 1;
+        var items = (s.items || []).filter(function (c) { return c !== '9.01'; }); // exhibits = boilerplate
+        var mapped = items.map(function (c) { return ITEM_MAP[c]; }).filter(Boolean);
+        var lead = mapped[0] || { label: 'files an 8-K material event', type: 'Regulatory' };
+        var itemsTxt = items.length ? ' (8-K Item ' + items.join(', ') + ')' : ' (8-K)';
+        var link = 'https://www.sec.gov/Archives/edgar/data/' + String(parseInt(cik, 10)) + '/' + s.adsh.replace(/-/g, '') + '/' + s.adsh + '-index.htm';
+        out.push({
+          headline: name + ' ' + lead.label + itemsTxt,
+          src: 'SEC EDGAR', ts: Date.parse(s.file_date) || Date.now(),
+          link: link, tickers: [sym], topicHint: null, origin: 'sec', type: lead.type
+        });
+      });
+      out.sort(function (a, b) { return b.ts - a.ts; });
+      return out.slice(0, 3);
+    }).catch(function () {
+      // fallback: the plain company atom feed (no item codes)
+      var url2 = 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=' + cik + '&type=8-K&count=3&output=atom';
+      return fetchText(url2).then(function (xml) {
+        return parseAtom(xml).slice(0, 3).map(function (it) {
+          return { headline: name + ' files ' + it.form + ' (SEC material event)', src: 'SEC EDGAR', ts: Date.parse(it.updated) || Date.now(), link: it.href, tickers: [sym], topicHint: null, origin: 'sec' };
+        });
       });
     });
   });

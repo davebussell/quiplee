@@ -135,7 +135,9 @@
     if (type === 'Analyst' || type === 'Buyback') mag = 'low';
     if (/record|well above|soar|block|halt|approv/.test(t)) mag = 'high';
     if (type === 'Analyst' || type === 'Buyback' || type === 'Legal') revenue = false;
-    if (dir === 'neutral') revenue = false;
+    // a results/guidance event is revenue-relevant even before direction is known
+    // (e.g. an 8-K Item 2.02 filing) — everything else needs a directional read
+    if (dir === 'neutral' && type !== 'Earnings' && type !== 'Guidance') revenue = false;
     var moveMap = { low: [0.5, 1.5], med: [1.5, 3.5], high: [3.5, 7] };
     var mv = moveMap[mag].slice();
     if (dir === 'bearish') mv = [-mv[1], -mv[0]];

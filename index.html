@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiplee · News breaks. We tell you what it's worth.</title>
   <meta name="description" content="Quiplee reads every market story in real time and tells you its revenue impact and anticipated move on the stock — with lookback and comparable-story evidence." />
+  <meta property="og:title" content="Quiplee — News breaks. We tell you what it's worth." />
+  <meta property="og:description" content="Real-time revenue-impact verdicts on every market story, graded in public against real price moves." />
+  <meta property="og:url" content="https://quiplee.com/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="theme-color" content="#0b0f17" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -48,6 +54,7 @@
         <button class="tab" data-view="watchlist">Watchlist</button>
       </nav>
       <div class="topbar-right">
+        <span id="market-pill" class="market-pill" title="US market session (NYSE hours, ET)"></span>
         <span id="data-mode" class="mode-pill demo" title="Data source">DEMO</span>
         <span class="live-dot" id="live-dot" title="Live"></span>
         <span class="muted" id="live-clock"></span>
@@ -168,6 +175,7 @@
   <script src="js/live.js"></script>
   <script src="js/prices.js"></script>
   <script src="js/outcomes.js"></script>
+  <script src="js/market.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

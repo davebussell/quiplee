@@ -24,7 +24,7 @@
     var story = {
       id: 'l-' + hash(keyOf(raw)).toString(36),
       src: raw.src || 'News',
-      type: raw.origin === 'sec' ? 'Regulatory' : Q.data.classifyType(raw.headline),
+      type: raw.type || (raw.origin === 'sec' ? 'Regulatory' : Q.data.classifyType(raw.headline)),
       tickers: tickers,
       topics: topicsFor(raw.tickers, raw.topicHint),
       headline: raw.headline,

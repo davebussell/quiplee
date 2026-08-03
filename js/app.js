@@ -56,6 +56,7 @@
     Q.prices.load(feedTickers()).then(function () {
       // join real prices to story timestamps -> realized outcomes -> scoreboard
       var changed = Q.outcomes.apply(Q.store.allStories());
+      Q.outcomes.apply(Q.store.getAlerts().map(function (a) { return a.story; }));
       if (changed) Q.store.persistNow();
       renderCurrent();
     }).catch(function () {});
@@ -104,7 +105,9 @@
     Q.ui.showApp(email);
     Q.ui.renderTypeChips();
     Q.ui.setClock();
+    Q.ui.renderMarket();
     state.clock = setInterval(Q.ui.setClock, 1000);
+    state.market = setInterval(Q.ui.renderMarket, 30000);
     // remember persisted stories so re-fetches don't duplicate or re-alert them
     Q.store.allStories().forEach(function (s) { if (s.real) state.seen[s.id] = 1; });
     // notifications toggle reflects saved preference (only if permission still granted)
@@ -127,6 +130,7 @@
   }
   function signOut() {
     stopLoop(); if (state.clock) clearInterval(state.clock);
+    if (state.market) clearInterval(state.market);
     Q.auth.logout();
     Q.ui.showLogin();
   }
