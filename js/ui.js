@@ -22,6 +22,10 @@
   }
   function fmt(n) { return (Math.round(n * 10) / 10).toString(); }
   function signed(n) { return (n >= 0 ? '+' : '−') + Math.abs(Math.round(n * 10) / 10) + '%'; }
+  function fmtVal(h) {
+    var v = h.value >= 100 ? Math.round(h.value).toLocaleString('en-US') : h.value.toFixed(2);
+    return v + ' ' + (h.valueCur || '');
+  }
   function impactText(im) {
     if (im.dir === 'neutral') return 'No clear move';
     return (im.dir === 'bullish' ? '+' : '−') + rangeStr(im.movePct);
@@ -233,7 +237,7 @@
     },
 
     setView: function (name) {
-      ['feed', 'screener', 'alerts', 'watchlist', 'analysts'].forEach(function (v) {
+      ['feed', 'screener', 'alerts', 'watchlist', 'analysts', 'portfolio'].forEach(function (v) {
         $('#view-' + v).hidden = v !== name;
       });
       [].forEach.call(document.querySelectorAll('.tab'), function (t) {
@@ -406,6 +410,83 @@
             '<td class="muted">' + timeAgo(p.last) + '</td></tr>';
         }).join('') + '</tbody></table>' +
         '<p class="muted" style="margin-top:12px;line-height:1.5">Batting average = directional, revenue-impacting calls whose anticipated direction matched the real next-day move, once the story aged into a graded outcome. Same rule the model scoreboard uses on itself.</p>';
+    },
+
+    renderPortfolio: function (selectedSym) {
+      var el = $('#portfolio-board'); if (!el) return;
+      var pf = Q.portfolio.get();
+
+      if (!pf) {
+        el.innerHTML =
+          '<div class="pf-import">' +
+            '<h3>Import your holdings</h3>' +
+            '<p class="muted">Export a holdings CSV from your broker and drop it here. Works with the standard Canadian-broker layout (Symbol, Name, Quantity, Market Price, Market Value columns).</p>' +
+            '<label class="btn btn-primary pf-file-label">Choose holdings CSV<input type="file" id="pf-file" accept=".csv,text/csv" hidden /></label>' +
+            '<p id="pf-error" class="login-error"></p>' +
+            '<div class="pf-privacy"><b>Private by design:</b> the file is read in your browser and stays in your browser (localStorage). Nothing is uploaded — no server, no account, no analytics. “Clear data” deletes it completely.</div>' +
+          '</div>';
+        return;
+      }
+
+      // ---- selected holding: full play-by-play ----
+      if (selectedSym) {
+        var h = null;
+        for (var i = 0; i < pf.holdings.length; i++) if (pf.holdings[i].sym === selectedSym) { h = pf.holdings[i]; break; }
+        if (!h) { el.innerHTML = '<div class="empty">Holding not found.</div>'; return; }
+        var pb = Q.theories.playbook(h.sym, h.name, h.type);
+        var cards = pb.scenarios.map(function (s) {
+          return '<div class="pf-scenario">' +
+            '<div class="pf-sc-head"><b>' + esc(s.name) + '</b><span class="pf-band">' + esc(s.band) + '</span></div>' +
+            '<div class="pf-theory muted">Theory: ' + esc(s.theory) + '</div>' +
+            '<div class="pf-play">' + esc(s.play) + '</div>' +
+            (s.prec && s.prec !== '—' ? '<div class="pf-meta"><b>Precedent:</b> ' + esc(s.prec) + '</div>' : '') +
+            (s.watch && s.watch !== '—' ? '<div class="pf-meta"><b>Watch:</b> ' + esc(s.watch) + '</div>' : '') +
+          '</div>';
+        }).join('');
+        el.innerHTML =
+          '<button class="link" data-pf-back="1">← all holdings</button>' +
+          '<div class="an-profile">' +
+            '<div class="an-head"><span class="an-name">' + esc(h.sym) + '</span><span class="muted">' + esc(h.name) + ' · ' + fmtVal(h) + '</span></div>' +
+            '<div class="pf-arch"><span class="badge neutral">' + esc(pb.label) + '</span><span class="muted"> ' + esc(pb.desc) + (pb.known ? '' : ' · auto-classified — verify') + '</span></div>' +
+          '</div>' +
+          '<div class="view-head" style="margin-top:16px"><h2 style="font-size:14px">If it happens, the play-by-play for shares like this</h2></div>' +
+          cards +
+          '<p class="muted" style="margin-top:12px;line-height:1.5">Bands are historical base rates for the archetype, approximate, for education — not predictions and not financial advice.</p>';
+        return;
+      }
+
+      // ---- overview: summary + risk mix + holdings table ----
+      var sm = Q.portfolio.summarize(pf);
+      var riskArchs = { 'leveraged-cyclical': 1, 'pre-profit-burner': 1, 'micro-spec': 1, 'crypto-proxy': 1 };
+      var riskPct = sm.mix.filter(function (m) { return riskArchs[m.arch]; }).reduce(function (a, m) { return a + m.pct; }, 0);
+      var totalsTxt = Object.keys(sm.totals).map(function (c) { return Math.round(sm.totals[c]).toLocaleString('en-US') + ' ' + c; }).join(' + ');
+      var mixBars = sm.mix.map(function (m) {
+        var hot = riskArchs[m.arch] ? ' hot' : '';
+        return '<div class="pf-mix-row"><span class="pf-mix-label">' + esc(m.label) + ' · ' + m.count + '</span>' +
+          '<div class="pf-mix-bar"><div class="pf-mix-fill' + hot + '" style="width:' + Math.max(2, m.pct) + '%"></div></div>' +
+          '<span class="pf-mix-pct">' + m.pct + '%</span></div>';
+      }).join('');
+      var crashCells = Q.theories.SCENARIOS[0].cells;
+      var rows = pf.holdings.map(function (h) {
+        var band = h.arch && crashCells[h.arch] ? crashCells[h.arch].band : '—';
+        return '<tr data-pf-sym="' + esc(h.sym) + '"><td class="an-name">' + esc(h.sym) + '</td>' +
+          '<td class="muted">' + esc(h.name.slice(0, 34)) + '</td>' +
+          '<td>' + fmtVal(h) + '</td>' +
+          '<td><span class="muted">' + esc(h.archLabel || '') + '</span></td>' +
+          '<td class="tag-down">' + esc(band) + '</td></tr>';
+      }).join('');
+
+      el.innerHTML =
+        '<div class="pf-summary">' +
+          '<div><b>' + sm.count + ' positions</b> · ' + totalsTxt + (pf.asOf ? ' · as of ' + esc(pf.asOf) : '') + '</div>' +
+          '<div class="pf-actions"><label class="link pf-file-label">re-import<input type="file" id="pf-file" accept=".csv,text/csv" hidden /></label>' +
+          '<button class="link" id="pf-clear">clear data</button></div>' +
+        '</div>' +
+        '<p id="pf-error" class="login-error"></p>' +
+        '<div class="pf-callout' + (riskPct >= 50 ? ' hot' : '') + '"><b>' + riskPct + '%</b> of this book sits in the archetypes crashes punish hardest (leveraged cyclicals, cash burners, micro-caps, crypto proxies). The Hertz Lesson applies here first.</div>' +
+        '<div class="pf-mix">' + mixBars + '</div>' +
+        '<table class="atable"><thead><tr><th>Symbol</th><th>Name</th><th>Value</th><th>Archetype</th><th>Crash band</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+        '<p class="muted" style="margin-top:10px">Click any holding for its full play-by-play (crash, earnings misses, rate shock, AI winter, commodity bust). Data stays in this browser only.</p>';
     },
 
     renderLiveMini: function () {

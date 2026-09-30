@@ -59,6 +59,8 @@
         <button class="tab" data-view="alerts">Alerts <span id="alert-badge" class="badge-count" hidden>0</span></button>
         <button class="tab" data-view="watchlist">Watchlist</button>
         <button class="tab" data-view="analysts">Analysts</button>
+        <button class="tab" data-view="portfolio">Portfolio</button>
+        <a class="tab" href="/stories/">Stories</a>
       </nav>
       <div class="topbar-right">
         <span id="market-pill" class="market-pill" title="US market session (NYSE hours, ET)"></span>
@@ -150,6 +152,15 @@
           <div id="analyst-board"></div>
         </section>
 
+        <!-- PORTFOLIO -->
+        <section id="view-portfolio" class="view" hidden>
+          <div class="view-head">
+            <h2>Portfolio stress test</h2>
+            <span class="muted">Import your holdings, get the play-by-play for crashes, misses and shocks — by archetype, with historical precedents.</span>
+          </div>
+          <div id="portfolio-board"></div>
+        </section>
+
         <!-- WATCHLIST -->
         <section id="view-watchlist" class="view" hidden>
           <div class="view-head">
@@ -198,6 +209,8 @@
   <script src="js/outcomes.js"></script>
   <script src="js/market.js"></script>
   <script src="js/analysts.js"></script>
+  <script src="js/theories.js"></script>
+  <script src="js/portfolio.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

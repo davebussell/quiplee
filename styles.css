@@ -268,6 +268,33 @@ input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px #6c5cff22; }
 .an-stats { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .an-stats .sb-rate { margin-bottom: 0; }
 
+/* ---------- portfolio stress test ---------- */
+.pf-import { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; max-width: 560px; }
+.pf-import h3 { margin: 0 0 8px; font-size: 16px; }
+.pf-import .muted { display: block; margin-bottom: 16px; line-height: 1.55; }
+.pf-file-label { cursor: pointer; display: inline-block; }
+.pf-privacy { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.55; border-top: 1px solid var(--border); padding-top: 14px; }
+.pf-privacy b { color: var(--bull); }
+.pf-summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.pf-actions { display: flex; gap: 14px; }
+.pf-callout { background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: 11px; padding: 12px 15px; font-size: 13.5px; margin-bottom: 14px; }
+.pf-callout.hot { border-left-color: var(--bear); }
+.pf-callout b { font-size: 16px; }
+.pf-mix { margin: 0 0 16px; display: flex; flex-direction: column; gap: 6px; }
+.pf-mix-row { display: grid; grid-template-columns: 240px 1fr 44px; gap: 10px; align-items: center; font-size: 12px; color: var(--muted); }
+.pf-mix-bar { height: 8px; border-radius: 999px; background: var(--bg-2); overflow: hidden; }
+.pf-mix-fill { height: 100%; border-radius: 999px; background: var(--violet); }
+.pf-mix-fill.hot { background: var(--bear); }
+.pf-mix-pct { text-align: right; font-variant-numeric: tabular-nums; }
+.pf-arch { margin-top: 8px; }
+.pf-scenario { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.pf-sc-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.pf-band { color: var(--bear); font-weight: 750; font-size: 14px; white-space: nowrap; }
+.pf-theory { font-size: 11.5px; margin-bottom: 8px; }
+.pf-play { font-size: 13.5px; line-height: 1.55; }
+.pf-meta { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+@media (max-width: 700px) { .pf-mix-row { grid-template-columns: 140px 1fr 40px; } }
+
 /* ---------- toasts ---------- */
 .toasts { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 10px; z-index: 80; }
 .toast { background: var(--panel-2); border: 1px solid var(--violet); border-left: 4px solid var(--violet); border-radius: 11px; padding: 12px 14px; max-width: 330px; box-shadow: var(--shadow); cursor: pointer; animation: arrive .3s ease; }

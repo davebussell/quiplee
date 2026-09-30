@@ -12,6 +12,7 @@
     else if (state.view === 'alerts') Q.ui.renderAlerts();
     else if (state.view === 'watchlist') Q.ui.renderWatchlist();
     else if (state.view === 'analysts') Q.ui.renderAnalysts(state.analystSel);
+    else if (state.view === 'portfolio') Q.ui.renderPortfolio(state.pfSel);
     Q.ui.refreshChrome();
   }
   function gotoView(name) {
@@ -192,6 +193,14 @@
       if (back) { state.analystSel = null; Q.ui.renderAnalysts(null); return; }
       var an = e.target.closest('[data-analyst]');
       if (an) { state.analystSel = an.getAttribute('data-analyst'); Q.ui.closeDetail(); gotoView('analysts'); return; }
+      var pfBack = e.target.closest('[data-pf-back]');
+      if (pfBack) { state.pfSel = null; Q.ui.renderPortfolio(null); return; }
+      var pfRow = e.target.closest('[data-pf-sym]');
+      if (pfRow) { state.pfSel = pfRow.getAttribute('data-pf-sym'); Q.ui.renderPortfolio(state.pfSel); return; }
+      if (e.target.closest('#pf-clear')) {
+        if (confirm('Delete the imported portfolio from this browser?')) { Q.portfolio.clear(); state.pfSel = null; Q.ui.renderPortfolio(null); }
+        return;
+      }
       var open = e.target.closest('[data-id]');
       if (!open) return;
       // inside the modal, only timeline rows re-open (jump between stories)
@@ -227,6 +236,21 @@
     $('#detail-close').addEventListener('click', Q.ui.closeDetail);
     $('#detail-modal').addEventListener('click', function (e) { if (e.target === this) Q.ui.closeDetail(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') Q.ui.closeDetail(); });
+
+    // portfolio CSV import (input is rendered dynamically → delegate on document)
+    document.addEventListener('change', function (e) {
+      if (!e.target || e.target.id !== 'pf-file') return;
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var r = Q.portfolio.importText(String(reader.result || ''));
+        if (r.error) { var er = document.querySelector('#pf-error'); if (er) er.textContent = r.error; return; }
+        state.pfSel = null;
+        Q.ui.renderPortfolio(null);
+      };
+      reader.readAsText(file);
+    });
 
     // pause when tab hidden
     document.addEventListener('visibilitychange', function () {
