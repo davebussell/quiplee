@@ -11,6 +11,7 @@
     else if (state.view === 'screener') Q.ui.renderScreener();
     else if (state.view === 'alerts') Q.ui.renderAlerts();
     else if (state.view === 'watchlist') Q.ui.renderWatchlist();
+    else if (state.view === 'analysts') Q.ui.renderAnalysts(state.analystSel);
     Q.ui.refreshChrome();
   }
   function gotoView(name) {
@@ -129,10 +130,8 @@
       .catch(function () { setMode('demo'); tickDemo(); startLoop(); });
   }
   function signOut() {
-    stopLoop(); if (state.clock) clearInterval(state.clock);
-    if (state.market) clearInterval(state.market);
     Q.auth.logout();
-    Q.ui.showLogin();
+    location.reload(); // no gate anymore — reload lands back on the open desk as a guest
   }
 
   // ---------- wiring ----------
@@ -189,6 +188,10 @@
     // story clicks (feed, screener, live-mini, alerts) via delegation on document
     document.addEventListener('click', function (e) {
       if (e.target.closest('a')) return; // real links (read article) navigate, not modal
+      var back = e.target.closest('[data-analyst-back]');
+      if (back) { state.analystSel = null; Q.ui.renderAnalysts(null); return; }
+      var an = e.target.closest('[data-analyst]');
+      if (an) { state.analystSel = an.getAttribute('data-analyst'); Q.ui.closeDetail(); gotoView('analysts'); return; }
       var open = e.target.closest('[data-id]');
       if (!open) return;
       // inside the modal, only timeline rows re-open (jump between stories)
@@ -235,7 +238,17 @@
   document.addEventListener('DOMContentLoaded', function () {
     Q.ui.bind(Q.store);
     wire();
+    // the front page IS the desk now — no login barrier; a session just personalizes
     var s = Q.auth.getSession();
-    if (s) startApp(s.email); else Q.ui.showLogin();
+    startApp(s ? s.email : null);
+    // first-visit intro strip (dismiss persists)
+    try {
+      var strip = $('#intro-strip');
+      if (strip && localStorage.getItem('q_intro') !== '1') strip.hidden = false;
+      $('#intro-dismiss').addEventListener('click', function () {
+        strip.hidden = true;
+        try { localStorage.setItem('q_intro', '1'); } catch (e2) {}
+      });
+    } catch (e) {}
   });
 })();

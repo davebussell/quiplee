@@ -105,12 +105,14 @@
     var im = s.impact;
     var dirCls = im.revenue && im.dir !== 'neutral' ? (im.dir === 'bullish' ? ' d-bull' : ' d-bear') : '';
     var linkHtml = s.link ? '<a class="art-link" href="' + esc(s.link) + '" target="_blank" rel="noopener noreferrer" title="Read the original article">↗</a>' : '';
+    var an = window.Q.analysts ? Q.analysts.extract(s) : null;
+    var anHtml = an && an.kind === 'analyst' ? '<button class="an-chip" data-analyst="' + esc(an.name) + '" title="Track this analyst’s record">' + esc(an.name) + ' ▸</button>' : '';
     return '' +
       '<div class="story' + (s.live ? ' fresh' : '') + dirCls + '" data-id="' + esc(s.id) + '">' +
         '<div class="story-top">' +
           '<span class="src">' + esc(s.src) + '</span>' +
           '<span class="dot-sep"></span><span>' + timeAgo(s.ts) + '</span>' +
-          linkHtml +
+          linkHtml + anHtml +
           '<span class="type-tag">' + esc(s.type) + '</span>' +
         '</div>' +
         '<div class="headline">' + esc(s.headline) + '</div>' +
@@ -216,7 +218,11 @@
     $: $,
 
     showLogin: function () { $('#login-view').hidden = false; $('#app-view').hidden = true; },
-    showApp: function (email) { $('#login-view').hidden = true; $('#app-view').hidden = false; $('#user-email').textContent = email || ''; },
+    showApp: function (email) {
+      $('#login-view').hidden = true; $('#app-view').hidden = false;
+      $('#user-email').textContent = email || '';
+      $('#logout-btn').hidden = !email; // guests see no sign-out — there's no gate anymore
+    },
     setLoginError: function (m) { $('#login-error').textContent = m || ''; },
     setClock: function () { $('#live-clock').textContent = new Date().toLocaleTimeString(); },
     renderMarket: function () {
@@ -227,7 +233,7 @@
     },
 
     setView: function (name) {
-      ['feed', 'screener', 'alerts', 'watchlist'].forEach(function (v) {
+      ['feed', 'screener', 'alerts', 'watchlist', 'analysts'].forEach(function (v) {
         $('#view-' + v).hidden = v !== name;
       });
       [].forEach.call(document.querySelectorAll('.tab'), function (t) {
@@ -364,6 +370,42 @@
         '</div>';
       }).join('');
       if (!w.length) $('#watch-tickers').innerHTML = '<div class="empty">No watched tickers. Add one above.</div>';
+    },
+
+    renderAnalysts: function (selected) {
+      var el = $('#analyst-board'); if (!el) return;
+      var all = store.allStories();
+      if (selected) {
+        var p = Q.analysts.get(selected, all);
+        if (!p) { el.innerHTML = '<div class="empty">No record for ' + esc(selected) + ' yet.</div>'; return; }
+        var kindLabel = p.kind === 'analyst' ? 'Analyst / research firm' : p.kind === 'filing' ? 'Regulatory filings' : 'Publisher';
+        var bat = p.avg == null ? '<span class="muted">not yet graded</span>' :
+          '<span class="sb-rate ' + (p.avg >= 50 ? 'up' : 'down') + '">' + p.avg + '%</span>';
+        el.innerHTML =
+          '<button class="link" data-analyst-back="1">← all analysts</button>' +
+          '<div class="an-profile">' +
+            '<div class="an-head"><span class="an-name">' + esc(p.name) + '</span><span class="muted">' + kindLabel + '</span></div>' +
+            '<div class="an-stats">' + bat +
+              '<span class="muted">batting average · ' + p.hits + ' of ' + p.graded + ' graded directional calls correct (vs real next-day moves) · ' + p.calls + ' directional calls · ' + p.stories.length + ' stories tracked</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="view-head" style="margin-top:18px"><h2 style="font-size:14px">What else they’re saying</h2></div>' +
+          '<div class="timeline">' + p.stories.slice(0, 20).map(tlRow).join('') + '</div>';
+        return;
+      }
+      var profiles = Q.analysts.profiles(all);
+      if (!profiles.length) { el.innerHTML = '<div class="empty">No tracked voices yet — stories populate this as they arrive.</div>'; return; }
+      el.innerHTML =
+        '<table class="atable"><thead><tr><th>Voice</th><th>Kind</th><th>Stories</th><th>Calls</th><th>Graded</th><th>Batting avg</th><th>Last seen</th></tr></thead><tbody>' +
+        profiles.slice(0, 30).map(function (p) {
+          var bat = p.avg == null ? '<span class="muted">—</span>' :
+            '<b class="' + (p.avg >= 50 ? 'tag-up' : 'tag-down') + '">' + p.avg + '%</b>';
+          var kindLabel = p.kind === 'analyst' ? 'Analyst' : p.kind === 'filing' ? 'Filings' : 'Publisher';
+          return '<tr data-analyst="' + esc(p.name) + '"><td class="an-name">' + esc(p.name) + '</td><td class="muted">' + kindLabel + '</td>' +
+            '<td>' + p.stories.length + '</td><td>' + p.calls + '</td><td>' + p.graded + '</td><td>' + bat + '</td>' +
+            '<td class="muted">' + timeAgo(p.last) + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        '<p class="muted" style="margin-top:12px;line-height:1.5">Batting average = directional, revenue-impacting calls whose anticipated direction matched the real next-day move, once the story aged into a graded outcome. Same rule the model scoreboard uses on itself.</p>';
     },
 
     renderLiveMini: function () {

@@ -250,6 +250,24 @@ input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px #6c5cff22; }
 .topic-counts { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
 .topic-counts b { color: var(--violet-2); }
 
+/* ---------- v3: open front page + analyst tracker ---------- */
+.intro-strip { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 14px 20px 0; padding: 11px 16px; background: linear-gradient(90deg, #191d3a, #14182b); border: 1px solid var(--violet); border-radius: 12px; font-size: 13px; color: var(--muted); }
+.intro-strip b { color: var(--text); }
+.an-chip { font: inherit; font-size: 11px; font-weight: 650; cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; color: var(--violet-2); }
+.an-chip:hover { border-color: var(--violet); }
+.atable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.atable th { text-align: left; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 8px 8px; border-bottom: 1px solid var(--border); }
+.atable td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+.atable tbody tr { cursor: pointer; }
+.atable tbody tr:hover { background: var(--panel-2); }
+.atable .an-name { font-weight: 650; }
+.tag-up { color: var(--bull); } .tag-down { color: var(--bear); }
+.an-profile { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-top: 12px; }
+.an-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.an-head .an-name { font-size: 20px; font-weight: 750; }
+.an-stats { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.an-stats .sb-rate { margin-bottom: 0; }
+
 /* ---------- toasts ---------- */
 .toasts { position: fixed; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 10px; z-index: 80; }
 .toast { background: var(--panel-2); border: 1px solid var(--violet); border-left: 4px solid var(--violet); border-radius: 11px; padding: 12px 14px; max-width: 330px; box-shadow: var(--shadow); cursor: pointer; animation: arrive .3s ease; }

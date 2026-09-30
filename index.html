@@ -58,6 +58,7 @@
         <button class="tab" data-view="screener">Screener</button>
         <button class="tab" data-view="alerts">Alerts <span id="alert-badge" class="badge-count" hidden>0</span></button>
         <button class="tab" data-view="watchlist">Watchlist</button>
+        <button class="tab" data-view="analysts">Analysts</button>
       </nav>
       <div class="topbar-right">
         <span id="market-pill" class="market-pill" title="US market session (NYSE hours, ET)"></span>
@@ -68,6 +69,11 @@
         <button id="logout-btn" class="btn btn-ghost">Sign out</button>
       </div>
     </header>
+
+    <div id="intro-strip" class="intro-strip" hidden>
+      <span><b>News breaks. We tell you what it's worth.</b> Every story scored for revenue impact — and every call graded in public against real price moves.</span>
+      <button id="intro-dismiss" class="link">dismiss</button>
+    </div>
 
     <div class="layout">
       <!-- ---------- Filters rail ---------- -->
@@ -135,6 +141,15 @@
           <div id="alerts-empty" class="empty" hidden>No alerts yet. Watch a ticker or arm a topic — revenue-impacting hits will land here.</div>
         </section>
 
+        <!-- ANALYSTS -->
+        <section id="view-analysts" class="view" hidden>
+          <div class="view-head">
+            <h2>Analysts &amp; sources</h2>
+            <span class="muted">Who's behind each story — their coverage, and their batting average on graded directional calls.</span>
+          </div>
+          <div id="analyst-board"></div>
+        </section>
+
         <!-- WATCHLIST -->
         <section id="view-watchlist" class="view" hidden>
           <div class="view-head">
@@ -182,6 +197,7 @@
   <script src="js/prices.js"></script>
   <script src="js/outcomes.js"></script>
   <script src="js/market.js"></script>
+  <script src="js/analysts.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
