@@ -135,6 +135,11 @@ WAIT = {
     "mayer-multiple": "The price would need to reach 2.4 times its 200-day average.",
     "trend-template": "Several conditions are failing at once, so no single close passes them all.",
     "darvas-box": "It needs a confirmed box first: three days without a new high, then three without a new low.",
+    "adx-directional-movement": "It needs +DI above −DI with ADX above 25, and ADX moves slowly.",
+    "best-six-months-macd": "The buy window is open, but it needs a fresh MACD crossover, which takes more than one day from here.",
+    "seasonal-timing-strategy": "The window is open, but MACD would need to cross its signal line, which takes more than one day from here.",
+    "cci-100": "It needs the CCI to cross +100, which takes more than one day from here.",
+    "elder-impulse": "It needs the 13-day EMA and the MACD histogram to move together, which takes more than one day from here.",
 }
 
 
@@ -180,8 +185,8 @@ def next_move(res, s, t):
     bc = BAR_CLOSE[bar]
     if not segs:
         lo, hi = trig.get("span", (None, None))
-        rng = f" between {money(lo, cur)} and {money(hi, cur)}" if lo else ""
-        out["headline"] = f"No single {bc[2:]}{rng} flips this call. {WAIT.get(s['slug'], 'It needs a bigger move, or more time, than one close can deliver.')}"
+        rng = f", not even one as low as {money(lo, cur)} or as high as {money(hi, cur)}" if lo else ""
+        out["headline"] = f"No single {bc[2:]} can flip this call{rng}. {WAIT.get(s['slug'], 'It needs a bigger move, or more time, than one close can deliver.')}"
         out["short"] = "Not on one close"
     else:
         def gap(seg):
@@ -470,8 +475,9 @@ class Site:
         self.stocks_index()
         for t in TICKERS:
             self.stock_page(t)
-            for s in TIMED:
-                self.pair_page(t, s)
+        for s in TIMED:            # warm the per-play summaries before forking
+            self.strat_summary(s)
+        self.render_pairs()
         self.learn.build()
         self.method_page()
         return self.pages
@@ -890,6 +896,22 @@ class Site:
         self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · every play's call", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, and how each has done since {start_y}.", body, active="stocks/"))
 
     # -------------------------------------------------------------- pair
+    def render_pairs(self, workers=None):
+        """Every stock x play page; one worker process per batch of tickers."""
+        import os
+        workers = workers or min(8, os.cpu_count() or 1)
+        if workers <= 1:
+            for t in TICKERS:
+                for s in TIMED:
+                    self.pair_page(t, s)
+            return
+        import multiprocessing as mp
+        global _SITE
+        _SITE = self
+        with mp.get_context("fork").Pool(workers) as pool:
+            for part in pool.imap_unordered(_pairs_for, [t["sym"] for t in TICKERS]):
+                self.pages.update(part)
+
     def pair_page(self, t, s):
         path, depth = self.pair_path(t, s), 3
         h = lambda x: self.href(depth, x)
@@ -1066,3 +1088,15 @@ class Site:
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
                        for p in sorted(list(self.pages.keys()) + ["desk/", "stories/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
+
+
+_SITE = None
+
+
+def _pairs_for(sym):
+    site = _SITE
+    t = TK[sym]
+    before = set(site.pages)
+    for s in TIMED:
+        site.pair_page(t, s)
+    return {k: v for k, v in site.pages.items() if k not in before}
