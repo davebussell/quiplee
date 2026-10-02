@@ -17,7 +17,7 @@ from .content import TICKERS, STRATEGIES
 ET = ZoneInfo("America/New_York")
 LOAD_START = "2004-01-01"      # warm-up history
 GRADE_START = pd.Timestamp("2005-01-01")
-COST_BPS = {"crypto": 10, "default": 5}   # per position change
+COST_BPS = {"crypto": 10, "micro": 30, "default": 5}   # per position change
 
 
 # --------------------------------------------------------------------------
@@ -289,7 +289,7 @@ def evaluate(sym, strat, close, irx, now):
     pos = pos[pos.notna()]
     r = close.pct_change().reindex(pos.index)
     rf = (irx.reindex(close.index, method="ffill").fillna(0) / periods).reindex(pos.index)
-    cost = (COST_BPS["crypto"] if crypto else COST_BPS["default"]) / 1e4
+    cost = (COST_BPS["micro"] if t.get("micro") else COST_BPS["crypto"] if crypto else COST_BPS["default"]) / 1e4
     strat_r = pos * r + (1 - pos) * rf - pos.diff().abs().fillna(0) * cost
     bh_r = r.copy()
     if len(strat_r):

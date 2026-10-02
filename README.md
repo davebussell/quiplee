@@ -5,7 +5,7 @@
 Quiplee has two parts:
 
 1. **The strategy site** (home, `/strategies/`, `/thinkers/`, `/stocks/`, `/method/`):
-   published trading rules tied to the people behind them, run on 24 stocks, ETFs
+   published trading rules tied to the people behind them, run on 64 stocks, ETFs
    and coins since 2005, every call graded, and the exact close that flips each
    rule next.
 2. **The live desk** (`/desk/`): real-time news scored for revenue impact
@@ -44,6 +44,18 @@ the same dates.
 pages daily after the U.S. close. If Netlify deploys from GitHub, that's it; if
 not, add `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` repo secrets and the workflow
 deploys directly.
+
+**Learn + glossary.** `tools/qstrat/learn.py` builds `/learn/` (seven lessons that
+quote live backtest numbers) and `/learn/glossary/`. Terms live in
+`tools/qstrat/glossary.py`; `tools/qstrat/linker.py` links the first use of each
+term on every generated page (and re-links `stories/*.html` and `desk/index.html`
+on each build). `assets/glossary.js` shows the hover/tap definitions and links
+terms inside the live desk's feed from `data/glossary.json`. To add a term, add an
+entry with its aliases; lower-case aliases match any case, aliases with capitals
+match exactly.
+
+**Universe.** 64 tickers in sector groups (`content.py`). Micro caps carry a
+0.30% switching cost. Sub-dollar prices show three significant digits.
 
 **Open item.** The PB EMA's real lengths are unconfirmed (its TradingView page
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change `fast`/`slow`

@@ -10,6 +10,7 @@ data/signals.json and sitemap.xml. The live news desk in /desk/ is left alone.
 Edit tools/qstrat/content.py to add tickers, thinkers or rules.
 """
 import argparse
+import json
 import os
 import shutil
 import sys
@@ -21,8 +22,57 @@ sys.path.insert(0, HERE)
 
 from qstrat import engine  # noqa: E402
 from qstrat.render import Site  # noqa: E402
+from qstrat.glossary import GLOSSARY, BY_SLUG  # noqa: E402
+from qstrat.linker import link_terms  # noqa: E402
 
-GENERATED_DIRS = ["strategies", "thinkers", "stocks", "method"]
+# Hand-written pages that also get glossary links (re-linked on every build).
+STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
+
+
+def root_href(slug):
+    g = BY_SLUG[slug]
+    if g.get("lesson"):
+        lesson, _, anchor = g["lesson"].partition("#")
+        return f"/learn/{lesson}/#{anchor}"
+    return f"/learn/glossary/#{slug}"
+
+
+def glossary_json():
+    # On the live desk, news headlines use some words in their everyday sense ("suppliers signal..."),
+    # so site-mechanics terms are left out of the desk's in-browser linking.
+    not_on_desk = {"signal", "in-out", "band", "next-move", "next-check", "closing-price"}
+    terms = [{"slug": g["slug"], "term": g["term"], "tip": g["tip"], "href": root_href(g["slug"]), "aliases": g["aliases"]}
+             for g in GLOSSARY if g["slug"] not in not_on_desk]
+    return json.dumps({"terms": terms}, ensure_ascii=False, indent=1)
+
+
+def link_static_pages(root):
+    """Glossary-link the Stories pages and the live desk shell in place."""
+    done = []
+    for folder, script_src in STATIC_LINKED.items():
+        d = os.path.join(root, folder)
+        if not os.path.isdir(d):
+            continue
+        for name in sorted(os.listdir(d)):
+            if not name.endswith(".html"):
+                continue
+            fp = os.path.join(d, name)
+            with open(fp, encoding="utf-8") as f:
+                html = f.read()
+            i = html.find("<body")
+            if i < 0:
+                continue
+            new = html[:i] + link_terms(html[i:], root_href)
+            if "glossary.js" not in new:
+                j = new.rfind("</body>")
+                new = new[:j] + f'<script src="{script_src}" defer></script>\n' + new[j:]
+            if new != html:
+                with open(fp, "w", encoding="utf-8") as f:
+                    f.write(new)
+            done.append(f"{folder}/{name}")
+    return done
+
+GENERATED_DIRS = ["strategies", "thinkers", "stocks", "method", "learn"]
 
 
 def write_pages(pages, out):
@@ -56,6 +106,9 @@ def main():
             f.write(site.signals_json())
         with open(os.path.join(ROOT, "sitemap.xml"), "w") as f:
             f.write(site.sitemap())
+        with open(os.path.join(ROOT, "data", "glossary.json"), "w", encoding="utf-8") as f:
+            f.write(glossary_json())
+        print("glossary-linked:", ", ".join(link_static_pages(ROOT)))
         print(f"wrote {len(pages)} pages to {ROOT} (closes to {site.asof.date()})")
 
     if args.preview:
@@ -64,7 +117,8 @@ def main():
         pv = Site(results, preview=True)
         pages = pv.build()
         write_pages(pages, out)
-        for rel in ["assets/site.css", "assets/site.js", "styles.css", "og-default.png", "desk/index.html"] + \
+        for rel in ["assets/site.css", "assets/site.js", "assets/sortable.js", "assets/glossary.js", "styles.css",
+                    "og-default.png", "desk/index.html", "data/glossary.json", "stories/index.html", "stories/the-hertz-lesson.html"] + \
                    [os.path.join("js", n) for n in os.listdir(os.path.join(ROOT, "js"))]:
             dst = os.path.join(out, rel)
             os.makedirs(os.path.dirname(dst), exist_ok=True)

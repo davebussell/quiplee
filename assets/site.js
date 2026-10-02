@@ -21,6 +21,7 @@
     if (money && a >= 1e6) s = (v / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, '') + 'M';
     else if (money && a >= 1e4) s = Math.round(v / 1e3).toLocaleString('en-US') + 'K';
     else if (a >= 1e4) s = Math.round(v).toLocaleString('en-US');
+    else if (a > 0 && a < 1) { var pl = Math.min(6, Math.max(2, -Math.floor(Math.log10(a)) + 2)); s = v.toFixed(pl); }
     else s = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return (cur || '') + s;
   }
@@ -36,6 +37,14 @@
     var mult = (e1 - e0) > 3 ? [1] : [1, 2, 5];
     for (var e = e0; e <= e1; e++) mult.forEach(function (m) { var v = m * Math.pow(10, e); if (v >= lo && v <= hi) out.push(v); });
     return out;
+  }
+  function fmtPct(v) {
+    if (v == null || isNaN(v)) return '–';
+    var p = Math.round(v * 100);
+    return (p < 0 ? '−' : '') + Math.abs(p) + '%';
+  }
+  function fmtFor(spec) {
+    return spec.fmt === 'pct' ? fmtPct : function (v) { return fmtNum(v, spec.cur, spec.fmt === 'money'); };
   }
   function roleColor(role) {
     return { price: css('--s-price'), s1: css('--s1'), s2: css('--s2'), bench: css('--s-bench') }[role] || css('--s1');
@@ -74,7 +83,7 @@
       node('line', { x1: m.l, x2: W - m.r, y1: y, y2: y, stroke: css('--line'), 'stroke-width': 1 }, svg);
       var t = node('text', { x: m.l - 8, y: y + 4, 'text-anchor': 'end', fill: css('--muted'),
         'font-size': 11, 'font-family': css('--data') }, svg);
-      t.textContent = fmtNum(v, spec.cur, spec.fmt === 'money').replace('.00', '');
+      t.textContent = fmtFor(spec)(v).replace('.00', '');
     });
 
     // x ticks: years for long spans, quarters otherwise
@@ -144,7 +153,7 @@
         dots[si].setAttribute('cx', x); dots[si].setAttribute('cy', Y(v)); dots[si].setAttribute('opacity', 1);
         var row = document.createElement('div'); row.className = 'row';
         var key = document.createElement('i'); key.style.background = roleColor(s.role);
-        var val = document.createElement('b'); val.textContent = fmtNum(v, spec.cur, spec.fmt === 'money');
+        var val = document.createElement('b'); val.textContent = fmtFor(spec)(v);
         var lab = document.createElement('span'); lab.textContent = s.name;
         row.appendChild(key); row.appendChild(val); row.appendChild(lab); tt.appendChild(row);
       });

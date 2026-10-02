@@ -11,6 +11,7 @@ import math
 import numpy as np
 import pandas as pd
 
+from .linker import link_terms
 from .content import (TICKERS, THINKERS, THINKER, STRATEGIES, STRATEGY, TIMED,
                       GROUP_ORDER, BAR_WORD)
 
@@ -23,7 +24,7 @@ ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0
         "fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E"
         "%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E")
 NAV = [("", "Signals"), ("strategies/", "Strategies"), ("thinkers/", "Thinkers"),
-       ("stocks/", "Stocks"), ("stories/", "Stories"), ("desk/", "Live desk"), ("method/", "Method")]
+       ("stocks/", "Stocks"), ("learn/", "Learn"), ("stories/", "Stories"), ("desk/", "Live desk"), ("method/", "Method")]
 
 
 # --------------------------------------------------------------------------
@@ -32,7 +33,12 @@ NAV = [("", "Signals"), ("strategies/", "Strategies"), ("thinkers/", "Thinkers")
 def money(v, cur="$"):
     if v is None or (isinstance(v, float) and math.isnan(v)):
         return "–"
-    return f"{cur}{v:,.0f}" if abs(v) >= 10000 else f"{cur}{v:,.2f}"
+    if abs(v) >= 10000:
+        return f"{cur}{v:,.0f}"
+    if 0 < abs(v) < 1:            # sub-dollar and penny stocks: keep 3 significant digits
+        places = min(6, max(2, -int(math.floor(math.log10(abs(v)))) + 2))
+        return f"{cur}{v:.{places}f}"
+    return f"{cur}{v:,.2f}"
 
 
 def pct(v, sign=True, d=1):
@@ -105,6 +111,9 @@ def next_move(res, strat, t):
         out["check"] = "No check needed"
         return out
     st = res["state"]
+    if st is None:
+        out["headline"] = "Not enough price history yet for this rule to make a call."
+        return out
     if st == 1:
         lvl = trig["exit"]
         out["headline"] = f"Stays in unless {BAR_CLOSE[bar]} lands below {money(lvl, cur)}."
@@ -205,6 +214,8 @@ class Site:
         self.asof = max(r["asof"] for r in results.values())
         self.pages = {}   # path -> html
         self.ver = self.asof.strftime("%Y%m%d")
+        from .learn import Learn
+        self.learn = Learn(self)
 
     # ----- helpers -----
     def r(self, sym, slug):
@@ -219,8 +230,9 @@ class Site:
     def pair_path(self, t, s):
         return f"stocks/{t['slug']}/{s['slug']}/"
 
-    def shell(self, path, title, desc, body, active=None, charts=False, extra_head=""):
+    def shell(self, path, title, desc, body, active=None, charts=False, extra_head="", lesson=None, glossary=False):
         depth = path.count("/")
+        body = link_terms(body, self.learn.href_for(depth, "glossary" if glossary else lesson))
         h = lambda target: self.href(depth, target)
         cur_attr = ' aria-current="page"'
         nav = "".join(f'<a href="{h(p)}"{cur_attr if p == active else ""}>{lab}</a>' for p, lab in NAV)
@@ -261,6 +273,7 @@ class Site:
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
+<script src="{h('assets/glossary.js')}?v={self.ver}" defer></script>
 </body>
 </html>
 """
@@ -272,7 +285,7 @@ class Site:
     def strat_summary(self, s):
         rows = [self.r(t["sym"], s["slug"]) for t in TICKERS]
         n = len(rows)
-        full = [(x["stats"]["full"]["strat"], x["stats"]["full"]["bh"]) for x in rows]
+        full = [(x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}) for x in rows]
         ok = [(a, b) for a, b in full if a and b]
         right = sum(x["batting"]["right"] for x in rows)
         calls = sum(x["batting"]["n"] for x in rows)
@@ -309,6 +322,7 @@ class Site:
             self.stock_page(t)
             for s in TIMED:
                 self.pair_page(t, s)
+        self.learn.build()
         self.method_page()
         return self.pages
 
@@ -376,7 +390,7 @@ class Site:
     <label for="pick-strategy">Strategy<select id="pick-strategy">{opt_s}</select></label>
     <label for="pick-stock">Stock<select id="pick-stock">{opt_t}</select></label>
     <button type="submit">Show the call</button>
-    <p class="picker-out">Rule outputs, not advice. Every number links to the rule and the data behind it.</p>
+    <p class="picker-out">Rule outputs, not advice. New to this? <a href="{h('learn/')}">Start with the short course</a>.</p>
   </form>
 </section>
 
@@ -479,7 +493,7 @@ class Site:
                 for t in [x for x in TICKERS if x["group"] == g]:
                     b = self.r(t["sym"], s["slug"])["stats"]["full"]["bh"]
                     rows += (f'<tr><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
-                             f'<td class="r {dir_cls(b["cagr"])}">{pct(b["cagr"])}</td><td class="r">{pct(b["maxdd"])}</td><td class="r">{ratio(b["sharpe"])}</td>'
+                             f'<td class="r {dir_cls(b.get("cagr"))}">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td><td class="r">{ratio(b.get("sharpe"))}</td>'
                              f'<td class="r nowrap">{dlong(self.r(t["sym"], s["slug"])["stats"]["start"])}</td></tr>')
             body = f"""
 <nav class="crumbs"><a href="{h('strategies/')}">Strategies</a><span>/</span><span>{e(s['name'])}</span></nav>
@@ -504,12 +518,12 @@ class Site:
                 now_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                              f'<td>{pill(x["state"])}{band}</td><td class="nowrap">{dlong(x["since"])}</td>'
                              f'<td class="nowrap" data-v="{sortv(None if nm["dist"] is None else abs(nm["dist"]))}">{"Exit below " if x["state"] == 1 else "Enter above "}{lvl}</td><td class="nowrap muted">{dlong(x["next_check"])}</td></tr>')
-                a, b = x["stats"]["full"]["strat"], x["stats"]["full"]["bh"]
+                a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 bat = x["batting"]
                 rec_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a></td>'
-                             f'<td class="r nowrap">{pct(a["cagr"])} <span class="muted">/ {pct(b["cagr"])}</span></td>'
-                             f'<td class="r nowrap">{pct(a["maxdd"])} <span class="muted">/ {pct(b["maxdd"])}</span></td>'
-                             f'<td class="r nowrap">{ratio(a["sharpe"])} <span class="muted">/ {ratio(b["sharpe"])}</span></td>'
+                             f'<td class="r nowrap">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
+                             f'<td class="r nowrap">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td>'
+                             f'<td class="r nowrap">{ratio(a.get("sharpe"))} <span class="muted">/ {ratio(b.get("sharpe"))}</span></td>'
                              f'<td class="r nowrap">{pct(bat["avg"], sign=False, d=0)} <span class="muted">of {bat["n"]}</span></td>'
                              f'<td class="r">{x["stats"]["switches_per_year"]:.1f}</td></tr>')
         body = f"""
@@ -638,16 +652,16 @@ class Site:
             since_move = x["price"] / x["since_price"] - 1 if x.get("since_price") else None
             nxt = (f'{"Exit below" if x["state"] == 1 else "Enter above"} {money(nm["level"], t["cur"])} <span class="muted">({pct(nm["dist"])})</span>'
                    if nm["level"] is not None else '<span class="muted">Structure not in place</span>')
-            a, b = x["stats"]["full"]["strat"], x["stats"]["full"]["bh"]
+            a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
             band = '<span class="band-mark" title="Inside the band"></span>' if x["trigger"].get("zone") == "between" else ""
             rows += (f'<tr><td><a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a><span class="sym-sub">{e(THINKER[s["thinker"]]["name"])} · {BAR_WORD[s["bar"]]}</span></td>'
                      f'<td>{pill(x["state"])}{band}</td><td class="nowrap">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
-                     f'<td class="nowrap" data-v="{sortv(None if nm["dist"] is None else abs(nm["dist"]))}">{nxt}</td><td class="r nowrap">{pct(a["cagr"])} <span class="muted">/ {pct(b["cagr"])}</span></td>'
-                     f'<td class="r nowrap">{pct(a["maxdd"])} <span class="muted">/ {pct(b["maxdd"])}</span></td></tr>')
+                     f'<td class="nowrap" data-v="{sortv(None if nm["dist"] is None else abs(nm["dist"]))}">{nxt}</td><td class="r nowrap">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
+                     f'<td class="r nowrap">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td></tr>')
         b = bh["stats"]["full"]["bh"]
         rows += (f'<tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
                  f'<td>{pill(1)}</td><td class="nowrap">{dlong(bh["stats"]["start"])}</td><td class="muted">Always in</td>'
-                 f'<td class="r">{pct(b["cagr"])}</td><td class="r">{pct(b["maxdd"])}</td></tr>')
+                 f'<td class="r">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td></tr>')
         spec = price_spec(bh, STRATEGY["buy-and-hold"], t, with_rule=False)
         chart = chart_block("px-" + t["slug"], spec, "", f"{e(t['short'])} over the last three years")
         others = "".join(f'<a href="{h("stocks/" + o["slug"] + "/")}">{e(o["short"])}</a>' for o in TICKERS if o["sym"] != t["sym"])
@@ -748,7 +762,7 @@ class Site:
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><a href="{h('stocks/' + t['slug'] + '/')}">{e(t['short'])}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(BAR_WORD[s['bar']])} rule · {e(t['group'])}</p>
 <h1 class="h1">{e(s['name'])} on {e(t['name'])}</h1>
-<div class="byline">Rule from <a href="{h('thinkers/' + th['slug'] + '/')}">{e(th['name'])}</a><span>·</span><a href="{h('strategies/' + s['slug'] + '/')}">How it works</a>{flag}</div></section>
+<div class="byline">Rule from <a href="{h('thinkers/' + th['slug'] + '/')}">{e(th['name'])}</a><span>·</span><a href="{h('strategies/' + s['slug'] + '/')}">How it works</a><span>·</span><a href="{h('learn/reading-a-page/')}">How to read this page</a>{flag}</div></section>
 {verdict}
 {pchart}
 {echart}
@@ -777,7 +791,7 @@ class Site:
 </ul></div>
 <div class="card prose"><p class="eyebrow">Execution and costs</p><ul>
 <li>A call made on a close is acted on at the next session.</li>
-<li>Each switch in or out costs 0.05% (0.10% for crypto).</li>
+<li>Each switch in or out costs 0.05% for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</li>
 <li>No leverage, no shorting, no taxes. The time-series momentum rule is tested long-only.</li>
 </ul></div>
 </section>

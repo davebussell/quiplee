@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://quiplee.com/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/desk/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/common-mistakes/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/glossary/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/moving-averages/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/reading-a-backtest/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/reading-a-page/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/signal-to-plan/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/the-seven-rules/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/learn/trend-following/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/method/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/aapl/</loc><lastmod>2026-10-01</lastmod></url>
@@ -12,6 +21,14 @@
   <url><loc>https://quiplee.com/stocks/aapl/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/aapl/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/aapl/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/aem-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/amd/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/amd/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/amd/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -28,6 +45,14 @@
   <url><loc>https://quiplee.com/stocks/amzn/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/amzn/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/amzn/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/apa/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/avgo/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/avgo/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/avgo/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -36,6 +61,22 @@
   <url><loc>https://quiplee.com/stocks/avgo/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/avgo/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/avgo/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bb-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/bsx/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/btc-usd/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/btc-usd/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/btc-usd/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -44,6 +85,62 @@
   <url><loc>https://quiplee.com/stocks/btc-usd/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/btc-usd/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/btc-usd/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/btdr/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/car/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/carr/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cs-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/cve-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eix/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/eose/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/eth-usd/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/eth-usd/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/eth-usd/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -52,6 +149,30 @@
   <url><loc>https://quiplee.com/stocks/eth-usd/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/eth-usd/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/eth-usd/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/fc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flnc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/flxs/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/gld/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/gld/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/gld/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -68,6 +189,54 @@
   <url><loc>https://quiplee.com/stocks/googl/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/googl/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/googl/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/gpro/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/hbm-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/holo/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/htz/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/img-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/intc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/iwm/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/iwm/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/iwm/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -84,6 +253,14 @@
   <url><loc>https://quiplee.com/stocks/jpm/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/jpm/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/jpm/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/leap-v/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/lly/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/lly/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/lly/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -92,6 +269,30 @@
   <url><loc>https://quiplee.com/stocks/lly/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/lly/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/lly/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/lscc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mara/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mdt/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/meta/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/meta/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/meta/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -100,6 +301,14 @@
   <url><loc>https://quiplee.com/stocks/meta/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/meta/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/meta/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/mgrc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/msft/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/msft/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/msft/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -116,6 +325,22 @@
   <url><loc>https://quiplee.com/stocks/mu/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/mu/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/mu/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/namm/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/npce/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/nvda/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/nvda/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/nvda/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -124,6 +349,14 @@
   <url><loc>https://quiplee.com/stocks/nvda/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/nvda/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/nvda/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/optt/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/pfe/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/pfe/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/pfe/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -132,6 +365,14 @@
   <url><loc>https://quiplee.com/stocks/pfe/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/pfe/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/pfe/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/prso/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/qqq/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/qqq/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/qqq/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -140,6 +381,30 @@
   <url><loc>https://quiplee.com/stocks/qqq/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/qqq/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/qqq/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/qutx/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/r/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/riot/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/ry-to/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/ry-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/ry-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -156,6 +421,14 @@
   <url><loc>https://quiplee.com/stocks/shop-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/shop-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/shop-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/slv/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/spy/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/spy/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/spy/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -164,6 +437,30 @@
   <url><loc>https://quiplee.com/stocks/spy/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/spy/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/spy/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/sthh/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/stm/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/supx/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tlt/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tlt/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tlt/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -172,6 +469,14 @@
   <url><loc>https://quiplee.com/stocks/tlt/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tlt/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tlt/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/trns/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tsla/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tsla/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tsla/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
@@ -180,6 +485,30 @@
   <url><loc>https://quiplee.com/stocks/tsla/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tsla/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/tsla/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/uri/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wcp-to/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/ripster-ema-clouds/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/stage-analysis/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/ten-month-sma/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/time-series-momentum/</loc><lastmod>2026-10-01</lastmod></url>
+  <url><loc>https://quiplee.com/stocks/wsc/trend-template/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/xiu-to/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/xiu-to/bull-market-support-band/</loc><lastmod>2026-10-01</lastmod></url>
   <url><loc>https://quiplee.com/stocks/xiu-to/pb-ema/</loc><lastmod>2026-10-01</lastmod></url>
