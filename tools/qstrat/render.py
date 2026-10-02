@@ -67,6 +67,11 @@ def pill(state, lg=False):
     return f'<span class="pill {cls}{" lg" if lg else ""}">{"IN" if state == 1 else "OUT"}</span>'
 
 
+def sortv(v):
+    """Raw value for a cell's data-v sort attribute; blank sorts last."""
+    return "" if v is None or (isinstance(v, float) and math.isnan(v)) else f"{v:.6g}"
+
+
 BAND_MARK = '<span class="band-mark" title="Inside the band"></span>'
 
 
@@ -255,6 +260,7 @@ class Site:
 <p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a></p>
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
+<script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
 </body>
 </html>
 """
@@ -497,7 +503,7 @@ class Site:
                 link = h(self.pair_path(t, s))
                 now_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                              f'<td>{pill(x["state"])}{band}</td><td class="nowrap">{dlong(x["since"])}</td>'
-                             f'<td class="nowrap">{"Exit below " if x["state"] == 1 else "Enter above "}{lvl}</td><td class="nowrap muted">{dlong(x["next_check"])}</td></tr>')
+                             f'<td class="nowrap" data-v="{sortv(None if nm["dist"] is None else abs(nm["dist"]))}">{"Exit below " if x["state"] == 1 else "Enter above "}{lvl}</td><td class="nowrap muted">{dlong(x["next_check"])}</td></tr>')
                 a, b = x["stats"]["full"]["strat"], x["stats"]["full"]["bh"]
                 bat = x["batting"]
                 rec_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a></td>'
@@ -521,7 +527,7 @@ class Site:
 </div></section>
 <section class="split">{rule_card}{self.against_card(depth)}</section>
 <section><div class="sec-head"><h2 class="h2">What it says now</h2><p>The exact close that would flip each call on its next {BAR_WORD[s['bar']]} check.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th>Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>Rule / buy and hold over the same dates, since 2005 or the first date with enough history.</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rec_rows}</tbody></table></div></section>
 """
@@ -636,7 +642,7 @@ class Site:
             band = '<span class="band-mark" title="Inside the band"></span>' if x["trigger"].get("zone") == "between" else ""
             rows += (f'<tr><td><a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a><span class="sym-sub">{e(THINKER[s["thinker"]]["name"])} · {BAR_WORD[s["bar"]]}</span></td>'
                      f'<td>{pill(x["state"])}{band}</td><td class="nowrap">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
-                     f'<td class="nowrap">{nxt}</td><td class="r nowrap">{pct(a["cagr"])} <span class="muted">/ {pct(b["cagr"])}</span></td>'
+                     f'<td class="nowrap" data-v="{sortv(None if nm["dist"] is None else abs(nm["dist"]))}">{nxt}</td><td class="r nowrap">{pct(a["cagr"])} <span class="muted">/ {pct(b["cagr"])}</span></td>'
                      f'<td class="r nowrap">{pct(a["maxdd"])} <span class="muted">/ {pct(b["maxdd"])}</span></td></tr>')
         b = bh["stats"]["full"]["bh"]
         rows += (f'<tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
@@ -651,7 +657,7 @@ class Site:
 <div class="byline"><span class="mono" style="color:var(--ink);font-size:18px">{money(bh['price'], t['cur'])}</span><span>close {dlong(bh['asof'])}</span><span>·</span>{self.meter(k, n)}</div></section>
 {chart}
 <section><div class="sec-head"><h2 class="h2">Every rule on {e(t['short'])}</h2><p>Record columns: rule / buy and hold, annual return and worst drawdown since {bh['stats']['start'].year}.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rule</th><th>Call</th><th>Since</th><th>Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Rule</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 <section><h2 class="h3">Other stocks</h2><div class="chips">{others}</div></section>
 """
         self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · every rule's call", f"What {len(TIMED)} published trading rules say about {t['name']} ({t['short']}) now, the exact levels that flip them, and how each has done since {bh['stats']['start'].year}.", body, active="stocks/"))
@@ -715,7 +721,7 @@ class Site:
                      f'<td class="r">{cell(st["5y"]["strat"], key, fmt)}</td><td class="r muted">{cell(st["5y"]["bh"], key, fmt)}</td></tr>')
         rows += f'<tr><td>Time invested</td><td class="r">{pct(st["invested"], sign=False, d=0)}</td><td class="r muted">100%</td><td></td><td></td></tr>'
         rows += f'<tr><td>Switches per year</td><td class="r">{st["switches_per_year"]:.1f}</td><td class="r muted">0</td><td></td><td></td></tr>'
-        stats_tbl = (f'<div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th class="r">Rule, since {st["start"].year}</th><th class="r">Buy &amp; hold</th>'
+        stats_tbl = (f'<div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th></th><th class="r">Rule, since {st["start"].year}</th><th class="r">Buy &amp; hold</th>'
                      f'<th class="r">Rule, 5 yrs</th><th class="r">Buy &amp; hold</th></tr></thead><tbody>{rows}</tbody></table></div>')
 
         # calls
@@ -726,7 +732,8 @@ class Site:
             res = ('<span class="muted">open</span>' if not c["closed"] else
                    ('<span class="up">✓ right</span>' if c["right"] else '<span class="down">✕ wrong</span>'))
             crow += (f'<tr><td class="nowrap">{dlong(c["date"])}</td><td>{pill(c["state"])}</td><td class="r">{money(c["price"], cur)}</td>'
-                     f'<td class="nowrap">{dlong(c["end"]) if c["closed"] else "now"}</td><td class="r {dir_cls(c["move"])}">{pct(c["move"])}</td><td>{res}</td></tr>')
+                     f'<td class="nowrap" data-v="{pd.Timestamp(c["end"]).strftime("%Y-%m-%d")}">{dlong(c["end"]) if c["closed"] else "now"}</td>'
+                     f'<td class="r {dir_cls(c["move"])}">{pct(c["move"])}</td><td data-v="{(1 if c["right"] else 0) if c["closed"] else ""}">{res}</td></tr>')
         bat_line = (f'Right on <b>{bat["right"]}</b> of <b>{bat["n"]}</b> closed calls ({pct(bat["avg"], sign=False, d=0)}). '
                     f'In calls averaged {pct(bat["in_avg"])}; out calls saw {t["short"]} move {pct(bat["out_avg"])} on average.') if bat["n"] else "No closed calls yet."
         calls_sec = f"""<section><div class="sec-head"><h2 class="h2">Every call, graded</h2><p>{bat_line}</p></div>
