@@ -10,3 +10,6 @@ desktop.ini
 
 # Node (not used, but just in case)
 node_modules/
+__pycache__/
+SHIP-QUIPLEE.cmd
+.ship/

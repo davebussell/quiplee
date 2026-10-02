@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live desk · Quiplee · News breaks. We tell you what it's worth.</title>
+  <meta name="description" content="Quiplee reads every market story in real time and tells you its revenue impact and anticipated move on the stock — with lookback and comparable-story evidence." />
+  <meta property="og:title" content="Quiplee — News breaks. We tell you what it's worth." />
+  <meta property="og:description" content="Real-time revenue-impact verdicts on every market story, graded in public against real price moves." />
+  <meta property="og:url" content="https://quiplee.com/desk/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#0b0f17" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="../styles.css" />
+  <meta property="og:image" content="https://quiplee.com/og-default.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:image" content="https://quiplee.com/og-default.png" />
+  <link rel="canonical" href="https://quiplee.com/desk/" />
+  <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://quiplee.com/#organization", "name": "Quiplee", "url": "https://quiplee.com/", "logo": "https://quiplee.com/og-default.png", "description": "Quiplee reads every market story in real time and tells you its revenue impact and the move to expect."}, {"@type": "WebSite", "@id": "https://quiplee.com/#website", "name": "Quiplee", "url": "https://quiplee.com/", "inLanguage": "en", "publisher": {"@id": "https://quiplee.com/#organization"}}]}</script>
+</head>
+<body>
+  <!-- ===================== LANDING + LOGIN ===================== -->
+  <section id="login-view" class="login-view" hidden>
+    <div class="landing">
+      <div class="hero">
+        <span class="logo logo-xl">quiplee<span class="logo-tick">▲</span></span>
+        <h1 class="hero-tag">News breaks.<br />We tell you what it's worth.</h1>
+        <p class="hero-sub">Quiplee reads every market story the moment it lands and answers the only question that matters: <em>what does this do to the stock?</em></p>
+        <ul class="hero-pillars">
+          <li><b>Real-time impact</b><span>Revenue verdict, direction, expected move and confidence — on every headline.</span></li>
+          <li><b>Backed by history</b><span>Every story is checked against how it moved the stock last time, with realized returns.</span></li>
+          <li><b>Your themes, watched</b><span>Arm a topic in the Screener and get pinged when anything revenue-impacting hits it.</span></li>
+        </ul>
+      </div>
+      <div class="login-card">
+        <p class="login-tag">Open your story-impact desk</p>
+        <form id="login-form">
+          <label class="field"><span>Email</span>
+            <input id="login-email" type="email" placeholder="you@example.com" required /></label>
+          <label class="field"><span>Password</span>
+            <input id="login-password" type="password" placeholder="••••••••" required /></label>
+          <button type="submit" class="btn btn-primary btn-block">Open the desk</button>
+          <p id="login-error" class="login-error" role="alert"></p>
+        </form>
+        <p class="login-note">Demo build — any email + password works; auth is validated client-side and stored in a local session cookie. Not financial advice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== APP ===================== -->
+  <section id="app-view" class="app-view" hidden>
+    <header class="topbar">
+      <a class="logo logo-sm" href="../" style="text-decoration:none">quiplee<span class="logo-tick">▲</span></a>
+      <nav class="tabs" id="tabs">
+        <a class="tab tab-link" href="../">Strategies</a>
+        <button class="tab active" data-view="feed">Live Feed</button>
+        <button class="tab" data-view="screener">Screener</button>
+        <button class="tab" data-view="alerts">Alerts <span id="alert-badge" class="badge-count" hidden>0</span></button>
+        <button class="tab" data-view="watchlist">Watchlist</button>
+        <button class="tab" data-view="analysts">Analysts</button>
+        <button class="tab" data-view="portfolio">Portfolio</button>
+        <a class="tab" href="/stories/">Stories</a>
+      </nav>
+      <div class="topbar-right">
+        <span id="market-pill" class="market-pill" title="US market session (NYSE hours, ET)"></span>
+        <span id="data-mode" class="mode-pill demo" title="Data source">DEMO</span>
+        <span class="live-dot" id="live-dot" title="Live"></span>
+        <span class="muted" id="live-clock"></span>
+        <span class="user-email muted" id="user-email"></span>
+        <button id="logout-btn" class="btn btn-ghost">Sign out</button>
+      </div>
+    </header>
+
+    <div id="intro-strip" class="intro-strip" hidden>
+      <span><b>News breaks. We tell you what it's worth.</b> Every story scored for revenue impact — and every call graded in public against real price moves.</span>
+      <button id="intro-dismiss" class="link">dismiss</button>
+    </div>
+
+    <div class="layout">
+      <!-- ---------- Filters rail ---------- -->
+      <aside class="rail-left">
+        <input id="search" class="search" type="text" placeholder="Search stories, tickers…" spellcheck="false" />
+
+        <div class="filter-group">
+          <div class="filter-head">Impact</div>
+          <label class="check"><input type="checkbox" id="f-revenue" /> Revenue-impacting only</label>
+          <div class="seg" id="f-direction">
+            <button data-dir="all" class="active">All</button>
+            <button data-dir="bullish">Bullish</button>
+            <button data-dir="bearish">Bearish</button>
+          </div>
+          <label class="check"><input type="checkbox" id="f-watched" /> Watched names/topics only</label>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-head">Story type <button id="types-clear" class="link">reset</button></div>
+          <div id="type-chips" class="type-chips"></div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-head">Watching</div>
+          <div id="watch-summary" class="watch-summary"></div>
+        </div>
+      </aside>
+
+      <!-- ---------- Main view ---------- -->
+      <main class="main">
+        <!-- FEED -->
+        <section id="view-feed" class="view">
+          <div class="view-head">
+            <h2 id="feed-title">Live Feed</h2>
+            <span class="muted" id="feed-count"></span>
+            <div class="seg seg-sm" id="feed-sort" style="margin-left:auto">
+              <button data-sort="latest" class="active">Latest</button>
+              <button data-sort="impact">Impact</button>
+            </div>
+          </div>
+          <div id="feed" class="feed"></div>
+          <div id="feed-empty" class="empty" hidden>No stories match your filters.</div>
+        </section>
+
+        <!-- SCREENER -->
+        <section id="view-screener" class="view" hidden>
+          <div class="view-head">
+            <h2>Story Screener</h2>
+            <span class="muted">Arm a topic — get pinged the moment a revenue-impacting story hits it.</span>
+          </div>
+          <div id="topic-grid" class="topic-grid"></div>
+          <div class="view-head"><h2>Matching your armed topics</h2></div>
+          <div id="screener-feed" class="feed"></div>
+          <div id="screener-empty" class="empty" hidden>Arm a topic above to start screening.</div>
+        </section>
+
+        <!-- ALERTS -->
+        <section id="view-alerts" class="view" hidden>
+          <div class="view-head">
+            <h2>Alerts</h2>
+            <button id="alerts-clear" class="link">clear all</button>
+            <label class="check" style="margin-left:auto"><input type="checkbox" id="notif-toggle" /> Browser notifications</label>
+          </div>
+          <div id="alerts-list" class="alerts-list"></div>
+          <div id="alerts-empty" class="empty" hidden>No alerts yet. Watch a ticker or arm a topic — revenue-impacting hits will land here.</div>
+        </section>
+
+        <!-- ANALYSTS -->
+        <section id="view-analysts" class="view" hidden>
+          <div class="view-head">
+            <h2>Analysts &amp; sources</h2>
+            <span class="muted">Who's behind each story — their coverage, and their batting average on graded directional calls.</span>
+          </div>
+          <div id="analyst-board"></div>
+        </section>
+
+        <!-- PORTFOLIO -->
+        <section id="view-portfolio" class="view" hidden>
+          <div class="view-head">
+            <h2>Portfolio stress test</h2>
+            <span class="muted">Import your holdings, get the play-by-play for crashes, misses and shocks — by archetype, with historical precedents.</span>
+          </div>
+          <div id="portfolio-board"></div>
+        </section>
+
+        <!-- WATCHLIST -->
+        <section id="view-watchlist" class="view" hidden>
+          <div class="view-head">
+            <h2>Watchlist</h2>
+            <form id="watch-add" class="watch-add">
+              <input id="watch-input" type="text" placeholder="Add ticker (e.g. NVDA)" maxlength="6" spellcheck="false" />
+              <button class="btn btn-ghost">＋ Add</button>
+            </form>
+          </div>
+          <div id="watch-tickers" class="watch-tickers"></div>
+        </section>
+      </main>
+
+      <!-- ---------- Live rail ---------- -->
+      <aside class="rail-right">
+        <div class="rail-card">
+          <div class="rail-head"><span class="live-dot"></span> Live impact</div>
+          <div id="live-mini" class="live-mini"></div>
+        </div>
+        <div class="rail-card">
+          <div class="rail-head">Model scoreboard</div>
+          <div id="scoreboard"></div>
+        </div>
+        <p class="rail-note">Heuristic model · not financial advice. Calls are graded in public against real moves.</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== STORY DETAIL ===================== -->
+  <div id="detail-modal" class="modal" hidden>
+    <div class="modal-card detail-card">
+      <button id="detail-close" class="modal-close" aria-label="Close">✕</button>
+      <div id="detail-body"></div>
+    </div>
+  </div>
+
+  <!-- toasts -->
+  <div id="toasts" class="toasts"></div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/store.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/live.js"></script>
+  <script src="../js/prices.js"></script>
+  <script src="../js/outcomes.js"></script>
+  <script src="../js/market.js"></script>
+  <script src="../js/analysts.js"></script>
+  <script src="../js/theories.js"></script>
+  <script src="../js/portfolio.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>
