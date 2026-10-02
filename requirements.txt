@@ -1,0 +1,4 @@
+# Site build (Netlify runs this on every push). Pinned to the versions the
+# engine is tested with. Fetching prices also needs yfinance (CI installs it).
+pandas==3.0.2
+numpy==2.4.4

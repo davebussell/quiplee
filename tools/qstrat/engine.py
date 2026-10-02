@@ -1,75 +1,86 @@
-"""Strategy engine: prices, rules, backtests, call history and next-move triggers.
+"""Play engine: cached prices in, graded backtests and next moves out.
 
-Every rule is evaluated on completed bars only (daily, weekly or month-end),
-acted on at the next session, charged a trading cost, and credited the T-bill
-yield while out of the market. The "next move" is the exact close that would
-flip the rule on its next bar, solved from the moving-average formulas.
+Every play is evaluated on finished bars only (daily, weekly or month-end),
+acted on at the next session, charged a trading cost per switch, and credited
+the T-bill yield while out. The "next move" is found by asking the play itself
+what it would say after one more bar at a range of hypothetical closes, then
+narrowing each flip point down to a fraction of a cent.
 """
 import datetime as dt
+import os
 from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
 
-from .content import TICKERS, STRATEGIES
+from .cal import future_sessions
+from .content import TICKERS, PLAYS
 
 ET = ZoneInfo("America/New_York")
-LOAD_START = "2004-01-01"      # warm-up history
 GRADE_START = pd.Timestamp("2005-01-01")
 COST_BPS = {"crypto": 10, "micro": 30, "default": 5}   # per position change
+PRICE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "prices")
+BENCH = "SPY"
 
 
 # --------------------------------------------------------------------------
 # Data
 # --------------------------------------------------------------------------
-def _close(sym):
-    d = yf.download(sym, start=LOAD_START, progress=False, auto_adjust=True)
-    if d is None or d.empty:
-        raise RuntimeError(f"no data for {sym}")
-    if isinstance(d.columns, pd.MultiIndex):
-        d.columns = d.columns.get_level_values(0)
-    c = d["Close"].dropna().astype(float)
-    c.index = pd.to_datetime(c.index).tz_localize(None).normalize()
-    return c[~c.index.duplicated(keep="last")]
+def price_file(sym, base=PRICE_DIR):
+    return os.path.join(base, sym.replace("^", "_").replace(".", "-").lower() + ".csv")
 
 
-def _drop_partial(c, crypto, now):
+def _read(sym, base):
+    d = pd.read_csv(price_file(sym, base), index_col="date", parse_dates=["date"])
+    d = d[~d.index.duplicated(keep="last")].sort_index()
+    d = d.dropna(subset=["close"])
+    for c in ["open", "high", "low"]:
+        d[c] = d[c].fillna(d["close"])
+    d["high"] = d[["high", "open", "close"]].max(axis=1)
+    d["low"] = d[["low", "open", "close"]].min(axis=1)
+    d["volume"] = d["volume"].fillna(0).astype(float)
+    return d[["open", "high", "low", "close", "volume"]].astype(float)
+
+
+def _drop_partial(d, crypto, now):
     """Drop today's still-forming bar so every signal uses a finished close."""
-    last = c.index[-1].date()
+    last = d.index[-1].date()
     if crypto:
         if last >= dt.datetime.now(dt.timezone.utc).date():
-            return c.iloc[:-1]
+            return d.iloc[:-1]
     elif last >= now.date() and (now.hour, now.minute) < (16, 30):
-        return c.iloc[:-1]
-    return c
+        return d.iloc[:-1]
+    return d
 
 
-def load_all(now=None):
+def load_all(now=None, base=PRICE_DIR):
     now = now or dt.datetime.now(ET)
-    irx = _close("^IRX") / 100.0          # 13-week T-bill, annualised decimal
-    prices = {}
-    for t in TICKERS:
-        prices[t["sym"]] = _drop_partial(_close(t["sym"]), t["crypto"], now)
+    irx = _read("^IRX", base)["close"] / 100.0
+    prices = {t["sym"]: _drop_partial(_read(t["sym"], base), t["crypto"], now) for t in TICKERS}
     return prices, irx, now
 
 
 # --------------------------------------------------------------------------
-# Bars and averages
+# Bars
 # --------------------------------------------------------------------------
-def to_bars(c, bar, crypto, now):
-    """Resample daily closes to the rule's bar. Each bar is stamped with the
-    date of its last actual session. Returns (bars, last_bar_complete, bar_end)."""
+AGG = {"open": "first", "high": "max", "low": "min", "close": "last", "volume": "sum", "hc": "max"}
+
+
+def to_bars(d, bar, crypto, now):
+    """Resample daily OHLCV to the play's bar. Each bar is stamped with the date
+    of its last actual session. Returns (bars, last_bar_complete, bar_end)."""
+    d = d.assign(hc=d["close"])
     if bar == "D":
-        return c.copy(), True, c.index[-1]
+        return d, True, d.index[-1]
     freq = ("W-SUN" if crypto else "W-FRI") if bar == "W" else "M"
-    key = c.index.to_period(freq)
-    g = c.groupby(key)
+    key = d.index.to_period(freq)
+    g = d.groupby(key)
+    bars = g.agg(AGG)
     last_dates = g.apply(lambda s: s.index[-1])
-    px = pd.Series(g.last().values, index=pd.DatetimeIndex(last_dates.values))
+    bars.index = pd.DatetimeIndex(last_dates.values)
     per = key[-1]
     end = per.end_time.normalize()
-    asof = c.index[-1]
+    asof = d.index[-1]
     if bar == "W":
         complete = asof >= end or (not crypto and asof.weekday() == 4) or now.date() > end.date()
     else:
@@ -79,134 +90,135 @@ def to_bars(c, bar, crypto, now):
             complete = (asof + pd.offsets.BDay(1)).month != asof.month or now.date() > end.date()
         if not crypto:
             end = (end - pd.offsets.BDay(0)) if end.weekday() < 5 else end - pd.offsets.BDay(1)
-    return px, bool(complete), end
-
-
-def ma(s, n, kind):
-    return s.ewm(span=n, adjust=False).mean() if kind == "ema" else s.rolling(n).mean()
-
-
-def next_thresh(s, n, kind):
-    """The close on the next bar at which price exactly equals the average
-    computed with that close included."""
-    if kind == "ema":   # P > EMA_next  <=>  P > EMA_now
-        return float(s.ewm(span=n, adjust=False).mean().iloc[-1])
-    return float(s.iloc[-(n - 1):].mean())      # P > SMA_next  <=>  P > mean(last n-1)
-
-
-def _warm(n, kind):
-    return n if kind == "sma" else 2 * n
-
-
-def _hold(set_series):
-    """Turn a 1/0/NaN 'set' series into a held state (NaN until first set)."""
-    return set_series.ffill()
+    return bars, bool(complete), end
 
 
 # --------------------------------------------------------------------------
-# Rules — each returns state (at completed bars), chart lines and a trigger
+# Context and the next-move solver
 # --------------------------------------------------------------------------
-def rule_band(px, s):
-    (nf, kf), (ns, ks) = s["fast"], s["slow"]
-    a, b = ma(px, nf, kf), ma(px, ns, ks)
-    hi, lo = np.maximum(a, b), np.minimum(a, b)
-    setv = pd.Series(np.nan, index=px.index)
-    setv[px > hi] = 1.0
-    setv[px < lo] = 0.0
-    warm = max(_warm(nf, kf), _warm(ns, ks))
-    setv.iloc[:warm] = np.nan
-    state = _hold(setv)
-    ta, tb = next_thresh(px, nf, kf), next_thresh(px, ns, ks)
-    p = px.iloc[-1]
-    zone = "above" if p > hi.iloc[-1] else ("below" if p < lo.iloc[-1] else "between")
-    trig = {"exit": min(ta, tb), "enter": max(ta, tb), "zone": zone}
-    return state, {s["lines"][0]: a, s["lines"][1]: b}, trig
+def make_ctx(t, idx, bench_close, irx, future=None):
+    is_bench = t["sym"] == BENCH
+    return {
+        "crypto": t["crypto"],
+        "bench": None if is_bench else bench_close.reindex(idx, method="ffill"),
+        "bench_full": bench_close,
+        "irx_daily": irx,
+        "future": future,
+    }
 
 
-TEMPLATE_LABELS = [
-    "Price above the 150 and 200-day averages",
-    "150-day above the 200-day",
-    "200-day higher than a month ago",
-    "50-day above the 150 and 200-day",
-    "Price above the 50-day",
-    "At least 30% above the 52-week low",
-    "Within 25% of the 52-week high",
-]
+def _hyp_row(done, partial, P, nxt_date):
+    if partial is not None:
+        o, h, l_, v, hc = partial["open"], max(partial["high"], P), min(partial["low"], P), partial["volume"], max(partial["hc"], P)
+        date = partial.name
+    else:
+        last = float(done["close"].iloc[-1])
+        o, h, l_, hc = last, max(last, P), min(last, P), P
+        v = float(done["volume"].iloc[-20:].mean()) if len(done) else 0.0
+        date = nxt_date
+    return pd.DataFrame({"open": [o], "high": [h], "low": [l_], "close": [P], "volume": [v], "hc": [hc]},
+                        index=pd.DatetimeIndex([date]))
 
 
-def rule_template(px, s):
-    s50, s150, s200 = px.rolling(50).mean(), px.rolling(150).mean(), px.rolling(200).mean()
-    s200p = s200.shift(21)
-    low52, high52 = px.rolling(252).min(), px.rolling(252).max()
-    conds = [
-        (px > s150) & (px > s200),
-        s150 > s200,
-        s200 > s200p,
-        (s50 > s150) & (s50 > s200),
-        px > s50,
-        px >= 1.3 * low52,
-        px >= 0.75 * high52,
-    ]
-    allok = conds[0]
-    for c in conds[1:]:
-        allok = allok & c
-    valid = s200p.notna() & low52.notna()
-    setv = pd.Series(np.nan, index=px.index)
-    setv[allok] = 1.0
-    setv[px < s50] = 0.0
-    setv[~valid] = np.nan
-    state = _hold(setv)
-    checks = [(lab, bool(c.iloc[-1])) for lab, c in zip(TEMPLATE_LABELS, conds)]
-    t50, t150, t200 = next_thresh(px, 50, "sma"), next_thresh(px, 150, "sma"), next_thresh(px, 200, "sma")
-    structural_ok = checks[1][1] and checks[2][1] and checks[3][1]
-    enter = max(t50, t150, t200, 1.3 * float(low52.iloc[-1]), 0.75 * float(high52.iloc[-1])) if structural_ok else None
-    trig = {"exit": t50, "enter": enter, "checks": checks, "structural_ok": structural_ok}
-    return state, {"50-day SMA": s50, "150-day SMA": s150, "200-day SMA": s200}, trig
+def solve(play, t, done, partial, state0, ref, bench_close, irx, future, bar):
+    """Find the closes on the next bar that would flip the play.
+
+    Returns {"segments": [(lo, hi), ...], "span": (lo, hi), "now": state if
+    the current partial bar closed at today's price}. lo/hi of None mean the
+    segment runs off the searched range."""
+    L = play.get("warm", 420) if bar == "D" else 100000
+    tail = done.iloc[-L:]
+    if len(tail) < len(done) and state0 is not None:
+        # path-dependent rules must agree with the full history on today's call
+        chk = play["fn"](tail, make_ctx(t, tail.index, bench_close, irx, future))["state"].iloc[-1]
+        if pd.isna(chk) or int(chk) != state0:
+            tail = done
+    nxt = future[0] if future is not None and len(future) else done.index[-1] + pd.Timedelta(days=1)
+    fut2 = future[1:] if future is not None and len(future) else None
+    df2 = pd.concat([tail, _hyp_row(tail, partial, float(tail["close"].iloc[-1]), nxt)])
+    ctx2 = make_ctx(t, df2.index, bench_close, irx, fut2)
+    h0 = df2.iloc[-1].copy()
+    ci = {c: df2.columns.get_loc(c) for c in df2.columns}
+
+    def f(P):
+        """The play's call if the next bar closed at P (the bar is reused in place)."""
+        if partial is not None:
+            hi, lo_, hc = max(partial["high"], P), min(partial["low"], P), max(partial["hc"], P)
+        else:
+            hi, lo_, hc = max(h0["open"], P), min(h0["open"], P), P
+        df2.iat[-1, ci["close"]] = P
+        df2.iat[-1, ci["high"]] = hi
+        df2.iat[-1, ci["low"]] = lo_
+        df2.iat[-1, ci["hc"]] = hc
+        st = play["fn"](df2, ctx2)["state"]
+        v = st.iloc[-1]
+        return None if pd.isna(v) else int(v)
+
+    wide = t["crypto"] or t.get("micro") or bar == "M"
+    lo_m, hi_m = (0.5, 2.0) if wide else ((0.6, 1.6) if bar == "W" else (0.7, 1.4))
+    grid = np.unique(np.concatenate([np.exp(np.linspace(np.log(lo_m), np.log(hi_m), 11)), [1.0]])) * ref
+    vals = [f(P) for P in grid]
+    if state0 is not None and not any(v is not None and v != state0 for v in vals):
+        # nothing nearby: look further out so slow rules still show a level
+        far = np.array([0.25, (0.25 * lo_m) ** 0.5, lo_m * 0.85, hi_m * 1.2, (4.0 * hi_m) ** 0.5, 4.0]) * ref
+        grid = np.concatenate([far[:3], grid, far[3:]])
+        vals = [f(P) for P in far[:3]] + vals + [f(P) for P in far[3:]]
+    out = {"segments": [], "span": (float(grid[0]), float(grid[-1])), "now": vals[list(grid).index(ref)] if ref in grid else f(ref)}
+    if state0 is None:
+        return out
+
+    def edge(a, b):
+        """a: a grid close that keeps the call, b: one that flips it."""
+        fa = vals_map[a]
+        for _ in range(40):
+            if abs(np.log(b / a)) < 2e-5:
+                break
+            m = (a * b) ** 0.5
+            if f(m) == fa:
+                a = m
+            else:
+                b = m
+        return (a * b) ** 0.5
+
+    vals_map = dict(zip(grid, vals))
+    flip = [v is not None and v != state0 for v in vals]
+    i = 0
+    while i < len(grid):
+        if not flip[i]:
+            i += 1
+            continue
+        j = i
+        while j + 1 < len(grid) and flip[j + 1]:
+            j += 1
+        lo = None if i == 0 else edge(grid[i - 1], grid[i])
+        hi = None if j == len(grid) - 1 else edge(grid[j + 1], grid[j])
+        out["segments"].append((lo, hi))
+        i = j + 1
+    return out
 
 
-def rule_stage(px, s):
-    s30 = px.rolling(30).mean()
-    rising = s30 > s30.shift(4)
-    setv = pd.Series(np.nan, index=px.index)
-    setv[(px > s30) & rising] = 1.0
-    setv[px < s30] = 0.0
-    setv.iloc[:34] = np.nan
-    state = _hold(setv)
-    thr = next_thresh(px, 30, "sma")
-    sum29 = float(px.iloc[-29:].sum())
-    rise_need = 30 * float(s30.iloc[-4]) - sum29     # next close that keeps the average rising
-    trig = {"exit": thr, "enter": max(thr, rise_need), "rising": bool(rising.iloc[-1])}
-    return state, {"30-week SMA": s30}, trig
+def next_calendar_flip(cal_series, last_date, state0):
+    fut = cal_series[cal_series.index > last_date]
+    ch = fut[fut != state0]
+    return (ch.index[0], int(ch.iloc[0])) if len(ch) else (None, None)
 
 
-def rule_faber(px, s):
-    s10 = px.rolling(10).mean()
-    setv = pd.Series(np.where(px > s10, 1.0, 0.0), index=px.index)
-    setv[s10.isna()] = np.nan
-    state = _hold(setv)
-    thr = next_thresh(px, 10, "sma")
-    return state, {"10-month SMA": s10}, {"exit": thr, "enter": thr}
-
-
-def rule_tsmom(px, s, irx):
-    rf_m = irx.groupby(irx.index.to_period("M")).mean()
-    rf12 = rf_m.rolling(12).mean()
-    rf12 = pd.Series(rf12.reindex(px.index.to_period("M")).values, index=px.index).ffill()
-    base = px.shift(12) * (1 + rf12)
-    setv = pd.Series(np.where(px > base, 1.0, 0.0), index=px.index)
-    setv[base.isna()] = np.nan
-    state = _hold(setv)
-    thr = float(px.iloc[-12]) * (1 + float(rf12.iloc[-1]))
-    return state, {"12 months ago + T-bills": base}, {"exit": thr, "enter": thr}
-
-
-def rule_hold(px, s):
-    state = pd.Series(1.0, index=px.index)
-    return state, {}, {}
+def next_window(season, asof, state0):
+    """For MACD-timed seasonal plays: the date the relevant window opens."""
+    (bm, bd), (sm, sd) = season
+    md = asof.month * 100 + asof.day
+    b, s = bm * 100 + bd, sm * 100 + sd
+    in_buy = (md >= b) or (md < s)
+    if state0 == 0 and not in_buy:
+        return pd.Timestamp(asof.year, bm, bd), "buy"
+    if state0 == 1 and in_buy:
+        y = asof.year + (1 if md >= b else 0)
+        return pd.Timestamp(y, sm, sd), "sell"
+    return None, ("buy" if in_buy else "sell")
 
 
 # --------------------------------------------------------------------------
-# Evaluation
+# Grading
 # --------------------------------------------------------------------------
 def _perf(ret, rf, periods):
     ret = ret.dropna()
@@ -226,9 +238,9 @@ def _perf(ret, rf, periods):
     }
 
 
-def _next_check(bar, asof, crypto, bar_end, complete):
+def _next_check(bar, asof, crypto, bar_end, complete, future):
     if bar == "D":
-        return asof + (pd.Timedelta(days=1) if crypto else pd.offsets.BDay(1))
+        return future[0] if future is not None and len(future) else asof + pd.offsets.BDay(1)
     if not complete:
         return bar_end
     if bar == "W":
@@ -245,114 +257,149 @@ def _calls(state, px, live_price, live_date):
         return []
     flips = ch[ch.ne(ch.shift())]
     out = []
+    idx = list(flips.index)
     for i, (d, v) in enumerate(flips.items()):
         p0 = float(px.loc[d])
-        if i + 1 < len(flips):
-            d1 = flips.index[i + 1]
+        if i + 1 < len(idx):
+            d1 = idx[i + 1]
             p1, closed = float(px.loc[d1]), True
         else:
             d1, p1, closed = live_date, live_price, False
         move = p1 / p0 - 1
-        out.append({
-            "date": d, "state": int(v), "price": p0, "end": d1, "end_price": p1,
-            "move": move, "closed": closed,
-            "right": (move > 0) if v == 1 else (move < 0),
-        })
+        out.append({"date": d, "state": int(v), "price": p0, "end": d1, "end_price": p1,
+                    "move": move, "closed": closed, "right": (move > 0) if v == 1 else (move < 0)})
     return out
 
 
-def evaluate(sym, strat, close, irx, now):
-    t = next(x for x in TICKERS if x["sym"] == sym)
+def evaluate(t, play, d, bench_close, irx, now, future):
     crypto = t["crypto"]
     periods = 365 if crypto else 252
-    bars, complete, bar_end = to_bars(close, strat["bar"], crypto, now)
+    bar = play["bar"]
+    bars, complete, bar_end = to_bars(d, bar, crypto, now)
     done = bars if complete else bars.iloc[:-1]
-    kind = strat["kind"]
-    if kind == "band":
-        state, lines, trig = rule_band(done, strat)
-    elif kind == "template":
-        state, lines, trig = rule_template(done, strat)
-    elif kind == "stage":
-        state, lines, trig = rule_stage(done, strat)
-    elif kind == "faber":
-        state, lines, trig = rule_faber(done, strat)
-    elif kind == "tsmom":
-        state, lines, trig = rule_tsmom(done, strat, irx)
-    else:
-        state, lines, trig = rule_hold(done, strat)
+    partial = None if complete else bars.iloc[-1]
+    close = d["close"]
+    asof, live = close.index[-1], float(close.iloc[-1])
+    hold = play.get("benchmark", False)
+
+    out = play["fn"](done, make_ctx(t, done.index, bench_close, irx, future if bar == "D" else None)) if len(done) else {"state": pd.Series(dtype=float), "lines": [], "panel": None, "extra": {}}
+    state = out["state"]
 
     # daily positions: act on the session after the signal bar
-    pos = state.reindex(close.index, method="ffill").shift(1)
-    if kind == "hold":
+    if hold:
         pos = pd.Series(1.0, index=close.index)
-    pos = pos[pos.index >= GRADE_START]
-    pos = pos[pos.notna()]
+    else:
+        pos = state.reindex(close.index, method="ffill").shift(1)
+    pos = pos[(pos.index >= GRADE_START) & pos.notna()]
     r = close.pct_change().reindex(pos.index)
     rf = (irx.reindex(close.index, method="ffill").fillna(0) / periods).reindex(pos.index)
     cost = (COST_BPS["micro"] if t.get("micro") else COST_BPS["crypto"] if crypto else COST_BPS["default"]) / 1e4
     strat_r = pos * r + (1 - pos) * rf - pos.diff().abs().fillna(0) * cost
     bh_r = r.copy()
     if len(strat_r):
-        strat_r.iloc[0] = np.nan      # first day has no prior close in-window
+        strat_r.iloc[0] = np.nan
         bh_r.iloc[0] = np.nan
 
-    asof = close.index[-1]
-    live = float(close.iloc[-1])
     five = asof - pd.DateOffset(years=5)
     stats = {
         "full": {"strat": _perf(strat_r, rf, periods), "bh": _perf(bh_r, rf, periods)},
         "5y": {"strat": _perf(strat_r[strat_r.index > five], rf, periods), "bh": _perf(bh_r[bh_r.index > five], rf, periods)},
     }
     yrs = len(pos) / periods if len(pos) else 1
-    stats["switches_per_year"] = float((pos.diff().abs() > 0).sum() / yrs)
+    stats["switches_per_year"] = float((pos.diff().abs() > 0).sum() / yrs) if len(pos) else 0.0
     stats["invested"] = float(pos.mean()) if len(pos) else None
     stats["start"] = pos.index[0] if len(pos) else None
 
-    calls = _calls(state[state.index >= GRADE_START - pd.Timedelta(days=40)], done, live, asof) if kind != "hold" else []
+    calls = [] if hold else _calls(state[state.index >= GRADE_START - pd.Timedelta(days=40)], done["close"], live, asof)
     closed = [c for c in calls if c["closed"]]
-    bat = {
-        "n": len(closed),
-        "right": sum(1 for c in closed if c["right"]),
-        "in_avg": float(np.mean([c["move"] for c in closed if c["state"] == 1])) if any(c["state"] == 1 for c in closed) else None,
-        "out_avg": float(np.mean([c["move"] for c in closed if c["state"] == 0])) if any(c["state"] == 0 for c in closed) else None,
-    }
+    ins = [c["move"] for c in closed if c["state"] == 1]
+    outs = [c["move"] for c in closed if c["state"] == 0]
+    bat = {"n": len(closed), "right": sum(1 for c in closed if c["right"]),
+           "in_avg": float(np.mean(ins)) if ins else None, "out_avg": float(np.mean(outs)) if outs else None}
     bat["avg"] = bat["right"] / bat["n"] if bat["n"] else None
 
-    cur_state = int(state.dropna().iloc[-1]) if state.notna().any() else None
+    cur_state = None if hold or not state.notna().any() else int(state.dropna().iloc[-1])
+    if hold:
+        cur_state = 1
     cur_call = calls[-1] if calls else None
-    nxt = _next_check(strat["bar"], asof, crypto, bar_end, complete)
+
+    # next move
+    trig = {"kind": "none", "extra": out.get("extra", {})}
+    if not hold and cur_state is not None:
+        if play.get("calendar"):
+            cal = out["extra"].get("calendar")
+            dte, to = next_calendar_flip(cal, done.index[-1], cur_state) if cal is not None else (None, None)
+            trig.update(kind="date", date=dte, to=to)
+        else:
+            sv = solve(play, t, done, partial, cur_state, live, bench_close, irx, future if bar == "D" else None, bar)
+            trig.update(kind="price", **sv)
+            if play.get("season") and not sv["segments"]:
+                wd, which = next_window(play["season"], asof, cur_state)
+                if wd is not None:
+                    trig.update(kind="window", date=wd, which=which)
+    trig["extra"] = {k: v for k, v in out.get("extra", {}).items() if k != "calendar"}
 
     # equity curves (weekly samples) for the chart
     eq_s = (1 + strat_r.fillna(0)).cumprod()
     eq_b = (1 + bh_r.fillna(0)).cumprod()
     wk = eq_s.groupby(eq_s.index.to_period("W")).tail(1).index
-    equity = {"dates": list(wk), "strat": eq_s.loc[wk].tolist(), "bh": eq_b.loc[wk].tolist()}
+    equity = {"dates": wk, "strat": eq_s.loc[wk].to_numpy(dtype=np.float32), "bh": eq_b.loc[wk].to_numpy(dtype=np.float32)}
 
-    # price window (last ~3 years) with rule lines and positions
-    w0 = asof - pd.DateOffset(years=3)
+    # price window with lines, panel and positions
+    yrs_win = 3 if hold else 2
+    w0 = asof - pd.DateOffset(years=yrs_win)
     win = close[close.index > w0]
-    line_win = {}
-    for k, s in lines.items():
-        s = s.dropna()
-        s = s[s.index > w0 - pd.Timedelta(days=40)]
-        line_win[k] = s
-    pos_win = state.reindex(win.index, method="ffill")
+    lines = []
+    for lab, s, role in out.get("lines", []):
+        s = s.reindex(win.index, method="ffill") if len(s) else s
+        lines.append((lab, s.astype(np.float32), role))
+    pnl = None
+    if out.get("panel"):
+        pn = dict(out["panel"])
+        pn["series"] = [(lab, s.reindex(win.index, method="ffill").astype(np.float32), role) for lab, s, role in pn["series"]]
+        pnl = pn
+    pos_win = state.reindex(win.index, method="ffill") if not hold else None
 
     return {
-        "sym": sym, "strategy": strat["slug"], "asof": asof, "price": live,
+        "sym": t["sym"], "strategy": play["slug"], "asof": asof, "price": live,
         "state": cur_state, "since": cur_call["date"] if cur_call else stats["start"],
         "since_price": cur_call["price"] if cur_call else None,
-        "trigger": trig, "bar": strat["bar"], "next_check": nxt,
+        "trigger": trig, "bar": bar, "next_check": _next_check(bar, asof, crypto, bar_end, complete, future),
         "bar_complete": complete, "stats": stats, "calls": calls, "batting": bat,
-        "equity": equity, "window": {"price": win, "lines": line_win, "pos": pos_win},
+        "equity": equity, "window": {"price": win, "lines": lines, "panel": pnl, "pos": pos_win},
         "periods": periods,
     }
 
 
-def run(prices, irx, now):
+# --------------------------------------------------------------------------
+# Running everything (one process per ticker)
+# --------------------------------------------------------------------------
+_G = {}
+
+
+def _run_ticker(sym):
+    t = next(x for x in TICKERS if x["sym"] == sym)
+    d = _G["prices"][sym]
+    bench = _G["prices"][BENCH]["close"]
+    future = future_sessions(d.index[-1], t["crypto"])
+    out = {}
+    for p in _G["plays"]:
+        out[(sym, p["slug"])] = evaluate(t, p, d, bench, _G["irx"], _G["now"], future)
+    return out
+
+
+def run(prices, irx, now, plays=None, tickers=None, workers=None):
+    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS)
+    syms = [t["sym"] for t in (tickers or TICKERS)]
+    workers = workers or max(1, min(len(syms), os.cpu_count() or 1))
     results = {}
-    for t in TICKERS:
-        c = prices[t["sym"]]
-        for s in STRATEGIES:
-            results[(t["sym"], s["slug"])] = evaluate(t["sym"], s, c, irx, now)
+    if workers > 1:
+        import multiprocessing as mp
+        ctx = mp.get_context("fork")
+        with ctx.Pool(workers) as pool:
+            for part in pool.imap_unordered(_run_ticker, syms):
+                results.update(part)
+    else:
+        for s in syms:
+            results.update(_run_ticker(s))
     return results

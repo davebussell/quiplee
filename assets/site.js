@@ -47,7 +47,7 @@
     return spec.fmt === 'pct' ? fmtPct : function (v) { return fmtNum(v, spec.cur, spec.fmt === 'money'); };
   }
   function roleColor(role) {
-    return { price: css('--s-price'), s1: css('--s1'), s2: css('--s2'), bench: css('--s-bench') }[role] || css('--s1');
+    return { price: css('--s-price'), s1: css('--s1'), s2: css('--s2'), s3: css('--s3'), bench: css('--s-bench') }[role] || css('--s1');
   }
 
   function draw(box, spec) {
@@ -59,9 +59,14 @@
     var iw = W - m.l - m.r, ih = H - m.t - m.b;
     var d = spec.d, n = d.length, dmax = d[n - 1] || 1;
     var lo = Infinity, hi = -Infinity;
-    spec.series.forEach(function (s) { s.v.forEach(function (v) { if (v != null) { if (v < lo) lo = v; if (v > hi) hi = v; } }); });
+    var vis = spec.cut != null ? Math.min(n - 1, spec.cut) : n - 1;
+    spec.series.forEach(function (s) { s.v.forEach(function (v, i) { if (v != null && i <= vis) { if (v < lo) lo = v; if (v > hi) hi = v; } }); });
     var log = !!spec.log;
+    (spec.levels || []).forEach(function (v) { if (v < lo) lo = v; if (v > hi) hi = v; });
+    if (lo === Infinity) { lo = 0; hi = 1; }
     if (log) { lo = lo * 0.92; hi = hi * 1.08; } else { var pad = (hi - lo) * 0.06 || 1; lo -= pad; hi += pad; }
+    if (spec.ymin != null) lo = spec.ymin;
+    if (spec.ymax != null) hi = spec.ymax;
     var X = function (i) { return m.l + (d[i] / dmax) * iw; };
     var Y = log
       ? function (v) { return m.t + ih - (Math.log(v) - Math.log(lo)) / (Math.log(hi) - Math.log(lo)) * ih; }
@@ -108,11 +113,24 @@
     });
     node('line', { x1: m.l, x2: W - m.r, y1: m.t + ih, y2: m.t + ih, stroke: css('--line-2'), 'stroke-width': 1 }, svg);
 
+    // reference levels (e.g. RSI 30/70)
+    (spec.levels || []).forEach(function (v) {
+      var yl = Y(v);
+      if (yl < m.t || yl > m.t + ih) return;
+      node('line', { x1: m.l, x2: W - m.r, y1: yl, y2: yl, stroke: css('--band'), 'stroke-width': 1, 'stroke-dasharray': '4 4', opacity: 0.75 }, svg);
+    });
+    // a vertical marker (practice mode: where the question stops)
+    if (spec.mark != null && spec.mark < n) {
+      var xm = X(spec.mark);
+      node('line', { x1: xm, x2: xm, y1: m.t, y2: m.t + ih, stroke: css('--violet-ink'), 'stroke-width': 1.5, 'stroke-dasharray': '3 3' }, svg);
+    }
+
     // series (draw the primary last so it sits on top)
     var order = spec.series.map(function (s, i) { return i; }).reverse();
     order.forEach(function (si) {
       var s = spec.series[si], path = '', pen = false;
-      for (var i = 0; i < n; i++) {
+      var lastI = spec.cut != null ? Math.min(n - 1, spec.cut) : n - 1;
+      for (var i = 0; i <= lastI; i++) {
         var v = s.v[i];
         if (v == null || (log && v <= 0)) { pen = false; continue; }
         path += (pen ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1);
@@ -123,7 +141,7 @@
     });
     // end dot on the first series
     var p = spec.series[0];
-    for (var k = n - 1; k >= 0; k--) if (p.v[k] != null) {
+    for (var k = (spec.cut != null ? Math.min(n - 1, spec.cut) : n - 1); k >= 0; k--) if (p.v[k] != null) {
       node('circle', { cx: X(k), cy: Y(p.v[k]), r: 4.5, fill: roleColor(p.role), stroke: css('--panel'), 'stroke-width': 2 }, svg);
       break;
     }
@@ -167,7 +185,8 @@
       dots.forEach(function (c) { c.setAttribute('opacity', 0); });
     }
     function nearest(px) {
-      var target = (px - m.l) / iw * dmax, lo2 = 0, hi2 = n - 1;
+      var target = (px - m.l) / iw * dmax, lo2 = 0, hi2 = spec.cut != null ? Math.min(n - 1, spec.cut) : n - 1;
+      if (spec.cut != null && target > d[hi2]) return hi2;
       while (hi2 - lo2 > 1) { var mid = (lo2 + hi2) >> 1; if (d[mid] < target) lo2 = mid; else hi2 = mid; }
       return Math.abs(d[lo2] - target) <= Math.abs(d[hi2] - target) ? lo2 : hi2;
     }
@@ -180,8 +199,8 @@
     box.onkeydown = function (e) {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       e.preventDefault();
-      var step = Math.max(1, Math.round(n / 60));
-      show(Math.max(0, Math.min(n - 1, (cur == null ? n - 1 : cur) + (e.key === 'ArrowRight' ? step : -step))));
+      var step = Math.max(1, Math.round(n / 60)), top = spec.cut != null ? Math.min(n - 1, spec.cut) : n - 1;
+      show(Math.max(0, Math.min(top, (cur == null ? top : cur) + (e.key === 'ArrowRight' ? step : -step))));
     };
     box.onblur = hide;
   }
@@ -201,6 +220,16 @@
     });
   }
 
+  // <select data-nav>: each option's value is a URL to open
+  function initNav() {
+    [].forEach.call(document.querySelectorAll('select[data-nav]'), function (sel) {
+      var tmpl = sel.getAttribute('data-tmpl');
+      sel.addEventListener('change', function () { if (sel.value) location.href = tmpl ? tmpl.replace('{v}', sel.value) : sel.value; });
+    });
+  }
+
+  window.QChart = { draw: draw };
+
   function initPicker() {
     var f = document.getElementById('picker');
     if (!f) return;
@@ -212,6 +241,7 @@
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { initCharts(); initPicker(); });
-  else { initCharts(); initPicker(); }
+  function init() { initCharts(); initPicker(); initNav(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();

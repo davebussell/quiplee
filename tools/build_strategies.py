@@ -1,13 +1,17 @@
-"""Build Quiplee's strategy site.
+"""Build Quiplee's plays site from the cached prices.
 
-    pip install yfinance pandas numpy
-    python tools/build_strategies.py                 # writes the site into the repo root
-    python tools/build_strategies.py --preview DIR   # also writes a static preview copy
+    pip install -r requirements.txt
+    python tools/fetch_prices.py                 # refresh data/prices/ (network; nightly in CI)
+    python tools/build_strategies.py             # build the whole site into _site/ (no network)
+    python tools/build_strategies.py --out DIR --preview   # local preview with explicit index.html links
 
-Pulls prices, runs every rule on every ticker, and regenerates the home page,
-/strategies/, /thinkers/, /stocks/ (incl. every stock x rule page), /method/,
-data/signals.json and sitemap.xml. The live news desk in /desk/ is left alone.
-Edit tools/qstrat/content.py to add tickers, thinkers or rules.
+Netlify runs the second command on every push (see netlify.toml) and publishes
+_site/. The build copies the hand-written parts of the site (live desk,
+stories, assets, js) unchanged apart from glossary links, then generates the
+home page, /strategies/ (plays), /thinkers/ (analysts), /stocks/ (every stock x
+play page), /learn/, /method/, data/*.json and sitemap.xml.
+Edit tools/qstrat/plays.py for plays, analysts.json for analysts, content.py
+for tickers.
 """
 import argparse
 import json
@@ -24,9 +28,14 @@ from qstrat import engine  # noqa: E402
 from qstrat.render import Site  # noqa: E402
 from qstrat.glossary import GLOSSARY, BY_SLUG  # noqa: E402
 from qstrat.linker import link_terms  # noqa: E402
+from qstrat.practice import build_practice, practice_json  # noqa: E402
 
-# Hand-written pages that also get glossary links (re-linked on every build).
+# Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
+GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json"}
+NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
+                 "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd"}
 
 
 def root_href(slug):
@@ -38,19 +47,40 @@ def root_href(slug):
 
 
 def glossary_json():
-    # On the live desk, news headlines use some words in their everyday sense ("suppliers signal..."),
-    # so site-mechanics terms are left out of the desk's in-browser linking.
-    not_on_desk = {"signal", "in-out", "band", "next-move", "next-check", "closing-price"}
+    # On the live desk, news headlines use some words in their everyday sense ("suppliers signal...",
+    # "a breakout quarter"), so site-mechanics and pattern terms are left out of the desk's in-browser linking.
+    not_on_desk = {"signal", "in-out", "band", "next-move", "next-check", "closing-price", "breakout", "pullback",
+                   "channel", "indicator", "seasonality", "exhaustion", "trailing-stop", "trading-volume"}
     terms = [{"slug": g["slug"], "term": g["term"], "tip": g["tip"], "href": root_href(g["slug"]), "aliases": g["aliases"]}
              for g in GLOSSARY if g["slug"] not in not_on_desk]
     return json.dumps({"terms": terms}, ensure_ascii=False, indent=1)
 
 
-def link_static_pages(root):
-    """Glossary-link the Stories pages and the live desk shell in place."""
+def copy_static(out):
+    """Copy every hand-written file the site serves into the output folder."""
+    for name in os.listdir(ROOT):
+        if name in NOT_PUBLISHED or name in GENERATED or name.startswith("."):
+            continue
+        src, dst = os.path.join(ROOT, name), os.path.join(out, name)
+        if os.path.isdir(src):
+            if name == "data":
+                os.makedirs(dst, exist_ok=True)
+                for f in os.listdir(src):
+                    if f == "prices" or f in GENERATED_DATA:
+                        continue
+                    s2 = os.path.join(src, f)
+                    (shutil.copytree if os.path.isdir(s2) else shutil.copy2)(s2, os.path.join(dst, f))
+                continue
+            shutil.copytree(src, dst, ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
+        else:
+            shutil.copy2(src, dst)
+
+
+def link_static_pages(out):
+    """Glossary-link the Stories pages and the live desk shell (in the output copy)."""
     done = []
     for folder, script_src in STATIC_LINKED.items():
-        d = os.path.join(root, folder)
+        d = os.path.join(out, folder)
         if not os.path.isdir(d):
             continue
         for name in sorted(os.listdir(d)):
@@ -72,8 +102,6 @@ def link_static_pages(root):
             done.append(f"{folder}/{name}")
     return done
 
-GENERATED_DIRS = ["strategies", "thinkers", "stocks", "method", "learn"]
-
 
 def write_pages(pages, out):
     for path, html in pages.items():
@@ -85,45 +113,41 @@ def write_pages(pages, out):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--preview", help="also write a self-contained preview copy to this folder")
-    ap.add_argument("--no-site", action="store_true", help="skip writing into the repo root")
+    ap.add_argument("--out", default=os.path.join(ROOT, "_site"), help="output folder (default: _site)")
+    ap.add_argument("--preview", action="store_true", help="spell out index.html in links, for file:// or plain static hosts")
+    ap.add_argument("--workers", type=int, default=None)
     args = ap.parse_args()
+    out = os.path.abspath(args.out)
 
     t0 = time.time()
     prices, irx, now = engine.load_all()
-    print(f"loaded {len(prices)} tickers in {time.time() - t0:.0f}s")
-    results = engine.run(prices, irx, now)
-    print(f"evaluated {len(results)} strategy x ticker pairs")
+    print(f"loaded {len(prices)} tickers (closes to {max(d.index[-1] for d in prices.values()).date()})")
+    results = engine.run(prices, irx, now, workers=args.workers)
+    print(f"evaluated {len(results)} play x ticker pairs in {time.time() - t0:.0f}s")
 
-    if not args.no_site:
-        site = Site(results, preview=False)
-        pages = site.build()
-        for d in GENERATED_DIRS:                      # clear stale pages (e.g. a removed ticker)
-            shutil.rmtree(os.path.join(ROOT, d), ignore_errors=True)
-        write_pages(pages, ROOT)
-        os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
-        with open(os.path.join(ROOT, "data", "signals.json"), "w") as f:
-            f.write(site.signals_json())
-        with open(os.path.join(ROOT, "sitemap.xml"), "w") as f:
-            f.write(site.sitemap())
-        with open(os.path.join(ROOT, "data", "glossary.json"), "w", encoding="utf-8") as f:
-            f.write(glossary_json())
-        print("glossary-linked:", ", ".join(link_static_pages(ROOT)))
-        print(f"wrote {len(pages)} pages to {ROOT} (closes to {site.asof.date()})")
+    t1 = time.time()
+    site = Site(results, preview=args.preview, prices=prices, irx=irx)
+    pages = site.build()
+    print(f"rendered {len(pages)} pages in {time.time() - t1:.0f}s")
 
-    if args.preview:
-        out = os.path.abspath(args.preview)
-        shutil.rmtree(out, ignore_errors=True)
-        pv = Site(results, preview=True)
-        pages = pv.build()
-        write_pages(pages, out)
-        for rel in ["assets/site.css", "assets/site.js", "assets/sortable.js", "assets/glossary.js", "styles.css",
-                    "og-default.png", "desk/index.html", "data/glossary.json", "stories/index.html", "stories/the-hertz-lesson.html"] + \
-                   [os.path.join("js", n) for n in os.listdir(os.path.join(ROOT, "js"))]:
-            dst = os.path.join(out, rel)
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy(os.path.join(ROOT, rel), dst)
-        print(f"wrote preview ({len(pages)} pages) to {out}")
+    shutil.rmtree(out, ignore_errors=True)
+    os.makedirs(out)
+    copy_static(out)
+    write_pages(pages, out)
+    os.makedirs(os.path.join(out, "data"), exist_ok=True)
+    with open(os.path.join(out, "data", "signals.json"), "w") as f:
+        f.write(site.signals_json())
+    with open(os.path.join(out, "data", "glossary.json"), "w", encoding="utf-8") as f:
+        f.write(glossary_json())
+    t2 = time.time()
+    items = build_practice(prices, irx, now)
+    with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:
+        f.write(practice_json(items))
+    print(f"built {len(items)} practice charts in {time.time() - t2:.0f}s")
+    with open(os.path.join(out, "sitemap.xml"), "w") as f:
+        f.write(site.sitemap())
+    print("glossary-linked:", ", ".join(link_static_pages(out)))
+    print(f"wrote the site to {out} in {time.time() - t0:.0f}s")
 
 
 if __name__ == "__main__":

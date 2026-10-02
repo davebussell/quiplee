@@ -1,11 +1,20 @@
-# Static site published from the repo root (no build step), plus serverless
-# functions for real-news ingestion.
+# Netlify builds the plays site from the cached prices in data/prices/ on every
+# push (the nightly price refresh is a push), then publishes _site/. The live
+# desk's serverless functions deploy from netlify/functions as before.
 [build]
-  publish = "."
+  command = "python -m pip install -q -r requirements.txt && python tools/build_strategies.py --out _site"
+  publish = "_site"
 
 [build.environment]
-  NODE_VERSION = "20"   # ensures global fetch() is available in functions
+  NODE_VERSION = "20"       # ensures global fetch() is available in functions
+  PYTHON_VERSION = "3.12"
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+# Lessons that were renamed when the site grew from 7 rules to 59 plays
+[[redirects]]
+  from = "/learn/the-seven-rules/*"
+  to = "/learn/the-play-families/"
+  status = 301

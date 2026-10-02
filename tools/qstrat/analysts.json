@@ -1,0 +1,1865 @@
+[
+ {
+  "slug": "bitcoin-playboy",
+  "name": "Bitcoin Playboy",
+  "role": "Founder of the PlayBit trading community",
+  "bio": "Runs PlayBit, a paid Discord community that trades stocks, options and crypto and sends members daily signals and watchlists. The PB EMA was published on TradingView by the developer FFriZz as the community's staple indicator and a personal favourite of Bitcoin Playboy.",
+  "argues": [
+   "A simple two-EMA band shows the trend regime at a glance: price above it is strength, below it is weakness.",
+   "The band doubles as support and resistance, so pullbacks into it are where decisions get made."
+  ],
+  "sources": [
+   [
+    "PlayBit EMA on TradingView (taken down 30 Sep 2026)",
+    "https://www.tradingview.com/scripts/pb-ema/"
+   ],
+   [
+    "PlayBit reviews on Trustpilot",
+    "https://www.trustpilot.com/review/playbit.info"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "benjamin-cowen",
+  "name": "Benjamin Cowen",
+  "role": "Crypto analyst, Into The Cryptoverse",
+  "bio": "Runs the Into The Cryptoverse YouTube channel and research service. He popularised the \"bull market support band\" for Bitcoin: the 20-week simple and 21-week exponential moving averages read together.",
+  "argues": [
+   "In a healthy bull market, price holds above the band and corrections tend to find support at it.",
+   "Losing the band on a weekly close has historically preceded extended weakness.",
+   "He has also said that in the current cycle the 50-week average has been the more reliable support."
+  ],
+  "sources": [
+   [
+    "Bull Market Support Band on LuxAlgo",
+    "https://www.luxalgo.com/library/indicator/uSBR7cFa-bull-market-support-band-20w-sma-21w-ema/"
+   ],
+   [
+    "Cowen's band update (video summary)",
+    "https://rosetta.to/u/intothecryptoverse/bitcoin-bull-market-support-band-2025-10-23"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "ripster",
+  "name": "Ripster",
+  "role": "Creator of the EMA Cloud system",
+  "bio": "Trader and TradingView author (ripster47) behind the EMA Cloud system, which shades the space between pairs of EMAs so trend and pullback zones are easy to see. His clouds are widely used by day and swing traders.",
+  "argues": [
+   "Short clouds such as 5/12 act as a fluid trendline for day trades.",
+   "Price holding above the 34/50 cloud confirms a bullish bias on any timeframe; below it, bearish."
+  ],
+  "sources": [
+   [
+    "Ripster EMA Clouds on TradingView",
+    "https://www.tradingview.com/scripts/ripster/"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "mark-minervini",
+  "name": "Mark Minervini",
+  "role": "Stock trader and author",
+  "bio": "Won the 1997 U.S. Investing Championship and wrote Trade Like a Stock Market Wizard. His Trend Template is a checklist of moving-average and 52-week-range conditions a stock must meet before he will consider buying it.",
+  "argues": [
+   "Only buy stocks already in a confirmed Stage 2 uptrend, with price above rising 50, 150 and 200-day averages.",
+   "Leaders trade near their 52-week highs and well above their 52-week lows."
+  ],
+  "sources": [
+   [
+    "Mark Minervini's Trend Template on TradingView",
+    "https://www.tradingview.com/script/22JWROvE-Mark-Minervini-s-Trend-Template/"
+   ],
+   [
+    "Trend Template criteria (ProRealCode)",
+    "https://prorealcode.com/prorealtime-market-screeners/trend-template-mark-minervini"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Trade Like a Stock Market Wizard",
+    "year": 2013
+   },
+   {
+    "title": "Think & Trade Like a Champion",
+    "year": 2017
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "stan-weinstein",
+  "name": "Stan Weinstein",
+  "role": "Author of Secrets for Profiting in Bull and Bear Markets",
+  "bio": "Technical analyst whose 1988 book laid out Stage Analysis: every stock cycles through basing, advancing, topping and declining stages, and the 30-week moving average tells you which one you are in.",
+  "argues": [
+   "Buy only in Stage 2: a breakout above a base, with price above a flat-to-rising 30-week moving average. Avoid stocks in Stage 4 declines.",
+   "A valid breakout should come on heavy volume, ideally at least twice the recent average.",
+   "Confirm buys with relative strength against the market that is improving and, ideally, positive, as plotted on Mansfield charts."
+  ],
+  "sources": [
+   [
+    "Stan Weinstein 30-week moving average on TradingView",
+    "https://www.tradingview.com/script/BSLCP2eI-Stan-Weinstein-30-week-Moving-Average/"
+   ],
+   [
+    "TraderLion: The Complete Guide to Stan Weinstein's Stage Analysis",
+    "https://traderlion.com/trading-strategies/stage-analysis/"
+   ],
+   [
+    "StageAnalysis.net: How to create the Mansfield Relative Strength indicator",
+    "https://stageanalysis.net/blog/4266/how-to-create-the-mansfield-relative-performance-indicator"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Stan Weinstein's Secrets for Profiting in Bull and Bear Markets",
+    "year": 1988
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "meb-faber",
+  "name": "Meb Faber",
+  "role": "Co-founder and CIO, Cambria Investment Management",
+  "bio": "Author of A Quantitative Approach to Tactical Asset Allocation (Journal of Wealth Management, 2007), one of the most downloaded papers on SSRN. It holds an asset only while its month-end price is above its 10-month average.",
+  "argues": [
+   "A 10-month average filter gives equity-like returns with far smaller drawdowns across asset classes.",
+   "His 10-year revisit found the rule shone in 2008-09, then trailed stocks in six of the next eight years."
+  ],
+  "sources": [
+   [
+    "Swedroe on Faber's rule, 10 years later (ETF.com)",
+    "https://www.etf.com/sections/index-investor-corner/swedroe-why-financial-trends-persist"
+   ],
+   [
+    "CXO Advisory review of the 2013 update",
+    "https://www.cxoadvisory.com/?p=1115"
+   ]
+  ],
+  "books": [
+   {
+    "title": "The Ivy Portfolio (with Eric Richardson)",
+    "year": 2009
+   },
+   {
+    "title": "Global Asset Allocation",
+    "year": 2015
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "moskowitz-ooi-pedersen",
+  "name": "Moskowitz, Ooi & Pedersen",
+  "role": "Authors of Time Series Momentum (2012)",
+  "bio": "Tobias Moskowitz, Yao Hua Ooi and Lasse Heje Pedersen documented time-series momentum in the Journal of Financial Economics in 2012: an asset's own past 12-month excess return predicts its next month, across equity, bond, currency and commodity futures.",
+  "argues": [
+   "Trends persist: assets that rose over the last year tend to keep rising in the near term, then partly reverse over longer horizons.",
+   "A diversified time-series momentum portfolio performed best in extreme markets."
+  ],
+  "sources": [
+   [
+    "Time Series Momentum (AQR library)",
+    "https://www.aqr.com/library/journal-articles/time-series-momentum"
+   ],
+   [
+    "Time Series Momentum (SSRN)",
+    "https://papers.ssrn.com/abstract=2089463"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Time Series Momentum, Journal of Financial Economics 104(2)",
+    "year": 2012
+   },
+   {
+    "title": "Efficiently Inefficient (Lasse Heje Pedersen)",
+    "year": 2015
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "john-bogle",
+  "name": "John C. Bogle",
+  "role": "Founder of Vanguard",
+  "bio": "Founded Vanguard in 1975 and launched the first index mutual fund for individual investors the following year. He argued that most investors do better by owning the market cheaply and staying put than by trying to time it.",
+  "argues": [
+   "Costs and bad timing are the two biggest drags on investor returns.",
+   "Buy the whole market, keep fees low and hold it."
+  ],
+  "sources": [
+   [
+    "John Bogle, Vanguard founder who urged low fees (WealthManagement.com)",
+    "https://www.wealthmanagement.com/people/john-bogle-vanguard-founder-who-urged-low-fees-dies-89"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Common Sense on Mutual Funds",
+    "year": 1999
+   },
+   {
+    "title": "The Little Book of Common Sense Investing",
+    "year": 2007
+   }
+  ],
+  "confidence": "high",
+  "notes": "",
+  "benchmark": true
+ },
+ {
+  "slug": "valeriy-zakamulin",
+  "name": "Valeriy Zakamulin",
+  "role": "Professor of Finance, University of Agder",
+  "bio": "Author of Market Timing with Moving Averages (2017) and a series of papers testing moving-average rules on up to 155 years of U.S. stock data, with trading costs and out-of-sample methods designed to avoid data-mining.",
+  "argues": [
+   "Found no statistically significant outperformance from timing rules in the second half of his long sample.",
+   "Timing rules generate many false signals in both bull and bear markets, but tend to beat the market in bear states.",
+   "Most of their edge comes from a handful of severe bear markets, so investors can lag buy-and-hold for years."
+  ],
+  "sources": [
+   [
+    "A Comprehensive Look at the Empirical Performance of Moving Average Trading Strategies (SSRN)",
+    "https://papers.ssrn.com/abstract=2677212"
+   ],
+   [
+    "Swedroe: Beware the lure of market timing (ETF.com)",
+    "https://www.etf.com/node/94433.md"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Market Timing with Moving Averages",
+    "year": 2017
+   }
+  ],
+  "confidence": "high",
+  "notes": "",
+  "skeptic": true
+ },
+ {
+  "slug": "quong-soudack",
+  "name": "Gene Quong & Avrum Soudack",
+  "role": "Co-creators of the Money Flow Index",
+  "bio": "Gene Quong and Avrum Soudack introduced the Money Flow Index in 'Volume-Weighted RSI: Money Flow', in the March 1989 issue of Technical Analysis of Stocks & Commodities. Little else about either author is publicly documented.",
+  "argues": [
+   "Wilder's RSI uses only closing prices and so ignores volume.",
+   "Classic market tops come with rising volume, so a volume-weighted RSI better measures money entering and leaving a market."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Traders.com: 'Volume-Weighted RSI: Money Flow', S&C V.7:3 (March 1989)",
+    "https://store.traders.com/-v07-c03-volumew-pdf.html"
+   ],
+   [
+    "StockCharts ChartSchool: Money Flow Index (MFI)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/money-flow-index-mfi.md"
+   ]
+  ],
+  "confidence": "low",
+  "notes": "Indicator origin is high confidence; personal bio is unknown. Consider a single combined credit 'Gene Quong & Avrum Soudack' rather than two profile pages."
+ },
+ {
+  "slug": "paul-tudor-jones",
+  "name": "Paul Tudor Jones",
+  "role": "Global macro hedge fund manager",
+  "bio": "Paul Tudor Jones II (born 1954, Memphis, Tennessee) founded Tudor Investment Corporation in 1980 and is known for profiting from the October 1987 crash. He co-founded the Robin Hood Foundation, a New York anti-poverty charity, in 1988, and was one of the traders interviewed in Jack Schwager's Market Wizards (1989).",
+  "argues": [
+   "The 200-day moving average of closing prices is the single metric he applies to everything he looks at; when something falls below it, he gets out and plays defense.",
+   "The central problem in investing is avoiding catastrophic loss, so capital preservation comes before return.",
+   "He looks for trades with roughly five times as much upside as downside, so that he can be wrong most of the time and still make money."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Trendfollowing.com: Paul Tudor Jones (cites Robbins, Money: Master the Game, 2014)",
+    "https://www.trendfollowing.com/paul-tudor-jones/"
+   ],
+   [
+    "25iq: A dozen things learned from Paul Tudor Jones",
+    "https://25iq.com/2015/07/25/a-dozen-things-ive-learned-from-paul-tudor-jones-about-investing-and-trading/amp/"
+   ],
+   [
+    "Wikipedia: Paul Tudor Jones",
+    "https://en.wikipedia.org/wiki/Paul_Tudor_Jones"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Bio facts are solid (Wikipedia; Market Wizards table of contents in a library catalog lists 'Paul Tudor Jones: the art of aggressive trading'). The 200-day remarks ('my metric for everything I look at is the 200-day moving average of closing prices', 'get out of anything that falls below the 200-day moving average') are consistently attributed to his interview in Tony Robbins' Money: Master the Game (2014), but I only saw this through secondary sources (trendfollowing.com, 25iq, Meb Faber's Nov 2014 post as cited by 25iq), not the book itself. 25iq also links some remarks to a University of Virginia talk; I could not pin down which line came from which venue. The 5:1 reward-to-risk point comes from trendfollowing.com only. He has written no books. He is a discretionary macro trader; the 200-day remark is a risk principle, not a published system."
+ },
+ {
+  "slug": "market-tradition",
+  "name": "Market tradition",
+  "role": "Widely used rule with no single originator",
+  "bio": "Some chart rules are so widely used that no single author can be credited. The 50/200-day 'golden cross' and 'death cross' are the clearest example: StockCharts ChartSchool describes them as standard double-crossover signals and cites John Murphy's textbook for the 'double crossover' terminology, but names no inventor.",
+  "argues": [
+   "A shorter moving average crossing above a longer one marks a bullish shift in trend (golden cross); the reverse marks a bearish shift (death cross).",
+   "Because both averages lag, crossover signals arrive late, so the rule trades responsiveness for fewer false signals."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "StockCharts ChartSchool: Moving Averages (golden cross / death cross)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/moving-averages-simple-and-exponential"
+   ],
+   [
+    "LuxAlgo library: Golden Cross (no attribution; 50/200 daily SMA is the media convention)",
+    "https://www.luxalgo.com/library/concept/golden-cross.md"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "I found no verifiable originator for the term or for the 50/200 pairing. Suggested on-site label: 'Market tradition (no single originator)'. Do not attribute it to Granville, Murphy or anyone else."
+ },
+ {
+  "slug": "joseph-granville",
+  "name": "Joseph E. Granville",
+  "role": "Market-letter writer; creator of On-Balance Volume",
+  "bio": "Joseph E. Granville (1923–2013) was an American financial writer and seminar speaker who published The Granville Market Letter from 1963 until shortly before his death. He developed and popularised On-Balance Volume (OBV) and wrote early books on the 200-day moving average and daily market timing. His January 1981 sell call was widely blamed for a sharp one-day market drop.",
+  "argues": [
+   "Volume moves ahead of price: a running total of volume on up days minus volume on down days (OBV) can reveal accumulation or distribution before price confirms it.",
+   "The 200-day moving average defines the major trend: price crossing above a 200-day average that has flattened or turned up is a buy, and price breaking below a flattening or falling average is a sell.",
+   "Market timing should rest on many daily technical indicators read together, not a single gauge."
+  ],
+  "books": [
+   {
+    "title": "A Strategy of Daily Stock Market Timing for Maximum Profit",
+    "year": 1960
+   },
+   {
+    "title": "Granville's New Key to Stock Market Profits",
+    "year": 1963
+   },
+   {
+    "title": "Granville's New Strategy of Daily Stock Market Timing for Maximum Profit",
+    "year": 1976
+   },
+   {
+    "title": "Granville's Last Stand",
+    "year": 1995
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Joseph Granville",
+    "https://en.wikipedia.org/wiki/Joseph_Granville"
+   ],
+   [
+    "CMT Association: Technically Speaking, October 2013 (Granville tribute; 1960 and 1963 books)",
+    "https://cmtassociation.org/?p=90349"
+   ],
+   [
+    "Wikipedia: On-balance volume",
+    "https://en.wikipedia.org/wiki/On-balance_volume"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Book years for 1960 and 1963 come from the CMT Association tribute; 1976 (Prentice-Hall) from Wikipedia. The 'eight rules' for the 200-day MA are only seen in secondary sources (a Vietnamese summary citing the 1976 book; OANDA describes signals 1 and 5). I did not see the original text, so the rule wording is medium confidence."
+ },
+ {
+  "slug": "alan-hull",
+  "name": "Alan Hull",
+  "role": "Australian investment educator; creator of HMA",
+  "bio": "Alan Hull is an Australian investment educator, author and speaker with a mathematics and IT background who created the Hull Moving Average (HMA) in 2005. He has written and presented for the ASX, the Australian Technical Analysts Association and the Australian Investors Association, and runs a newsletter at alanhull.com.",
+  "argues": [
+   "A moving average can be made far more responsive to current prices without losing smoothness by combining weighted averages and smoothing over the square root of the period.",
+   "Because the HMA has so little lag, traders should use its turning points as entry and exit signals rather than crossovers, which depend on lag."
+  ],
+  "books": [
+   {
+    "title": "Active Investing",
+    "year": null
+   },
+   {
+    "title": "Trade My Way",
+    "year": 2011
+   },
+   {
+    "title": "Invest My Way",
+    "year": 2013
+   }
+  ],
+  "sources": [
+   [
+    "alanhull.com: Hull Moving Average",
+    "https://alanhull.com/hull-moving-average"
+   ],
+   [
+    "alanhull.com: About Alan Hull",
+    "https://alanhull.com/about"
+   ],
+   [
+    "Incredible Charts: Hull Moving Average",
+    "https://www.incrediblecharts.com/indicators/hull-moving-average.php"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Active Investing: Wiley lists a revised 2nd edition (Oct 2013) and ellibs lists a 2010 Wiley edition, so the first-edition year is unverified (left null). Invest My Way: Wiley-VCH lists April 2013. Trade My Way: British Library catalog shows 2011. Wiley also says he previously wrote 'Blue Chip Investing' (year unverified, omitted)."
+ },
+ {
+  "slug": "perry-kaufman",
+  "name": "Perry J. Kaufman",
+  "role": "Systematic trader and trading-systems author",
+  "bio": "Perry J. Kaufman is an American systematic trader and author who began in aerospace, working on navigation and control systems including for Project Gemini, before moving into commodity futures. He has run trading systems at several firms, including Transworld Oil and Graham Capital Management. His book Trading Systems and Methods has gone through multiple editions since 1978.",
+  "argues": [
+   "A moving average should change speed with market conditions: fast when price moves efficiently in one direction, slow when price is choppy and noisy.",
+   "The 'efficiency ratio' (net price change divided by the sum of absolute bar-to-bar changes) is a practical way to measure that noise."
+  ],
+  "books": [
+   {
+    "title": "Commodity Trading Systems and Methods",
+    "year": 1978
+   },
+   {
+    "title": "The New Commodity Trading Systems and Methods",
+    "year": 1987
+   },
+   {
+    "title": "Smarter Trading: Improving Performance in Changing Markets",
+    "year": 1995
+   },
+   {
+    "title": "Trading Systems and Methods (6th edition)",
+    "year": 2020
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Perry J. Kaufman",
+    "https://en.wikipedia.org/wiki/Perry_J._Kaufman"
+   ],
+   [
+    "StockCharts ChartSchool: Kaufman's Adaptive Moving Average (KAMA)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/kaufmans-adaptive-moving-average-kama"
+   ],
+   [
+    "TA-Lib: KAMA (cites Smarter Trading, McGraw-Hill, 1995)",
+    "https://ta-lib.org/functions/kama"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "The 2020 entry is the 6th edition of the 'Trading Systems and Methods' line, not a first publication. The year that title first replaced 'New Commodity Trading Systems and Methods' was not verified."
+ },
+ {
+  "slug": "patrick-mulloy",
+  "name": "Patrick G. Mulloy",
+  "role": "Author of 1994 DEMA/TEMA articles",
+  "bio": "Patrick G. Mulloy introduced the double exponential moving average (DEMA) in the January 1994 issue of Technical Analysis of Stocks & Commodities and the triple exponential moving average (TEMA) in the February 1994 issue. Little else about him is publicly documented.",
+  "argues": [
+   "Ordinary moving averages force a trade-off between smoothness and lag, and combining an EMA with EMAs of itself can remove much of the lag.",
+   "Using these faster averages inside indicators such as MACD gives quicker signals than standard EMAs."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Traders.com: 'Smoothing Data With Faster Moving Averages', TASC V.12:1, Jan 1994",
+    "https://store.traders.com/-v12-c01-smoothi-pdf.html"
+   ],
+   [
+    "Traders.com: 'Smoothing Data With Less Lag', TASC V.12:2, Feb 1994",
+    "https://store.traders.com/-v12-c02-smoothi-pdf.html"
+   ],
+   [
+    "Wikipedia: Triple exponential moving average",
+    "https://en.wikipedia.org/wiki/Triple_exponential_moving_average"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "The articles and dates are verified (high). I found no biography (occupation, nationality, books), so keep the bio to the two articles. Note: Wikipedia credits TEMA to the January article, but the traders.com abstract shows TEMA ('TEMA1') was introduced in the February 1994 follow-up."
+ },
+ {
+  "slug": "ed-seykota",
+  "name": "Ed Seykota",
+  "role": "Pioneer of computerized trend-following systems",
+  "bio": "Ed Seykota (born 1946) earned an electrical engineering and management degree from MIT in 1969 and around 1970 began building computerized trend-following systems for futures on punched-card mainframes. He was profiled in Jack Schwager's Market Wizards (1989) and later founded the Trading Tribe Process, a group method for working through traders' emotional issues.",
+  "argues": [
+   "A trading system does not need constant changes; the real task is for a trader to build a system they are personally compatible with.",
+   "Every trend measurement compares a current reading with a historical one, so there is no single 'the trend', only trends defined by the method chosen.",
+   "Trading results are driven by the trader's feelings and habits as much as by the method, which is the premise of his Trading Tribe work."
+  ],
+  "books": [
+   {
+    "title": "The Trading Tribe",
+    "year": 2005
+   }
+  ],
+  "sources": [
+   [
+    "seykota.com: A Simple Trading System, Exponential Average Crossover",
+    "https://www.seykota.com/tribe/TSP/EA/index.htm"
+   ],
+   [
+    "seykota.com: FAQ on trends (exponential lag formula)",
+    "https://www.seykota.com/tribe/TSP/Trends/index.htm"
+   ],
+   [
+    "Wikipedia: Ed Seykota",
+    "https://en.wikipedia.org/wiki/Ed_Seykota"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "The 15/150 figure IS verifiable: his own site's teaching example uses Fast Lag 15 / Slow Lag 150 (and also 85/325), long-or-out, on an S&P continuous futures contract. It is presented as a simple tutorial system, not as his personal trading system. Market Wizards chapter title per library catalog: 'Ed Seykota: everybody gets what they want'."
+ },
+ {
+  "slug": "andreas-clenow",
+  "name": "Andreas F. Clenow",
+  "role": "Zurich-based fund manager and quant author",
+  "bio": "Andreas Clenow is a Swedish-Swiss financier and author based in Zurich who has worked as a hedge fund manager, quantitative trader and fintech founder, and is CIO of ACIES Asset Management, a family office. He holds the CMT designation and has written three widely read books on systematic trading.",
+  "argues": [
+   "Most professional trend-following funds use very similar, simple core rules; their results differ mainly through asset mix, risk level and time frame, not clever entry and exit signals.",
+   "Would-be trend followers fail by obsessing over buy and sell rules instead of position sizing, diversification and risk.",
+   "Ranking stocks by volatility-adjusted momentum and sizing positions by volatility can aim to beat the S&P 500 with lower volatility, and he discourages copying anyone's strategy blindly."
+  ],
+  "books": [
+   {
+    "title": "Following the Trend: Diversified Managed Futures Trading",
+    "year": 2013
+   },
+   {
+    "title": "Stocks on the Move: Beating the Market with Hedge Fund Momentum Strategies",
+    "year": 2015
+   },
+   {
+    "title": "Trading Evolved: Anyone Can Build Killer Trading Strategies in Python",
+    "year": 2019
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Andreas Clenow, CMT (presenter bio)",
+    "https://cmtassociation.org/presenter/andreas-clenow/"
+   ],
+   [
+    "CMT Association: Clenow presentation slides (core trend model rules)",
+    "https://cmtassociation.org/wp-content/uploads/2024/01/0828-clenow-1.pdf"
+   ],
+   [
+    "O'Reilly: Following the Trend (Wiley)",
+    "https://www.oreilly.com/library/view/-/9781118410844/"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Following the Trend: O'Reilly lists the Wiley release as December 2012, while the British Library and booksellers give 2013 (copyright year). Use 2013. A 2nd edition appeared in late 2022 (CMT bio). He also wrote a novel, A Most Private Bank (year not verified)."
+ },
+ {
+  "slug": "daryl-guppy",
+  "name": "Daryl Guppy",
+  "role": "Australian trader, author and market commentator",
+  "bio": "Daryl Guppy is an Australian private trader, author and financial columnist based in Darwin who founded guppytraders.com in 1996. He has been a regular commentator on CNBC Asia and has written widely on Chinese as well as Western markets. He created the Guppy Multiple Moving Average (GMMA).",
+  "argues": [
+   "Price action reflects two groups, short-term traders and long-term investors, and their behaviour can be tracked with two bundles of moving averages.",
+   "When the long-term group stays widely and evenly spaced, investors are committed to the trend; when either group compresses, agreement is breaking down and the trend may change.",
+   "The GMMA is mainly a tool for reading trend quality, not a self-contained entry and exit signal."
+  ],
+  "books": [
+   {
+    "title": "Share Trading",
+    "year": 1996
+   },
+   {
+    "title": "Better Stock Trading: Money and Risk Management",
+    "year": 2003
+   },
+   {
+    "title": "Trend Trading: A Seven-Step Approach to Success",
+    "year": 2004
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Daryl Guppy",
+    "https://en.wikipedia.org/wiki/Daryl_Guppy"
+   ],
+   [
+    "CMT Association: Daryl Guppy (Share Trading, 1996)",
+    "https://cmtassociation.org/?p=53475"
+   ],
+   [
+    "Ellibs: Trend Trading (Wiley, 2004; covers the GMMA)",
+    "https://www.ellibs.com/book/9780731400850/trend-trading-a-seven-step-approach-to-success"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "I could NOT verify which book first introduced the GMMA or in what year. Trend Trading (2004) is confirmed to cover it, with 'the most recent updates'. Other titles (Trading Tactics, Market Trading Tactics, Chart Trading, Snapshot Trading) exist, but I did not verify their years, so they are omitted."
+ },
+ {
+  "slug": "goichi-hosoda",
+  "name": "Goichi Hosoda",
+  "role": "Japanese journalist; creator of Ichimoku charts",
+  "bio": "Goichi Hosoda was a Japanese newspaper journalist who wrote under the pen name Ichimoku Sanjin and developed the Ichimoku Kinko Hyo ('equilibrium chart at a glance') method from the late 1930s. He refined it for about three decades, reportedly using students to run the calculations, and released it publicly in book form in the late 1960s.",
+  "argues": [
+   "A single chart of mid-points of recent highs and lows, projected forward and back in time, can show trend, momentum and support or resistance at a glance.",
+   "Its standard 9/26/52 periods were tied to the Japanese trading calendar of the time (about a week and a half, a month, and two months of trading days)."
+  ],
+  "books": [
+   {
+    "title": "Ichimoku Kinko Hyo (Japanese guidebook; exact title and volume not verified)",
+    "year": 1969
+   }
+  ],
+  "sources": [
+   [
+    "StockCharts ChartSchool: Ichimoku Cloud",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/ichimoku-cloud"
+   ],
+   [
+    "Traders.com: Muranaka, Ichimoku charts (TASC, October 2000)",
+    "https://traders.com/Documentation/FEEDbk_docs/2000/10/Abstracts_new/Muranaka/Muranaka.html"
+   ],
+   [
+    "Wikipedia: Ichimoku Kinko Hyo",
+    "https://en.wikipedia.org/wiki/Ichimoku_Kink%C5%8D_Hy%C5%8D"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Publication year conflicts: StockCharts says 1969, while the October 2000 TASC article says the guidebook 'finally appeared in 1968'. Wikipedia says 'late 1960s'. Suggest 'late 1960s (1968/1969)'. I did not verify the Japanese book title or his birth and death years (TASC says he died in 1983)."
+ },
+ {
+  "slug": "olivier-seban",
+  "name": "Olivier Seban",
+  "role": "French trader and personal-finance author",
+  "bio": "Olivier Seban is a French trader, investor, speaker and author of personal-finance books, published by Maxima/Dunod. Charting platforms including TradingView, cTrader and ABC Bourse credit him with creating the Supertrend indicator.",
+  "argues": [
+   "A trend can be followed mechanically with a line set a multiple of average true range away from price: stay with the trend until price closes through the line.",
+   "Building wealth works in stages of accumulation, investment and protection, which is the structure of his best-known personal-finance book."
+  ],
+  "books": [
+   {
+    "title": "Tout le monde mérite d'être riche",
+    "year": 2006
+   }
+  ],
+  "sources": [
+   [
+    "TradingView Help: Supertrend (credits Olivier Seban)",
+    "https://www.tradingview.com/support/solutions/43000634738-supertrend/"
+   ],
+   [
+    "ABC Bourse: Le Supertrend (credits Seban; defaults 10 and 3)",
+    "https://www.abcbourse.com/apprendre/11_le_supertrend.html"
+   ],
+   [
+    "cTrader Help: Supertrend (defaults 10 and 3; 'early 2000s')",
+    "https://help.ctrader.com/indicators/built-in/trend/supertrend/"
+   ]
+  ],
+  "confidence": "low",
+  "notes": "Attribution to Seban is consistent across platforms, but I found NO primary publication (book, article or date) where he introduced Supertrend. cTrader says 'early 2000s' without a source. Do not print a creation year. First edition of Tout le monde mérite d'être riche: Maxima, April 2006 (bookseller listing); the 3rd edition is from Dunod, January 2025."
+ },
+ {
+  "slug": "bill-williams",
+  "name": "Bill Williams",
+  "role": "Trader-educator; founder of Profitunity",
+  "bio": "Bill Williams (born 1932) was an American trader, educator and commodity trading advisor who founded Profitunity, a trading-education business. His books apply ideas from chaos theory and trading psychology to markets, and he created several widely used indicators, including the Alligator, Fractals and the Awesome Oscillator.",
+  "argues": [
+   "Traders do not trade the market so much as their own belief system, so self-understanding matters more than forecasting.",
+   "Markets trend only a minority of the time (he put it at roughly 15–30%), so a trader should stay out while the market is directionless and act when a trend emerges.",
+   "Market behaviour is better described by chaos theory and fractal structure than by linear forecasting."
+  ],
+  "books": [
+   {
+    "title": "Trading Chaos: Applying Expert Techniques to Maximize Your Profits",
+    "year": 1995
+   },
+   {
+    "title": "New Trading Dimensions: How to Profit from Chaos in Stocks, Bonds, and Commodities",
+    "year": 1998
+   },
+   {
+    "title": "Trading Chaos (2nd edition, with Justine Gregory-Williams)",
+    "year": 2004
+   }
+  ],
+  "sources": [
+   [
+    "Wiley: New Trading Dimensions (Oct 1998; features the 'Market Alligator')",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471295418.html"
+   ],
+   [
+    "Wiley: Trading Chaos, 2nd edition (2004)",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471463086.html"
+   ],
+   [
+    "MetaTrader 5 Help: Alligator",
+    "https://www.metatrader5.com/en/terminal/help/indicators/bw_indicators/alligator.md"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Born 1932 per a library catalog record for Trading Chaos (1995, Wiley). I did not verify whether or when he died. Wiley calls him 'PhD, CTA'. The 15–30% figure is attributed to him in MetaTrader's help text, not seen in his book."
+ },
+ {
+  "slug": "botes-siepman",
+  "name": "Etienne Botes & Douglas Siepman",
+  "role": "Co-creators of the Vortex Indicator",
+  "bio": "Etienne Botes and Douglas Siepman introduced the Vortex Indicator in the January 2010 issue of Technical Analysis of Stocks & Commodities. They based it on J. Welles Wilder's directional movement concept and on Viktor Schauberger's studies of vortex flows in water. Little else about the authors is publicly documented.",
+  "argues": [
+   "Upward and downward 'vortex movement' (each bar's high against the prior low, and each low against the prior high) can be compared to show which side controls the trend.",
+   "When the positive and negative lines cross, the trend is changing, and the wider they spread, the stronger the trend."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Traders.com: 'The Vortex Indicator', TASC January 2010",
+    "https://traders.com/Documentation/FEEDbk_docs/2010/01/Botes.html"
+   ],
+   [
+    "StockCharts ChartSchool: Vortex Indicator",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/vortex-indicator"
+   ],
+   [
+    "Wikipedia: Vortex indicator",
+    "https://en.wikipedia.org/wiki/Vortex_indicator"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Publication is verified (high). No biographical details (nationality, occupation) were verifiable, so keep the bio to the article. Entered as one combined analyst. Split into two slugs only if the site needs separate pages, and both bios would be equally thin."
+ },
+ {
+  "slug": "edwin-coppock",
+  "name": "Edwin S. C. Coppock",
+  "role": "Economist; founder of Trendex Research",
+  "bio": "Edwin Sedgwick 'Sedge' Coppock was an American economist and founder of Trendex Research in San Antonio, Texas. He designed the Coppock Curve (originally the 'Trendex Model') to spot long-term buying opportunities in broad US stock indices after major declines, and published it in Barron's.",
+  "argues": [
+   "Recovering from a market decline is like recovering from a bereavement; he reportedly took the 11- and 14-month look-back periods from Episcopal bishops' estimate of how long mourning normally lasts.",
+   "The indicator is for finding major long-term buy points in broad indices after bear markets, not for selling or short-term trading."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Wikipedia: Coppock curve",
+    "https://en.wikipedia.org/wiki/Coppock_curve"
+   ],
+   [
+    "StockCharts ChartSchool: Coppock Curve",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/coppock-curve"
+   ],
+   [
+    "Van Tharp Institute: 'A Long-Term Indicator with a Surprising Following' (D.R. Barton)",
+    "https://vantharp.com/a-long-term-indicator-with-a-surprising-following-by-d-r-barton-jr/"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "CONFLICT on the publication date: Wikipedia says Barron's, 15 October 1962, StockCharts says Barron's, October 1965, and Van Tharp says 'reported in some sources with a 1962 origin and was for sure in a Barron's article in 1965'. Suggested wording: 'Barron's, 1960s (often dated 1962; confirmed by 1965)'. The church-commission and mourning story comes from Wikipedia and StockCharts; label it 'reportedly'."
+ },
+ {
+  "slug": "martin-pring",
+  "name": "Martin J. Pring",
+  "role": "Technical analyst, author and strategist",
+  "bio": "Martin J. Pring is a technical analyst and author best known for Technical Analysis Explained, a standard text used in CMT and IFTA certification. He founded Pring Research, co-founded the asset manager Pring Turner Capital, and has been chief technical strategist at StockCharts.com since 2015. He created the Know Sure Thing (KST) and Special K indicators.",
+  "argues": [
+   "Combining smoothed rates of change over several time frames into one weighted indicator (KST) gives a clearer read of the trend and its reversals than any single momentum measure.",
+   "Asset allocation should rotate between stocks, bonds and commodities according to the stage of the business cycle, the idea behind the Pring Turner approach and the Dow Jones Pring U.S. Business Cycle Index (2012)."
+  ],
+  "books": [
+   {
+    "title": "Technical Analysis Explained",
+    "year": 1979
+   }
+  ],
+  "sources": [
+   [
+    "pring.com: About",
+    "https://www.pring.com/about-us/"
+   ],
+   [
+    "StockCharts: Martin Pring bio",
+    "https://stockcharts.com/articles/bios/martin-pring.html"
+   ],
+   [
+    "Traders.com: 'Summed Rate Of Change (KST)', TASC V.10:9, Sept 1992",
+    "https://store.traders.com/-v10-c09-summed-pdf.html"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "The first-edition year of Technical Analysis Explained is 1979 per pring.com (the 2nd edition is 1985 per the Penn library catalog). Founding year of Pring Research: StockCharts says 1981, pring.com says 1984 (with the InterMarket Review), so avoid printing it. Other books (Investment Psychology Explained, How to Forecast Interest Rates, Martin Pring on Price Patterns, Investing in the Second Lost Decade) exist but their years were not verified, so they are omitted."
+ },
+ {
+  "slug": "tushar-chande",
+  "name": "Tushar S. Chande",
+  "role": "Indicator developer and commodity trading advisor",
+  "bio": "Tushar S. Chande holds a PhD, has been president of LongView Capital Management in West Des Moines, Iowa, and is a registered commodity trading advisor. He holds nine US patents and has created several widely used indicators, including Aroon, the Chande Momentum Oscillator, StochRSI and VIDYA.",
+  "argues": [
+   "Whether a market is trending, and how strongly, can be judged by how recently it made its latest high or low (the idea behind Aroon).",
+   "Indicators can adapt their speed to market volatility rather than using fixed look-backs (VIDYA), and a trader needs an original point of view to survive."
+  ],
+  "books": [
+   {
+    "title": "The New Technical Trader (with Stanley Kroll)",
+    "year": 1994
+   },
+   {
+    "title": "Beyond Technical Analysis",
+    "year": null
+   }
+  ],
+  "sources": [
+   [
+    "Sophia University library: The New Technical Trader (Wiley, 1994)",
+    "https://www.lib.sophia.ac.jp/opac/opac_link/bibid/1000537827"
+   ],
+   [
+    "Wiley: Beyond Technical Analysis, 2nd ed. author info",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471415677,descCd-authorInfo.html"
+   ],
+   [
+    "StockCharts ChartSchool: Aroon",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/aroon"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Confirmed: The New Technical Trader was co-written with Stanley Kroll (Wiley, 1994). Beyond Technical Analysis: only the 2nd edition (2001) was verified, so the first-edition year is left null. Top Traders Unplugged also credits him with Aroon, StochRSI, CMO and VIDYA."
+ },
+ {
+  "slug": "j-welles-wilder",
+  "name": "J. Welles Wilder Jr.",
+  "role": "Engineer who invented RSI, ADX and Parabolic SAR",
+  "bio": "J. Welles Wilder Jr. (1935-2021) was an American mechanical engineer and real-estate developer who turned to technical analysis and founded Trend Research Ltd. His 1978 book New Concepts in Technical Trading Systems introduced the Relative Strength Index, Average True Range, the Directional Movement system (ADX) and the Parabolic SAR. He moved to Christchurch, New Zealand in 1999.",
+  "argues": [
+   "RSI readings above 70 mark overbought conditions and readings below 30 oversold ones, but he treated failure swings and divergences as the stronger evidence of a coming reversal.",
+   "An ADX above 25 indicates a strong trend, while an ADX below 20 indicates that no trend is present.",
+   "Traders who cannot manage their emotions should not be trading at all."
+  ],
+  "books": [
+   {
+    "title": "New Concepts in Technical Trading Systems",
+    "year": 1978
+   },
+   {
+    "title": "The Adam Theory of Markets or What Matters Is Profit",
+    "year": 1987
+   },
+   {
+    "title": "The Delta Phenomenon, or the Hidden Order in All Markets",
+    "year": 1991
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: J. Welles Wilder Jr.",
+    "https://en.wikipedia.org/wiki/J._Welles_Wilder_Jr."
+   ],
+   [
+    "StockCharts ChartSchool: Relative Strength Index (RSI)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/relative-strength-index-rsi"
+   ],
+   [
+    "StockCharts ChartSchool: Average Directional Index (ADX)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/average-directional-index-adx"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Birth/death (11 Jun 1935 - 18 Apr 2021), engineering degree (NC State, 1962) and book list come from Wikipedia. Wikipedia also lists 'The Wisdom of the Ages in Acquiring Wealth' (1989), omitted here as less relevant. RSI also appeared in Commodities magazine, June 1978 (Wikipedia: Relative strength index). The emotion point paraphrases a quote Wikipedia attributes to him."
+ },
+ {
+  "slug": "gerald-appel",
+  "name": "Gerald Appel",
+  "role": "Money manager who created the MACD",
+  "bio": "Gerald Appel (born 1933, New York) is an American money manager and newsletter writer who developed the Moving Average Convergence/Divergence (MACD) indicator in the late 1970s. He founded the newsletter Systems and Forecasts in 1973 and Signalert Asset Management, and managed client money for more than 35 years before retiring in 2012. He has written 17 books on investing and market timing.",
+  "argues": [
+   "Typical investors follow trends rather than lead them and so arrive late; disciplined, rules-based timing tools are meant to correct that.",
+   "Quantitative technical tools should be used primarily to reduce risk, not only to chase returns.",
+   "Practical timing models (momentum, breadth, seasonality, relative strength) can serve short-, intermediate- and long-term investors alike."
+  ],
+  "books": [
+   {
+    "title": "Double Your Money Every Three Years",
+    "year": 1974
+   },
+   {
+    "title": "Technical Analysis: Power Tools for Active Investors",
+    "year": 2005
+   },
+   {
+    "title": "Opportunity Investing",
+    "year": 2007
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Gerald Appel (2019 Annual Award)",
+    "https://cmtassociation.org/?p=38085"
+   ],
+   [
+    "InformIT / FT Press: Technical Analysis: Power Tools for Active Investors",
+    "https://www.informit.com/store/technical-analysis-power-tools-for-active-investors-9780131479029"
+   ],
+   [
+    "StockCharts ChartSchool: MACD",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/macd-moving-average-convergence-divergence-oscillator"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Birth year/place and early book list (1974, 2007) from the Contemporary Authors entry on encyclopedia.com (https://www.encyclopedia.com/arts/educational-magazines/appel-gerald-1933), which also says he practised as a psychotherapist/psychoanalyst for decades; omitted from bio as not essential. The exact year and venue of MACD's first publication could not be verified - all sources say only 'late 1970s'. Power Tools published March 2005 (FT Press)."
+ },
+ {
+  "slug": "alexander-elder",
+  "name": "Alexander Elder",
+  "role": "Psychiatrist-turned-trader and trading educator",
+  "bio": "Alexander Elder is a Russian-born American trader and author who was born in Leningrad, grew up in Estonia, trained as a physician and practised psychiatry in New York, where he taught at Columbia University. He founded Financial Trading Seminars (now elder.com) in 1988 and the SpikeTrade group in 2004. His books include Trading for a Living (1993) and Come Into My Trading Room (2002), named a Barron's book of the year.",
+  "argues": [
+   "Trading success rests on three Ms: Mind (psychology), Method (analysis and systems) and Money (risk management).",
+   "Risk should be capped per trade (his 2% rule) and per month: stop trading once losses reach 6% of capital in a month (his 6% rule).",
+   "Indicators should be used to enter cautiously but exit fast; his Impulse System forbids buying when trend and momentum are both falling."
+  ],
+  "books": [
+   {
+    "title": "Trading for a Living",
+    "year": 1993
+   },
+   {
+    "title": "Come Into My Trading Room",
+    "year": 2002
+   },
+   {
+    "title": "Entries & Exits",
+    "year": 2006
+   },
+   {
+    "title": "The New Sell & Sell Short",
+    "year": 2011
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Alexander Elder",
+    "https://en.wikipedia.org/wiki/Alexander_Elder"
+   ],
+   [
+    "elder.com: About Dr. Alexander Elder",
+    "https://www.elder.com/about"
+   ],
+   [
+    "StockCharts ChartSchool: Elder Impulse System",
+    "https://chartschool.stockcharts.com/table-of-contents/chart-analysis/chart-types/elder-impulse-system"
+   ],
+   [
+    "Wiley: Come Into My Trading Room (April 2002)",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471225347.html"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Triple Screen: two secondary sources say it was introduced in 1986, one says in Futures magazine; the month (April) could not be verified - treat as 'Futures magazine, 1986 (secondary sources)'. 6% rule wording via incrediblecharts.com summarising Come Into My Trading Room; 2% rule detail not quoted there but is well documented. Wikipedia's account of how he left the USSR is omitted as not needed."
+ },
+ {
+  "slug": "george-lane",
+  "name": "George C. Lane",
+  "role": "Educator who popularised the stochastic oscillator",
+  "bio": "George C. Lane (1921-2004) was an American technical analyst and educator who ran Investment Educators in Watseka, Illinois, which he joined in 1954. He began his market career at E.F. Hutton in the 1950s and is credited with popularising the stochastic oscillator, developed in the late 1950s by a group of Chicago futures traders he was part of. He described the indicator in a 1984 article in Technical Analysis of Stocks & Commodities.",
+  "argues": [
+   "Momentum changes direction before price does, like a rocket that must slow before it turns down - so stochastics can anticipate turns.",
+   "A divergence between the stochastic and price is the first and most important signal, more important than overbought/oversold readings.",
+   "Stochastics work best combined with cycles, Elliott Wave and Fibonacci retracements for timing."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Wikipedia: George Lane (technical analyst)",
+    "https://en.wikipedia.org/wiki/George_Lane_(technical_analyst)"
+   ],
+   [
+    "StockCharts ChartSchool: Stochastic Oscillator",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/stochastic-oscillator-fast-slow-and-full"
+   ],
+   [
+    "Traders.com: 'Lane's Stochastics', S&C V.2:3 (May/June 1984)",
+    "https://store.traders.com/-v02-c03-lane-pdf.html"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Sole invention is not clear: Wikipedia says he was 'part of a group of futures traders in Chicago who developed' it and that he popularised it; StockCharts says he developed it in the late 1950s. Safer wording: 'popularised by George Lane'. Wikipedia lists 'Getting Started With Stochastics' (George C. Lane & Caire Lane, 1998) - publisher/edition not verified, so left out of books. The 1984 S&C article bylines him as 'George C. Lane, M.D.'."
+ },
+ {
+  "slug": "larry-williams",
+  "name": "Larry Williams",
+  "role": "Futures trader and creator of Williams %R",
+  "bio": "Larry R. Williams (born 1942, Miles City, Montana) is an American futures trader and author who has traded since 1962 and developed the Williams %R indicator in 1966. He won the 1987 Robbins World Cup Championship of Futures Trading, turning $10,000 into more than $1.1 million over the 12-month contest. He also created the Ultimate Oscillator and has written several books on short-term trading.",
+  "argues": [
+   "%R measures where today's close sits within the recent high-low range, and he used it more for trend analysis than as a simple overbought/oversold switch.",
+   "The same %R reading means different things in bull markets, bear markets and trading ranges, so signals must be read in market context.",
+   "Short-term trading offers large upside but is extremely risky, so knowing when to exit and holding winners matter as much as entries."
+  ],
+  "books": [
+   {
+    "title": "How I Made One Million Dollars... Last Year... Trading Commodities",
+    "year": 1973
+   },
+   {
+    "title": "Long-Term Secrets to Short-Term Trading",
+    "year": 1999
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Larry R. Williams",
+    "https://en.wikipedia.org/wiki/Larry_R._Williams"
+   ],
+   [
+    "Larry Williams (ireallytrade.com): Williams Percent R",
+    "https://futures.ireallytrade.com/williamspercentr"
+   ],
+   [
+    "Wiley: Long-Term Secrets to Short-Term Trading (2nd ed.)",
+    "https://www.wiley-vch.de/en/areas-interest/finance-economics-law/long-term-secrets-to-short-term-trading-978-0-470-91573-8"
+   ],
+   [
+    "StockCharts ChartSchool: Williams %R",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/williams-r.md"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Year conflicts: Williams' own site says %R was first made public in the 1973 edition of 'How I Made One Million Dollars...'; Wikipedia lists the book as 1979 (probably a later edition). Long-Term Secrets: first edition Wiley 1999 per AbeBooks (ISBN 9780471297222); Wikipedia says 1998. Robbins 1987: Wikipedia gives '$1,137,600 (11,376%)', which is internally inconsistent (that ending figure is ~11,276%); other sources say $1,147,607 - so say 'more than $1.1 million'. %R developed 1966 per both his site and Wiley's author bio. Wikipedia also says his daughter, actress Michelle Williams, won the same contest in 1997 - not needed."
+ },
+ {
+  "slug": "donald-lambert",
+  "name": "Donald R. Lambert",
+  "role": "Commodities analyst who created the CCI",
+  "bio": "Donald R. Lambert was a commodities analyst who introduced the Commodity Channel Index (CCI) in Commodities magazine (now Modern Trader) in 1980; the article was later reprinted in Technical Analysis of Stocks & Commodities. He designed the CCI as a timing tool for cyclical and seasonal commodity markets, scaled like a statistical standard score. Little further biographical information is publicly documented.",
+  "argues": [
+   "Commodity prices move in cycles, and a standardised index comparing price to its moving average can time when those cyclical moves begin and end.",
+   "The CCI's lookback should be less than one-third of the market's cycle length.",
+   "A move above +100 signals the start of an uptrend and a reason to buy; the position should be closed when the CCI falls back below +100."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Traders.com: 'Commodity Channel Index: Tool for Trading Cyclic Trends' (S&C V.1:5 reprint)",
+    "https://store.traders.com/-v01-c05-comm-pdf.html"
+   ],
+   [
+    "Traders.com: Charting The Market - CCI (S&C, October 2004)",
+    "https://traders.com/Documentation/FEEDbk_docs/2004/10/Charting/charting.html"
+   ],
+   [
+    "StockCharts ChartSchool: Commodity Channel Index (CCI)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/commodity-channel-index-cci.md"
+   ],
+   [
+    "Wikipedia: Commodity channel index",
+    "https://en.wikipedia.org/wiki/Commodity_channel_index"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Indicator facts are high confidence; personal bio is essentially unknown (no dates, career details found). Many sources say October 1980 for the Commodities issue - month not verified here. Keep the bio to what is above."
+ },
+ {
+  "slug": "tom-demark",
+  "name": "Tom DeMark",
+  "role": "Market-timing analyst behind the DeMARK Indicators",
+  "bio": "Thomas R. (Tom) DeMark is an American market-timing analyst and the founder and CEO of DeMARK Analytics, which licenses the DeMARK Indicators including TD Sequential. He began his career more than 50 years ago at a large pension and profit-sharing fund, later held executive roles at Tudor Investment Corporation and with bond manager Van Hoisington, and has been a long-time special advisor to Steven A. Cohen (SAC Capital, now Point72). He has consulted for firms including Goldman Sachs, Soros Fund Management, Steinhardt Partners and IBM.",
+  "argues": [
+   "Price trends can be timed by objectively anticipating trend exhaustion rather than by following the trend.",
+   "Market-timing techniques should be mechanical and objective rather than subjective chart reading.",
+   "A completed price sequence (setup followed by countdown) marks where buying or selling pressure is likely spent."
+  ],
+  "books": [
+   {
+    "title": "The New Science of Technical Analysis",
+    "year": 1994
+   },
+   {
+    "title": "New Market Timing Techniques: Innovative Studies in Market Rhythm & Price Exhaustion",
+    "year": 1997
+   },
+   {
+    "title": "DeMark on Day Trading Options",
+    "year": 1999
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Tom DeMark (2020 Annual Award)",
+    "https://cmtassociation.org/presenter/tom-demark/"
+   ],
+   [
+    "Society of Technical Analysts: Tom DeMark speaker bio",
+    "https://www.technicalanalysts.com/meetings/speakers/tom-demark-2"
+   ],
+   [
+    "O'Reilly: The New Science of Technical Analysis (1994) - contents incl. 'Sequential' chapter",
+    "https://www.oreilly.com/library/view/the-new-science/9780471035480/"
+   ],
+   [
+    "Wiley: New Market Timing Techniques - author info",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471149780,descCd-authorInfo.html"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Cohen role: CMT says special advisor to Steven A. Cohen of Point72 'for over 27 years'; the STA page says 'formerly an executive vice-president of Tudor'; Wiley author info says executive positions at Tudor and the Van Hoisington bond fund; AbeBooks blurb says he formed Devan Capital with Van Hoisington in 1992. Consulting list (Goldman Sachs, Soros, Steinhardt, Union Carbide, IBM, etc.) from CMT/STA bios. The STA page also lists 'DeMark Indicators' (Bloomberg Press, 2008) but that book was written by Jason Perl - do not credit it to DeMark. Paul Tudor Jones is named among people he consulted with (CMT). 'TD Sequential' and 'DeMARK Indicators' are registered trademarks - use descriptive play names. The third 'argues' item is a summary of the method, not a verified quote."
+ },
+ {
+  "slug": "john-bollinger",
+  "name": "John Bollinger",
+  "role": "Analyst and creator of Bollinger Bands",
+  "bio": "John Bollinger (born 1950, Montpelier, Vermont) is an American financial analyst who developed Bollinger Bands in the 1980s and runs Bollinger Capital Management. He was chief market analyst at the Financial News Network from 1984 to 1990 and was the first person to hold both the CFA and CMT designations. He set out his method in Bollinger on Bollinger Bands (2001).",
+  "argues": [
+   "Touches of the bands are just 'tags', not buy or sell signals in themselves.",
+   "Closes outside the bands are initially continuation signals, not reversal signals.",
+   "The middle band should describe the intermediate-term trend rather than be tuned to be the best crossover line."
+  ],
+  "books": [
+   {
+    "title": "Bollinger on Bollinger Bands",
+    "year": 2001
+   }
+  ],
+  "sources": [
+   [
+    "BollingerBands.com: Bollinger Band Rules",
+    "https://www.bollingerbands.com/bollinger-band-rules"
+   ],
+   [
+    "Wikipedia: John Bollinger",
+    "https://en.wikipedia.org/wiki/John_Bollinger"
+   ],
+   [
+    "StockCharts ChartSchool: Bollinger Bands",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/bollinger-bands.md"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Book year: McGraw-Hill, July 2001 (bookseller listings, Wikipedia John Bollinger); Wikipedia's Bollinger Bands article says 2002 - use 2001. 'Early 1980s' is commonly stated but I only verified '1980s'. Rules quoted are #6, #8 and #10 of his published list."
+ },
+ {
+  "slug": "chester-keltner",
+  "name": "Chester W. Keltner",
+  "role": "Chicago grain trader behind Keltner Channels",
+  "bio": "Chester W. Keltner (1909-1998) was a Chicago grain trader who described what he called the 'ten-day moving average trading rule' in his 1960 book How to Make Money in Commodities. The technique, now known as Keltner Channels, plots a 10-day average of typical price with bands set by the 10-day average daily range. Keltner made no claim to have originated it.",
+  "argues": [
+   "A 10-day average of the typical price ((high+low+close)/3), bracketed by the 10-day average daily range, describes the short-term trend.",
+   "A close above the upper line is a buy signal and a close below the lower line a sell signal - trade with the break."
+  ],
+  "books": [
+   {
+    "title": "How to Make Money in Commodities",
+    "year": 1960
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Keltner channel",
+    "https://en.wikipedia.org/wiki/Keltner_channel"
+   ],
+   [
+    "StockCharts ChartSchool: Keltner Channels",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/keltner-channels.md"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Life dates and 'Chicago grain trader' come only from Wikipedia; not cross-checked. Publisher of the 1960 book not verified."
+ },
+ {
+  "slug": "linda-bradford-raschke",
+  "name": "Linda Bradford Raschke",
+  "role": "Market Wizard trader who modernised Keltner Channels",
+  "bio": "Linda Bradford Raschke (born 1959, Pasadena, California) is an American trader who began as an equity-options market maker on the Pacific Coast and Philadelphia exchanges in 1981, became a registered CTA in 1992 and later ran hedge funds before retiring from managing outside money in 2015. She was profiled in Jack Schwager's The New Market Wizards (1992) and co-wrote Street Smarts with Laurence Connors. StockCharts credits her with the modern ATR-based version of Keltner Channels, introduced in the 1980s.",
+  "argues": [
+   "Channel width is better measured with Wilder's Average True Range than with the simple high-low range used by Keltner.",
+   "Failed breakouts to new 20-day extremes can be faded - the 'Turtle Soup' setup in Street Smarts."
+  ],
+  "books": [
+   {
+    "title": "Street Smarts: High Probability Short-Term Trading Strategies (with Laurence A. Connors)",
+    "year": 1995
+   },
+   {
+    "title": "Trading Sardines",
+    "year": 2019
+   }
+  ],
+  "sources": [
+   [
+    "LindaRaschke.net: Bio",
+    "https://lindaraschke.net/bio-linda/"
+   ],
+   [
+    "Wikipedia: Linda Bradford Raschke",
+    "https://en.wikipedia.org/wiki/Linda_Bradford_Raschke"
+   ],
+   [
+    "StockCharts ChartSchool: Keltner Channels",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/keltner-channels.md"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Street Smarts: Wikipedia says 1995; AbeBooks lists the M. Gordon Publishing edition as 1996. Trading Sardines: her site says Daughters Press 2019, Wikipedia says 2018. Her exact original Keltner parameters (EMA length, ATR length, multiplier) were NOT verified; StockCharts' default is 20-EMA, 10-ATR, x2. Turtle Soup attribution (Connors & Raschke, Street Smarts) via a secondary source (LuxAlgo)."
+ },
+ {
+  "slug": "chuck-lebeau",
+  "name": "Chuck LeBeau",
+  "role": "Trading-systems researcher who created the Chandelier Exit",
+  "bio": "Chuck (Charles) LeBeau is an American trading-systems researcher known for his work on exit strategies. He spent about twenty years at E.F. Hutton, latterly as a vice president and regional futures director, later ran a commodity trading advisor and hedge fund, and co-wrote Technical Traders Guide to Computer Analysis of the Futures Markets with David W. Lucas. His Chandelier Exit was popularised by Alexander Elder's 2002 book Come Into My Trading Room.",
+  "argues": [
+   "Exits are among the most important parts of a trading system - often more important to results than entries.",
+   "A trailing stop hung a multiple of Average True Range below the highest high lets a trend run while adapting to volatility."
+  ],
+  "books": [
+   {
+    "title": "Technical Traders Guide to Computer Analysis of the Futures Markets (with David W. Lucas)",
+    "year": 1992
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Chuck LeBeau",
+    "https://cmtassociation.org/presenter/chuck-lebeau/"
+   ],
+   [
+    "StockCharts ChartSchool: Chandelier Exit",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/chandelier-exit.md"
+   ],
+   [
+    "Incredible Charts: Chandelier Exits",
+    "https://www.incrediblecharts.com/indicators/chandelier_exits.php"
+   ],
+   [
+    "Van Tharp Institute newsletter on Chuck LeBeau",
+    "https://vantharp.com/Weekly_update/Weekly_472_Apr_28_2010.htm"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Book year: AbeBooks lists 1992 (McGraw-Hill/Irwin); the Van Tharp newsletter says 1991. Exact full title varies ('Market' vs 'Markets'). CMT says the book was 'published in seven languages and reprinted 15 times'. He is also listed as founder of SmartStops.net (CMT). Van Tharp also describes him as an authority on ADX and ATR."
+ },
+ {
+  "slug": "marc-chaikin",
+  "name": "Marc Chaikin",
+  "role": "Stockbroker-turned-analyst behind Chaikin Money Flow",
+  "bio": "Marc Chaikin is an American stockbroker turned technical analyst who started in the brokerage business in the mid-1960s, ran the options department at Tucker Anthony & R. L. Day, and founded Bomar Securities, which he sold to Instinet in 1992. He developed the Accumulation/Distribution Line (originally the Cumulative Money Flow Line), the Chaikin Oscillator and Chaikin Money Flow, and later founded Chaikin Analytics.",
+  "argues": [
+   "The closer a close is to the day's high, the more accumulation has taken place; the closer to the low, the more distribution.",
+   "Tracking money flow - volume weighted by where price closes - is essential to sound stock decisions.",
+   "He advises against trying to time the broad market in the short term, preferring volume-based accumulation/distribution analysis."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Wikipedia: Marc Chaikin",
+    "https://en.wikipedia.org/wiki/Marc_Chaikin"
+   ],
+   [
+    "StockCharts ChartSchool: Chaikin Money Flow (CMF)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/chaikin-money-flow-cmf.md"
+   ],
+   [
+    "Traders.com: 'Chatting With Marc Chaikin', S&C V.12:1 (January 1994)",
+    "https://store.traders.com/-v12-c01-chattin-pdf.html"
+   ],
+   [
+    "Fidelity Learning Center: Chaikin Money Flow",
+    "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/cmf"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "No book by Chaikin found. Start date: Wikipedia says stockbroker from 1965; the 1994 S&C interview summary says he got his licence at the end of the 1966 bear market at Shearson Hammill - hence 'mid-1960s'. The date/venue CMF was first published was NOT found. The first 'argues' item is the stated principle behind his indicators (Fidelity), not a direct quote of Chaikin; items 2-3 paraphrase the publisher's summary of the 1994 interview."
+ },
+ {
+  "slug": "larry-connors",
+  "name": "Larry Connors",
+  "role": "Author of quantified short-term trading strategies",
+  "bio": "Laurence (Larry) Connors is an American trader, author and publisher who began his career at Merrill Lynch in 1982 and was a vice president at Donaldson, Lufkin & Jenrette from 1990 to 1994. He chairs The Connors Group and leads Connors Research, and has written or co-written more than 20 books on short-term, statistically tested trading strategies. He received the CMT Association's Charles H. Dow Award in 2020.",
+  "argues": [
+   "If a strategy cannot be quantified and statistically tested, it should not be traded.",
+   "Buy pullbacks rather than breakouts, and buy stocks trading above their 200-day moving average rather than below it.",
+   "In his tests, stop-losses hurt the performance of short-term mean-reversion strategies on stocks and stock indices."
+  ],
+  "books": [
+   {
+    "title": "Street Smarts: High Probability Short-Term Trading Strategies (with Linda Bradford Raschke)",
+    "year": 1995
+   },
+   {
+    "title": "Short Term Trading Strategies That Work (with Cesar Alvarez)",
+    "year": 2008
+   },
+   {
+    "title": "High Probability ETF Trading (with Cesar Alvarez)",
+    "year": 2009
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Laurence Connors",
+    "https://cmtassociation.org/?p=2494"
+   ],
+   [
+    "StockCharts ChartSchool: RSI(2)",
+    "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/rsi-2.md"
+   ],
+   [
+    "Traders.com: Interview: Larry Connors On How Markets Really Work (S&C, December 2004)",
+    "https://store.traders.com/stcov227inla.html"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "STTSTW: TradingMarkets, 2008, ISBN 9780981923901 (AbeBooks). High Probability ETF Trading: a February 2010 S&C article calls it 'recently published', consistent with 2009, but no edition record was seen - year is medium confidence; co-authorship with Alvarez is from search-result titles. Whether Connors founded TradingMarkets.com was not verified (avoid saying so)."
+ },
+ {
+  "slug": "cesar-alvarez",
+  "name": "Cesar Alvarez",
+  "role": "Quant researcher and Connors co-author",
+  "bio": "Cesar Alvarez is an American quantitative trader who worked as a software engineer on early versions of Microsoft Excel before serving as director of research/trading strategies at Connors Research and TradingMarkets.com from 2004 to 2013. He co-wrote Short Term Trading Strategies That Work (2008) with Larry Connors, writes the Alvarez Quant Trading blog and holds the CMT designation.",
+  "argues": [
+   "Simple mean-reversion rules can be robust: in their tests the Double 7s idea also held up as Double 5s through Double 10s.",
+   "Trading ideas should be tested systematically on historical data before they are traded.",
+   "Buying weakness within long-term uptrends and selling into strength is a repeatable edge in stocks and ETFs."
+  ],
+  "books": [
+   {
+    "title": "Short Term Trading Strategies That Work (with Larry Connors)",
+    "year": 2008
+   },
+   {
+    "title": "High Probability ETF Trading (with Larry Connors)",
+    "year": 2009
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Cesar Alvarez",
+    "https://cmtassociation.org/?p=36576"
+   ],
+   [
+    "Smarter Trading podcast: Cesar Alvarez",
+    "https://smarter-trading.castos.com/episodes/cesar-alvarez-building-quantitative-trading-systems-to-trade-the-stock-market"
+   ],
+   [
+    "The Chartist: Double 7's Strategy",
+    "https://www.thechartist.com.au/?p=5968"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Arguments 2-3 summarise his and Connors' published approach rather than quote him. Same HPET year caveat as Connors."
+ },
+ {
+  "slug": "richard-donchian",
+  "name": "Richard Donchian",
+  "role": "Managed-futures pioneer and trend-following analyst",
+  "bio": "Richard Donchian (1905–1993) was an American commodities trader and analyst with an economics degree from Yale. In 1949 he started Futures, Inc., described by CME Group as the first publicly managed futures fund, and in 1960 became director of commodity research at Hayden Stone, later working at Shearson. From 1960 to 1979 he wrote the weekly Commodity Trend Timing newsletter, built on moving-average trend rules.",
+  "argues": [
+   "Commodities can be traded with systematic, rule-based trend following rather than discretionary forecasts.",
+   "Trend signals can come from moving-average crossovers (his newsletter used 5- and 20-day averages) or from price breaking out of its recent high-low range, the basis of the channel later named after him.",
+   "Limit losses and let profits run, whatever other rules say (one of the trading guidelines attributed to him)."
+  ],
+  "books": [
+   {
+    "title": "Commodity Trend Timing (weekly newsletter, 1960–1979)",
+    "year": 1960
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Richard Donchian",
+    "https://en.wikipedia.org/wiki/Richard_Donchian"
+   ],
+   [
+    "CME Group: The miraculous growth of managed futures",
+    "https://www.cmegroup.com/education/articles-and-reports/the-miraculous-growth-of-managed-futures.html"
+   ],
+   [
+    "DTN/Progressive Farmer: Donchian Rules (Todd Hultman, 2016)",
+    "https://www.dtnpf.com/agriculture/web/ag/news/article/2016/07/26/donchian-rules"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Bio facts (dates, Yale, Futures Inc. 1949, Hayden Stone 1960, newsletter 1960–79) are solid. I found no primary publication for the 4-week rule: secondary sources say he traded it as a 'weekly rule' in the 1950s–60s, and DTN says test results were published 'as early as 1970' and found it to be the most profitable system then known (tester not named in what I saw). Wikipedia's line that he 'created the Turtle Trading Rule' in 1950 is muddled, so I did not use it. Oxfordstrat dates 'Donchian's 20 guides' to 1934, which I could not confirm. He also wrote an article, 'Trend-Following Methods in Commodity Price Analysis', but I could not confirm its year. 'Father of trend following' is a common label, so I kept it out of the bio. Draft check: Futures Inc. 1949 is confirmed."
+ },
+ {
+  "slug": "richard-dennis-william-eckhardt",
+  "name": "Richard Dennis & William Eckhardt",
+  "role": "Commodity traders who ran the Turtle experiment",
+  "bio": "Richard Dennis (born 1949) is a Chicago commodities speculator, nicknamed the 'Prince of the Pit', who started as an order runner at the Chicago Mercantile Exchange at 17. His trading partner William Eckhardt left graduate study in mathematics for the trading pits. In 1983–84 they recruited 23 trainees through newspaper ads, taught them a rule-based trend-following system in two weeks and funded their accounts, to settle a bet over whether trading could be taught.",
+  "argues": [
+   "Dennis held that successful trading rests on rules that can be taught; Eckhardt argued it needed innate talent. The 'Turtle' experiment settled their bet in Dennis's favour.",
+   "The Turtle rules entered on breakouts to new 20- or 55-day highs or lows, sized positions by volatility (N, a 20-day average true range) and placed stops 2N from entry.",
+   "Eckhardt argued that human nature aims to maximise the chance of a gain rather than the size of gains, which favours mechanical systems and small risk per trade (he cited about 2%)."
+  ],
+  "books": [
+   {
+    "title": "The Original Turtle Trading Rules (OriginalTurtles.org; Curtis Faith and the original Turtles)",
+    "year": 2003
+   },
+   {
+    "title": "Way of the Turtle (Curtis Faith, McGraw-Hill)",
+    "year": 2007
+   },
+   {
+    "title": "Market Wizards (Jack D. Schwager; includes Dennis interview)",
+    "year": 1989
+   },
+   {
+    "title": "The New Market Wizards (Jack D. Schwager; includes Eckhardt interview)",
+    "year": 1992
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Richard Dennis",
+    "https://en.wikipedia.org/wiki/Richard_Dennis"
+   ],
+   [
+    "Wikipedia: William Eckhardt (trader)",
+    "https://en.wikipedia.org/wiki/William_Eckhardt_(trader)"
+   ],
+   [
+    "The Original Turtle Trading Rules (hosted copy, © 2003 OriginalTurtles.org)",
+    "https://pdfcoffee.com/turtle-rules-pdf-free.html"
+   ],
+   [
+    "Apple Books: Way of the Turtle (McGraw Hill, 30 March 2007)",
+    "https://books.apple.com/book/isbn9780071486644"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Neither man wrote a book about the Turtle rules. The rules were published in 2003 by Curtis Faith and other Turtles at OriginalTurtles.org, and Faith (the youngest Turtle, 19 at the time) expanded on them in Way of the Turtle (2007). Wikipedia's Dennis page dates Market Wizards to 1993, but the first edition is 1989 (Wikipedia's Market Wizards page) and The New Market Wizards is 1992. I confirmed Eckhardt's New Market Wizards interview only from secondary sources (hedgefundalpha, Wikipedia references), so treat it as medium. The 2% risk figure comes from an Eckhardt quote reported by hedgefundalpha. Wikipedia's disambiguation page gives Eckhardt's birth year as 1955. I could not confirm when Eckhardt Trading Company was founded. Wikipedia says Dennis reportedly lost about $50m in 1987–88."
+ },
+ {
+  "slug": "nicolas-darvas",
+  "name": "Nicolas Darvas",
+  "role": "Professional dancer and self-taught stock trader",
+  "bio": "Nicolas Darvas (1920–1977) was a Hungarian-born professional dancer who left Hungary in 1943 and later toured with his half-sister Julia as a dance team. Trading by cable and telegram from his tours, he said he made about $2.45 million in 18 months during the 1957–58 market. He described the method in How I Made $2,000,000 in the Stock Market (1960).",
+  "argues": [
+   "A rising stock moves in a series of 'boxes' (trading ranges); buy only when price breaks out above the top of the current box.",
+   "Protect every position with a stop-loss order just below the box bottom, and raise it as new, higher boxes form.",
+   "Focus on stocks already making new highs, with volume confirming the move, rather than on cheap or out-of-favour stocks."
+  ],
+  "books": [
+   {
+    "title": "How I Made $2,000,000 in the Stock Market",
+    "year": 1960
+   },
+   {
+    "title": "Wall Street: The Other Las Vegas",
+    "year": 1964
+   },
+   {
+    "title": "The Anatomy of Success",
+    "year": 1965
+   },
+   {
+    "title": "The Darvas System for Over-the-Counter Profits",
+    "year": 1971
+   },
+   {
+    "title": "You Can Still Make It in the Market",
+    "year": 1977
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Nicolas Darvas",
+    "https://en.wikipedia.org/wiki/Nicolas_Darvas"
+   ],
+   [
+    "WallStreetMojo: Darvas Box Theory",
+    "https://wallstreetmojo.com/darvas-box-theory"
+   ],
+   [
+    "MQL5: automating the Darvas box (secondary summary of the 1960 rules)",
+    "https://www.mql5.com/en/articles/24111"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Bio and bibliography come from Wikipedia. Wikipedia also says the New York Attorney General disputed his profits (alleging about $216,000), and a court blocked that inquiry. The '3 days' box-confirmation rule, the stop below the box bottom and the new-high/volume focus all come from secondary summaries, not the book itself. I could not see a primary text, so the third 'argues' point is medium confidence."
+ },
+ {
+  "slug": "george-hwang",
+  "name": "Thomas J. George & Chuan-Yang Hwang",
+  "role": "Finance professors; 52-week-high momentum researchers",
+  "bio": "Thomas J. George is Bauer Professor of Finance and director of the AIM Center for Investment Management at the University of Houston (PhD, University of Michigan, 1989). Chuan-Yang Hwang was at the Hong Kong University of Science and Technology's School of Business and Management when they co-wrote 'The 52-Week High and Momentum Investing' (Journal of Finance, 2004). The paper used U.S. stock data from July 1963 to December 2001.",
+  "argues": [
+   "How close a stock is to its 52-week high explains a large part of momentum profits, and forecasts future returns better than past returns themselves.",
+   "Traders anchor on the 52-week high. When good news pushes a price near it, they are reluctant to bid it higher, so the price under-reacts and later catches up.",
+   "Short-term momentum and long-term reversals appear to be separate phenomena, not two halves of one overreaction-and-correction cycle."
+  ],
+  "books": [
+   {
+    "title": "The 52-Week High and Momentum Investing, Journal of Finance 59(5): 2145–2176",
+    "year": 2004
+   }
+  ],
+  "sources": [
+   [
+    "Thomas J. George faculty page, University of Houston",
+    "https://www.bauer.uh.edu/tgeorge/"
+   ],
+   [
+    "Paper PDF (author's site)",
+    "https://www.bauer.uh.edu/tgeorge/papers/gh4-paper.pdf"
+   ],
+   [
+    "RePEc/IDEAS: Journal of Finance 59(5), 2004",
+    "https://ideas.repec.org/a/bla/jfinan/v59y2004i5p2145-2176.html"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "I did not verify Hwang's later affiliation (often given as Nanyang Technological University), so the bio uses only the HKUST affiliation printed on the paper. Excluding January, the paper reports 1.23% a month for the 52-week-high strategy against 1.07% for JT momentum."
+ },
+ {
+  "slug": "martin-zweig",
+  "name": "Martin Zweig",
+  "role": "Market timer, newsletter writer and author",
+  "bio": "Martin Zweig (1942–2013) was an American investor and newsletter writer with a PhD in finance from Michigan State University (1969), who also wrote for Barron's. He wrote Winning on Wall Street (1986) and was a regular guest on PBS's Wall $treet Week. At his death he was chairman of Zweig-DiMenna Associates.",
+  "argues": [
+   "A simple trend-following model applied to a broad stock index (his Four Percent Model) forces the investor to stay with the market's main trend.",
+   "Following the 4% indicator on the Value Line index from 1966 turned $10,000 into more than $233,000 by late 1988, about 15% a year (his own backtest).",
+   "On Wall $treet Week on 16 October 1987 he said he was deeply worried about the stock market, three days before the crash."
+  ],
+  "books": [
+   {
+    "title": "Winning on Wall Street",
+    "year": 1986
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Martin Zweig",
+    "https://en.wikipedia.org/wiki/Martin_Zweig"
+   ],
+   [
+    "CXO Advisory: Martin Zweig's Four Percent Model",
+    "https://www.cxoadvisory.com/technical-trading/martin-zweigs-four-percent-model-indicator/"
+   ],
+   [
+    "Stocks & Commodities: 4% model, 'originally developed by Ned Davis'",
+    "https://technical.traders.com/tradersonline/display.asp?art=153"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "On Ned Davis: one Stocks & Commodities article says the 4% model was 'originally developed by Ned Davis of Ned Davis Research'. Another S&C piece traces it to Arthur Merrill's 'Filtered Waves', which Zweig adapted. Zweig popularised it in Winning on Wall Street (pp. 93–94 of the 1994 revised edition). Suggested credit: 'Martin Zweig (popularised); originally developed by Ned Davis'. The $233,000 figure is quoted in an S&C abstract and attributed to Zweig's own analysis. 'Don't fight the Fed' and 'Don't fight the tape' are widely attributed to him but I did not verify them, so they are left out."
+ },
+ {
+  "slug": "jegadeesh-titman",
+  "name": "Narasimhan Jegadeesh & Sheridan Titman",
+  "role": "Finance professors who documented stock momentum",
+  "bio": "Narasimhan Jegadeesh (Emory University) and Sheridan Titman (McCombs School of Business, University of Texas at Austin) wrote their landmark momentum paper at UCLA's Anderson School, with Titman also at HKUST. Their 1993 Journal of Finance paper is the standard reference for cross-sectional stock momentum. In 2022 they received the Wharton-Jacobs Levy Prize for Quantitative Financial Innovation for it.",
+  "argues": [
+   "Buying stocks that did well over the past 3–12 months and selling those that did poorly earned significant positive returns in U.S. data from 1965 to 1989.",
+   "Those returns are not explained by systematic risk or delayed reactions to common factors, and part of the first-year gain reverses over the next two years.",
+   "In 2001 they showed momentum profits continued through the 1990s, which argues against data snooping and fits behavioural explanations based on delayed overreaction."
+  ],
+  "books": [
+   {
+    "title": "Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency, Journal of Finance 48(1): 65–91",
+    "year": 1993
+   },
+   {
+    "title": "Profitability of Momentum Strategies: An Evaluation of Alternative Explanations, Journal of Finance 56(2): 699–720",
+    "year": 2001
+   }
+  ],
+  "sources": [
+   [
+    "RePEc/IDEAS: Journal of Finance 48(1), 1993",
+    "https://ideas.repec.org/a/bla/jfinan/v48y1993i1p65-91.html"
+   ],
+   [
+    "Knowledge at Wharton: Wharton-Jacobs Levy Prize (2022)",
+    "https://knowledge.wharton.upenn.edu/article/recognizing-an-investing-signal-that-defied-wisdom-and-endured/"
+   ],
+   [
+    "RePEc/IDEAS: Journal of Finance 56(2), 2001",
+    "https://ideas.repec.org/a/bla/jfinan/v56y2001i2p699-720.html"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Figures from the paper: the 6-month/6-month strategy earned 0.95% a month (no skip) and is described as a 12.01% compounded annual excess return. The 12/3 strategy earned 1.31% a month, or 1.49% with a one-week skip. Their headline sample ran January 1965 to December 1989 (CRSP). The 'skip the most recent month' 12-1 form is not from this paper, which only tested an optional one-week skip."
+ },
+ {
+  "slug": "gary-antonacci",
+  "name": "Gary Antonacci",
+  "role": "Momentum researcher and author of Dual Momentum Investing",
+  "bio": "Gary Antonacci is a U.S. investment researcher with an MBA from Harvard Business School and the founder of Optimal Momentum. He developed 'dual momentum', which combines relative-strength momentum with trend-following 'absolute' momentum, and set it out in Dual Momentum Investing (McGraw-Hill, 2014). His momentum research placed second (2011) and first (2012) in NAAIM's Wagner Award competition.",
+  "argues": [
+   "Relative momentum (owning the stronger of several assets) and absolute momentum (holding an asset only if its own past return beats T-bills) work best together.",
+   "Absolute momentum does more than relative momentum to cut volatility and drawdowns, though both can raise returns.",
+   "His Global Equities Momentum (GEM) model is reviewed monthly. It compares U.S. and non-U.S. stocks over 12 months and moves to bonds when stocks fail to beat T-bills."
+  ],
+  "books": [
+   {
+    "title": "Dual Momentum Investing: An Innovative Strategy for Higher Returns with Lower Risk (McGraw-Hill)",
+    "year": 2014
+   },
+   {
+    "title": "Risk Premia Harvesting Through Dual Momentum (SSRN working paper; later Journal of Management & Entrepreneurship 11(1), 2017)",
+    "year": 2012
+   },
+   {
+    "title": "Momentum Success Factors (NAAIM Wagner Award, 1st place)",
+    "year": 2012
+   },
+   {
+    "title": "Optimal Momentum Investing (NAAIM Wagner Award, 2nd place)",
+    "year": 2011
+   }
+  ],
+  "sources": [
+   [
+    "CMT Association: Gary Antonacci bio",
+    "https://cmtassociation.org/?p=42795"
+   ],
+   [
+    "NAAIM: Wagner Award winners",
+    "https://naaim.org/?p=987"
+   ],
+   [
+    "Optimal Momentum: Global Equities Momentum",
+    "https://www.optimalmomentum.com/global-equities-momentum/"
+   ],
+   [
+    "Journal of Management & Entrepreneurship record (2017)",
+    "https://gnanaganga.inflibnet.ac.in:8443/jspui/handle/123456789/14295?mode=full"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Correction to the draft: the 2012 Wagner Award first place went to Antonacci's 'Momentum Success Factors', not 'Risk Premia Harvesting Through Dual Momentum'. He took second place in 2011 with 'Optimal Momentum Investing'. 'Risk Premia Harvesting' was an SSRN paper (2012, data through 2011) later published in the Journal of Management & Entrepreneurship (2017). The CMT bio calls the prize the 'Founders Award', while NAAIM's own page lists it as the Wagner Award. I could not open SSRN (HTTP 429), so the 2012 posting date rests on AlphaArchitect's July 2012 review."
+ },
+ {
+  "slug": "bouman-jacobsen",
+  "name": "Sven Bouman & Ben Jacobsen",
+  "role": "Researchers behind the Halloween indicator study",
+  "bio": "Ben Jacobsen is a finance professor at TIAS School for Business and Society who studies seasonality in stock returns. Sven Bouman works at the asset manager Saemor Capital (affiliations as given by the American Economic Association). Their 2002 American Economic Review paper tested the old 'Sell in May and go away' saying in 37 stock markets.",
+  "argues": [
+   "Stock returns from November to April were higher than from May to October in 36 of the 37 markets they studied, and they called this a puzzle.",
+   "A 'Halloween strategy' beat buy-and-hold in nearly every market they studied: stocks from November to April, the risk-free asset from May to October.",
+   "In later work with Cherry Zhang, Jacobsen extended the test to 108 markets and more than 300 years of UK data (1693–2011) and found an average winter-minus-summer gap of about 4.5 percentage points."
+  ],
+  "books": [
+   {
+    "title": "The Halloween Indicator, 'Sell in May and Go Away': Another Puzzle, American Economic Review 92(5): 1618–1635",
+    "year": 2002
+   },
+   {
+    "title": "The Halloween Indicator: Everywhere and All the Time (Jacobsen & Zhang, working paper)",
+    "year": 2012
+   }
+  ],
+  "sources": [
+   [
+    "RePEc/IDEAS: American Economic Review 92(5), 2002",
+    "https://ideas.repec.org/a/aea/aecrev/v92y2002i5p1618-1635.html"
+   ],
+   [
+    "CFA Institute Enterprising Investor: The Halloween Indicator (2012)",
+    "https://rpc.cfainstitute.org/blogs/enterprising-investor/2012/the-halloween-indicator-a-stock-market-anomaly-that-is-stronger-than-ever"
+   ],
+   [
+    "CXO Advisory: Jacobsen & Zhang, Halloween effect everywhere and all the time",
+    "https://www.cxoadvisory.com/?p=22076"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "The affiliations (Jacobsen at TIAS, Bouman at Saemor Capital) come from an AEA 'Research Highlights' chart page that I saw at benny.aeaweb.org/research/charts/halloween-spirits; I could not fetch the aeaweb.org article page. Sample start dates differ by country; the CFA summary gives 1973–1998. I could not confirm where the Jacobsen & Zhang paper was eventually published, so it is listed as a 2012 working paper."
+ },
+ {
+  "slug": "yale-jeffrey-hirsch",
+  "name": "Yale Hirsch & Jeffrey Hirsch",
+  "role": "Founder and editor of the Stock Trader's Almanac",
+  "bio": "Yale Hirsch (1923–2021) created the Stock Trader's Almanac in 1967, an annual guide to stock-market seasonality, cycles and patterns. His son Jeffrey Hirsch joined in 1990 as a market analyst and later became editor-in-chief.",
+  "argues": [
+   "The stock market has made almost all its gains in six months of the year, November through April (the 'Best Six Months', first identified in 1986).",
+   "The last five trading days of December and the first two of January, the 'Santa Claus Rally' that Yale Hirsch defined in 1972, tend to be positive.",
+   "The market's direction in January tends to point the way for the rest of the year (the 'January Barometer')."
+  ],
+  "books": [
+   {
+    "title": "Stock Trader's Almanac (annual)",
+    "year": 1967
+   }
+  ],
+  "sources": [
+   [
+    "Stock Trader's Almanac: About Us",
+    "https://stocktradersalmanac.com/AboutUs.aspx"
+   ],
+   [
+    "Stock Trader's Almanac: Yale Hirsch (1923–2021)",
+    "https://stocktradersalmanac.com/Alert/20211123_2.aspx"
+   ],
+   [
+    "Stock Trader's Almanac: Best Six Months / Tactical Seasonal Switching",
+    "https://stocktradersalmanac.com/Strategy.aspx"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "Draft checks: 1967, the Santa Claus Rally defined in 1972 as the last 5 + first 2 trading days, and Best Six Months first found in 1986 are all confirmed by the Almanac's own pages. The Almanac's MACD-timed version uses 8-17-9 MACD buy signals on the DJIA, S&P 500 and NASDAQ, which must occur on or after the first trading day of October (Almanac, Oct 2020). I could not confirm the sell-side MACD parameters."
+ },
+ {
+  "slug": "sy-harding",
+  "name": "Sy Harding",
+  "role": "Newsletter editor and seasonal market timer",
+  "bio": "Sy Harding was an American market analyst who founded Asset Management Research Corp. in 1988 and edited the Street Smart Report newsletter. His books include Riding the Bear: How to Prosper in the Coming Bear Market (Adams Media, 1999) and Beat the Market the Easy Way! (Wheatmark, 2007). In 1999 he introduced a Seasonal Timing Strategy that adds MACD signals to the market's favourable winter season.",
+  "argues": [
+   "The best average days to enter and exit the market's favourable season are around October 16 and April 20.",
+   "Timing those entries and exits with MACD works better than fixed calendar dates: wait for a MACD buy signal if it is not already on one by October 16, and for a MACD sell signal if it is still bullish on April 20.",
+   "In 1999 he forecast a coming bear market, and one followed in 2000–02."
+  ],
+  "books": [
+   {
+    "title": "Riding the Bear: How to Prosper in the Coming Bear Market",
+    "year": 1999
+   },
+   {
+    "title": "Beat the Market the Easy Way!",
+    "year": 2007
+   }
+  ],
+  "sources": [
+   [
+    "Stocks & Commodities interview: Seasonality With Sy Harding (V.30:5)",
+    "https://store.traders.com/stcov304inse.html"
+   ],
+   [
+    "MoneyShow: Harding on the Oct 16 / Apr 20 MACD rules (2013)",
+    "https://moneyshow.com/articles/dailyguru-31892"
+   ],
+   [
+    "CXO Advisory: Simple test of Sy Harding's Seasonal Timing Strategy",
+    "https://cxoadvisory.com/calendar-effects/simple-test-of-sy-hardings-seasonal-timing-strategy"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "The October 16 and April 20 dates and the MACD delay logic are confirmed in Harding's own words (MoneyShow, 2013). His exact MACD parameters (daily or weekly, which periods) are not in any source I found. StockCharts' Arthur Hill wrote in 2016 that he did not know whether Harding used daily or weekly MACD. Harding says he introduced the strategy in 1999; it is commonly linked to Riding the Bear (1999), but I did not see the book confirm this. CXO says it was applied to the DJIA. Arthur Hill calls him 'the late Sy Harding' (2016); I did not verify his date of death."
+ },
+ {
+  "slug": "robert-ariel",
+  "name": "Robert A. Ariel",
+  "role": "Researcher who documented the monthly effect",
+  "bio": "Robert A. Ariel was a doctoral candidate at MIT's Sloan School of Management when his study of within-month return patterns circulated as a 1984 MIT working paper. It was published as 'A Monthly Effect in Stock Returns' in the Journal of Financial Economics in 1987. He later published 'High Stock Returns before Holidays' in the Journal of Finance (1990).",
+  "argues": [
+   "In CRSP index returns for 1963–1981, the market's whole cumulative advance came in the first half of the month, starting with the last trading day of the previous month. Second-half returns averaged about zero.",
+   "Stocks earn unusually high returns on the trading day before a holiday. In 1963–82 more than a third of the market's annual gain came on eight pre-holiday days."
+  ],
+  "books": [
+   {
+    "title": "A Monthly Effect in Stock Returns, Journal of Financial Economics 18(1): 161–174",
+    "year": 1987
+   },
+   {
+    "title": "High Stock Returns before Holidays: Existence and Evidence on Possible Causes, Journal of Finance 45(5): 1611–1626",
+    "year": 1990
+   }
+  ],
+  "sources": [
+   [
+    "RePEc/IDEAS: Journal of Financial Economics 18(1), 1987",
+    "https://ideas.repec.org/a/eee/jfinec/v18y1987i1p161-174.html"
+   ],
+   [
+    "RePEc/IDEAS: Journal of Finance 45(5), 1990",
+    "https://ideas.repec.org/a/bla/jfinan/v45y1990i5p1611-26.html"
+   ],
+   [
+    "Christian Science Monitor (1985): A new art from the calendar",
+    "https://csmonitor.com/1985/0708/fwall8-f.html"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "There is very little biographical information about Ariel online. The MIT Sloan affiliation comes from the 1985 CSM article. I did not see the 1987 abstract verbatim; the first-half finding is as described by the CSM article and an MMU review paper."
+ },
+ {
+  "slug": "lakonishok-smidt",
+  "name": "Josef Lakonishok & Seymour Smidt",
+  "role": "Finance professors behind a 90-year seasonality study",
+  "bio": "Josef Lakonishok is Karnes Professor of Finance (now retired) at the University of Illinois at Urbana-Champaign and co-founded LSV Asset Management in 1994. Seymour Smidt (died 2017) taught economics and finance at Cornell from 1956 to 2005. Their 1988 Review of Financial Studies paper examined about 90 years of daily Dow Jones Industrial Average returns.",
+  "argues": [
+   "Ninety years of DJIA data show persistently unusual returns around the turn of the week, the turn of the month, the turn of the year and holidays.",
+   "The turn-of-the-month effect is concentrated in a four-day window: the last trading day of a month and the first three trading days of the next."
+  ],
+  "books": [
+   {
+    "title": "Are Seasonal Anomalies Real? A Ninety-Year Perspective, Review of Financial Studies 1(4): 403–425",
+    "year": 1988
+   }
+  ],
+  "sources": [
+   [
+    "SUFE academic newsletter: citation and abstract (RFS 1988)",
+    "https://academicnewsletter.sufe.edu.cn/info/355994"
+   ],
+   [
+    "Wall Street Transcript: Josef Lakonishok interview/bio",
+    "https://www.twst.com/interview/josef-lakonishok-lsv-asset-management"
+   ],
+   [
+    "Cornell Chronicle: Seymour 'Sy' Smidt dies at 88",
+    "https://news.cornell.edu/node/287729"
+   ]
+  ],
+  "confidence": "high",
+  "notes": "The [-1,+3] window is as cited in an MMU paper and on Quantpedia; I did not read the original paper text. The DJIA sample is 1897–1986 per Quantpedia."
+ },
+ {
+  "slug": "trace-mayer",
+  "name": "Trace Mayer",
+  "role": "Early bitcoin investor and podcast host",
+  "bio": "Trace Mayer is an early bitcoin investor and the host of the Bitcoin Knowledge Podcast. He holds accounting and law degrees, including a JD from California Western School of Law. He introduced the Mayer Multiple, bitcoin's price divided by its 200-day moving average, around 2017.",
+  "argues": [
+   "Comparing bitcoin's price with its 200-day moving average shows whether the price is historically cheap or stretched.",
+   "In his historical simulations, buying bitcoin whenever the multiple was below 2.4 gave the best long-term results. Readings of 2.4 or more marked speculative bubbles."
+  ],
+  "books": [],
+  "sources": [
+   [
+    "Bitcoin Knowledge: About Trace Mayer",
+    "https://www.bitcoin.kn/about/"
+   ],
+   [
+    "The Investor's Podcast TIP252: Trace Mayer (2019)",
+    "https://www.theinvestorspodcast.com/episodes/trace-mayer-bitcoin/"
+   ],
+   [
+    "Newhedge: Bitcoin Mayer Multiple",
+    "https://newhedge.io/bitcoin/mayer-multiple"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "My fetch of mayermultiple.info (the original site) was blocked, so the 2.4 rule and the 2017 date come from a secondary source (Newhedge). The podcast show notes list 'How to value bitcoin using the Mayer Multiple', but the transcript was paywalled. I left his books (e.g. The Great Credit Contraction) out because I did not verify them."
+ },
+ {
+  "slug": "robert-levy",
+  "name": "Robert A. Levy",
+  "role": "Early academic tester of relative strength",
+  "bio": "Robert A. Levy published one of the first academic tests of relative-strength stock selection, 'Relative Strength as a Criterion for Investment Selection', in the Journal of Finance in December 1967. His rule bought stocks trading well above their average price over the previous 27 weeks.",
+  "argues": [
+   "Buying stocks whose current price is well above their 27-week average price earned significant abnormal returns (as summarised by Jegadeesh & Titman, 1993).",
+   "The higher a stock's relative-strength ranking, the better it tended to perform over the following six months."
+  ],
+  "books": [
+   {
+    "title": "Relative Strength as a Criterion for Investment Selection, Journal of Finance 22(4): 595–610",
+    "year": 1967
+   }
+  ],
+  "sources": [
+   [
+    "RePEc/IDEAS: Journal of Finance 22(4), 1967",
+    "https://ideas.repec.org/a/bla/jfinan/v22y1967i4p595-610.html"
+   ],
+   [
+    "Nasdaq/Zacks: Are you ignoring a predictive stock indicator? (2015)",
+    "https://www.nasdaq.com/articles/are-you-ignoring-predictive-stock-indicator-2015-05-13"
+   ],
+   [
+    "Jegadeesh & Titman (1993) PDF, intro discussing Levy",
+    "https://floridapsc.com/library/filings/2013/07457-2013/Support/Gulf's%20response%20to%20OPC's%201st%20POD,%20No.%2057/Jegadeesh%20and%20Titman%201993%20(140-167).pdf"
+   ]
+  ],
+  "confidence": "low",
+  "notes": "Correction to the draft: Jegadeesh & Titman describe Levy's measure as the current price against the average price over the past 27 weeks, not 26. German 'RSL nach Levy' tools also default to 27 weeks. Jensen & Bennington (1970) argued Levy's result reflected selection bias and that his rule did not beat buy-and-hold in their sample. I could not verify sample size, years or Levy's exact buy/sell rank cutoffs. He is probably the Robert A. Levy who earned a business PhD at American University in 1966, founded CDA Investment Technologies and later chaired the Cato Institute, but no source I saw links him to this paper, so this stays out of the bio."
+ }
+]
