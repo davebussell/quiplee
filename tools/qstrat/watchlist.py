@@ -13,6 +13,7 @@ import math
 
 from .content import TICKERS, TIMED, FAMILIES
 from .render import next_move
+from . import stockview as sv
 
 e = html.escape
 EXTRA_ALIASES = {"BITCOIN": "BTC-USD", "BTC": "BTC-USD", "ETHEREUM": "ETH-USD", "ETH": "ETH-USD", "ETHER": "ETH-USD",
@@ -56,6 +57,10 @@ def watch_json(site):
         out[sym] = {"n": t["name"], "s": t["short"], "g": t["group"], "u": t["slug"], "cur": t["cur"],
                     "p": _r(bh["price"], 6), "d1": _r(d1, 4), "y1": _r(site.one_year(t), 4), "ma": _r(ma, 4), "c": states,
                     "r": [rk.get("score"), rk.get("level")] if rk.get("level") else None, "m": moves}
+        ol = sv.outlook(site, t)
+        if ol["ok"]:
+            out[sym]["up"] = _r(ol["upside"], 4)
+            out[sym]["na"] = ol["n_an"]
         if t.get("requested"):
             out[sym]["req"] = t.get("since") or 1
         for a in {t["name"].upper(), t["short"].upper()}:
@@ -111,6 +116,7 @@ def watchlist_page(site):
 <li><b>Plays in:</b> how many of the plays you picked hold the stock now. Most in usually means a strong, broad trend; a split means the plays disagree.</li>
 <li><b>Strip:</b> one square per play, green for in, red for out, in family order.</li>
 <li><b>Crash exposure:</b> the Hertz checklist of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
+<li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
 <li><b>Weight:</b> your share of the list by value, when your file includes quantities or market values. Otherwise every name counts equally.</li>
 </ul><p class="small muted">What published rules say, not advice. Quiplee doesn't know your goals, taxes or timeline.</p></div>
 </section>

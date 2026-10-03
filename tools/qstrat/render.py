@@ -591,7 +591,7 @@ class Site:
   <a class="card art-card" href="{h('articles/bubbles-and-crashes/')}"><span class="eyebrow">Macro</span><span class="name">A century of bubbles and crashes</span><span class="muted small">From 1929 to 2022: what fell, how far, what set it off, and which warning signs had a real track record.</span></a>
   <a class="card art-card" href="{h('articles/cash-or-invested/')}"><span class="eyebrow">Macro</span><span class="name">Cash, stay invested, or buckets?</span><span class="muted small">What selling, holding, rebalancing and a trend rule did through 2008, 2020 and 2022.</span></a>
   <a class="card art-card" href="{h('articles/debt-and-crashes/')}"><span class="eyebrow">Stocks · live</span><span class="name">Debt decides who survives a crash</span><span class="muted small">The Hertz lens on every covered stock, ranked by balance sheet.</span></a>
-  <a class="card art-card" href="{h('articles/green-across-the-board/')}"><span class="eyebrow">Stocks · live</span><span class="name">Green across the board</span><span class="muted small">The names most plays agree on: room to grow, the backdrop, and where the rules get out.</span></a>
+  <a class="card art-card" href="{h('articles/green-across-the-board/')}"><span class="eyebrow">Stocks · live</span><span class="name">Green across the board, with room to run</span><span class="muted small">Scored half on the plays and half on analysts' upside, with the backdrop and where the rules get out.</span></a>
   <a class="card art-card" href="{h('stories/the-hertz-lesson.html')}"><span class="eyebrow">Story</span><span class="name">The Hertz lesson</span><span class="muted small">Why a crash doesn't care about your revenue: the four pipes and the five-check scorecard.</span></a>
 </div></section>
 <section aria-labelledby="tracks-h"><div class="sec-head"><h2 class="h2" id="tracks-h">Learn it properly</h2><p>Three short tracks with hands-on widgets, real prices and quizzes.</p></div>
@@ -666,11 +666,9 @@ class Site:
     def home_signals(self, depth):
         h = lambda x: self.href(depth, x)
         cands = [t for t in self.universe if not t.get("index") and t["group"] != "Sectors"]
-
-        def share(t):
-            k, n = self.consensus(t)
-            return k / n if n else 0
-        top = sorted(cands, key=lambda t: (-share(t), t["short"]))[:6]
+        scored = [(t, sv.outlook(self, t)) for t in cands]
+        top = sorted([z for z in scored if z[1]["ok"] and z[1]["trend"] >= 0.5], key=lambda z: (-z[1]["score"], z[0]["short"]))[:6]
+        stretched = sorted([z for z in scored if z[1]["ok"] and z[1]["trend"] >= 0.6 and z[1]["upside"] <= 0.02], key=lambda z: -z[1]["trend"])[:4]
         eq = [t for t in cands if not t["crypto"] and t["group"] != "Indexes & ETFs" and (self.meta.get(t["sym"]) or {}).get("risk")]
         risky = sorted(eq, key=lambda t: (-self.meta[t["sym"]]["risk"]["score"], t["short"]))[:6]
 
@@ -679,11 +677,20 @@ class Site:
             x = self.r(t["sym"], "buy-and-hold")
             return (f'<a class="card stock-card" href="{h("stocks/" + t["slug"] + "/")}"><div class="top"><span class="sym">{e(t["short"])}</span>'
                     f'<span class="px">{money(x["price"], t["cur"])}</span></div><span class="muted small">{e(t["name"])}</span>{count_in(k, n, "plays in")}{extra}</a>')
-        g = "".join(card(t, "") for t in top)
+
+        def up_line(o):
+            u = o["upside"]
+            return (f'<span class="small">Analysts\' target <b class="{dir_cls(u)}">{pct(u, d=0)}</b> <span class="muted">({o["n_an"]})</span>'
+                    f' · score <b>{round(o["score"] * 100)}</b></span>')
+        g = "".join(card(t, up_line(o)) for t, o in top)
+        st_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a> ({o["k"]} of {o["n"]} in, target {pct(o["upside"], d=0)})' for t, o in stretched)
+        st_html = (f'<p class="note-line">Most plays are in, but the price is already at or above analysts\' average target: {st_txt}. '
+                   f'Strong trend, little room left on the targets.</p>') if stretched else ""
         r = "".join(card(t, f'<span class="small lvl-{sv.LEVEL_CLASS[self.meta[t["sym"]]["risk"]["level"]]}">{e(self.meta[t["sym"]]["risk"]["level"])} crash exposure</span>') for t in risky)
-        return f"""<section aria-labelledby="sig-h"><div class="sec-head"><h2 class="h2" id="sig-h">Strongest signals</h2>
-<p>The names most plays agree on tonight. A broad uptrend, not a promise. <a href="{h('articles/green-across-the-board/')}">Room to grow, and where the rules get out</a></p></div>
+        return f"""<section aria-labelledby="sig-h"><div class="sec-head"><h2 class="h2" id="sig-h">Strongest setups</h2>
+<p>Stocks at least half the plays hold, scored half on the plays and half on how far analysts' average 12-month target sits above the price. Not a recommendation. <a href="{h('articles/green-across-the-board/')}">How the score works, and where the rules get out</a></p></div>
 <div class="grid grid-3">{g}</div>
+{st_html}
 <div class="sec-head"><h3 class="h3">Most exposed if the market cracks</h3><p>Highest crash exposure: market swings, past crashes, debt and run-up. <a href="{h('articles/debt-and-crashes/')}">The Hertz lens</a></p></div>
 <div class="grid grid-3">{r}</div></section>"""
 
@@ -999,10 +1006,16 @@ class Site:
                           f'<span class="tile-note">{"Above: the long trend is up." if gap >= 0 else "Below: the long trend is down."}</span></div>')
         crash_tile = (f'<a class="card tile tile-link" href="#crash"><span class="tile-label">Crash exposure</span><span class="tile-value lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>'
                       f'<span class="tile-note">{rk["score"]} of 10 on the Hertz checklist</span></a>') if lvl else ""
+        ol = sv.outlook(self, t)
+        out_tile = ""
+        if ol["ok"]:
+            out_tile = (f'<a class="card tile tile-link" href="{h("articles/green-across-the-board/")}"><span class="tile-label">Plays + analysts\' upside</span>'
+                        f'<span class="tile-value">{round(ol["score"] * 100)}<small> / 100</small></span>{fill_bar(round(ol["score"] * 100), 100)}'
+                        f'<span class="tile-note">Target <b class="{dir_cls(ol["upside"])}">{pct(ol["upside"], d=0)}</b> from {ol["n_an"]} analysts; half the score is the plays.</span></a>')
         summary = f"""<section class="sum-tiles">
 <div class="card tile"><span class="tile-label">Core plays in</span><span class="tile-value">{kc}<small> / {nc}</small></span>{fill_bar(kc, nc)}<span class="tile-note">The 20 most-followed plays.</span></div>
 <div class="card tile"><span class="tile-label">All plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Quiplee tests.</span></div>
-{crash_tile}{trend_tile}
+{out_tile}{crash_tile}{trend_tile}
 </section>"""
         req_note = ""
         if t.get("requested"):
@@ -1256,6 +1269,8 @@ class Site:
 <li>Each gauge is calm, watch or warning on thresholds stated on the Markets page, chosen from the research cited there. The weather word adds them up: two points per warning, one per watch, and "stormy" also needs the trend gauge to have broken.</li>
 </ul></div>
 </section>
+<section class="card prose"><p class="eyebrow">Plays + analysts' upside score</p>
+<p>Used to rank the strongest setups on the home page and in Green across the board (which only include stocks at least half the plays hold), and to sort the watchlist. Half is the share of all {len(TIMED)} plays holding the stock. Half is the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic; the score is a ranking aid, not a forecast or a recommendation.</p></section>
 <section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
 <p>Tickers added on the watchlist that Quiplee doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each of the 20 core plays. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>

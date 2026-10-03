@@ -723,3 +723,6 @@ button.btn { cursor: pointer; }
 .idx-card .px { font: 600 18px var(--data); }
 .idx-card { min-width: 0; }
 .idx-card .consensus { white-space: normal; flex-wrap: wrap; gap: 4px 8px; }
+.green-card .g-val { min-width: 0; text-align: right; }
+.green-card .g-val span { white-space: normal; }
+@media (max-width: 520px) { .green-card .g-top { flex-direction: column; } .green-card .g-val { align-items: flex-start; text-align: left; } }

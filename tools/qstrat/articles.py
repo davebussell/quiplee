@@ -124,8 +124,8 @@ class Articles:
                   "What selling, holding, rebalancing and a simple trend rule would have done through 2008, 2020 and 2022, and why the bucket approach exists.", "written", WRITTEN))
         L.append(("stocks", "articles/debt-and-crashes/", "Debt decides who survives a crash",
                   "The Hertz lens on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.", "live", None))
-        L.append(("stocks", "articles/green-across-the-board/", "Green across the board: the names most plays agree on",
-                  "The stocks most plays hold right now. Is there room left, what the market backdrop says, and where the rules would get out.", "live", None))
+        L.append(("stocks", "articles/green-across-the-board/", "Green across the board, with room to run",
+                  "The stocks scored half on how many plays hold them and half on analysts' upside: where the room is, what the backdrop says, and where the rules would get out.", "live", None))
         L.append(("strategies", "articles/the-core-20/", "The 20 core plays, and why these 20",
                   "Out of 59 plays, these 20 cover every family and the rules traders actually follow. One page on each, with how it has scored.", "live", None))
         L.append(("strategies", "articles/trend-vs-reversion/", "Trend or mean reversion? It depends on the market",
@@ -463,9 +463,28 @@ class Articles:
         path, depth = "articles/green-across-the-board/", 2
         h = self.h(depth)
         cands = [t for t in self.s.universe if not t.get("index") and t["group"] != "Sectors"]
-        scored = sorted(cands, key=lambda t: (-self.share(t)[0], t["short"]))
-        top = [t for t in scored if self.share(t)[0] >= 0.6][:8] or scored[:6]
+        outl = {t["sym"]: sv.outlook(self.s, t) for t in cands}
+        # green across the board first: at least half the plays in, then ranked on the combined score
+        ranked = sorted([t for t in cands if outl[t["sym"]]["ok"] and outl[t["sym"]]["trend"] >= 0.5], key=lambda t: (-outl[t["sym"]]["score"], t["short"]))
+        top = ranked[:8]
         M = self.s.macro or {}
+        # the scoring table: every name at least half the plays hold, best score first
+        tbl = ""
+        for t in sorted([t for t in cands if outl[t["sym"]]["trend"] >= 0.5],
+                        key=lambda t: (-(outl[t["sym"]]["score"] if outl[t["sym"]]["ok"] else -1), -outl[t["sym"]]["trend"])):
+            o = outl[t["sym"]]
+            sc = f'<b>{round(o["score"] * 100)}</b>' if o["ok"] else f'<span class="muted small">{e(o["why"])}</span>'
+            u = o["upside"]
+            tbl += (f'<tr><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
+                    f'<td class="r" data-v="{o["trend"]:.4f}">{o["k"]}/{o["n"]}</td>'
+                    f'<td class="r {"up" if (u or 0) > 0.02 else "down" if u is not None and u < 0 else ""}" data-v="{"" if u is None else f"{u:.4f}"}">{pc(u) if u is not None else "–"}</td>'
+                    f'<td class="r" data-v="{o["n_an"]}">{o["n_an"] or "–"}</td>'
+                    f'<td class="r" data-v="{o["score"] if o["ok"] else ""}">{sc}</td></tr>')
+        score_tbl = (f'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r">Plays in</th><th class="r">To analysts\' target</th>'
+                     f'<th class="r">Analysts</th><th class="r" data-sort-first="desc">Score</th></tr></thead><tbody>{tbl}</tbody></table></div>')
+        stretched = [t for t in cands if outl[t["sym"]]["ok"] and outl[t["sym"]]["trend"] >= 0.6 and outl[t["sym"]]["upside"] <= 0.02]
+        stretched_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a> ({outl[t["sym"]]["k"]} of {outl[t["sym"]]["n"]} plays in, target {pc(outl[t["sym"]]["upside"])})'
+                                  for t in sorted(stretched, key=lambda t: -outl[t["sym"]]["trend"]))
         cards = ""
         for t in top:
             sh, k, n = self.share(t)
@@ -492,14 +511,14 @@ class Articles:
             if tgt and na and na >= 3:
                 room.append(f"analysts' average target is {pc(tgt / price - 1)} from here ({int(na)} analysts)")
             if rk.get("runup2y") is not None:
-                room.append(f"up {pc(rk['runup2y'])} in two years")
+                room.append(f"{'up' if rk['runup2y'] >= 0 else 'down'} {pc(abs(rk['runup2y']), sign=False)} in two years")
             if rk.get("off_high") is not None:
                 room.append("at its 52-week high" if rk["off_high"] > -0.01 else f"{pc(rk['off_high'])} from its 52-week high")
             cards += f"""<article class="card green-card"><div class="g-top"><div><p class="eyebrow">{e(t['group'])}</p>
 <h3 class="h3"><a href="{h('stocks/' + t['slug'] + '/')}">{e(t['name'])} ({e(t['short'])})</a></h3></div>
-<div class="g-val"><b>{k}/{n}</b><span class="small muted">plays in · core {kc}/{nc}</span></div></div>
+<div class="g-val"><b>{round(outl[t['sym']]['score'] * 100)}</b><span class="small muted">score · {k}/{n} plays in · target {pc(outl[t['sym']]['upside'])}</span></div></div>
 <ul class="green-facts">
-<li><b>Room to grow?</b> {e("; ".join(room).capitalize()) if room else "No analyst coverage or valuation data."}{(" Valued at " + e(" and ".join(val)) + ".") if val else ""}</li>
+<li><b>Room to grow?</b> {e(("; ".join(room))[:1].upper() + ("; ".join(room))[1:] + ".") if room else "No analyst coverage or valuation data."}{(" Valued at " + e(" and ".join(val)) + ".") if val else ""}</li>
 <li><b>Crash exposure:</b> <span class="lvl lvl-{sv.LEVEL_CLASS[rk['level']] if rk.get('level') else 'calm'}">{e(rk.get('level', '–'))}</span>{(". It " + e(rk['why'][0]) + ".") if rk.get('why') else "."}</li>
 <li><b>Where the rules get out:</b> {ex_txt or "No price-based exit level among the core plays right now."}</li>
 </ul>
@@ -509,9 +528,22 @@ class Articles:
                    f"See all nine gauges on the <a href='{h('markets/')}'>Markets page</a> and the longer argument in <a href='{h('articles/is-this-a-bubble/')}'>Is this a bubble?</a>")
         body = f"""
 <div class="prose">
-{P(f"These are the names the most plays hold as of the {self.s.asof.strftime('%B %-d')} close, across all {len(TIMED)} plays and all six families. When trend, breakout and momentum plays agree, a stock is in a strong, broad uptrend. That is useful to know, and it is not the same as cheap or safe.")}
+{P(f"A strong trend and room to run are two different things. A stock can have almost every play in and already sit above where analysts think it's worth. So this list ranks each name half on how many of the {len(TIMED)} plays hold it after the {self.s.asof.strftime('%B %-d')} close, and half on how far analysts' average 12-month price target sits above the price.")}
+<h2 class="h2">How the score works</h2>
+<ul>
+<li><b>Half: the plays.</b> The share of all {len(TIMED)} plays holding the stock. 46 of 59 in gives 78% of this half.</li>
+<li><b>Half: analysts' upside.</b> The gap to the average 12-month target, scored in a straight line from 20% below the price (nothing) to 50% above it (full marks). A price sitting right on the target earns 29% of this half.</li>
+<li><b>Guards.</b> Only names at least half the plays hold make the list. At least {sv.MIN_ANALYSTS} analysts must cover the stock, and a target more than double the price is ignored as stale, which usually happens after a share consolidation. ETFs, indexes and coins have no targets, so they aren't scored.</li>
+</ul>
+{P("Analyst targets are opinions, they lean optimistic, and they tend to follow the price rather than lead it. They are useful here as a rough check on how much good news is already in the price, not as a forecast.")}
 </div>
 <div class="green-grid">{cards}</div>
+<div class="prose">
+<h2 class="h2">Strong trend, little room on the targets</h2>
+<p>{("Most plays are in on these, but the price already sits at or above analysts' average target: " + stretched_txt + ". The trend is real; the upside analysts see has mostly been used up, so a pullback or a cut in targets matters more.") if stretched_txt else "No name with most plays in is trading at or above its analysts' average target tonight."}</p>
+<h2 class="h2">Every name at least half the plays hold</h2>
+</div>
+{score_tbl}
 <div class="prose">
 <h2 class="h2">Is there room to grow?</h2>
 {P("Momentum research is on the side of strong stocks: winners over the past three to twelve months have tended to keep outperforming for a while (Jegadeesh and Titman, 1993), which is why so many plays here buy strength. The same research shows momentum can reverse violently, especially after a market fall. Run-ups matter too: in Greenwood, Shleifer and You's work, two-year gains of 100% or more crashed about half the time, though usually after rising further first.",
@@ -526,8 +558,8 @@ class Articles:
 <li><b>Stage in.</b> Buying in two or three steps reduces the cost of being wrong about timing.</li>
 </ul>
 </div>"""
-        self.shell(path, "stocks", "Green across the board: the names most plays agree on",
-                   "The stocks most plays hold right now. Is there room left, what the market backdrop says, and where the rules would get out.",
+        self.shell(path, "stocks", "Green across the board, with room to run",
+                   "The stocks scored half on how many plays hold them and half on analysts' upside: where the room is, what the backdrop says, and where the rules would get out.",
                    body, [("Jegadeesh & Titman, Returns to buying winners and selling losers (Journal of Finance, 1993)", "https://doi.org/10.1111/j.1540-6261.1993.tb04702.x"),
                           ("Greenwood, Shleifer & You, Bubbles for Fama (NBER w23191)", "https://www.nber.org/system/files/working_papers/w23191/w23191.pdf")],
                    live=True, related=self.related(depth, ["articles/debt-and-crashes/", "articles/is-this-a-bubble/", "articles/the-core-20/"]))

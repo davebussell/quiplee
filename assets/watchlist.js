@@ -181,6 +181,9 @@
     sel.forEach(function (i) { var c = t.c[i]; if (c === '1') { k++; n++; } else if (c === '0') n++; });
     return [k, n];
   }
+  // half the plays in, half analysts' upside scored from -20% (0) to +50% (1); names without a target count as 0% upside
+  function upPts(u) { return (Math.min(Math.max(u, -0.2), 0.5) + 0.2) / 0.7; }
+  function score(t, sel) { var kn = count(t, sel); return 0.5 * (kn[1] ? kn[0] / kn[1] : 0) + 0.5 * upPts(t.up == null ? 0 : t.up); }
   function status(sym) {
     if (D.t[sym]) return 'covered';
     if (rejected[sym] || posted[sym] === 'bad') return 'rejected';
@@ -252,17 +255,16 @@
 
     // rows
     var showW = W.byValue;
-    var head = ['Stock', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var head = ['Stock', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
-    var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) { return el('th', { 'class': i >= 1 && i <= 4 || hd === 'Weight' ? 'r' : '', text: hd }); }))]);
+    var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) { return el('th', { 'class': i >= 1 && i <= 4 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd }); }))]);
     var tb = el('tbody');
     var rows = st.items.slice().sort(function (a, b) {
       var A = D.t[a.sym], B = D.t[b.sym];
       if (!!A !== !!B) return A ? -1 : 1;
       if (!A) return a.sym < b.sym ? -1 : 1;
       if (showW) return (W.w[b.sym] || 0) - (W.w[a.sym] || 0);
-      var ka = count(A, sel), kb = count(B, sel);
-      return (kb[1] ? kb[0] / kb[1] : 0) - (ka[1] ? ka[0] / ka[1] : 0);
+      return score(B, sel) - score(A, sel);
     });
     rows.forEach(function (it) {
       var t = D.t[it.sym], s = status(it.sym);
@@ -295,6 +297,7 @@
         el('td', { 'class': 'r ' + cls(t.y1), text: Q.pct(t.y1, 0) }),
         el('td', { 'class': 'r ' + cls(t.ma), text: Q.pct(t.ma, 0) }),
         el('td', {}, [el('span', { 'class': 'consensus' }, [fill(kn[0], kn[1]), kn[0] + ' of ' + kn[1]])]),
+        el('td', { 'class': 'r ' + (t.up == null ? 'muted' : t.up > 0.02 ? 'up' : t.up < 0 ? 'down' : ''), title: t.up == null ? 'Fewer than 3 analysts, or no target' : 'Average 12-month target from ' + t.na + ' analysts', text: t.up == null ? '–' : Q.pct(t.up, 0) }),
         el('td', {}, [strip]),
         el('td', {}, [t.r ? el('span', { 'class': 'lvl lvl-' + LVL[t.r[1]], text: t.r[1] }) : el('span', { 'class': 'muted', text: '–' })])
       ];

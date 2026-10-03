@@ -347,3 +347,42 @@ def crash_card(t, rk, depth_href):
 <ul class="crash-facts">{fl}</ul></div>
 <p class="chart-note">Hertz fell about 85% in 2008 and went bankrupt in 2020, not because people stopped renting cars, but because a sudden shock met a balance sheet built on debt. This checklist scores both halves: how hard the stock swings with the market, and how much debt it carries into a downturn. It describes fragility; it does not predict a crash.</p>
 </div>"""
+
+
+# --------------------------------------------------------------------------
+# outlook: the plays' consensus weighed equally with analysts' upside
+# --------------------------------------------------------------------------
+UPSIDE_FLOOR, UPSIDE_CAP = -0.20, 0.50     # upside scored linearly from -20% (0) to +50% (full marks)
+MIN_ANALYSTS = 3
+TREND_WEIGHT = 0.5                        # the other half is analyst upside
+
+
+def upside_points(u):
+    """Analyst upside mapped to 0-1 (the same formula is in assets/watchlist.js)."""
+    return (min(max(u, UPSIDE_FLOOR), UPSIDE_CAP) - UPSIDE_FLOOR) / (UPSIDE_CAP - UPSIDE_FLOOR)
+
+
+def outlook(site, t, plays=None):
+    """{'score', 'trend', 'upside', 'n_an', 'ok', 'why'}: half how many plays hold the stock, half how far
+    analysts' average 12-month target sits above the price. Needs 3+ analysts; a target more than double
+    the price is treated as stale (usually after a share consolidation) and ignored."""
+    k, n = site.consensus(t, plays)
+    trend = k / n if n else 0.0
+    x = site.R.get((t["sym"], "buy-and-hold"))
+    f = site.fund.get(t["sym"]) or {}
+    tgt, na = num(f.get("targetMeanPrice")), int(num(f.get("numberOfAnalystOpinions")) or 0)
+    out = {"trend": trend, "k": k, "n": n, "upside": None, "n_an": na, "ok": False, "score": None, "why": ""}
+    if not x or not tgt or not is_equity(t, f):
+        out["why"] = "no analyst target"
+        return out
+    u = tgt / x["price"] - 1
+    out["upside"] = u
+    if na < MIN_ANALYSTS:
+        out["why"] = f"only {na} analyst{'s' if na != 1 else ''}"
+        return out
+    if u > 1.0:
+        out["why"] = "target looks stale"
+        return out
+    out["ok"] = True
+    out["score"] = TREND_WEIGHT * trend + (1 - TREND_WEIGHT) * upside_points(u)
+    return out
