@@ -33,7 +33,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
-GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles"}
+GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
+             "picks", "members", "locked"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",

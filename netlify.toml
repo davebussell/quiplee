@@ -30,3 +30,10 @@
   from = "/stories/"
   to = "/articles/"
   status = 301
+
+# The locked versions of members-only pages are served by the member gate at
+# the real URLs; keep the copies under /locked/ out of search results
+[[headers]]
+  for = "/locked/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"

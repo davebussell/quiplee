@@ -89,6 +89,27 @@ live desk's feed from `data/glossary.json`.
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in `plays_fn.pb_ema`
 and drop its `flag` in `plays.py` once confirmed.
 
+**Members.** `/picks/` (the top-picks tracker) and every report under
+`/articles/` (not the hub) are for members. `netlify/edge-functions/member-gate.js`
+serves the full page only with a signed member cookie; otherwise it serves the
+page's locked version (title, opening line, sign-in / join card) that
+`tools/qstrat/members.py` builds under `/locked/`. `netlify/functions/member.mjs`
+signs members in (password checked against `QM_PASS_HASH`, a PBKDF2 hash; the
+password itself is never stored) and keeps each member's saved list.
+`netlify/functions/paypal.mjs` handles the $5/month PayPal subscription once
+`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_PLAN_ID` and
+`PAYPAL_WEBHOOK_ID` are set (`PAYPAL_ENV=sandbox` for testing); emails go
+through Resend with `RESEND_API_KEY`. Cookies are signed with `QM_SECRET`.
+To change the members' password, set a new `QM_PASS_HASH` (everyone signed in
+with the old one is signed out):
+`python -c "import hashlib,os,base64;b=lambda x:base64.urlsafe_b64encode(x).rstrip(b'=').decode();s=os.urandom(16);print('pbkdf2-sha256\$310000\$'+b(s)+'\$'+b(hashlib.pbkdf2_hmac('sha256',input('password: ').encode(),s,310000)))"`
+
+**Top picks.** `tools/qstrat/picks.py`: five picks from the strongest setups,
+reviewed after each Friday close, held while in the top 10. The history lives in
+Netlify Blobs behind `/api/picks-state` (token `PICKS_STATE_TOKEN`), not in this
+repo; only the production build writes it. Locally, set `QUIPLEE_PICKS_FILE` to a
+JSON file.
+
 ---
 
 ## Live desk (`/desk/`)

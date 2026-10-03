@@ -56,7 +56,8 @@ def nav_menus():
                     ("stocks/?sort=score", "Strongest setups", "Most plays in, plus room to the analysts' targets"),
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
                     ("stocks/?view=families", "By play family", "Trend, breakout, momentum, reversion, volume, calendar"),
-                    ("watchlist/", "My watchlist", "Check your own stocks, or add ones Quiplee doesn't cover")],
+                    ("watchlist/", "My watchlist", "Check your own stocks, or add ones Quiplee doesn't cover"),
+                    ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
                         ("articles/the-core-20/", "The core 20", "The plays to learn first"),
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
@@ -68,7 +69,8 @@ def nav_menus():
         "articles/": [("articles/#new-h", "Long reads", "Bubbles, crashes, debt and positioning"),
                       ("articles/#stocks", "Stock briefs", "A plain-English brief on every covered name"),
                       ("articles/#strategies", "Strategies and sectors", "The core 20, regimes, backtests, sector briefs"),
-                      ("articles/#macro", "Macro", "The bubble question, crash history, cash vs invested")],
+                      ("articles/#macro", "Macro", "The bubble question, crash history, cash vs invested"),
+                      ("members/", "Members", "The reports, the top picks and alerts on your stocks")],
     }
 ROLE_VAR = {"s1": "--s1", "s2": "--s2", "s3": "--s3", "price": "--s-price", "bench": "--s-bench"}
 
@@ -462,7 +464,7 @@ class Site:
 </main>
 <footer class="site-foot"><div class="wrap foot-row">
 <p>Quiplee runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Quiplee takes no positions in the names it covers.</p>
-<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a></p>
+<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a> · <a href="{h('members/')}">Members</a></p>
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
@@ -532,6 +534,11 @@ class Site:
         watchlist_page(self)
         from .articles import Articles
         Articles(self).build()
+        from .members import members_page
+        from . import picks
+        members_page(self)
+        state, info = picks.run(self)
+        picks.picks_page(self, state, info)
         self.home()
         self.strategies_index()
         for s in PLAYS:
@@ -741,6 +748,7 @@ class Site:
         return f"""<section aria-labelledby="sig-h"><div class="sec-head"><h2 class="h2" id="sig-h">Strongest setups</h2>
 <p>Stocks at least half the plays hold, scored half on the plays and half on how far analysts' average 12-month target sits above the price. Not a recommendation. <a href="{h('articles/green-across-the-board/')}">How the score works, and where the rules get out</a></p></div>
 <div class="grid grid-3">{g}</div>
+<p class="mem-note"><span class="tag mem">Members</span> <span>The <a href="{h('picks/')}">top-picks tracker</a> holds the top five of this list by rule, reviewed every Friday, and tracks each pick against the S&amp;P 500.</span></p>
 {st_html}
 <div class="sec-head"><h3 class="h3">Most exposed if the market cracks</h3><p>Highest crash exposure: market swings, past crashes, debt and run-up. <a href="{h('articles/debt-and-crashes/')}">The storm test</a></p></div>
 <div class="grid grid-3">{r}</div></section>"""
@@ -1163,8 +1171,10 @@ class Site:
             links.append((f"articles/sectors/{slugify(t['group'])}/", f"{t['group']}: what the plays say", "Every covered name in the sector, side by side."))
         links.append(("articles/debt-and-crashes/", "Debt decides who survives a crash", "The storm test on every covered stock."))
         links.append(("articles/is-this-a-bubble/", "Is this a bubble?", "The gauges in October 2026, and what history says about timing."))
-        cards = "".join(f'<a class="card art-card" href="{h(u)}"><span class="name">{e(a)}</span><span class="muted small">{e(b)}</span></a>' for u, a, b in links)
-        return f'<section><div class="sec-head"><h2 class="h2">Read more</h2></div><div class="grid grid-4">{cards}</div></section>'
+        from .members import member_tag
+        cards = "".join(f'<a class="card art-card" href="{h(u)}"><span class="name">{e(a)}</span><span class="muted small">{e(b)}</span>{member_tag()}</a>' for u, a, b in links)
+        return (f'<section><div class="sec-head"><h2 class="h2">Read more</h2><p>Reports for <a href="{h("members/")}">Quiplee Members</a>.</p></div>'
+                f'<div class="grid grid-4">{cards}</div></section>')
 
     def index_exposed(self, t, depth):
         """On an index page: the covered names that trade on that market, by crash exposure."""
@@ -1395,7 +1405,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted(list(self.pages.keys()) + ["desk/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

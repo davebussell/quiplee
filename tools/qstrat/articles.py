@@ -19,6 +19,7 @@ import pandas as pd
 from . import macro
 from . import stockview as sv
 from .content import TICKERS, TIMED, PLAY, FAMILIES, FAMILY, GROUP_ORDER, credit
+from .members import locked_page, member_tag, PRICE
 
 e = html.escape
 WRITTEN = pd.Timestamp("2026-10-03")
@@ -89,8 +90,12 @@ class Articles:
 {src}
 {related}
 </article>"""
-        self.s.add(path, self.s.shell(path, html.unescape(title.replace("<em>", "").replace("</em>", "")), desc or html.unescape(dek), page,
+        plain = html.unescape(title.replace("<em>", "").replace("</em>", ""))
+        self.s.add(path, self.s.shell(path, plain, desc or html.unescape(dek), page,
                                       active="articles/", scripts=("assets/widgets.js",)))
+        crumbs = f'<nav class="crumbs"><a href="{h("articles/")}">Articles</a><span>/</span><a href="{h("articles/")}#{bucket}">{e(bname)}</a></nav>'
+        head = f'<header class="pair-head"><p class="eyebrow">{e(bname)} · {e(when)}</p><h1 class="h1">{title}</h1><p class="lede">{dek}</p></header>'
+        locked_page(self.s, path, plain, desc or html.unescape(dek), head, what="report", active="articles/", crumbs=crumbs)
 
     def gauge_table(self, depth):
         M = self.s.macro
@@ -109,7 +114,7 @@ class Articles:
         cards = ""
         for b, sp, title, dek, kind, _ in self.list:
             if sp in slugs:
-                cards += f'<a class="card art-card" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])}</span><span class="name">{title}</span><span class="muted small">{dek}</span></a>'
+                cards += f'<a class="card art-card" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])}</span><span class="name">{title}</span><span class="muted small">{dek}</span>{member_tag()}</a>'
         return f'<section><h2 class="h2">Keep reading</h2><div class="grid grid-3">{cards}</div></section>' if cards else ""
 
     # ------------------------------------------------------------- registry
@@ -166,7 +171,7 @@ class Articles:
             for b, sp, title, dek, kind, _ in self.list:
                 if b != key or "/sectors/" in sp:
                     continue
-                tag = '<span class="tag live">Live</span>' if kind == "live" else ""
+                tag = '<span class="art-tags">' + ('<span class="tag live">Live</span>' if kind == "live" else "") + member_tag() + '</span>'
                 cards += f'<a class="card art-card" href="{h(sp)}">{tag}<span class="name">{title}</span><span class="muted small">{dek}</span></a>'
             extra = ""
             if key == "stocks":
@@ -187,12 +192,13 @@ class Articles:
             b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
             when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
             feat += (f'<a class="card art-card feat" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])} · {e(when)}</span>'
-                     f'<span class="name">{title}</span><span class="muted small">{dek}</span></a>')
+                     f'<span class="name">{title}</span><span class="muted small">{dek}</span>{member_tag()}</a>')
         feat += (f'<a class="card art-card feat" href="{h("stories/the-hertz-lesson.html")}"><span class="eyebrow">Story · Sep 30, 2026</span>'
                  f'<span class="name">The Hertz lesson: why a crash doesn\'t care about your revenue</span>'
                  f'<span class="muted small">How a car-rental giant fell 85% in a housing crash, and the five checks that sort survivors from casualties.</span></a>')
         body = f"""<section class="pair-head"><p class="eyebrow">Articles and stories</p><h1 class="h1">Read the market, then the stock</h1>
 <p class="lede">Plain-English pieces built on the same numbers as the rest of Quiplee. The live ones rebuild every night with the latest close, so they never go stale.</p>
+<p class="mem-note">{member_tag()} <span>The reports are for <a href="{h('members/')}">Quiplee Members</a>: {PRICE} a month, with the top-picks tracker and alerts on your stocks. The Hertz story stays free.</span></p>
 <div class="chips fam-chips">{''.join(f'<a href="#{k}">{e(n)}</a>' for k, n, _ in BUCKETS)}</div></section>
 <section aria-labelledby="new-h"><div class="sec-head"><h2 class="h2" id="new-h">Start with these</h2><p>The long reads: bubbles, crashes, debt, positioning and the names the plays agree on.</p></div>
 <div class="grid grid-3">{feat}</div></section>
