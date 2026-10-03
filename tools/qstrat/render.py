@@ -418,7 +418,7 @@ class Site:
 </main>
 <footer class="site-foot"><div class="wrap foot-row">
 <p>Quiplee runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Quiplee takes no positions in the names it covers.</p>
-<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('stories/')}">Stories</a></p>
+<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a></p>
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
@@ -585,6 +585,15 @@ class Site:
 </section>
 {self.home_market(depth)}
 {self.home_signals(depth)}
+<section aria-labelledby="reads-h"><div class="sec-head"><h2 class="h2" id="reads-h">Long reads</h2><p><a href="{h('articles/')}">All articles and stories</a></p></div>
+<div class="grid grid-3">
+  <a class="card art-card" href="{h('articles/is-this-a-bubble/')}"><span class="eyebrow">Macro</span><span class="name">Is this a bubble? The gauges in October 2026</span><span class="muted small">Valuations and concentration rival 2000; credit, jobs and volatility are calm; rates are the highest since 2007. What history says to make of it.</span></a>
+  <a class="card art-card" href="{h('articles/bubbles-and-crashes/')}"><span class="eyebrow">Macro</span><span class="name">A century of bubbles and crashes</span><span class="muted small">From 1929 to 2022: what fell, how far, what set it off, and which warning signs had a real track record.</span></a>
+  <a class="card art-card" href="{h('articles/cash-or-invested/')}"><span class="eyebrow">Macro</span><span class="name">Cash, stay invested, or buckets?</span><span class="muted small">What selling, holding, rebalancing and a trend rule did through 2008, 2020 and 2022.</span></a>
+  <a class="card art-card" href="{h('articles/debt-and-crashes/')}"><span class="eyebrow">Stocks · live</span><span class="name">Debt decides who survives a crash</span><span class="muted small">The Hertz lens on every covered stock, ranked by balance sheet.</span></a>
+  <a class="card art-card" href="{h('articles/green-across-the-board/')}"><span class="eyebrow">Stocks · live</span><span class="name">Green across the board</span><span class="muted small">The names most plays agree on: room to grow, the backdrop, and where the rules get out.</span></a>
+  <a class="card art-card" href="{h('stories/the-hertz-lesson.html')}"><span class="eyebrow">Story</span><span class="name">The Hertz lesson</span><span class="muted small">Why a crash doesn't care about your revenue: the four pipes and the five-check scorecard.</span></a>
+</div></section>
 <section aria-labelledby="tracks-h"><div class="sec-head"><h2 class="h2" id="tracks-h">Learn it properly</h2><p>Three short tracks with hands-on widgets, real prices and quizzes.</p></div>
 <div class="grid grid-3">
   <a class="card practice-card" href="{h('learn/')}#track-basics"><span class="eyebrow">Track 1</span><span class="name">Stock basics</span><span class="muted small">What a stock is, candlesticks, trends, P/E, balance sheets and position size.</span></a>
@@ -1273,7 +1282,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted(list(self.pages.keys()) + ["desk/", "stories/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted(list(self.pages.keys()) + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

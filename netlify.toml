@@ -18,3 +18,15 @@
   from = "/learn/the-seven-rules/*"
   to = "/learn/the-play-families/"
   status = 301
+
+# Stories now live alongside every other piece under /articles/ (the Hertz
+# lesson keeps its URL at /stories/the-hertz-lesson.html)
+[[redirects]]
+  from = "/stories"
+  to = "/articles/"
+  status = 301
+
+[[redirects]]
+  from = "/stories/"
+  to = "/articles/"
+  status = 301

@@ -181,11 +181,23 @@ class Articles:
                 chips = "".join(f'<a href="{h("articles/sectors/" + slugify(g) + "/")}">{e(g)}</a>' for g in self.sector_groups())
                 extra = f'<div class="card"><p class="h3">Sector briefs</p><div class="chips" style="margin-top:10px">{chips}</div></div>'
             secs += f'<section id="{key}"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>{extra}<div class="grid grid-3">{cards}</div></section>'
-        body = f"""<section class="pair-head"><p class="eyebrow">Articles</p><h1 class="h1">Read the market, then the stock</h1>
+        feat = ""
+        for sp in ["articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
+                   "articles/debt-and-crashes/", "articles/green-across-the-board/"]:
+            b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
+            when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
+            feat += (f'<a class="card art-card feat" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])} · {e(when)}</span>'
+                     f'<span class="name">{title}</span><span class="muted small">{dek}</span></a>')
+        feat += (f'<a class="card art-card feat" href="{h("stories/the-hertz-lesson.html")}"><span class="eyebrow">Story · Sep 30, 2026</span>'
+                 f'<span class="name">The Hertz lesson: why a crash doesn\'t care about your revenue</span>'
+                 f'<span class="muted small">How a car-rental giant fell 85% in a housing crash, and the five checks that sort survivors from casualties.</span></a>')
+        body = f"""<section class="pair-head"><p class="eyebrow">Articles and stories</p><h1 class="h1">Read the market, then the stock</h1>
 <p class="lede">Plain-English pieces built on the same numbers as the rest of Quiplee. The live ones rebuild every night with the latest close, so they never go stale.</p>
 <div class="chips fam-chips">{''.join(f'<a href="#{k}">{e(n)}</a>' for k, n, _ in BUCKETS)}</div></section>
+<section aria-labelledby="new-h"><div class="sec-head"><h2 class="h2" id="new-h">Start with these</h2><p>The long reads: bubbles, crashes, debt, positioning and the names the plays agree on.</p></div>
+<div class="grid grid-3">{feat}</div></section>
 {secs}"""
-        self.s.add(path, self.s.shell(path, "Articles", "Stock briefs for every covered name, strategy and sector pieces, and macro articles on bubbles, crashes and positioning, rebuilt nightly.",
+        self.s.add(path, self.s.shell(path, "Articles and stories", "Long reads on bubbles, crashes, debt and positioning, stock briefs for every covered name, and strategy and sector pieces, rebuilt nightly.",
                                       body, active="articles/"))
 
     # ================================================================ macro
