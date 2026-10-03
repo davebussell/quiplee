@@ -19,7 +19,12 @@
   function $(id) { return document.getElementById(id); }
   function msg(t, kind) { var m = $('wl-msg'); m.textContent = t; m.className = 'small ' + (kind || 'muted'); }
   function getJSON(url) { return fetch(url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
-  function save() { if (!st.shared && !st.example) Q.watchSet({ items: st.items }); }
+  var mem = null, syncTimer = null;   // the member's saved list, once signed in
+  function save() {
+    if (st.shared || st.example) return;
+    Q.watchSet({ items: st.items });
+    if (mem && mem.synced) { clearTimeout(syncTimer); syncTimer = setTimeout(function () { putList({}); }, 800); }
+  }
   function loadMode() {
     try { var m = JSON.parse(localStorage.getItem(MODE_KEY) || 'null'); if (m) { st.mode = m.mode || 'core'; st.pick = m.pick || []; } } catch (e) {}
   }
@@ -359,6 +364,55 @@
     if (waiting.length) box.appendChild(el('p', { 'class': 'small muted', text: 'In the queue for ' + whenText() + ': ' + waiting.slice(0, 40).join(', ') + (waiting.length > 40 ? '…' : '') }));
   }
 
+  // ---------------------------------------------------------------- members: the list the alert email checks
+  function alMsg(t) { var m = $('wl-al-msg'); if (m) m.textContent = t; }
+  function alState() {
+    if (!mem) return;
+    var n = (mem.tickers || []).length;
+    if (!mem.email) alMsg('This sign-in has no email on file, so no alerts can be sent. Subscribers get them at their PayPal email.');
+    else if (!n) alMsg('Save your list once; after that it stays in step as you add or remove stocks.');
+    else alMsg('Saved: ' + n + ' stock' + (n === 1 ? '' : 's') + '. ' + (mem.alerts ? 'Alerts are on: Quiplee checks after each close and emails only when something changed.' : 'Alerts are off.'));
+  }
+  function putList(extra) {
+    var body = { tickers: st.items.map(function (x) { return x.sym; }) };
+    Object.keys(extra).forEach(function (k) { body[k] = extra[k]; });
+    return fetch('/api/member/list', { method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); return j; }); })
+      .then(function (j) { mem.tickers = j.tickers; mem.alerts = j.alerts; mem.email = j.email; mem.synced = true; alState(); })
+      .catch(function (e) { alMsg("Couldn't save: " + e.message); });
+  }
+  function memberInit() {
+    var box = $('wl-alerts');
+    if (!box || location.protocol === 'file:') return;
+    fetch('/api/member/me', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !j.member) return null;
+        box.querySelector('.wl-al-guest').hidden = true;
+        box.querySelector('.wl-al-mem').hidden = false;
+        return fetch('/api/member/list', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.json(); });
+      })
+      .then(function (L) {
+        if (!L) return;
+        mem = { tickers: L.tickers || [], alerts: L.alerts !== false, email: !!L.email, synced: (L.tickers || []).length > 0 };
+        $('wl-al-on').checked = mem.alerts;
+        // a list saved on another device fills an empty (or example) list here
+        if (mem.tickers.length && !st.shared && (st.example || !st.items.length)) {
+          st.items = mem.tickers.map(function (s) { return { sym: s }; });
+          st.example = false; Q.watchSet({ items: st.items }); render();
+          msg('Loaded your saved list.');
+        }
+        alState();
+      })
+      .catch(function () {});
+    $('wl-al-save').addEventListener('click', function () {
+      if (!mem) return;
+      if (st.example || !st.items.length) { alMsg('Add your own stocks first.'); return; }
+      alMsg('Saving…'); putList({ alerts: $('wl-al-on').checked });
+    });
+    $('wl-al-on').addEventListener('change', function () { if (mem && mem.synced) putList({ alerts: this.checked }); });
+  }
+
   function loadExample() { st.items = EXAMPLE.filter(function (s) { return D.t[s]; }).map(function (s) { return { sym: s }; }); st.example = true; render(); }
 
   function init() {
@@ -397,6 +451,7 @@
     });
     $('wl-clear').addEventListener('click', function () { st.items = []; st.example = false; st.shared = false; Q.watchSet({ items: [] }); history.replaceState(null, '', location.pathname); render(); msg('List cleared.'); });
     if (st.mode !== 'core') setMode(st.mode); else render();
+    memberInit();
     var add = params.get('add');
     if (add && !shared) { addEntries(parseText(add)); history.replaceState(null, '', location.pathname); }
     // queue state + names that failed checks

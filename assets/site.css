@@ -815,3 +815,10 @@ button.btn { cursor: pointer; }
 .pk-card .chart-card { padding: 0; border: 0; background: none; }
 .pk-card .chart-card .h3 { font-size: 13px; color: var(--muted); font-family: var(--ui); font-weight: 500; }
 @media (max-width: 600px) { .pk-nm { display: none; } }
+.wl-alerts { display: flex; flex-direction: column; gap: 10px; }
+.wl-al-guest, .wl-al-mem { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; font-size: 14px; color: var(--ink-2); }
+.wl-al-guest > span:last-child { flex: 1 1 280px; min-width: 0; }
+.wl-alerts .tag.mem { flex: none; }
+.wl-al-on { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.wl-al-on input { width: 16px; height: 16px; accent-color: var(--violet); }
+#wl-al-msg { flex-basis: 100%; }
