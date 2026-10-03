@@ -12,19 +12,31 @@ import numpy as np
 import pandas as pd
 
 from .linker import link_terms
+from . import stockview as sv
 from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, GROUP_ORDER, BAR_WORD,
                       FAMILIES, FAMILY, FAMILY_ORDER, credit)
 
 e = html.escape
 TK = {t["sym"]: t for t in TICKERS}
+
+
+def universe():
+    """The curated list. Reader-requested tickers get their own pages but stay out
+    of the cross-stock tables and counts, which would otherwise shift as readers add names."""
+    return [t for t in TICKERS if not t.get("requested")]
+
+
+def plays_for(t):
+    """Plays that get a page of their own on this ticker (core 20 for reader requests)."""
+    return [p for p in TIMED if p.get("core")] if t.get("requested") else TIMED
 BASE = "https://quiplee.com/"
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' "
         "fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E"
         "%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E")
-NAV = [("", "Signals"), ("strategies/", "Plays"), ("thinkers/", "Analysts"), ("stocks/", "Stocks"),
-       ("learn/", "Learn"), ("stories/", "Stories"), ("desk/", "Live desk"), ("method/", "Method")]
+NAV = [("markets/", "Markets"), ("stocks/", "Stocks"), ("strategies/", "Plays"), ("thinkers/", "Analysts"),
+       ("learn/", "Learn"), ("articles/", "Articles"), ("watchlist/", "Watchlist"), ("desk/", "Live desk")]
 ROLE_VAR = {"s1": "--s1", "s2": "--s2", "s3": "--s3", "price": "--s-price", "bench": "--s-bench"}
 
 
@@ -330,8 +342,13 @@ def key_wash(kind, label):
 # site
 # --------------------------------------------------------------------------
 class Site:
-    def __init__(self, results, preview=False, built=None, prices=None, irx=None):
+    def __init__(self, results, preview=False, built=None, prices=None, irx=None, meta=None):
         self.R = results
+        self.meta = meta or {}
+        self.universe = universe()
+        self.macro = None
+        from .risk import load_fundamentals
+        self.fund = load_fundamentals(TICKERS)
         self.preview = preview
         self.built = built
         self.prices = prices
@@ -401,7 +418,7 @@ class Site:
 </main>
 <footer class="site-foot"><div class="wrap foot-row">
 <p>Quiplee runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Quiplee takes no positions in the names it covers.</p>
-<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a></p>
+<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('stories/')}">Stories</a></p>
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
@@ -417,7 +434,7 @@ class Site:
     def strat_summary(self, s):
         if s["slug"] in self._sum:
             return self._sum[s["slug"]]
-        rows = [self.r(t["sym"], s["slug"]) for t in TICKERS]
+        rows = [self.r(t["sym"], s["slug"]) for t in universe()]
         n = len(rows)
         full = [(x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}) for x in rows]
         ok = [(a, b) for a, b in full if a and b]
@@ -455,16 +472,22 @@ class Site:
 
     def stock_options(self, selected=None, value=None):
         out = ""
-        for g in GROUP_ORDER:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
             out += f'<optgroup label="{e(g)}">' + "".join(
                 f'<option value="{e(value(t) if value else t["slug"])}"{" selected" if t["sym"] == selected else ""}>{e(t["short"])} · {e(t["name"])}</option>'
-                for t in TICKERS if t["group"] == g) + "</optgroup>"
+                for t in universe() if t["group"] == g) + "</optgroup>"
         return out
 
     # ======================================================================
     # pages
     # ======================================================================
     def build(self):
+        from .markets import markets_page
+        from .watchlist import watchlist_page
+        markets_page(self)
+        watchlist_page(self)
+        from .articles import Articles
+        Articles(self).build()
         self.home()
         self.strategies_index()
         for s in PLAYS:
@@ -486,7 +509,7 @@ class Site:
     def home(self):
         path, depth = "", 0
         h = lambda x: self.href(depth, x)
-        timed_pairs = [(t, s, self.r(t["sym"], s["slug"])) for t in TICKERS for s in TIMED]
+        timed_pairs = [(t, s, self.r(t["sym"], s["slug"])) for t in universe() for s in TIMED]
         graded = [(a, b) for _, _, x in timed_pairs for a, b in [(x["stats"]["full"]["strat"], x["stats"]["full"]["bh"])] if a and b]
         total = len(graded)
         dd = sum(1 for a, b in graded if a["maxdd"] > b["maxdd"])
@@ -499,9 +522,9 @@ class Site:
         # board: stocks x families
         head = "".join(f'<th class="c" scope="col"><a href="{h("strategies/")}#fam-{k}">{e(name)}</a><span class="sym-sub">{len(ps)} plays</span></th>' for k, name, ps in fams)
         rows = ""
-        for g in GROUP_ORDER:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
             rows += f'<tr class="grp"><td class="stick">{e(g)}</td><td colspan="{len(fams) + 1}"></td></tr>'
-            for t in [x for x in TICKERS if x["group"] == g]:
+            for t in [x for x in universe() if x["group"] == g]:
                 cells = ""
                 for k, name, ps in fams:
                     kk, nn = self.consensus(t, ps)
@@ -540,17 +563,34 @@ class Site:
         body = f"""
 <section class="hero">
   <div class="hero-copy">
-    <p class="eyebrow">Trading plays, graded in public</p>
-    <h1 class="h1">{len(TIMED)} plays. {n_an} analysts. See the next move.</h1>
-    <p class="lede">Quiplee takes the trading rules people actually follow, from the Turtles' breakouts to Meb Faber's 10-month average and Larry Connors' RSI(2) pullback, runs each one on {len(TICKERS)} stocks, ETFs and coins from 2005 or their first trading day, grades every call it made, and shows the exact close that would flip it next.</p>
+    <p class="eyebrow">Published trading rules, run on real prices every night</p>
+    <h1 class="h1">See what the rules say about your stocks.</h1>
+    <p class="lede">Quiplee runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
+    <div class="hero-links"><a class="btn primary" href="{h('learn/')}">New? Start with the basics</a><a class="btn" href="{h('markets/')}">Read the market</a></div>
   </div>
-  <form class="card picker" id="picker" data-href="{e(tmpl)}">
-    <label for="pick-strategy">Play<select id="pick-strategy">{self.play_options("200-day-rule")}</select></label>
-    <label for="pick-stock">Stock<select id="pick-stock">{self.stock_options("NVDA")}</select></label>
-    <button type="submit">Show the call</button>
-    <p class="picker-out">Rule outputs, not advice. New to this? <a href="{h('learn/')}">Start with the short course</a>.</p>
-  </form>
+  <div class="card picker">
+    <form class="home-check" action="{h('watchlist/')}" method="get">
+      <label for="home-add" class="h3">Check your stocks</label>
+      <input id="home-add" name="add" type="text" placeholder="NVDA, SHOP.TO, Hertz…" autocomplete="off" spellcheck="false">
+      <button type="submit">See the read</button>
+      <p class="picker-out">Or upload a Wealthsimple or broker CSV on the <a href="{h('watchlist/')}">watchlist</a>. Names Quiplee doesn't cover yet are analysed after the next close.</p>
+    </form>
+    <form class="home-pick" id="picker" data-href="{e(tmpl)}">
+      <p class="small muted">Or look up one play on one stock</p>
+      <label for="pick-strategy">Play<select id="pick-strategy">{self.play_options("200-day-rule")}</select></label>
+      <label for="pick-stock">Stock<select id="pick-stock">{self.stock_options("NVDA")}</select></label>
+      <button type="submit" class="secondary">Show the call</button>
+    </form>
+  </div>
 </section>
+{self.home_market(depth)}
+{self.home_signals(depth)}
+<section aria-labelledby="tracks-h"><div class="sec-head"><h2 class="h2" id="tracks-h">Learn it properly</h2><p>Three short tracks with hands-on widgets, real prices and quizzes.</p></div>
+<div class="grid grid-3">
+  <a class="card practice-card" href="{h('learn/')}#track-basics"><span class="eyebrow">Track 1</span><span class="name">Stock basics</span><span class="muted small">What a stock is, candlesticks, trends, P/E, balance sheets and position size.</span></a>
+  <a class="card practice-card" href="{h('learn/')}#track-plays"><span class="eyebrow">Track 2</span><span class="name">The plays</span><span class="muted small">How the {len(TIMED)} published rules work, family by family, and how to read their record.</span></a>
+  <a class="card practice-card" href="{h('learn/')}#track-markets"><span class="eyebrow">Track 3</span><span class="name">Markets and risk</span><span class="muted small">Indexes, bubbles and crashes, and cash versus staying invested.</span></a>
+</div></section>
 
 <section aria-labelledby="score-h">
   <div class="sec-head"><h2 class="h2" id="score-h">Does timing beat Bogle?</h2>
@@ -574,15 +614,6 @@ class Site:
   <ul class="flips">{flip_html}</ul>
 </section>
 
-<section aria-labelledby="practice-h">
-  <div class="sec-head"><h2 class="h2" id="practice-h">Learn the plays by doing</h2><p>Short, interactive practice built from real charts.</p></div>
-  <div class="grid grid-3">
-    <a class="card practice-card" href="{h('learn/call-it/')}"><span class="eyebrow">Practice</span><span class="name">Call it</span><span class="muted small">A real chart and a play's rule. Is it IN or OUT? Then see what happened next.</span></a>
-    <a class="card practice-card" href="{h('learn/flashcards/')}"><span class="eyebrow">Flashcards</span><span class="name">Terms and plays</span><span class="muted small">Flip through every play and glossary term until they stick.</span></a>
-    <a class="card practice-card" href="{h('learn/play-quiz/')}"><span class="eyebrow">Quiz</span><span class="name">Who's behind the play?</span><span class="muted small">Match plays to analysts, rules and families. New questions every round.</span></a>
-  </div>
-</section>
-
 <section aria-labelledby="thinkers-h">
   <div class="sec-head"><h2 class="h2" id="thinkers-h">Some of the analysts</h2>
   <p>Every play is tied to the person who published or popularised it, checked against their own books, papers and interviews. <a href="{h('thinkers/')}">All {n_an} analysts</a></p></div>
@@ -601,7 +632,51 @@ class Site:
             {"@type": "Organization", "@id": BASE + "#organization", "name": "Quiplee", "url": BASE, "logo": BASE + "og-default.png"},
             {"@type": "WebSite", "@id": BASE + "#website", "name": "Quiplee", "url": BASE, "inLanguage": "en", "publisher": {"@id": BASE + "#organization"}}]}
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
-        self.add(path, self.shell(path, "Quiplee · Every trading play, graded", f"{len(TIMED)} famous trading plays from {n_an} named analysts, tested on stocks, ETFs and crypto since 2005, with every call graded and the exact level that flips each one next.", body, active="", extra_head=extra))
+        self.add(path, self.shell(path, "Quiplee · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
+
+    def home_market(self, depth):
+        M = self.macro
+        if not M:
+            return ""
+        h = lambda x: self.href(depth, x)
+        from .markets import fmt_val
+        wcls = {"Calm": "calm", "Mostly calm": "calm", "Unsettled": "watch", "Stormy": "warning"}[M["weather"]]
+        chips = "".join(f'<a class="gchip {g["status"]}" href="{h("markets/")}#g-{g["key"]}"><i></i><span>{e(g["name"])}</span><b>{fmt_val(g, g["value"])}</b></a>' for g in M["gauges"])
+        core = [p for p in TIMED if p.get("core")]
+        idx = ""
+        for t in [x for x in TICKERS if x.get("index")]:
+            kc, nc = self.consensus(t, core)
+            y1 = self.one_year(t)
+            idx += (f'<a class="card idx-card" href="{h("stocks/" + t["slug"] + "/")}"><span class="sym">{e(t["short"])}</span>'
+                    f'<span class="px mono">{money(self.r(t["sym"], "buy-and-hold")["price"], "")}</span><span class="small {dir_cls(y1)}">{pct(y1, d=0)} in a year</span>'
+                    f'{count_in(kc, nc, "core in")}</a>')
+        return f"""<section aria-labelledby="mkt-h"><div class="sec-head"><h2 class="h2" id="mkt-h">Market weather: <span class="wx {wcls}">{e(M['weather'])}</span></h2>
+<p>{M['counts']['warning']} of {len(M['gauges'])} crash gauges flash a warning. <a href="{h('markets/')}">Read the market</a> · <a href="{h('articles/is-this-a-bubble/')}">Is this a bubble?</a></p></div>
+<div class="gchips">{chips}</div><div class="idx-row">{idx}</div></section>"""
+
+    def home_signals(self, depth):
+        h = lambda x: self.href(depth, x)
+        cands = [t for t in self.universe if not t.get("index") and t["group"] != "Sectors"]
+
+        def share(t):
+            k, n = self.consensus(t)
+            return k / n if n else 0
+        top = sorted(cands, key=lambda t: (-share(t), t["short"]))[:6]
+        eq = [t for t in cands if not t["crypto"] and t["group"] != "Indexes & ETFs" and (self.meta.get(t["sym"]) or {}).get("risk")]
+        risky = sorted(eq, key=lambda t: (-self.meta[t["sym"]]["risk"]["score"], t["short"]))[:6]
+
+        def card(t, extra):
+            k, n = self.consensus(t)
+            x = self.r(t["sym"], "buy-and-hold")
+            return (f'<a class="card stock-card" href="{h("stocks/" + t["slug"] + "/")}"><div class="top"><span class="sym">{e(t["short"])}</span>'
+                    f'<span class="px">{money(x["price"], t["cur"])}</span></div><span class="muted small">{e(t["name"])}</span>{count_in(k, n, "plays in")}{extra}</a>')
+        g = "".join(card(t, "") for t in top)
+        r = "".join(card(t, f'<span class="small lvl-{sv.LEVEL_CLASS[self.meta[t["sym"]]["risk"]["level"]]}">{e(self.meta[t["sym"]]["risk"]["level"])} crash exposure</span>') for t in risky)
+        return f"""<section aria-labelledby="sig-h"><div class="sec-head"><h2 class="h2" id="sig-h">Strongest signals</h2>
+<p>The names most plays agree on tonight. A broad uptrend, not a promise. <a href="{h('articles/green-across-the-board/')}">Room to grow, and where the rules get out</a></p></div>
+<div class="grid grid-3">{g}</div>
+<div class="sec-head"><h3 class="h3">Most exposed if the market cracks</h3><p>Highest crash exposure: market swings, past crashes, debt and run-up. <a href="{h('articles/debt-and-crashes/')}">The Hertz lens</a></p></div>
+<div class="grid grid-3">{r}</div></section>"""
 
     def thinker_card(self, th, depth):
         h = lambda x: self.href(depth, x)
@@ -663,9 +738,9 @@ class Site:
         rule_card = self.rule_card(s)
         if s.get("benchmark"):
             rows = ""
-            for g in GROUP_ORDER:
+            for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
                 rows += f'<tr class="grp"><td colspan="5">{e(g)}</td></tr>'
-                for t in [x for x in TICKERS if x["group"] == g]:
+                for t in [x for x in universe() if x["group"] == g]:
                     b = self.r(t["sym"], s["slug"])["stats"]["full"]["bh"] or {}
                     rows += (f'<tr><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                              f'<td class="r {dir_cls(b.get("cagr"))}">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td><td class="r">{ratio(b.get("sharpe"))}</td>'
@@ -681,10 +756,10 @@ class Site:
 
         sm = self.strat_summary(s)
         now_rows, rec_rows = "", ""
-        for g in GROUP_ORDER:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
             now_rows += f'<tr class="grp"><td colspan="5">{e(g)}</td></tr>'
             rec_rows += f'<tr class="grp"><td colspan="6">{e(g)}</td></tr>'
-            for t in [x for x in TICKERS if x["group"] == g]:
+            for t in [x for x in universe() if x["group"] == g]:
                 x = self.r(t["sym"], s["slug"])
                 nm = next_move(x, s, t)
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
@@ -724,7 +799,7 @@ class Site:
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>Play / buy and hold over the same dates, since 2005 or the first date with enough history.</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rec_rows}</tbody></table></div></section>
 """
-        self.add(path, self.shell(path, s["long"], f"{s['long']} from {credit(s)}: {s['short']} Current calls and full record on {len(TICKERS)} stocks.", body, active="strategies/"))
+        self.add(path, self.shell(path, s["long"], f"{s['long']} from {credit(s)}: {s['short']} Current calls and full record on {len(universe())} stocks.", body, active="strategies/"))
 
     def rule_card(self, s):
         rules = "".join(f"<li>{e(x)}</li>" for x in s["rules"])
@@ -797,7 +872,7 @@ class Site:
                     continue
                 sm = self.strat_summary(s)
                 score = lambda t: ((self.r(t["sym"], slug)["stats"]["full"]["strat"] or {}).get("sharpe") or -9) - ((self.r(t["sym"], slug)["stats"]["full"]["bh"] or {}).get("sharpe") or -9)
-                best = sorted(TICKERS, key=score, reverse=True)[:12]
+                best = sorted(universe(), key=score, reverse=True)[:12]
                 chips = "".join(f'<a href="{h(self.pair_path(t, s))}">{e(t["short"])}{pill(self.r(t["sym"], slug)["state"])}</a>' for t in best)
                 co = [a for a in s["analysts"] if a != th["slug"]]
                 with_ = (" · with " + ", ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in co)) if co else ""
@@ -809,7 +884,7 @@ class Site:
 <div class="card tile"><span class="tile-label">Beat buy and hold (Sharpe)</span><span class="tile-value">{sm['beat_sharpe']} of {sm['graded']}</span><span class="tile-note">On raw return: {sm['beat_cagr']} of {sm['graded']}.</span></div>
 <div class="card tile"><span class="tile-label">In right now</span><span class="tile-value">{sm['in_now']} of {sm['n']}</span><span class="tile-note">As of the {dlong(self.asof)} close.</span></div>
 </div>
-<p class="muted small">Best risk-adjusted results against buy and hold:</p><div class="chips">{chips}<a href="{h('strategies/' + slug + '/')}">All {len(TICKERS)} stocks →</a></div></section>"""
+<p class="muted small">Best risk-adjusted results against buy and hold:</p><div class="chips">{chips}<a href="{h('strategies/' + slug + '/')}">All {len(universe())} stocks →</a></div></section>"""
         body = f"""
 <nav class="crumbs"><a href="{h('thinkers/')}">Analysts</a><span>/</span><span>{e(th['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(th['role'])}</p><h1 class="h1">{e(th['name'])}</h1><p class="lede">{e(th['bio'])}</p></section>
@@ -820,7 +895,7 @@ class Site:
 {extra}
 """
         n_plays = len([x for x in th["strategies"] if not PLAY[x].get("benchmark")])
-        desc = f"{th['name']}, {th['role']}: " + (f"{n_plays} play{'s' if n_plays != 1 else ''} tested on {len(TICKERS)} stocks, and what they say now." if n_plays else "background, sources and books.")
+        desc = f"{th['name']}, {th['role']}: " + (f"{n_plays} play{'s' if n_plays != 1 else ''} tested on {len(universe())} stocks, and what they say now." if n_plays else "background, sources and books.")
         self.add(path, self.shell(path, th["name"], desc, body, active="thinkers/"))
 
     # ------------------------------------------------------------ stocks
@@ -834,7 +909,7 @@ class Site:
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
         secs = ""
-        for g in GROUP_ORDER:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in TICKERS)]:
             cards = ""
             for t in [x for x in TICKERS if x["group"] == g]:
                 k, n = self.consensus(t)
@@ -843,7 +918,8 @@ class Site:
                 cards += (f'<a class="card stock-card" href="{h("stocks/" + t["slug"] + "/")}"><div class="top"><span class="sym">{e(t["short"])}</span>'
                           f'<span class="px">{money(x["price"], t["cur"])}</span></div><span class="muted small">{e(t["name"])} · 1 yr <span class="{dir_cls(y1)}">{pct(y1)}</span></span>'
                           f'{count_in(k, n, "plays in")}</a>')
-            secs += f'<section><h2 class="h2">{e(g)}</h2><div class="grid grid-4">{cards}</div></section>'
+            note = ('<p class="muted small">Added by readers through the <a href="' + h("watchlist/") + '">watchlist</a>. Every play runs on them each night.</p>') if g == "Reader-requested" else ""
+            secs += f'<section><h2 class="h2">{e(g)}</h2>{note}<div class="grid grid-4">{cards}</div></section>'
         body = f"""
 <section class="pair-head"><p class="eyebrow">Stocks</p><h1 class="h1">{len(TICKERS)} stocks, ETFs and coins</h1>
 <p class="lede">Open any name to see all {len(TIMED)} plays' calls on it, the level that flips each one, and how each has done on it since 2005.</p></section>
@@ -853,25 +929,34 @@ class Site:
     def stock_page(self, t):
         path, depth = f"stocks/{t['slug']}/", 2
         h = lambda x: self.href(depth, x)
-        bh = self.r(t["sym"], "buy-and-hold")
+        sym = t["sym"]
+        bh = self.r(sym, "buy-and-hold")
+        meta = self.meta.get(sym) or {}
+        fund = self.fund.get(sym)
+        rk = meta.get("risk")
+        core = [p for p in TIMED if p.get("core")]
         k, n = self.consensus(t)
-        tiles = ""
-        rows = ""
+        kc, nc = self.consensus(t, core)
+        own_pages = {p["slug"] for p in plays_for(t)}
+        tiles, rows = "", ""
         for fk, fname, _ in FAMILIES:
             ps = [p for p in TIMED if p["family"] == fk]
             kk, nn = self.consensus(t, ps)
             tiles += (f'<a class="card fam-tile" href="#fam-{fk}"><span class="tile-label">{e(fname)}</span>'
                       f'<span class="fam-n"><b>{kk}</b> of {nn} in</span>{fill_bar(kk, nn)}</a>')
-            rows += f'<tr class="grp" id="fam-{fk}"><td colspan="6">{e(fname)}</td></tr>'
+            has_core = any(p.get("core") for p in ps)
+            rows += f'<tr class="grp{"" if has_core else " nc"}" id="fam-{fk}"><td colspan="6">{e(fname)}</td></tr>'
             for s in ps:
-                x = self.r(t["sym"], s["slug"])
+                x = self.r(sym, s["slug"])
                 nm = next_move(x, s, t)
                 since_move = x["price"] / x["since_price"] - 1 if x.get("since_price") else None
                 dv = abs(nm["dist"]) if nm["dist"] is not None else (nm.get("dist_days", 0) / 365 if nm.get("dist_days") is not None else None)
                 nxt = nm["short"] + (f' <span class="muted">({pct(nm["dist"])})</span>' if nm["dist"] is not None else "")
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
-                rows += (f'<tr><td><a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a><span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
+                name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages else f'<b>{e(s["name"])}</b>')
+                core_tag = ' <span class="core-tag" title="One of the 20 core plays">core</span>' if s.get("core") else ""
+                rows += (f'<tr class="{"" if s.get("core") else "nc"}"><td>{name}{core_tag}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
                          f'<td>{pill(x["state"])}{band}</td><td class="nowrap" data-v="{pd.Timestamp(x["since"]).strftime("%Y-%m-%d") if x["since"] is not None else ""}">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
                          f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td><td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
                          f'<td class="r nowrap" data-v="{sortv(a.get("maxdd"))}">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td></tr>')
@@ -879,21 +964,110 @@ class Site:
         rows += (f'<tr class="grp"><td colspan="6">Benchmark</td></tr><tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
                  f'<td>{pill(1)}</td><td class="nowrap">{dlong(bh["stats"]["start"])}</td><td class="muted">Always in</td>'
                  f'<td class="r">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td></tr>')
-        spec = price_spec(bh, PLAY["buy-and-hold"], t, with_rule=False)
-        chart = chart_block("px-" + t["slug"], spec, "", f"{e(t['short'])} over the last three years")
         others = self.stock_options(t["sym"])
         start_y = bh['stats']['start'].year if bh['stats']['start'] is not None else ""
+
+        # price facts
+        day_ch = None
+        if meta.get("ohlc") is not None and len(meta["ohlc"]) > 1:
+            cc = meta["ohlc"]["close"]
+            day_ch = float(cc.iloc[-1] / cc.iloc[-2] - 1)
+        y1 = self.one_year(t)
+        if meta.get("ohlc") is not None and len(meta["ohlc"]):
+            chart = sv.candles_block(t, meta, learn=h("learn/candlesticks/"))
+            heat = sv.heatmap_block(self, t, meta, lambda p: h(self.pair_path(t, p)) if p["slug"] in own_pages else None)
+        else:
+            chart = chart_block("px-" + t["slug"], price_spec(bh, PLAY["buy-and-hold"], t, with_rule=False), "", f"{e(t['short'])} over the last three years")
+            heat = ""
+        read = sv.read_lines(self, t, meta, fund) if meta else []
+        read_html = "".join(f"<li>{e(x)}</li>" for x in read)
+        lvl = rk["level"] if rk else None
+        trend_tile = ""
+        if meta.get("ohlc") is not None and len(meta["ohlc"]) >= 200:
+            cc = meta["ohlc"]["close"]
+            gap = float(cc.iloc[-1] / cc.iloc[-200:].mean() - 1)
+            trend_tile = (f'<div class="card tile"><span class="tile-label">Against its 200-day average</span><span class="tile-value {dir_cls(gap)}">{pct(gap, d=0)}</span>'
+                          f'<span class="tile-note">{"Above: the long trend is up." if gap >= 0 else "Below: the long trend is down."}</span></div>')
+        crash_tile = (f'<a class="card tile tile-link" href="#crash"><span class="tile-label">Crash exposure</span><span class="tile-value lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>'
+                      f'<span class="tile-note">{rk["score"]} of 10 on the Hertz checklist</span></a>') if lvl else ""
+        summary = f"""<section class="sum-tiles">
+<div class="card tile"><span class="tile-label">Core plays in</span><span class="tile-value">{kc}<small> / {nc}</small></span>{fill_bar(kc, nc)}<span class="tile-note">The 20 most-followed plays.</span></div>
+<div class="card tile"><span class="tile-label">All plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Quiplee tests.</span></div>
+{crash_tile}{trend_tile}
+</section>"""
+        req_note = ""
+        if t.get("requested"):
+            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Quiplee runs every play on it each night; '
+                        f'the 20 core plays get a full page each.</p>')
+        idx_note = ""
+        if t.get("index"):
+            idx_note = ('<p class="note-line">An index is a scoreboard, not something you can buy directly. Investors hold it through an index fund or ETF, '
+                        'which tracks it closely. The plays read the index itself.</p>')
+        fund_html = sv.fundamentals_card(t, fund, bh["price"], learn=h("learn/valuation/"))
+        crash_html = sv.crash_card(t, rk, h) if rk else ""
+        deep = ""
+        if fund_html or crash_html:
+            deep = f'<section class="deep" id="crash">{crash_html}{fund_html}</section>'
+        exposed = self.index_exposed(t, depth) if t.get("index") else ""
+        arts = self.articles_for(t, depth)
+        watch_btn = (f'<button type="button" class="btn sm" data-watch-add="{e(sym)}" data-watch-href="{e(h("watchlist/"))}">+ Add to my watchlist</button>')
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><span>{e(t['short'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
-<div class="byline"><span class="mono" style="color:var(--ink);font-size:18px">{money(bh['price'], t['cur'])}</span><span>close {dlong(bh['asof'])}</span><span>·</span>{count_in(k, n, "plays in")}</div></section>
+<div class="byline"><span class="mono" style="color:var(--ink);font-size:18px">{money(bh['price'], t['cur'])}</span>
+<span class="{dir_cls(day_ch)}">{pct(day_ch)} on the day</span><span>·</span><span class="{dir_cls(y1)}">{pct(y1)} in a year</span><span>·</span><span>close {dlong(bh['asof'])}</span></div>
+{idx_note}{req_note}</section>
+<section class="card read-card"><div class="read-top"><p class="eyebrow">The read</p>{watch_btn}</div><ul class="read">{read_html}</ul>
+<p class="muted small">What published rules and the numbers say, not a recommendation. <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
+{summary}
 {chart}
-<section><div class="fam-tiles">{tiles}</div></section>
-<section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p>Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+{heat}
+<section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2>
+<div class="seg seg-sm" role="group" aria-label="Which plays" data-coretoggle="plays-tbl"><button type="button" aria-pressed="true" data-v="core">Core 20</button><button type="button" aria-pressed="false" data-v="all">All {len(TIMED)}</button></div></div>
+<div class="fam-tiles">{tiles}</div>
+<p class="muted small">Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p>
+<div class="tbl-wrap core-only" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+{deep}
+{exposed}
+{arts}
 <section class="jump"><label class="small muted" for="jump-stock">Another stock</label><select id="jump-stock" data-nav data-tmpl="{e(h('stocks/{v}/'))}">{others}</select></section>
 """
-        self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · every play's call", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, and how each has done since {start_y}.", body, active="stocks/"))
+        self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js",)))
+
+    def articles_for(self, t, depth):
+        h = lambda x: self.href(depth, x)
+        links = [(f"articles/stocks/{t['slug']}/", f"{t['short']}: the brief", "What the plays, the levels and the business say, in plain English. Rebuilt nightly.")]
+        eq = [x for x in self.universe if x["group"] == t["group"] and not x.get("index") and not x["crypto"] and x["group"] not in ("Indexes & ETFs", "Sectors")]
+        if len(eq) >= 3 and t in eq:
+            from .articles import slugify
+            links.append((f"articles/sectors/{slugify(t['group'])}/", f"{t['group']}: what the plays say", "Every covered name in the sector, side by side."))
+        links.append(("articles/debt-and-crashes/", "Debt decides who survives a crash", "The Hertz lens on every covered stock."))
+        links.append(("articles/is-this-a-bubble/", "Is this a bubble?", "The gauges in October 2026, and what history says about timing."))
+        cards = "".join(f'<a class="card art-card" href="{h(u)}"><span class="name">{e(a)}</span><span class="muted small">{e(b)}</span></a>' for u, a, b in links)
+        return f'<section><div class="sec-head"><h2 class="h2">Read more</h2></div><div class="grid grid-4">{cards}</div></section>'
+
+    def index_exposed(self, t, depth):
+        """On an index page: the covered names that trade on that market, by crash exposure."""
+        h = lambda x: self.href(depth, x)
+        canada = t["sym"] == "^GSPTSE"
+        names = [x for x in universe() if not x.get("index") and not x["crypto"] and x["group"] not in ("Indexes & ETFs", "Sectors")
+                 and x["canadian"] == canada and self.meta.get(x["sym"], {}).get("risk")]
+        if not names:
+            return ""
+        names.sort(key=lambda x: (-self.meta[x["sym"]]["risk"]["score"], x["short"]))
+        rows = ""
+        for x in names:
+            rk = self.meta[x["sym"]]["risk"]
+            kc, nc = self.consensus(x, [p for p in TIMED if p.get("core")])
+            rows += (f'<tr><td><a class="sym" href="{h("stocks/" + x["slug"] + "/")}">{e(x["short"])}</a><span class="sym-sub">{e(x["name"])}</span></td>'
+                     f'<td data-v="{rk["score"]}"><span class="lvl lvl-{sv.LEVEL_CLASS[rk["level"]]}">{e(rk["level"])}</span> <span class="muted">{rk["score"]}/10</span></td>'
+                     f'<td class="r" data-v="{sortv(rk.get("beta"))}">{ratio(rk.get("beta"))}</td>'
+                     f'<td class="r" data-v="{sortv(rk.get("runup2y"))}">{pct(rk.get("runup2y"), d=0)}</td>'
+                     f'<td data-v="{kc}">{count_in(kc, nc)}</td><td class="small muted why-col">{e("; ".join(rk.get("why") or [])[:140])}</td></tr>')
+        market = "Canadian" if canada else "U.S."
+        return f"""<section><div class="sec-head"><h2 class="h2">Who would feel a crash first</h2>
+<p>The {market} stocks Quiplee covers, ranked by crash exposure. Quiplee covers a sample of names, not the full index.</p></div>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays</th><th>Why</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
 
     # -------------------------------------------------------------- pair
     def render_pairs(self, workers=None):
@@ -902,7 +1076,7 @@ class Site:
         workers = workers or min(8, os.cpu_count() or 1)
         if workers <= 1:
             for t in TICKERS:
-                for s in TIMED:
+                for s in plays_for(t):
                     self.pair_page(t, s)
             return
         import multiprocessing as mp
@@ -1035,7 +1209,7 @@ class Site:
         h = lambda x: self.href(depth, x)
         body = f"""
 <section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Quiplee tests a play</h1>
-<p class="lede">The same test for all {len(TIMED)} plays and all {len(TICKERS)} stocks, written down so anyone can check it.</p></section>
+<p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>
@@ -1062,10 +1236,23 @@ class Site:
 <li>Daily plays check every close. Weekly plays check the Friday close (Sunday for crypto). Monthly plays check the last close of the month. Future dates use the U.S. market holiday calendar.</li>
 </ul></div>
 </section>
+<section class="split">
+<div class="card prose"><p class="eyebrow">Crash exposure</p><ul>
+<li>A 10-point checklist per stock: market swings (beta over three years of weekly returns and monthly downside capture against the S&amp;P 500, or the TSX for Canadian names; up to 3 points), past crashes (its fall against its index's in the 2000–02, 2008–09, 2020 and 2022 bear markets; up to 2), debt (negative equity, debt to equity, interest cover and net debt to EBITDA; up to 3) and run-up (two-year gains of 100% or 150%; up to 2).</li>
+<li>0–2 is Low, 3–4 Moderate, 5–6 High, 7 or more Very high. It describes fragility, not timing.</li>
+<li>Company figures come from Yahoo Finance and are refreshed nightly; banks and insurers borrow as their business, so their debt ratios read high by design.</li>
+</ul></div>
+<div class="card prose"><p class="eyebrow">Market gauges</p><ul>
+<li>Nine monthly series: trend (S&amp;P 500 against its 200-day average, and how many plays hold it), valuation (Shiller CAPE from multpl.com), run-up (Nasdaq-100 two-year return), concentration (equal-weight RSP against SPY over three years), volatility (VIX), the 10-year minus 3-month yield curve, the Baa corporate spread, the Sahm rule and the 10-year Treasury yield, from Yahoo Finance and FRED.</li>
+<li>Each gauge is calm, watch or warning on thresholds stated on the Markets page, chosen from the research cited there. The weather word adds them up: two points per warning, one per watch, and "stormy" also needs the trend gauge to have broken.</li>
+</ul></div>
+</section>
+<section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
+<p>Tickers added on the watchlist that Quiplee doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each of the 20 core plays. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
 <p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Quiplee's.</p></section>
 <section class="card prose"><p class="eyebrow">What this is not</p>
-<p>Quiplee reports what a published rule says. It does not know your goals, taxes or other holdings, and it is not financial advice. Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(TICKERS)} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Quiplee's paraphrase of public material, and Quiplee has no affiliation with them.</p>
+<p>Quiplee reports what a published rule says. It does not know your goals, taxes or other holdings, and it is not financial advice. Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Quiplee's paraphrase of public material, and Quiplee has no affiliation with them.</p>
 <p>Rebuilt automatically after each U.S. market close. <a href="{h('strategies/')}">See every play</a> or <a href="{h('thinkers/valeriy-zakamulin/')}">the case against timing</a>.</p></section>
 """
         self.add(path, self.shell(path, "Method", "How Quiplee tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))
@@ -1097,6 +1284,6 @@ def _pairs_for(sym):
     site = _SITE
     t = TK[sym]
     before = set(site.pages)
-    for s in TIMED:
+    for s in plays_for(t):
         site.pair_page(t, s)
     return {k: v for k, v in site.pages.items() if k not in before}

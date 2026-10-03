@@ -8,8 +8,9 @@
 Netlify runs the second command on every push (see netlify.toml) and publishes
 _site/. The build copies the hand-written parts of the site (live desk,
 stories, assets, js) unchanged apart from glossary links, then generates the
-home page, /strategies/ (plays), /thinkers/ (analysts), /stocks/ (every stock x
-play page), /learn/, /method/, data/*.json and sitemap.xml.
+home page, /markets/ (crash gauges and the plays on indexes), /watchlist/,
+/articles/, /strategies/ (plays), /thinkers/ (analysts), /stocks/ (every stock x
+play page), /learn/ (three tracks), /method/, data/*.json and sitemap.xml.
 Edit tools/qstrat/plays.py for plays, analysts.json for analysts, content.py
 for tickers.
 """
@@ -32,10 +33,11 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
-GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json"}
+GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
-                 "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd"}
+                 "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
+                 "package.json", "package-lock.json"}
 
 
 def root_href(slug):
@@ -123,10 +125,11 @@ def main():
     prices, irx, now = engine.load_all()
     print(f"loaded {len(prices)} tickers (closes to {max(d.index[-1] for d in prices.values()).date()})")
     results = engine.run(prices, irx, now, workers=args.workers)
+    meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
     print(f"evaluated {len(results)} play x ticker pairs in {time.time() - t0:.0f}s")
 
     t1 = time.time()
-    site = Site(results, preview=args.preview, prices=prices, irx=irx)
+    site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
     pages = site.build()
     print(f"rendered {len(pages)} pages in {time.time() - t1:.0f}s")
 
@@ -139,6 +142,9 @@ def main():
         f.write(site.signals_json())
     with open(os.path.join(out, "data", "glossary.json"), "w", encoding="utf-8") as f:
         f.write(glossary_json())
+    from qstrat.watchlist import watch_json
+    with open(os.path.join(out, "data", "watch.json"), "w", encoding="utf-8") as f:
+        f.write(watch_json(site))
     t2 = time.time()
     items = build_practice(prices, irx, now)
     with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:

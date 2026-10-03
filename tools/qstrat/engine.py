@@ -15,6 +15,7 @@ import pandas as pd
 
 from .cal import future_sessions
 from .content import TICKERS, PLAYS
+from . import risk
 
 ET = ZoneInfo("America/New_York")
 GRADE_START = pd.Timestamp("2005-01-01")
@@ -54,9 +55,24 @@ def _drop_partial(d, crypto, now):
 
 
 def load_all(now=None, base=PRICE_DIR):
+    """Prices for every ticker that has enough history. Tickers without a usable
+    price file (e.g. a reader request whose download failed) are dropped from the
+    shared TICKERS list in place, so no page or link refers to them."""
     now = now or dt.datetime.now(ET)
     irx = _read("^IRX", base)["close"] / 100.0
-    prices = {t["sym"]: _drop_partial(_read(t["sym"], base), t["crypto"], now) for t in TICKERS}
+    prices, keep = {}, []
+    for t in TICKERS:
+        try:
+            d = _drop_partial(_read(t["sym"], base), t["crypto"], now)
+        except (OSError, ValueError, KeyError) as ex:
+            print(f"skipping {t['sym']}: no usable price file ({ex.__class__.__name__})")
+            continue
+        if len(d) < 60:
+            print(f"skipping {t['sym']}: only {len(d)} sessions of history")
+            continue
+        prices[t["sym"]] = d
+        keep.append(t)
+    TICKERS[:] = keep
     return prices, irx, now
 
 
@@ -359,6 +375,13 @@ def evaluate(t, play, d, bench_close, irx, now, future):
         pn["series"] = [(lab, s.reindex(win.index, method="ffill").astype(np.float32), role) for lab, s, role in pn["series"]]
         pnl = pn
     pos_win = state.reindex(win.index, method="ffill") if not hold else None
+    # weekly call history (last two years) for the plays-over-time heatmap
+    if hold:
+        hist = "1" * 104
+    else:
+        st_d = state.reindex(close.index, method="ffill")
+        wk = st_d.groupby(st_d.index.to_period("W-FRI")).last().iloc[-104:]
+        hist = "".join("-" if pd.isna(v) else str(int(v)) for v in wk.values)
 
     return {
         "sym": t["sym"], "strategy": play["slug"], "asof": asof, "price": live,
@@ -367,7 +390,7 @@ def evaluate(t, play, d, bench_close, irx, now, future):
         "trigger": trig, "bar": bar, "next_check": _next_check(bar, asof, crypto, bar_end, complete, future),
         "bar_complete": complete, "stats": stats, "calls": calls, "batting": bat,
         "equity": equity, "window": {"price": win, "lines": lines, "panel": pnl, "pos": pos_win},
-        "periods": periods,
+        "periods": periods, "hist": hist,
     }
 
 
@@ -385,11 +408,21 @@ def _run_ticker(sym):
     out = {}
     for p in _G["plays"]:
         out[(sym, p["slug"])] = evaluate(t, p, d, bench, _G["irx"], _G["now"], future)
+    # per-ticker extras: crash exposure, three years of candles, the heatmap's week axis
+    bclose = _G["prices"][t["bench"]]["close"] if t.get("bench") in _G["prices"] else None
+    yr = d[d.index > d.index[-1] - pd.DateOffset(years=3)]    # 2 years shown + a year to warm up the 200-day average
+    weeks = d["close"].groupby(d.index.to_period("W-FRI")).last().index[-104:]
+    out[(sym, "__meta")] = {
+        "risk": risk.assess(t, d["close"], bclose, _G.get("fund", {}).get(sym)),
+        "ohlc": yr[["open", "high", "low", "close", "volume"]].astype("float32"),
+        "weeks": [w.end_time.normalize() for w in weeks],
+        "first": d.index[0],
+    }
     return out
 
 
 def run(prices, irx, now, plays=None, tickers=None, workers=None):
-    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS)
+    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS, fund=risk.load_fundamentals(TICKERS))
     syms = [t["sym"] for t in (tickers or TICKERS)]
     workers = workers or max(1, min(len(syms), os.cpu_count() or 1))
     results = {}

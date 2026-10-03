@@ -9,6 +9,25 @@ reviewed in one place. Keep claims factual and sourced; paraphrase, don't quote.
 # --------------------------------------------------------------------------
 # kind: etf | crypto | stock    cur: display currency prefix
 TICKERS = [
+    # Market indexes (benchmarks: not directly tradable; buy them through an index ETF)
+    {"sym": "^GSPC", "name": "S&P 500 index", "short": "S&P 500", "slug": "sp500", "group": "Market indexes", "cur": "", "index": True},
+    {"sym": "^NDX", "name": "Nasdaq-100 index", "short": "Nasdaq-100", "slug": "nasdaq-100", "group": "Market indexes", "cur": "", "index": True},
+    {"sym": "^DJI", "name": "Dow Jones Industrial Average", "short": "Dow", "slug": "dow", "group": "Market indexes", "cur": "", "index": True},
+    {"sym": "^RUT", "name": "Russell 2000 index", "short": "Russell 2000", "slug": "russell-2000", "group": "Market indexes", "cur": "", "index": True},
+    {"sym": "^GSPTSE", "name": "S&P/TSX Composite index", "short": "TSX", "slug": "tsx", "group": "Market indexes", "cur": "", "index": True},
+    # US sector ETFs (Select Sector SPDRs, plus a semiconductor ETF)
+    {"sym": "XLK", "name": "Technology Select Sector ETF", "short": "XLK", "group": "Sectors", "cur": "$", "sector": "Technology"},
+    {"sym": "SMH", "name": "VanEck Semiconductor ETF", "short": "SMH", "group": "Sectors", "cur": "$", "sector": "Semiconductors"},
+    {"sym": "XLC", "name": "Communication Services Select Sector ETF", "short": "XLC", "group": "Sectors", "cur": "$", "sector": "Communication services"},
+    {"sym": "XLY", "name": "Consumer Discretionary Select Sector ETF", "short": "XLY", "group": "Sectors", "cur": "$", "sector": "Consumer discretionary"},
+    {"sym": "XLF", "name": "Financial Select Sector ETF", "short": "XLF", "group": "Sectors", "cur": "$", "sector": "Financials"},
+    {"sym": "XLV", "name": "Health Care Select Sector ETF", "short": "XLV", "group": "Sectors", "cur": "$", "sector": "Health care"},
+    {"sym": "XLI", "name": "Industrial Select Sector ETF", "short": "XLI", "group": "Sectors", "cur": "$", "sector": "Industrials"},
+    {"sym": "XLE", "name": "Energy Select Sector ETF", "short": "XLE", "group": "Sectors", "cur": "$", "sector": "Energy"},
+    {"sym": "XLB", "name": "Materials Select Sector ETF", "short": "XLB", "group": "Sectors", "cur": "$", "sector": "Materials"},
+    {"sym": "XLP", "name": "Consumer Staples Select Sector ETF", "short": "XLP", "group": "Sectors", "cur": "$", "sector": "Consumer staples"},
+    {"sym": "XLU", "name": "Utilities Select Sector ETF", "short": "XLU", "group": "Sectors", "cur": "$", "sector": "Utilities"},
+    {"sym": "XLRE", "name": "Real Estate Select Sector ETF", "short": "XLRE", "group": "Sectors", "cur": "$", "sector": "Real estate"},
     # Indexes & ETFs
     {"sym": "SPY", "name": "S&P 500 ETF", "group": "Indexes & ETFs", "cur": "$"},
     {"sym": "QQQ", "name": "Nasdaq-100 ETF", "group": "Indexes & ETFs", "cur": "$"},
@@ -86,13 +105,41 @@ TICKERS = [
     {"sym": "LEAP.V", "name": "Quantum Critical Metals", "group": "Micro caps", "cur": "C$", "micro": True},
     {"sym": "QUTX", "name": "Quantum X", "group": "Micro caps", "cur": "$", "micro": True},
 ]
-GROUP_ORDER = ["Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Healthcare",
+GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Healthcare",
                "Financials", "Industrials & rentals", "Energy & power", "Metals & mining", "Crypto miners", "Micro caps"]
 
+# Reader-requested tickers (added by the nightly queue; see tools/sync_requests.py)
+import json as _json0
+import os as _os0
+_REQ = _os0.path.join(_os0.path.dirname(_os0.path.dirname(_os0.path.dirname(_os0.path.abspath(__file__)))), "data", "universe", "requested.json")
+_known = {t["sym"] for t in TICKERS}
+if _os0.path.exists(_REQ):
+    for _r in _json0.load(open(_REQ)).get("tickers", []):
+        if _r.get("status") == "ok" and _r["sym"] not in _known:
+            TICKERS.append({"sym": _r["sym"], "name": _r.get("name") or _r["sym"], "group": "Reader-requested",
+                            "cur": _r.get("cur", "$"), "requested": True, "since": _r.get("added")})
+            _known.add(_r["sym"])
+GROUP_ORDER.append("Reader-requested")
+
+
+def _short(sym):
+    return sym.replace("-USD", "").replace(".TO", "").replace(".V", "").replace(".NE", "").replace("^", "")
+
+
 for t in TICKERS:
-    t["slug"] = t["sym"].lower().replace(".", "-")
+    t.setdefault("slug", t["sym"].lower().replace(".", "-").replace("^", ""))
     t["crypto"] = t["sym"].endswith("-USD")
-    t["short"] = t["sym"].replace("-USD", "").replace(".TO", "").replace(".V", "")
+    t.setdefault("short", _short(t["sym"]))
+    t["canadian"] = t["sym"].endswith((".TO", ".V", ".NE")) or t["sym"] == "^GSPTSE"
+    # benchmark for beta and crash comparisons
+    if t["sym"] == "^GSPC":
+        t["bench"] = None
+    elif t["canadian"]:
+        t["bench"] = "^GSPTSE" if t["sym"] != "^GSPTSE" else "^GSPC"
+    else:
+        t["bench"] = "^GSPC"
+TK_BY_SYM = {t["sym"]: t for t in TICKERS}
+INDEXES = [t for t in TICKERS if t.get("index")]
 
 
 # --------------------------------------------------------------------------
@@ -101,7 +148,7 @@ for t in TICKERS:
 import json as _json
 import os as _os
 
-from .plays import PLAYS, PLAY, TIMED, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
+from .plays import PLAYS, PLAY, TIMED, CORE, CORE_SLUGS, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
 
 with open(_os.path.join(_os.path.dirname(__file__), "analysts.json"), encoding="utf-8") as _f:
     THINKERS = _json.load(_f)

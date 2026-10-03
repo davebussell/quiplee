@@ -26,7 +26,7 @@ from qstrat.content import TICKERS  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "prices")
 START = "2004-01-01"
-EXTRA = ["^IRX"]
+EXTRA = ["^IRX", "^VIX", "^TNX", "RSP", "HYG", "IEF"]   # cash rate + macro gauges
 ET = ZoneInfo("America/New_York")
 
 
@@ -34,12 +34,17 @@ def file_for(sym):
     return os.path.join(OUT, sym.replace("^", "_").replace(".", "-").lower() + ".csv")
 
 
-def download(sym, tries=3):
+def start_for(sym):
+    """Indexes get long history (1985) for the macro charts; everything else from 2004."""
+    return "1985-01-01" if sym.startswith("^") and sym != "^IRX" else START
+
+
+def download(sym, tries=3, start=None):
     import yfinance as yf
     last = None
     for i in range(tries):
         try:
-            d = yf.download(sym, start=START, progress=False, auto_adjust=True, threads=False)
+            d = yf.download(sym, start=start or start_for(sym), progress=False, auto_adjust=True, threads=False)
             if d is not None and not d.empty:
                 if isinstance(d.columns, pd.MultiIndex):
                     d.columns = d.columns.get_level_values(0)

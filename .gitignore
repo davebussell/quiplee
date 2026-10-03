@@ -8,7 +8,7 @@ desktop.ini
 # Netlify local link state (keep out of git)
 .netlify/
 
-# Node (not used, but just in case)
+# Node (the watchlist queue function's dependency is installed by Netlify)
 node_modules/
 __pycache__/
 SHIP-QUIPLEE.cmd
@@ -26,3 +26,7 @@ _site/
 /data/signals.json
 /data/glossary.json
 /data/practice.json
+/data/watch.json
+/markets/
+/watchlist/
+/articles/

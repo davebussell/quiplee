@@ -16,7 +16,37 @@ from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, BAR_WORD, 
 from .glossary import GLOSSARY, TOPICS, BY_SLUG
 from . import ind
 
-LESSONS = [
+BASICS = [
+    dict(slug="what-is-a-stock", title="What a stock is, and what sets its price", minutes=5, track="basics",
+         summary="Shares, market cap and why a $2 stock can be a bigger company than a $400 one. Buy a slice of a real company."),
+    dict(slug="how-prices-move", title="Bids, asks and why prices move", minutes=5, track="basics",
+         summary="The order book behind every price. Place trades in a live book and watch the price move."),
+    dict(slug="candlesticks", title="Reading candlesticks", minutes=6, track="basics",
+         summary="Open, high, low and close in one shape. Build candles yourself, then read a real chart."),
+    dict(slug="trends-tops-bottoms", title="Trends, tops and bottoms", minutes=7, track="basics",
+         summary="Higher highs, lower lows, support, resistance and moving averages, on real charts you control."),
+    dict(slug="valuation", title="What a stock is worth: earnings and P/E", minutes=7, track="basics",
+         summary="Earnings per share, P/E, forward P/E and the other yardsticks, with real companies' numbers."),
+    dict(slug="balance-sheet", title="Equity, debt and staying power", minutes=7, track="basics",
+         summary="What a company owns and owes, and why debt decides who survives a downturn. Stress-test real companies."),
+    dict(slug="evaluating-a-stock", title="A ten-minute check on any stock", minutes=6, track="basics",
+         summary="Business, price, growth, debt, trend and crash risk in order, run live on any covered stock."),
+    dict(slug="risk-and-sizing", title="Risk, volatility and position size", minutes=6, track="basics",
+         summary="Volatility, beta, the maths of losses, and how to size a position from its exit."),
+]
+MARKETS_TRACK = [
+    dict(slug="indexes", title="Indexes and the whole market", minutes=5, track="markets",
+         summary="What the S&P 500, Nasdaq-100, Dow and TSX are, why the giants move them, and what concentration means."),
+    dict(slug="bubbles", title="Bubbles, crashes and the warning signs", minutes=6, track="markets",
+         summary="How manias run, which warning signs have a record, and why timing a top is so hard."),
+    dict(slug="positioning", title="Staying invested, cash and buckets", minutes=7, track="markets",
+         summary="What selling, holding and rebalancing did through real crashes, and how to build buckets."),
+]
+TRACKS = [("basics", "Stock basics", "Start here if you're new. What a stock is, how prices move, candlesticks, trends, valuation, balance sheets and risk."),
+          ("plays", "The plays", "How the published trading rules work, family by family, and how to read their record."),
+          ("markets", "Markets and risk", "Indexes, bubbles and crashes, and how to position for a fall you can't time.")]
+
+PLAYS_TRACK = [
     dict(slug="reading-a-page", title="How to read a Quiplee page", minutes=5,
          summary="What the IN/OUT call, the next move, the charts and the record on every page mean, using a live example."),
     dict(slug="moving-averages", title="Moving averages, explained", minutes=6,
@@ -44,7 +74,11 @@ LESSONS = [
     dict(slug="common-mistakes", title="Seven common mistakes", minutes=5,
          summary="The errors that turn a sensible play into a losing habit, and how to avoid them."),
 ]
+for _l in PLAYS_TRACK:
+    _l["track"] = "plays"
+LESSONS = BASICS + PLAYS_TRACK + MARKETS_TRACK
 LESSON = {l["slug"]: l for l in LESSONS}
+TRACK_NAME = {k: n for k, n, _ in TRACKS}
 
 
 def Q(q, a, c, why):
@@ -235,21 +269,23 @@ class Learn:
                 f'<script type="application/json">{jdump(qs)}</script>'
                 f'<noscript><p class="muted">Turn on JavaScript to take the quiz.</p></noscript><div class="quiz-body"></div></section>')
 
-    def lesson_shell(self, slug, body_html):
+    def lesson_shell(self, slug, body_html, scripts=None):
         l = LESSON[slug]
         path, depth = f"learn/{slug}/", 2
-        i = [x["slug"] for x in LESSONS].index(slug) + 1
+        tr = [x for x in LESSONS if x["track"] == l["track"]]
+        i = [x["slug"] for x in tr].index(slug) + 1
+        tn = [k for k, _, _ in TRACKS].index(l["track"]) + 1
         h = lambda x: self.s.href(depth, x)
         body = f"""
-<nav class="crumbs"><a href="{h('learn/')}">Learn</a><span>/</span><span>Lesson {i} of {len(LESSONS)}</span></nav>
+<nav class="crumbs"><a href="{h('learn/')}">Learn</a><span>/</span><a href="{h('learn/')}#track-{l['track']}">Track {tn}: {TRACK_NAME[l['track']]}</a><span>/</span><span>Lesson {i} of {len(tr)}</span></nav>
 <article class="lesson" data-lesson="{slug}">
-<header class="pair-head"><p class="eyebrow">Lesson {i} · {l['minutes']} min read</p><h1 class="h1">{l['title']}</h1><p class="lede">{l['summary']}</p></header>
+<header class="pair-head"><p class="eyebrow">Track {tn} · Lesson {i} · {l['minutes']} min</p><h1 class="h1">{l['title']}</h1><p class="lede">{l['summary']}</p></header>
 {body_html}
 {self.quiz_block(slug)}
 </article>
 {self.nav_box(slug, depth)}
 """
-        self.s.add(path, self.s.shell(path, l["title"], l["summary"], body, active="learn/", lesson=slug, scripts=["assets/learn.js"]))
+        self.s.add(path, self.s.shell(path, l["title"], l["summary"], body, active="learn/", lesson=slug, scripts=scripts or ["assets/learn.js"]))
 
     def spy_table(self, family, cols="std"):
         depth = 2
@@ -296,29 +332,36 @@ class Learn:
     def hub(self):
         path, depth = "learn/", 1
         h = lambda x: self.s.href(depth, x)
-        items = "".join(
-            f'<li><a class="card lesson-card" data-lesson-link="{l["slug"]}" href="{h("learn/" + l["slug"] + "/")}"><span class="lesson-n">{i}</span>'
-            f'<span class="lesson-txt"><b>{l["title"]}</b><span class="muted small">{l["summary"]}</span></span>'
-            f'<span class="lesson-meta muted small nowrap"><span class="lesson-done" hidden>✓ Read</span><span class="lesson-score"></span><span>{l["minutes"]} min</span></span></a></li>'
-            for i, l in enumerate(LESSONS, 1))
+        tracks = ""
+        for tn, (tk, tname, tdesc) in enumerate(TRACKS, 1):
+            ls = [l for l in LESSONS if l["track"] == tk]
+            items = "".join(
+                f'<li><a class="card lesson-card" data-lesson-link="{l["slug"]}" href="{h("learn/" + l["slug"] + "/")}"><span class="lesson-n">{i}</span>'
+                f'<span class="lesson-txt"><b>{l["title"]}</b><span class="muted small">{l["summary"]}</span></span>'
+                f'<span class="lesson-meta muted small nowrap"><span class="lesson-done" hidden>✓ Read</span><span class="lesson-score"></span><span>{l["minutes"]} min</span></span></a></li>'
+                for i, l in enumerate(ls, 1))
+            tracks += (f'<section class="track" id="track-{tk}"><div class="sec-head"><div><p class="eyebrow">Track {tn} · {len(ls)} lessons · about {sum(l["minutes"] for l in ls)} min</p>'
+                       f'<h2 class="h2">{tname}</h2></div><p>{tdesc}</p></div><ol class="lesson-list">{items}</ol></section>')
         common = ["moving-average", "ema", "rsi", "atr", "breakout", "mean-reversion", "drawdown", "sharpe-ratio",
                   "buy-and-hold", "whipsaw", "relative-strength", "trailing-stop", "t-bills", "tfsa"]
         chips = "".join(f'<a href="{h("learn/glossary/")}#{c}">{BY_SLUG[c]["term"]}</a>' for c in common)
         total = sum(l["minutes"] for l in LESSONS)
         nq = sum(len(v) for v in QUIZZES.values())
         body = f"""
-<section class="pair-head"><p class="eyebrow">Learn</p><h1 class="h1">Trading plays, without the jargon</h1>
-<p class="lede">{len(LESSONS)} short lessons, about {total} minutes in all, that take you from "what is a moving average?" to reading any of the {len(TIMED)} plays on Quiplee with confidence. Then practise on real charts until the plays are second nature. Every technical word on the site links back to a plain-English definition.</p></section>
+<section class="pair-head"><p class="eyebrow">Learn</p><h1 class="h1">From "what is a stock?" to reading the market</h1>
+<p class="lede">{len(LESSONS)} short, hands-on lessons in three tracks, about {total} minutes in all. Start with how stocks work, move on to the {len(TIMED)} trading plays, then learn to read the whole market and plan for a crash. Every lesson uses real prices and real companies, and every technical word on the site links back to a plain-English definition.</p>
+<div class="track-pills">{''.join(f'<a class="card track-pill" href="#track-{k}"><span class="eyebrow">Track {i}</span><b>{n}</b></a>' for i, (k, n, _) in enumerate(TRACKS, 1))}</div></section>
 <section class="card progress" id="progress" hidden aria-live="polite"><p class="eyebrow">Your progress</p><div class="progress-grid"></div>
 <p class="muted small">Saved in this browser only. <button type="button" class="linkish" id="progress-reset">Reset</button></p></section>
+{tracks}
+<p class="muted small">Each lesson ends with a short quiz ({nq} questions in all). Read them in order the first time.</p>
 <section aria-labelledby="practice-h"><div class="sec-head"><h2 class="h2" id="practice-h">Practise</h2><p>Interactive, built from real prices, new questions every round.</p></div>
 <div class="grid grid-3">
   <a class="card practice-card" href="{h('learn/call-it/')}"><span class="eyebrow">Practice</span><span class="name">Call it</span><span class="muted small">A real chart and a play's rule, stopped on a real day. Is the play IN or OUT? Then see what happened next.</span></a>
   <a class="card practice-card" href="{h('learn/flashcards/')}"><span class="eyebrow">Flashcards</span><span class="name">Plays, terms, analysts</span><span class="muted small">{len(TIMED)} plays, {len(GLOSSARY)} terms and every analyst. Mark what you know; the rest comes back.</span></a>
   <a class="card practice-card" href="{h('learn/play-quiz/')}"><span class="eyebrow">Quiz</span><span class="name">Who, what and how often?</span><span class="muted small">Ten questions a round on who's behind each play, what gets it in, and how often it checks.</span></a>
 </div></section>
-<section><div class="sec-head"><h2 class="h2">The course</h2><p>Read them in order the first time. Each ends with a short quiz ({nq} questions in all).</p></div>
-<ol class="lesson-list">{items}</ol></section>
+
 <section class="split">
 <div class="card prose"><p class="eyebrow">The glossary</p><p class="h3">{len(GLOSSARY)} terms, each in a sentence or two</p>
 <p>From "adjusted price" to "whipsaw". Hover over any underlined word on the site to see its definition without leaving the page; tap it on a phone.</p>
@@ -487,6 +530,8 @@ class Learn:
         self.flashcards()
         self.play_quiz()
         self.reading_list()
+        from .basics import Basics
+        Basics(self).build()
         self.reading_a_page()
         self.moving_averages()
         self.trend_following()
@@ -1047,3 +1092,7 @@ class Learn:
                 return f"#{slug}"
             return self.s.href(depth, "learn/glossary/") + f"#{slug}"
         return f
+
+
+from .basics import QUIZZES as _BASIC_QUIZZES  # noqa: E402
+QUIZZES.update(_BASIC_QUIZZES)

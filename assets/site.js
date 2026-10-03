@@ -20,6 +20,7 @@
     var a = Math.abs(v), s;
     if (money && a >= 1e6) s = (v / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, '') + 'M';
     else if (money && a >= 1e4) s = Math.round(v / 1e3).toLocaleString('en-US') + 'K';
+    else if (money && a >= 1e3) s = (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
     else if (a >= 1e4) s = Math.round(v).toLocaleString('en-US');
     else if (a > 0 && a < 1) { var pl = Math.min(6, Math.max(2, -Math.floor(Math.log10(a)) + 2)); s = v.toFixed(pl); }
     else s = v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -44,7 +45,9 @@
     return (p < 0 ? '−' : '') + Math.abs(p) + '%';
   }
   function fmtFor(spec) {
-    return spec.fmt === 'pct' ? fmtPct : function (v) { return fmtNum(v, spec.cur, spec.fmt === 'money'); };
+    if (spec.fmt === 'pct') return spec.pctd ? function (v) { return v == null || isNaN(v) ? '–' : (v < 0 ? '−' : '') + Math.abs(v * 100).toFixed(spec.pctd) + '%'; } : fmtPct;
+    if (spec.fmt === 'dec') return function (v) { return v == null || isNaN(v) ? '–' : (v < 0 ? '−' : '') + Math.abs(v).toFixed(spec.dp == null ? 1 : spec.dp) + (spec.unit || ''); };
+    return function (v) { return fmtNum(v, spec.cur, spec.fmt === 'money'); };
   }
   function roleColor(role) {
     return { price: css('--s-price'), s1: css('--s1'), s2: css('--s2'), s3: css('--s3'), bench: css('--s-bench') }[role] || css('--s1');
@@ -81,6 +84,12 @@
         fill: r[2] === 1 ? css('--in-wash') : css('--out-wash') }, svg);
     });
 
+    // grey spans (e.g. recessions)
+    (spec.shade || []).forEach(function (r) {
+      var x0 = X(Math.max(0, r[0])), x1 = X(Math.min(n - 1, r[1]));
+      node('rect', { x: x0, y: m.t, width: Math.max(2, x1 - x0), height: ih, fill: css('--line'), opacity: 0.55 }, svg);
+    });
+
     // grid + y ticks
     var ticks = log ? logTicks(lo, hi) : niceTicks(lo, hi, narrow ? 4 : 5);
     ticks.forEach(function (v) {
@@ -96,8 +105,9 @@
     var years = (last - first) / 3.156e10, marks = [];
     var y0 = first.getUTCFullYear(), y1 = last.getUTCFullYear();
     if (years > 2.5) {
-      var every = years > 12 ? 4 : years > 6 ? 2 : 1;
-      for (var y = y0 + 1; y <= y1; y++) if ((y - y0 - 1) % every === 0) marks.push([Date.UTC(y, 0, 1), String(y)]);
+      var every = years > 80 ? 20 : years > 40 ? 10 : years > 12 ? (narrow ? 8 : 4) : years > 6 ? 2 : 1;
+      if (narrow && years > 4 && every < 2) every = 2;
+      for (var y = y0 + 1; y <= y1; y++) if ((every >= 10 ? y % every : (y - y0 - 1) % every) === 0) marks.push([Date.UTC(y, 0, 1), String(y)]);
     } else {
       for (var yy = y0; yy <= y1; yy++) for (var q = 0; q < 12; q += 3) {
         var tq = Date.UTC(yy, q, 1);
@@ -118,6 +128,16 @@
       var yl = Y(v);
       if (yl < m.t || yl > m.t + ih) return;
       node('line', { x1: m.l, x2: W - m.r, y1: yl, y2: yl, stroke: css('--band'), 'stroke-width': 1, 'stroke-dasharray': '4 4', opacity: 0.75 }, svg);
+    });
+    // labelled vertical pins (e.g. past market peaks)
+    (spec.pins || []).forEach(function (pn, k) {
+      if (pn[0] < 0 || pn[0] >= n) return;
+      var xp = X(pn[0]);
+      node('line', { x1: xp, x2: xp, y1: m.t, y2: m.t + ih, stroke: css('--muted'), 'stroke-width': 1, 'stroke-dasharray': '2 3', opacity: 0.8 }, svg);
+      if (!narrow || k % 2 === 0) {
+        var tp = node('text', { x: xp + 3, y: m.t + 10 + (k % 2) * 12, fill: css('--muted'), 'font-size': 10, 'font-family': css('--data') }, svg);
+        tp.textContent = pn[1];
+      }
     });
     // a vertical marker (practice mode: where the question stops)
     if (spec.mark != null && spec.mark < n) {
@@ -163,7 +183,9 @@
       var dl = document.createElement('div'); dl.className = 'd';
       var state = null;
       (spec.runs || []).forEach(function (r) { if (i >= r[0] && i <= r[1]) state = r[2]; });
-      dl.textContent = fmtDate(day(spec.t0, d[i])) + (state == null ? '' : state === 1 ? ' · rule in' : ' · rule out');
+      var shaded = (spec.shade || []).some(function (r) { return i >= r[0] && i <= r[1]; });
+      dl.textContent = (spec.monthly ? MON[day(spec.t0, d[i]).getUTCMonth()] + ' ' + day(spec.t0, d[i]).getUTCFullYear() : fmtDate(day(spec.t0, d[i])))
+        + (state == null ? '' : state === 1 ? ' · rule in' : ' · rule out') + (shaded ? ' · ' + (spec.shadeLabel || 'shaded') : '');
       tt.appendChild(dl);
       spec.series.forEach(function (s, si) {
         var v = s.v[i];

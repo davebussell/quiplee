@@ -322,8 +322,22 @@ PLAYS = [
       "Own it and never sell. Every other play on Quiplee is graded against this one.", ["Always in."], [], "", benchmark=True),
 ]
 
+# The 20 most influential plays: the default set for reader-requested stocks and the
+# watchlist. One or more from every family, weighted to the rules most widely
+# taught and followed.
+CORE_SLUGS = [
+    "200-day-rule", "golden-cross", "ten-month-sma", "stage-analysis", "trend-template", "ichimoku-cloud",
+    "parabolic-sar", "macd-signal-cross", "four-week-rule", "turtle-system-2", "bollinger-breakout",
+    "time-series-momentum", "dual-momentum", "52-week-high", "rsi-30-70", "rsi-2-pullback", "stochastic-20-80",
+    "on-balance-volume", "halloween-indicator", "supertrend",
+]
+for _p in PLAYS:
+    _p["core"] = _p["slug"] in CORE_SLUGS
+
 PLAY = {p["slug"]: p for p in PLAYS}
 TIMED = [p for p in PLAYS if not p.get("benchmark")]
+CORE = [next(p for p in TIMED if p["slug"] == s) for s in CORE_SLUGS]
+assert len(CORE) == 20
 BAR_WORD = {"D": "daily", "W": "weekly", "M": "month-end"}
 
 

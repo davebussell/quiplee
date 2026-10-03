@@ -19,51 +19,71 @@ publishes `_site/` (see `netlify.toml`); generated pages are not committed.
 
 ```
 tools/fetch_prices.py        downloads adjusted daily OHLCV into data/prices/*.csv (network)
-tools/build_strategies.py    builds the whole site from data/prices/ into _site/ (no network)
-tools/qstrat/plays.py        the 59 plays: family, analysts, rules, assumptions (edit here)
+tools/fetch_macro.py         CAPE (multpl) and FRED series (UNRATE, BAA10Y, T10Y3M, USREC) into data/macro/
+tools/fetch_fundamentals.py  company fundamentals (Yahoo) into data/fundamentals/<slug>.json
+tools/sync_requests.py       turns watchlist requests (/api/watch) into data/universe/requested.json
+tools/build_strategies.py    builds the whole site from data/ into _site/ (no network)
+tools/qstrat/plays.py        the 59 plays (20 flagged core): family, analysts, rules, assumptions
 tools/qstrat/plays_fn.py     each play's rule as code (state 1/0 per finished bar)
 tools/qstrat/ind.py          indicator library (EMA, RSI, ATR, MACD, ADX, PSAR, Supertrend, ...)
 tools/qstrat/analysts.json   verified bios, arguments, books and sources for every analyst
-tools/qstrat/content.py      the 64-ticker universe; loads plays and analysts
-tools/qstrat/engine.py       bars, backtests, call grading, the next-move solver
-tools/qstrat/render.py       HTML for every page type
-tools/qstrat/learn.py        13 lessons with quizzes, glossary, Call it, flashcards, play quiz, reading list
+tools/qstrat/content.py      the universe (indexes, sectors, stocks, reader requests); loads plays and analysts
+tools/qstrat/engine.py       bars, backtests, call grading, the next-move solver, per-ticker meta
+tools/qstrat/risk.py         crash exposure (the Hertz lens): beta, past crashes, debt, run-up
+tools/qstrat/macro.py        the nine market gauges, positioning data, best-days maths
+tools/qstrat/render.py       HTML for home, plays, analysts, stocks, pairs, method
+tools/qstrat/stockview.py    stock-page blocks: candlesticks, heatmap, the read, fundamentals, crash card
+tools/qstrat/markets.py      /markets/: weather, index and sector tables, gauges, past tops, simulator
+tools/qstrat/watchlist.py    /watchlist/ page and data/watch.json
+tools/qstrat/articles.py     /articles/: macro pieces, stock and sector briefs (rebuilt nightly)
+tools/qstrat/learn.py        Learn hub, 13 play lessons, glossary, Call it, flashcards, play quiz, reading list
+tools/qstrat/basics.py       Track 1 (stock basics) and Track 3 (markets and risk) lessons with widgets
 tools/qstrat/practice.py     the Call it chart scenarios (data/practice.json) and play-quiz bank
-assets/site.js, learn.js     chart renderer; interactive learning (progress in localStorage)
+netlify/functions/watch.mjs  the request queue (Netlify Function + Blobs) behind /api/watch
+assets/site.js, learn.js     line charts; quizzes, flashcards, Call it (progress in localStorage)
+assets/widgets.js            candlesticks, plays heatmap, positioning simulator, core toggle
+assets/lab.js, watchlist.js  Learn widgets and step-by-step lessons; the watchlist app
 ```
 
 ```bash
 pip install -r requirements.txt yfinance
 python tools/fetch_prices.py                       # refresh the price cache
+python tools/fetch_macro.py && python tools/fetch_fundamentals.py
 python tools/build_strategies.py                   # build into _site/ (about 3 minutes)
 python tools/build_strategies.py --out /tmp/q --preview   # preview with explicit index.html links
 ```
 
-Page map: `/` signal board by family · `/strategies/<play>/` · `/thinkers/<analyst>/` ·
-`/stocks/<ticker>/` · `/stocks/<ticker>/<play>/` (the core page: what the play
-says, the next move, price with the play's lines and indicator panel, growth vs
-buy-and-hold, every call graded) · `/learn/` (course, practice, glossary, reading list).
+Page map: `/` market weather, strongest signals, check your stocks · `/markets/` ·
+`/watchlist/` · `/articles/` (including `/articles/stocks/<ticker>/` and
+`/articles/sectors/<group>/`) · `/strategies/<play>/` · `/thinkers/<analyst>/` ·
+`/stocks/<ticker>/` (candlesticks, plays heatmap, every play, fundamentals, crash
+card) · `/stocks/<ticker>/<play>/` · `/learn/` (three tracks, practice, glossary).
 
 **Method.** Signals use finished daily, weekly (Fri; Sun for crypto) or
 month-end bars and are acted on at the next session; 5 bps per switch (10 for
 crypto, 30 for micro caps); T-bill yield (^IRX) while out; long or cash only.
 The next move is found numerically: the engine asks each play what it would say
 after one more bar at a grid of hypothetical closes and bisects every flip point.
-The original seven rules were regression-checked against the old closed-form
-levels (identical returns; levels within 0.02%). Calendar plays report the date
-of their next change.
+Calendar plays report the date of their next change.
 
-**Refresh.** `.github/workflows/refresh-prices.yml` fetches prices after each U.S.
-close and commits `data/prices/`; that push triggers the Netlify build.
+**Refresh.** `.github/workflows/refresh-prices.yml` runs after each U.S. close:
+it adds reader-requested tickers, fetches prices, macro series and fundamentals,
+and commits `data/`; that push triggers the Netlify build.
 
-**Learn + glossary.** Terms live in `tools/qstrat/glossary.py` (94 terms);
+**Bring your own stocks.** The watchlist keeps each reader's list in their
+browser. Tickers Quiplee doesn't cover are POSTed to `/api/watch` (symbols only).
+The nightly job validates up to 25 a night (300 in total), the build runs all
+plays on them, and core-play pages are published. Reader-requested names stay out
+of the cross-stock scoreboards.
+
+**Learn + glossary.** Terms live in `tools/qstrat/glossary.py`;
 `tools/qstrat/linker.py` links the first use of each term on every generated page
 and in the output copies of `stories/*.html` and `desk/index.html`.
 `assets/glossary.js` shows the hover/tap definitions and links terms inside the
 live desk's feed from `data/glossary.json`.
 
-**Universe.** 64 tickers in sector groups (`content.py`). Micro caps carry a
-0.30% switching cost. Sub-dollar prices show three significant digits.
+**Universe.** Market indexes, U.S. sector funds and the stock groups in
+`content.py`, plus reader requests. Micro caps carry a 0.30% switching cost.
 
 **Open item.** The PB EMA's real lengths are unconfirmed (its TradingView page
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in `plays_fn.pb_ema`
