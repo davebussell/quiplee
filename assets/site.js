@@ -263,7 +263,29 @@
     });
   }
 
-  function init() { initCharts(); initPicker(); initNav(); }
+  // header menus: hover or focus on desktop; on touch screens the first tap opens the menu, the second follows the link
+  function initMenus() {
+    var items = document.querySelectorAll('.nav-item.has-dd');
+    if (!items.length) return;
+    var touch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    function closeAll(except) {
+      [].forEach.call(items, function (it) { if (it !== except) { it.classList.remove('open'); it.querySelector('.nav-top').setAttribute('aria-expanded', 'false'); } });
+    }
+    [].forEach.call(items, function (it) {
+      var top = it.querySelector('.nav-top');
+      top.addEventListener('click', function (e) {
+        if (touch && !it.classList.contains('open')) {
+          e.preventDefault(); closeAll(it); it.classList.add('open'); top.setAttribute('aria-expanded', 'true');
+        }
+      });
+      it.addEventListener('mouseenter', function () { if (!touch) top.setAttribute('aria-expanded', 'true'); });
+      it.addEventListener('mouseleave', function () { if (!touch) top.setAttribute('aria-expanded', 'false'); });
+    });
+    document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.nav-item')) closeAll(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeAll(); if (document.activeElement && document.activeElement.closest && document.activeElement.closest('.nav-item')) document.activeElement.blur(); } });
+  }
+
+  function init() { initCharts(); initPicker(); initNav(); initMenus(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

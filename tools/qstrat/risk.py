@@ -1,8 +1,9 @@
-"""Crash exposure: the Hertz lens.
+"""Crash exposure: the storm test.
 
-Hertz didn't fall 90% in 2020 because its cars stopped being useful. It fell
-because a sudden macro shock met a balance sheet loaded with debt. This module
-measures both halves for every ticker, from data Quiplee already has:
+A crash marks every stock down; how far a stock falls, and whether the company
+comes through, depends on how hard it swings with the market and how much debt
+it carries into the downturn. This module measures both halves for every
+ticker, from data Quiplee already has:
 
   market sensitivity  beta and downside capture against its benchmark index
   crash history       how far it fell in each past market crash vs its index

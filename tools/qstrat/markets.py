@@ -294,9 +294,9 @@ def markets_page(site):
 <p class="muted small">No two tops looked alike. 2000 was about valuation; 2007 about credit; 2020 was a shock nothing on this list could see; 2022 was rates. The point is not to match a pattern but to see which kinds of fragility are present now.</p></section>
 
 <section aria-labelledby="ex-h"><div class="sec-head"><h2 class="h2" id="ex-h">Who would feel a crash first</h2>
-<p>The covered stocks with the highest crash exposure: how hard they swing with the market, how they fared in past crashes, their debt and their run-up. The Hertz lens: shocks hurt most where debt is heavy.</p></div>
+<p>The covered stocks with the highest crash exposure: how hard they swing with the market, how they fared in past crashes, their debt and their run-up. This is the storm test: shocks hurt most where debt is heavy.</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays in</th><th>Why</th></tr></thead><tbody>{crows}</tbody></table></div>
-<p class="muted small">Every stock page has its full crash card. Index pages list every covered name on that market. <a href="{h('stories/the-hertz-lesson.html')}">The Hertz lesson</a></p></section>
+<p class="muted small">Every stock page has its full crash card. Index pages list every covered name on that market. <a href="{h('articles/debt-and-crashes/')}">How the storm test works</a></p></section>
 
 <section aria-labelledby="pos-h" id="positioning"><div class="sec-head"><h2 class="h2" id="pos-h">Cash, stay in, or buckets?</h2>
 <p>What different choices would have done through real crashes. Pick a period, a mix and a plan. Educational, not advice: the right mix depends on when you need the money.</p></div>

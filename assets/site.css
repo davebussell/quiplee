@@ -726,3 +726,46 @@ button.btn { cursor: pointer; }
 .green-card .g-val { min-width: 0; text-align: right; }
 .green-card .g-val span { white-space: normal; }
 @media (max-width: 520px) { .green-card .g-top { flex-direction: column; } .green-card .g-val { align-items: flex-start; text-align: left; } }
+
+/* ---------- v6: header menus ---------- */
+.site-nav { align-items: center; }
+.nav-item { position: relative; }
+.nav-item .nav-top { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 13.5px; font-weight: 500; padding: 6px 10px; border-radius: 8px; }
+.nav-item .nav-top:hover, .nav-item.open .nav-top, .nav-item:focus-within .nav-top { color: var(--ink); background: var(--panel); text-decoration: none; }
+.nav-item .nav-top[aria-current="page"] { color: var(--ink); background: var(--panel-2); }
+.caret { width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); opacity: .7; }
+.dd { display: none; position: absolute; top: 100%; left: 0; padding-top: 6px; z-index: 50; min-width: 300px; }
+.dd-in { background: var(--panel); border: 1px solid var(--line-2); border-radius: 12px; padding: 6px; box-shadow: 0 18px 40px -16px rgba(0, 0, 0, .8); display: flex; flex-direction: column; }
+.dd a { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; border-radius: 8px; color: var(--ink); }
+.dd a:hover, .dd a:focus-visible { background: var(--panel-2); text-decoration: none; }
+.dd a b { font: 600 13.5px var(--ui); }
+.dd a span { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+@media (hover: hover) { .nav-item:hover .dd { display: block; } }
+.nav-item:focus-within .dd, .nav-item.open .dd { display: block; }
+@media (max-width: 720px) {
+  .head-row { position: relative; }
+  .nav-item { position: static; }
+  .nav-item .nav-top { padding: 5px 10px; font-size: 13px; }
+  .dd { left: 0; right: 0; min-width: 0; padding-top: 4px; }
+  .dd a { padding: 10px 12px; }
+}
+/* the old flat nav links (desk and story pages keep their own headers) */
+.site-nav > a { color: var(--muted); }
+
+/* ---------- v6: stock list ---------- */
+.st-views { margin-top: 4px; }
+.st-tools { display: flex; flex-direction: column; gap: 10px; }
+.st-tools input { font: 500 15px var(--ui); color: var(--ink); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 11px 12px; width: 100%; max-width: 520px; }
+.st-tools input:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 108, 245, .2); }
+.st-tools .chips { align-items: center; gap: 6px; }
+.chip-btn[aria-pressed="true"] { color: var(--ink); background: var(--panel-2); border-color: var(--violet); }
+.st-tbl .stick { position: sticky; left: 0; background: var(--panel); z-index: 1; min-width: 132px; }
+.st-tbl tbody tr:hover td.stick { background: var(--panel-2); }
+.st-tbl td, .st-tbl th { white-space: nowrap; }
+.st-tbl td.grp-col { white-space: normal; min-width: 110px; }
+.st-views { align-self: flex-start; }
+@media (max-width: 600px) {
+  .st-tools .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; margin-inline: -16px; padding-inline: 16px; }
+  .st-tools .chips::-webkit-scrollbar { display: none; }
+  .st-tools .chips .chip-btn, .st-tools .chips span { flex: none; }
+}

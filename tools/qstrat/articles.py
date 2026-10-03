@@ -123,7 +123,7 @@ class Articles:
         L.append(("macro", "articles/cash-or-invested/", "Cash, stay invested, or buckets?",
                   "What selling, holding, rebalancing and a simple trend rule would have done through 2008, 2020 and 2022, and why the bucket approach exists.", "written", WRITTEN))
         L.append(("stocks", "articles/debt-and-crashes/", "Debt decides who survives a crash",
-                  "The Hertz lens on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.", "live", None))
+                  "The storm test on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.", "live", None))
         L.append(("stocks", "articles/green-across-the-board/", "Green across the board, with room to run",
                   "The stocks scored half on how many plays hold them and half on analysts' upside: where the room is, what the backdrop says, and where the rules would get out.", "live", None))
         L.append(("strategies", "articles/the-core-20/", "The 20 core plays, and why these 20",
@@ -250,7 +250,7 @@ class Articles:
 
 <h2 class="h2">What to do with this</h2>
 <ul>
-<li><b>Know your exposure.</b> Put your holdings in the <a href="{h('watchlist/')}">watchlist</a> and look at the crash column. Stocks with heavy debt and big run-ups fall furthest when credit tightens (<a href="{h('articles/debt-and-crashes/')}">the Hertz lens</a>).</li>
+<li><b>Know your exposure.</b> Put your holdings in the <a href="{h('watchlist/')}">watchlist</a> and look at the crash column. Stocks with heavy debt and big run-ups fall furthest when credit tightens (<a href="{h('articles/debt-and-crashes/')}">the storm test</a>).</li>
 <li><b>Plan for a 30–50% fall before it happens.</b> Money you need in the next few years shouldn't depend on stocks. <a href="{h('articles/cash-or-invested/')}">Cash, stay invested, or buckets</a> runs the numbers.</li>
 <li><b>Use rules, not moods.</b> Trend rules don't predict tops, but they step aside once a fall is under way. Meb Faber's 10-month rule on the S&amp;P 500 ETF is <b>{rule_now or '–'}</b> tonight. <a href="{h('stocks/spy/ten-month-sma/')}">See its record</a>.</li>
 <li><b>Rebalance.</b> If a few winners have grown into most of your portfolio, trimming them back to a target is the simplest bubble insurance there is.</li>
@@ -319,7 +319,7 @@ class Articles:
 <ol>
 <li><b>Valuation sets the size of the fall, not the date.</b> The most expensive markets (1929, 2000) fell furthest, but they stayed expensive for years first.</li>
 <li><b>Tight money is usually the trigger.</b> Rate rises came before 1929, Japan, 2000, 2007 and 2022. The exceptions, 1987 and 2020, were shocks that recovered fast.</li>
-<li><b>Debt decides who survives.</b> Companies and investors who had to sell at the bottom are the ones the crash destroyed. <a href="{h('articles/debt-and-crashes/')}">The Hertz lens</a> applies this to every stock Quiplee covers.</li>
+<li><b>Debt decides who survives.</b> Companies and investors who had to sell at the bottom are the ones the crash destroyed. <a href="{h('articles/debt-and-crashes/')}">The storm test</a> applies this to every stock Quiplee covers.</li>
 </ol>
 <p>All nine of Quiplee's gauges, with their history and readings at the last four tops, are on the <a href="{h('markets/')}">Markets page</a>.</p>
 </div>"""
@@ -427,8 +427,8 @@ class Articles:
                      f'<td class="r" data-v="{nd if nd is not None else ""}">{nd_txt}</td><td class="r" data-v="{cover if cover is not None else ""}">{cv_txt}</td>'
                      f'<td data-v="{rk["score"]}"><span class="lvl lvl-{sv.LEVEL_CLASS[rk["level"]]}">{e(rk["level"])}</span></td></tr>')
         heavy_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}#crash">{e(t["short"])}</a>' for t in heavy[:10]) or "none"
-        intro = P(f"Hertz fell about 85% in the 2008 crash and went bankrupt in 2020. Neither time was it because people stopped renting cars forever. Both times a sudden shock met a business that ran on borrowed money and needed to keep borrowing. When lenders pulled back, revenue didn't matter; the debt came due anyway. <a href='{h('stories/the-hertz-lesson.html')}'>The Hertz lesson</a> tells that story in full.",
-                  "The lesson generalises. A crash marks every stock down. Debt decides which companies come out the other side and which are forced to sell assets, issue shares at the bottom or hand the business to their lenders.")
+        intro = P("A crash marks every stock down. What decides which companies come through it is mostly debt. A business that runs on borrowed money has to keep paying interest and refinancing loans whether sales hold up or not, so when a shock hits and lenders pull back, the debt comes due anyway. Revenue doesn't pay a bill that lenders won't roll over.",
+                  "Quiplee's <b>storm test</b> scores every covered stock on that question, alongside how hard it swings with the market, how it fared in past crashes and how far it has run up. The result is its crash exposure: Low, Moderate, High or Very high.")
         light_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}#crash">{e(t["short"])}</a>' for t in light[:10]) or "none"
         body = f"""
 <div class="prose">
@@ -445,17 +445,17 @@ class Articles:
 </div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r" data-sort-first="desc">Debt points</th><th class="r">Debt / equity</th><th class="r">Net debt / EBITDA</th><th class="r">Interest cover</th><th>Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <div class="prose">
-<p class="small muted">Debt points are one part of Quiplee's 10-point crash exposure score, which also weighs how hard a stock swings with the market, how it fared in past crashes and the size of its run-up. Company figures from Yahoo Finance; banks such as JPMorgan and RBC borrow as their business, so their ratios read high by design.</p>
+<p class="small muted">Debt points are one part of the 10-point storm test, which also weighs how hard a stock swings with the market, how it fared in past crashes and the size of its run-up. Company figures from Yahoo Finance; banks such as JPMorgan and RBC borrow as their business, so their ratios read high by design.</p>
 <h2 class="h2">What to do with it</h2>
 <ul>
 <li>Check the crash card on any <a href="{h('stocks/')}">stock page</a> before adding to a position, especially after a big run-up.</li>
 <li>Size positions so that a heavily borrowed company falling 80% wouldn't change your plans. That is what leverage can do to a stock in a credit crunch.</li>
-<li>In a downturn, money tends to move to cash, Treasuries and companies with net cash, the opposite of a Hertz.</li>
+<li>In a downturn, money tends to move to cash, Treasuries and companies with net cash: the opposite of a heavily borrowed business.</li>
 </ul>
-<p>Learn to read a balance sheet in the <a href="{h('learn/balance-sheet/')}">balance-sheet lesson</a>, with a stress test you can run yourself.</p>
+<p>Learn to read a balance sheet in the <a href="{h('learn/balance-sheet/')}">balance-sheet lesson</a>, with a stress test you can run yourself. For a worked example of a revenue-rich company undone by its debt, read <a href="{h('stories/the-hertz-lesson.html')}">the Hertz story</a>.</p>
 </div>"""
         self.shell(path, "stocks", "Debt decides who survives a crash",
-                   "The Hertz lens on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.",
+                   "The storm test on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.",
                    body, [("Yahoo Finance company fundamentals", "https://finance.yahoo.com/")], live=True,
                    related=self.related(depth, ["articles/green-across-the-board/", "articles/bubbles-and-crashes/", "articles/is-this-a-bubble/"]))
 

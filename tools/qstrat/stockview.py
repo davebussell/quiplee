@@ -1,5 +1,5 @@
 """The visual blocks on a stock page: candlesticks, the plays-over-time heatmap,
-the plain-English read, fundamentals and crash exposure (the Hertz lens).
+the plain-English read, fundamentals and crash exposure (the storm test).
 
 Each function returns an HTML string. Charts carry their data as embedded JSON
 for assets/widgets.js to draw.
@@ -272,7 +272,7 @@ def fundamentals_card(t, fund, price, learn="#"):
 
 
 # --------------------------------------------------------------------------
-# crash exposure (the Hertz lens)
+# crash exposure (the storm test)
 # --------------------------------------------------------------------------
 PART = [("market", "Market swings", 3, "Beta and downside capture against its index"),
         ("history", "Past crashes", 2, "How far it fell in past crashes, against its index"),
@@ -339,13 +339,13 @@ def crash_card(t, rk, depth_href):
     why_html = ("<ul class='why'>" + "".join(f"<li>It {e(w)}.</li>" for w in why) + "</ul>") if why else '<p class="muted small">Nothing on the checklist stands out.</p>'
     no_fund = "" if rk.get("has_fund") or t.get("index") or t["crypto"] or t["group"] in ("Indexes & ETFs", "Sectors") else '<p class="muted small">No balance-sheet data for this name, so debt is not scored.</p>'
     return f"""<div class="card crash-card">
-<div class="chart-top"><h3 class="h3">If the market cracks: crash exposure</h3><a class="small" href="{depth_href('stories/the-hertz-lesson.html')}">The Hertz lesson</a></div>
+<div class="chart-top"><h3 class="h3">If the market cracks: the storm test</h3><a class="small" href="{depth_href('articles/debt-and-crashes/')}">How the storm test works</a></div>
 <div class="crash-top"><div class="crash-level {cls}"><span class="eyebrow">Exposure</span><b>{e(lvl)}</b><span class="muted small">{rk['score']} of 10 points</span></div>
 <ul class="crash-parts">{parts}</ul></div>
 {why_html}{no_fund}
 <div class="crash-grid"><div class="crash-bars"><p class="eyebrow">Past crashes, peak to low</p>{bars}</div>
 <ul class="crash-facts">{fl}</ul></div>
-<p class="chart-note">Hertz fell about 85% in 2008 and went bankrupt in 2020, not because people stopped renting cars, but because a sudden shock met a balance sheet built on debt. This checklist scores both halves: how hard the stock swings with the market, and how much debt it carries into a downturn. It describes fragility; it does not predict a crash.</p>
+<p class="chart-note">A crash marks every stock down; debt decides which companies come through. The storm test scores both halves: how hard the stock swings with the market, and how much debt it carries into a downturn. It describes fragility; it does not predict a crash.</p>
 </div>"""
 
 

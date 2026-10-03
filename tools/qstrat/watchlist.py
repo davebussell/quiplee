@@ -88,7 +88,7 @@ def watchlist_page(site):
 <section class="wl" id="wl" data-base="{'../' * depth}" data-api="/api/watch" data-stock="{e(h('stocks/{u}/'))}" data-pair="{e(h('stocks/{u}/{s}/'))}">
 <div class="card wl-add">
 <label for="wl-in" class="h3">Add stocks</label>
-<textarea id="wl-in" rows="3" placeholder="NVDA, SHOP.TO, Hertz, BTC&#10;or one per line, or paste rows from a spreadsheet" spellcheck="false" autocomplete="off"></textarea>
+<textarea id="wl-in" rows="3" placeholder="NVDA, SHOP.TO, Apple, BTC&#10;or one per line, or paste rows from a spreadsheet" spellcheck="false" autocomplete="off"></textarea>
 <div class="wl-actions">
 <button type="button" class="btn primary" id="wl-go">Add to my list</button>
 <label class="btn" for="wl-file">Upload a CSV<input type="file" id="wl-file" accept=".csv,text/csv,text/plain" hidden></label>
@@ -115,7 +115,7 @@ def watchlist_page(site):
 <div class="card prose"><p class="eyebrow">What the columns mean</p><ul>
 <li><b>Plays in:</b> how many of the plays you picked hold the stock now. Most in usually means a strong, broad trend; a split means the plays disagree.</li>
 <li><b>Strip:</b> one square per play, green for in, red for out, in family order.</li>
-<li><b>Crash exposure:</b> the Hertz checklist of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
+<li><b>Crash exposure:</b> the storm test of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
 <li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
 <li><b>Weight:</b> your share of the list by value, when your file includes quantities or market values. Otherwise every name counts equally.</li>
 </ul><p class="small muted">What published rules say, not advice. Quiplee doesn't know your goals, taxes or timeline.</p></div>

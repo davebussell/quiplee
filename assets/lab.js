@@ -337,7 +337,7 @@
       out.appendChild(stat('Interest cover after the shock', cov1 != null ? (cov1 < 0 ? 'losing money' : cov1.toFixed(1) + '×') : '–', cov1 != null && cov1 < 2 ? 'Under 2×: interest becomes hard to pay' : '', cov1 != null && cov1 < 2 ? 'down' : 'up'));
       var lev = (stockMove / -(st.ev / 100));
       txt.textContent = st.ev ? 'A ' + st.ev + '% markdown of the whole business moves this stock ' + (eq1 > 0 ? pc(stockMove) : 'to zero') + ', ' + (isFinite(lev) && eq1 > 0 ? lev.toFixed(1) + '× the markdown' : 'because debt soaks up everything') + '. ' +
-        (net > 0 ? 'Debt magnifies every move in the business, which is exactly what happened to Hertz.' : 'With net cash, the stock moves less than the business: cash cushions the fall.') : 'Move the sliders to stress the company.';
+        (net > 0 ? 'Debt magnifies every move in the business: shareholders absorb the whole hit.' : 'With net cash, the stock moves less than the business: cash cushions the fall.') : 'Move the sliders to stress the company.';
     }
     draw();
   }
