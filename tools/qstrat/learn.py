@@ -936,7 +936,7 @@ class Learn:
         body = f"""
 <section class="prose" id="what">
 <h2 class="h2">What a backtest is</h2>
-<p>A backtest runs a play on past prices to see what it would have done. Quiplee runs every play on every stock from January 2005 (or the stock's first trading day), and plays fair: it only uses closing prices that were already known, acts on the next trading day, charges a cost on every switch, and pays T-bill interest while the play is out.</p>
+<p>A backtest runs a play on past prices to see what it would have done. Quiplee runs every play on every stock from January 2005 (or the stock's first trading day), and plays fair: it only uses closing prices that were already known, acts on the next trading day, deducts a trading cost on every switch, and earns T-bill interest while the play is out.</p>
 <p>A backtest tells you how a play behaved, not what it will do next. Treat it like a car's crash-test rating. It's useful, but the road ahead will be different.</p>
 </section>
 <section class="prose" id="benchmark">
@@ -964,7 +964,7 @@ class Learn:
 </section>
 <section class="prose">
 <h2 class="h2">Switches, time invested and costs</h2>
-<p><b>Switches per year</b> counts how often the play changes its mind; every switch costs money and, in a taxable account, can create a tax bill. <b>Time invested</b> is the share of days the play held the stock. Quiplee charges 0.05% per switch for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</p>
+<p><b>Switches per year</b> counts how often the play changes its mind; every switch costs money and, in a taxable account, can create a tax bill. <b>Time invested</b> is the share of days the play held the stock. Quiplee's backtests deduct 0.05% per switch for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</p>
 </section>
 <section class="prose" id="traps">
 <h2 class="h2">Three traps that flatter backtests</h2>

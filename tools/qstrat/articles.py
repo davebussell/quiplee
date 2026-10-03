@@ -805,7 +805,7 @@ class Articles:
 <li><b>Luck looks like skill.</b> With {n:,} combinations, some will look brilliant by chance. Trust a play that does reasonably well across many stocks over one that did spectacularly on one.</li>
 <li><b>Survivors only.</b> Every stock here still trades today. Companies that went to zero aren't in the test, which flatters buy and hold and every play alike.</li>
 <li><b>The skeptic's view.</b> Valeriy Zakamulin found moving-average timing showed no reliable edge in the second half of 155 years of U.S. data; the rules earned their keep in a few severe bear markets. <a href="{h('thinkers/valeriy-zakamulin/')}">His scoreboard</a>.</li>
-<li><b>Costs and taxes.</b> Quiplee charges trading costs but not taxes. In a taxable account, frequent switching can cost more than any edge.</li>
+<li><b>Costs and taxes.</b> Quiplee's backtests deduct trading costs but not taxes. In a taxable account, frequent switching can cost more than any edge.</li>
 </ul>
 <p>The <a href="{h('learn/reading-a-backtest/')}">backtest lesson</a> explains every column, and the <a href="{h('method/')}">method page</a> lists every assumption.</p>
 </div>"""

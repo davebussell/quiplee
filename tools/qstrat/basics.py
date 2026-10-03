@@ -72,8 +72,8 @@ QUIZZES = {
           "Prices move when people change what they are willing to pay or accept. A big gap can open with very little trading."),
         Q("What is a limit order?", ["An order that fills at any price", "An order that names the worst price you'll accept", "An order to sell everything", "An order limited to 100 shares"], 1,
           "A limit buy won't pay more than your price, and a limit sell won't take less. It may not fill at all."),
-        Q("Why does Quiplee charge micro caps 0.30% a trade, six times a big stock?", ["Higher taxes", "The gap between bid and ask is much wider", "They trade fewer days", "Exchange rules"], 1,
-          "Thinly traded stocks have wide spreads and shallow order books, so buying and selling costs more."),
+        Q("Why does it usually cost more to buy and sell a tiny company's stock than a big one's?", ["Higher taxes", "The gap between the bid and the ask is much wider", "They trade fewer days a year", "Exchange rules"], 1,
+          "Few people trade tiny stocks, so the spread is wide and the order book is thin: you pay up to buy and take less to sell. That's why Quiplee's backtests assume 0.30% a trade for micro caps but 0.05% for big stocks."),
     ],
     "candlesticks": [
         Q("A candle's box runs from $10 to $12 and it is hollow (green). Where did the day open and close?", ["Opened $12, closed $10", "Opened $10, closed $12", "High $12, low $10", "You can't tell"], 1,
@@ -82,7 +82,7 @@ QUIZZES = {
           "The wicks reach the highest and lowest prices of the period."),
         Q("A candle has a tiny body near the top and a long lower wick, after a fall. What is it called?", ["Shooting star", "Doji", "Hammer", "Marubozu"], 2,
           "A hammer: sellers pushed it down but buyers brought it back to close near the high."),
-        Q("What does research say about trading candlestick patterns on their own?", ["They reliably predict the next day", "Studies such as one on Dow stocks found they don't make money by themselves", "They work only on crypto", "They are illegal to trade"], 1,
+        Q("What does research say about trading candlestick patterns on their own?", ["They reliably predict the next day", "Studies such as one on Dow stocks found they don't make money by themselves", "They work only on crypto", "They only work in bull markets"], 1,
           "A 2006 study of Dow stocks found popular patterns had no value on their own. Candles are a way to read price, not a strategy."),
     ],
     "trends-tops-bottoms": [
@@ -245,7 +245,7 @@ class Basics:
                  check("The best ask is $50.02 with 200 shares, the next is $50.04 with 500. You buy 400 at market. What happens?",
                        ["All 400 fill at $50.02", "200 fill at $50.02 and 200 at $50.04", "The order is rejected"], 1,
                        "A market order works through the book: 200 at the best ask, then the rest at the next price up.")),
-            step(prose("<b>Market or limit?</b> A market order fills now at whatever the book offers. A limit order names your worst price and waits. Limits protect you in thinly traded stocks, where the spread can be wide; that's why Quiplee charges micro caps 0.30% per trade against 0.05% for big stocks.",
+            step(prose("<b>Market or limit?</b> A market order fills now at whatever the book offers. A limit order names your worst price and waits. Limits protect you in thinly traded stocks, where the spread can be wide; that's why Quiplee's backtests assume each trade in a micro cap costs 0.30%, against 0.05% for a big stock.",
                        "<b>Volume</b> is how many shares changed hands. Big moves on heavy volume mean many people acted on new information; the <a href=\"" + h("learn/volume/") + "\">volume lesson</a> covers plays built on it.")),
             step(prose("<b>Why plays read only the close.</b> Prices swing all day. The closing price is the one everybody agrees on, it sets the next day's starting point, and it is what most published rules use. A dip below a level at noon that recovers by 4pm doesn't count.")),
         )

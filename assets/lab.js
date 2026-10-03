@@ -127,26 +127,32 @@
   }
 
   // ------------------------------------------------------------ 3. candle builder
-  var PRESETS = { 'Big up day': [20, 82, 18, 80], 'Big down day': [80, 82, 18, 20], 'Doji': [50, 75, 25, 50.5], 'Hammer': [70, 74, 20, 73], 'Shooting star': [30, 80, 28, 27], 'Spinning top': [48, 70, 30, 53] };
+  var PRESETS = { 'Big up day': [20, 82, 18, 80], 'Big down day': [80, 82, 18, 20], 'Doji': [50, 75, 25, 50], 'Hammer': [62, 74, 20, 72], 'Shooting star': [38, 80, 29, 31], 'Spinning top': [48, 70, 30, 53] };
   function candleName(o, h, l, c) {
-    var rng = h - l || 1, body = Math.abs(c - o), up = h - Math.max(o, c), dn = Math.min(o, c) - l;
-    if (body / rng < 0.1) return ['Doji', 'Open and close almost equal: buyers and sellers fought to a draw. After a long run it can mean the move is tiring.'];
-    if (dn > 2 * body && up < body * 0.6) return ['Hammer', 'Sellers pushed it well down, buyers pushed it back up to close near the high. After a fall it hints that buyers are stepping in.'];
-    if (up > 2 * body && dn < body * 0.6) return ['Shooting star', 'Buyers pushed it well up but it closed near the low. After a rise it hints that sellers are stepping in.'];
-    if (body / rng > 0.85) return [c > o ? 'Big up day (marubozu)' : 'Big down day (marubozu)', c > o ? 'Opened near the low and closed near the high: buyers in control all day.' : 'Opened near the high and closed near the low: sellers in control all day.'];
-    if (body / rng < 0.35) return ['Spinning top', 'Small body, wicks both ways: an undecided day.'];
+    var rng = h - l || 1, body = Math.abs(c - o), up = h - Math.max(o, c), dn = Math.min(o, c) - l, b = body / rng;
+    if (b < 0.07) {
+      if (up > 0.65 * rng) return ['Gravestone doji', 'Opened and closed near the low after buyers pushed it far higher: the rally was rejected. After a rise it can warn of a turn down.'];
+      if (dn > 0.65 * rng) return ['Dragonfly doji', 'Opened and closed near the high after sellers pushed it far lower: the selling was rejected. After a fall it can hint at a turn up.'];
+      return ['Doji', 'Open and close almost equal: buyers and sellers fought to a draw. After a long run it can mean the move is tiring.'];
+    }
+    if (b <= 0.35 && dn >= 2 * body && up <= 0.15 * rng) return ['Hammer', 'Sellers pushed it well down, buyers pushed it back up to close near the high. After a fall it hints that buyers are stepping in.'];
+    if (b <= 0.35 && up >= 2 * body && dn <= 0.15 * rng) return ['Shooting star', 'Buyers pushed it well up but it closed near the low. After a rise it hints that sellers are stepping in.'];
+    if (b > 0.85) return [c > o ? 'Big up day (marubozu)' : 'Big down day (marubozu)', c > o ? 'Opened near the low and closed near the high: buyers in control all day.' : 'Opened near the high and closed near the low: sellers in control all day.'];
+    if (b < 0.35) return ['Spinning top', 'Small body, wicks both ways: an undecided day.'];
     return [c > o ? 'Up day' : 'Down day', c > o ? 'Closed above where it opened.' : 'Closed below where it opened.'];
   }
   function CandleBuilder(box) {
     var st = { o: 40, h: 75, l: 25, c: 65 };
+    // sliders run 0-100; shown as prices between $95 and $105 so the moves look like a real day
+    function px(v) { return 95 + v / 10; }
     var ui = el('div', { 'class': 'lab-ui lab-ui-4' }), pre = el('div', { 'class': 'chips' }), pic = el('div', { 'class': 'cb-pic' }), txt = el('div', { 'class': 'cb-txt' });
     var sl = {};
     [['o', 'Open'], ['h', 'High'], ['l', 'Low'], ['c', 'Close']].forEach(function (k) {
-      sl[k[0]] = slider(k[1], 0, 100, 0.5, st[k[0]], function (v) { return '$' + (v).toFixed(2); }, function (v) { st[k[0]] = v; fix(k[0]); draw(); });
+      sl[k[0]] = slider(k[1], 0, 100, 1, st[k[0]], function (v) { return '$' + px(v).toFixed(2); }, function (v) { st[k[0]] = v; fix(k[0]); draw(); });
       ui.appendChild(sl[k[0]]);
     });
     Object.keys(PRESETS).forEach(function (n) {
-      pre.appendChild(el('button', { type: 'button', 'class': 'chip-btn', text: n, on: { click: function () { var p = PRESETS[n]; st = { o: p[0], h: p[1], l: p[2], c: p[3] }; Object.keys(sl).forEach(function (k) { sl[k].set(st[k]); }); draw(); } } }));
+      pre.appendChild(el('button', { type: 'button', 'class': 'chip-btn', text: n, on: { click: function () { var p = PRESETS[n]; st = { o: p[0], h: Math.max(p[1], p[0], p[3]), l: Math.min(p[2], p[0], p[3]), c: p[3] }; Object.keys(sl).forEach(function (k) { sl[k].set(st[k]); }); draw(); } } }));
     });
     function fix(k) {
       if (k === 'h') st.h = Math.max(st.h, st.o, st.c); else if (k === 'l') st.l = Math.min(st.l, st.o, st.c);
@@ -156,24 +162,29 @@
     box.appendChild(pre); box.appendChild(el('div', { 'class': 'cb-wrap' }, [pic, txt])); box.appendChild(ui);
     function draw() {
       pic.innerHTML = '';
-      var W = 240, H = 260, Y = function (v) { return 12 + (100 - v) / 100 * (H - 24); };
+      var W = 250, H = 260, Y = function (v) { return 12 + (100 - v) / 100 * (H - 24); };
       var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Candle' }, pic);
       var up = st.c >= st.o, col = css(up ? '--candle-up' : '--candle-down'), x = 90;
       svgEl('line', { x1: x, x2: x, y1: Y(st.h), y2: Y(st.l), stroke: col, 'stroke-width': 3 }, svg);
       var yt = Y(Math.max(st.o, st.c)), yb = Y(Math.min(st.o, st.c));
       svgEl('rect', { x: x - 26, y: yt, width: 52, height: Math.max(2, yb - yt), fill: up ? css('--panel') : col, stroke: col, 'stroke-width': 3, rx: 2 }, svg);
-      [['High', st.h], ['Low', st.l], [up ? 'Close' : 'Open', Math.max(st.o, st.c)], [up ? 'Open' : 'Close', Math.min(st.o, st.c)]].forEach(function (p, i) {
-        var yy = Y(p[1]);
-        svgEl('line', { x1: x + 30, x2: x + 44, y1: yy, y2: yy, stroke: css('--muted'), 'stroke-width': 1 }, svg);
-        var t = svgEl('text', { x: x + 48, y: yy + 4, fill: css('--ink-2'), 'font-size': 12, 'font-family': css('--data') }, svg);
-        t.textContent = p[0] + ' $' + p[1].toFixed(2);
+      // labels sorted top to bottom and pushed apart so they never overlap; a leader line joins each to its price
+      var labs = [['High', st.h], [up ? 'Close' : 'Open', Math.max(st.o, st.c)], [up ? 'Open' : 'Close', Math.min(st.o, st.c)], ['Low', st.l]]
+        .map(function (p) { return { t: p[0] + ' $' + px(p[1]).toFixed(2), y: Y(p[1]) }; });
+      var gap = 16, i2;
+      for (i2 = 0; i2 < labs.length; i2++) labs[i2].ly = i2 ? Math.max(labs[i2].y, labs[i2 - 1].ly + gap) : Math.max(labs[i2].y, 10);
+      for (i2 = labs.length - 1; i2 >= 0; i2--) labs[i2].ly = Math.min(labs[i2].ly, i2 < labs.length - 1 ? labs[i2 + 1].ly - gap : H - 8);
+      labs.forEach(function (lb) {
+        svgEl('path', { d: 'M' + (x + 30) + ' ' + lb.y + 'H' + (x + 38) + 'L' + (x + 46) + ' ' + lb.ly + 'H' + (x + 50), fill: 'none', stroke: css('--muted'), 'stroke-width': 1 }, svg);
+        var t = svgEl('text', { x: x + 54, y: lb.ly + 4, fill: css('--ink-2'), 'font-size': 12, 'font-family': css('--data') }, svg);
+        t.textContent = lb.t;
       });
       var nm = candleName(st.o, st.h, st.l, st.c);
       txt.innerHTML = '';
       txt.appendChild(el('p', { 'class': 'eyebrow', text: 'This candle' }));
       txt.appendChild(el('p', { 'class': 'h3', text: nm[0] }));
       txt.appendChild(el('p', { text: nm[1] }));
-      txt.appendChild(el('p', { 'class': 'small muted', text: 'Body: ' + Math.abs(st.c - st.o).toFixed(2) + ' · upper wick: ' + (st.h - Math.max(st.o, st.c)).toFixed(2) + ' · lower wick: ' + (Math.min(st.o, st.c) - st.l).toFixed(2) + '. Day ' + (up ? 'up ' : 'down ') + pc((st.c - st.o) / (st.o || 1), 1) + ' from the open.' }));
+      txt.appendChild(el('p', { 'class': 'small muted', text: 'Body $' + (Math.abs(st.c - st.o) / 10).toFixed(2) + ' · upper wick $' + ((st.h - Math.max(st.o, st.c)) / 10).toFixed(2) + ' · lower wick $' + ((Math.min(st.o, st.c) - st.l) / 10).toFixed(2) + '. Closed ' + pc((px(st.c) - px(st.o)) / px(st.o), 1) + ' from the open; the day\'s range was ' + pc((px(st.h) - px(st.l)) / px(st.l), 1).replace('+', '') + '.' }));
     }
     draw();
   }
