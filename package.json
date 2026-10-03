@@ -3,6 +3,6 @@
   "private": true,
   "description": "Netlify Functions for quiplee.com (the site itself is built by tools/build_strategies.py)",
   "dependencies": {
-    "@netlify/blobs": "^11.1.3"
+    "@netlify/blobs": "^11.0.0"
   }
 }
