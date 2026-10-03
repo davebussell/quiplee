@@ -28,7 +28,7 @@
   var MAP = {
     AAPL: 'fortress-mega', GOOG: 'fortress-mega', GOOGL: 'fortress-mega', MSFT: 'fortress-mega', AMZN: 'fortress-mega', META: 'fortress-mega', NVDA: 'fortress-mega',
     CARR: 'quality-large', BSX: 'quality-large', MDT: 'medtech', NPCE: 'pre-profit-burner',
-    HTZ: 'leveraged-cyclical', WSC: 'leveraged-cyclical', MGRC: 'leveraged-cyclical', CAR: 'leveraged-cyclical', URI: 'leveraged-cyclical', R: 'leveraged-cyclical',
+    HTZ: 'leveraged-cyclical', WSC: 'leveraged-cyclical', CAR: 'leveraged-cyclical', URI: 'leveraged-cyclical', R: 'leveraged-cyclical',
     TRNS: 'smallcap-industrial', FLXS: 'smallcap-industrial', FC: 'smallcap-industrial',
     LSCC: 'semis-growth', STM: 'semis-growth', STHH: 'semis-growth', INTC: 'turnaround', AMD: 'semis-growth', MU: 'semis-growth', AVGO: 'semis-growth', SUPX: 'micro-spec',
     EOSE: 'pre-profit-burner', FLNC: 'pre-profit-burner', OPTT: 'micro-spec', PRSO: 'micro-spec', HOLO: 'micro-spec', QUTX: 'micro-spec', NAMM: 'micro-spec', LEAP: 'micro-spec', GPRO: 'turnaround',

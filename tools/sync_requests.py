@@ -21,7 +21,7 @@ import urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
-from qstrat.content import TICKERS  # noqa: E402
+from qstrat.content import TICKERS, EXCLUDED  # noqa: E402
 
 QUEUE = os.environ.get("QUIPLEE_QUEUE_URL", "https://quiplee.com/api/watch")
 REQ = os.path.join(ROOT, "data", "universe", "requested.json")
@@ -68,7 +68,7 @@ def main():
     except Exception as ex:
         print(f"queue unavailable: {ex}")
         return 0
-    todo = [q for q in queue if q["sym"] not in covered and q["sym"] not in rejected]
+    todo = [q for q in queue if q["sym"] not in covered and q["sym"] not in rejected and q["sym"] not in EXCLUDED]
     room = max(0, min(PER_NIGHT, MAX_TOTAL - len(req["tickers"])))
     today = dt.date.today().isoformat()
     added = 0

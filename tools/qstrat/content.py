@@ -73,7 +73,6 @@ TICKERS = [
     {"sym": "CARR", "name": "Carrier Global", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "URI", "name": "United Rentals", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "R", "name": "Ryder System", "group": "Industrials & rentals", "cur": "$"},
-    {"sym": "MGRC", "name": "McGrath RentCorp", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "WSC", "name": "WillScot", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "HTZ", "name": "Hertz", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "CAR", "name": "Avis Budget", "group": "Industrials & rentals", "cur": "$"},
@@ -108,6 +107,9 @@ TICKERS = [
 GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Healthcare",
                "Financials", "Industrials & rentals", "Energy & power", "Metals & mining", "Crypto miners", "Micro caps"]
 
+# Tickers Quiplee doesn't cover, even if a reader asks for them
+EXCLUDED = {"MGRC"}
+
 # Reader-requested tickers (added by the nightly queue; see tools/sync_requests.py)
 import json as _json0
 import os as _os0
@@ -115,7 +117,7 @@ _REQ = _os0.path.join(_os0.path.dirname(_os0.path.dirname(_os0.path.dirname(_os0
 _known = {t["sym"] for t in TICKERS}
 if _os0.path.exists(_REQ):
     for _r in _json0.load(open(_REQ)).get("tickers", []):
-        if _r.get("status") == "ok" and _r["sym"] not in _known:
+        if _r.get("status") == "ok" and _r["sym"] not in _known and _r["sym"] not in EXCLUDED:
             TICKERS.append({"sym": _r["sym"], "name": _r.get("name") or _r["sym"], "group": "Reader-requested",
                             "cur": _r.get("cur", "$"), "requested": True, "since": _r.get("added")})
             _known.add(_r["sym"])

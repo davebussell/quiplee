@@ -152,6 +152,7 @@
         .then(function (j) {
           (j.queued || []).forEach(function (s) { posted[s] = 'queued'; queue[s] = queue[s] || { first: new Date().toISOString(), count: 1 }; });
           (j.rejected || []).forEach(function (s) { posted[s] = 'bad'; });
+          (j.unavailable || []).forEach(function (s) { posted[s] = 'excluded'; });
           render();
         })
         .catch(function () { c.forEach(function (s) { posted[s] = 'error'; }); render(); });
@@ -186,6 +187,7 @@
   function score(t, sel) { var kn = count(t, sel); return 0.5 * (kn[1] ? kn[0] / kn[1] : 0) + 0.5 * upPts(t.up == null ? 0 : t.up); }
   function status(sym) {
     if (D.t[sym]) return 'covered';
+    if (posted[sym] === 'excluded') return 'excluded';
     if (rejected[sym] || posted[sym] === 'bad') return 'rejected';
     if (posted[sym] === 'error') return 'error';
     if (queue[sym] || posted[sym] === 'queued') return 'queued';
@@ -271,10 +273,11 @@
       var rm = el('button', { type: 'button', 'class': 'wl-x', 'aria-label': 'Remove ' + it.sym, text: '×', on: { click: function () { st.items = st.items.filter(function (x) { return x.sym !== it.sym; }); if (st.example) st.example = false; save(); render(); } } });
       if (!t) {
         var txt = { queued: 'In the queue: analysis ' + whenText() + ', ready the next day.', sending: 'Sending to the queue…', new: 'Not covered yet.',
-          rejected: 'No price history found for this symbol. Check the ticker (Canadian names need .TO or .V).', error: "Couldn't reach the queue. " }[s];
+          rejected: 'No price history found for this symbol. Check the ticker (Canadian names need .TO or .V).', error: "Couldn't reach the queue. ",
+          excluded: "Quiplee doesn't cover this name." }[s];
         var cell = el('td', { colspan: String(head.length - 2), 'class': 'wl-status ' + s, text: txt });
         if (s === 'error' || s === 'new') cell.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'Send it again', on: { click: function () { delete posted[it.sym]; sendQueue([it.sym]); } } }));
-        tb.appendChild(el('tr', { 'class': 'wl-pending' }, [el('td', {}, [el('b', { 'class': 'sym', text: it.sym }), el('span', { 'class': 'sym-sub', text: s === 'rejected' ? 'Not found' : 'Analysis pending' })]), cell, el('td', {}, [rm])]));
+        tb.appendChild(el('tr', { 'class': 'wl-pending' }, [el('td', {}, [el('b', { 'class': 'sym', text: it.sym }), el('span', { 'class': 'sym-sub', text: s === 'rejected' ? 'Not found' : s === 'excluded' ? 'Not covered' : 'Analysis pending' })]), cell, el('td', {}, [rm])]));
         return;
       }
       var kn = count(t, sel);
