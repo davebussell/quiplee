@@ -1,4 +1,4 @@
-/* learn.js — Quiplee's interactive learning: lesson quizzes, flashcards,
+/* learn.js — Be The Puck's interactive learning: lesson quizzes, flashcards,
  * "Call it" chart practice, the play quiz and the progress panel.
  * Progress lives in this browser's localStorage only (wrapped so private
  * windows and blocked storage just mean nothing is remembered). */

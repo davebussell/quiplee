@@ -57,7 +57,7 @@ export function compare(D, tickers, prev) {
 export function digest(D, changes) {
   const base = siteUrl();
   const nItems = changes.reduce((a, c) => a + c.items.length, 0);
-  const subject = `Quiplee: ${nItems} change${nItems === 1 ? "" : "s"} on your stocks after the ${fmtDate(D.asof)} close`;
+  const subject = `Be The Puck: ${nItems} change${nItems === 1 ? "" : "s"} on your stocks after the ${fmtDate(D.asof)} close`;
   const color = { in: "#14946a", out: "#d23c55", near: "#a8740f", risk: "#a8740f", move: "#141821" };
   const blocks = changes.map((c) => `<div style="padding:12px 0;border-top:1px solid #e3e6ee">
 <p style="margin:0 0 6px"><a href="${base}/stocks/${mail.esc(c.slug)}/" style="color:#141821;font-weight:700;text-decoration:none">${mail.esc(c.short)}</a> <span style="color:#6b7385">${mail.esc(c.name)} · ${c.k} of ${c.n} core plays in</span></p>

@@ -1,4 +1,4 @@
-/* news.js — Quiplee ingestion proxy (Netlify Function, zero dependencies).
+/* news.js — Be The Puck ingestion proxy (Netlify Function, zero dependencies).
  *
  * GET /.netlify/functions/news?tickers=NVDA,AAPL&topics=Cloud&names=NVDA:Nvidia;AAPL:Apple
  *
@@ -10,7 +10,7 @@
  */
 'use strict';
 
-var UA = 'Quiplee/1.0 (+https://quiplee.com; contact dave@clickshift.ca)';
+var UA = 'Be The Puck/1.0 (+https://bethepuck.com; contact dave@clickshift.ca)';
 var DEFAULT_NAMES = {
   NVDA: 'Nvidia', AMD: 'AMD', AVGO: 'Broadcom', MU: 'Micron', MSFT: 'Microsoft',
   AMZN: 'Amazon', GOOGL: 'Alphabet', META: 'Meta', AAPL: 'Apple', TSLA: 'Tesla',
@@ -118,7 +118,7 @@ function loadCiks() {
     CIK_CACHE = map; return map;
   }).catch(function () { CIK_CACHE = {}; return CIK_CACHE; });
 }
-// 8-K item codes -> human label + Quiplee story type. Wording is chosen so the
+// 8-K item codes -> human label + Be The Puck story type. Wording is chosen so the
 // client impact engine reads the right direction (e.g. "warns", "termination").
 var ITEM_MAP = {
   '2.02': { label: 'reports quarterly results', type: 'Earnings' },

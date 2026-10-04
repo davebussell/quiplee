@@ -1,4 +1,4 @@
-/* qm.mjs: Quiplee Members helpers shared by the Node functions.
+/* qm.mjs: Be The Puck Members helpers shared by the Node functions.
  *
  * A member cookie ("qm") is  v1.<base64url JSON payload>.<base64url HMAC-SHA256>
  * signed with QM_SECRET. Payloads:
@@ -125,7 +125,7 @@ export function activeRecord(rec) {
   return !!rec.paid_through && Date.parse(rec.paid_through) > Date.now();
 }
 
-export const siteUrl = () => (env("URL") || "https://quiplee.com").replace(/\/$/, "");
+export const siteUrl = () => (env("URL") || "https://bethepuck.com").replace(/\/$/, "");
 
 /** A one-time sign-in link for a subscriber, good for 7 days. */
 export function linkFor(id, next = "/picks/") {

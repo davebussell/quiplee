@@ -1,4 +1,4 @@
-/* member.mjs: Quiplee Members sign-in and the member's saved list.
+/* member.mjs: Be The Puck Members sign-in and the member's saved list.
  *
  * POST /api/member/login     password + next  -> sets the member cookie, back to next
  * GET  /api/member/logout                     -> clears it, to /members/
@@ -118,11 +118,11 @@ async function sendLink(req, context) {
     const r = id ? await freshRecord(id) : null;
     if (r && activeRecord(r)) {
       const link = linkFor(id);
-      await mail.send(email, "Your Quiplee sign-in link",
-        mail.shell("Sign in to Quiplee Members", `<p>Tap the button to sign in on this device. The link works for 7 days.</p>
+      await mail.send(email, "Your Be The Puck sign-in link",
+        mail.shell("Sign in to Be The Puck Members", `<p>Tap the button to sign in on this device. The link works for 7 days.</p>
 <p style="margin:18px 0"><a href="${mail.esc(link)}" style="background:#7c6cf5;color:#fff;padding:11px 18px;border-radius:9px;text-decoration:none;font-weight:600">Sign in</a></p>
 <p style="font-size:13px;color:#6b7385">Didn't ask for this? You can ignore it.</p>`),
-        "Sign in to Quiplee Members: " + link);
+        "Sign in to Be The Puck Members: " + link);
     }
   } catch (e) { /* same reply either way */ }
   return done;

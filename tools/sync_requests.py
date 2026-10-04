@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Turn readers' watchlist requests into covered stocks (runs nightly in CI).
 
-1. Read the queue from https://quiplee.com/api/watch (Netlify Function + Blobs).
+1. Read the queue from https://bethepuck.com/api/watch (Netlify Function + Blobs).
 2. For each symbol not already covered or rejected, check it has a real price
    history on Yahoo Finance (at least 60 sessions) and look up its name and
    currency.
@@ -23,7 +23,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 from qstrat.content import TICKERS, EXCLUDED  # noqa: E402
 
-QUEUE = os.environ.get("QUIPLEE_QUEUE_URL", "https://quiplee.com/api/watch")
+QUEUE = os.environ.get("QUIPLEE_QUEUE_URL", "https://bethepuck.com/api/watch")
 REQ = os.path.join(ROOT, "data", "universe", "requested.json")
 REJ = os.path.join(ROOT, "data", "universe", "rejected.json")
 PER_NIGHT, MAX_TOTAL = 25, 300
@@ -63,7 +63,7 @@ def main():
     covered = {t["sym"] for t in TICKERS} | {r["sym"] for r in req["tickers"]}
     rejected = {r["sym"] for r in rej["tickers"]}
     try:
-        with urllib.request.urlopen(urllib.request.Request(QUEUE, headers={"User-Agent": "quiplee-sync"}), timeout=60) as r:
+        with urllib.request.urlopen(urllib.request.Request(QUEUE, headers={"User-Agent": "bethepuck-sync"}), timeout=60) as r:
             queue = json.load(r).get("requests", [])
     except Exception as ex:
         print(f"queue unavailable: {ex}")

@@ -1,16 +1,16 @@
-# Quiplee — Brand & Content Strategy
+# Be The Puck — Brand & Content Strategy
 
-> **Positioning (one line):** Quiplee is the real-time newsroom that reads every
+> **Positioning (one line):** Be The Puck is the real-time newsroom that reads every
 > story for you and tells you, instantly, what it means for the stock.
 
 ---
 
 ## 1. The one-sentence pitch
 
-**"News breaks. Quiplee tells you what it's worth."**
+**"News breaks. Be The Puck tells you what it's worth."**
 
 Every headline is a question for investors: *does this move the stock, and how
-much?* Quiplee answers that question the moment the story lands — scoring its
+much?* Be The Puck answers that question the moment the story lands — scoring its
 revenue impact, the likely direction and size of the move, and how comparable
 stories have played out before.
 
@@ -18,9 +18,11 @@ stories have played out before.
 
 ## 2. Name & brand essence
 
-**Quiplee** = *quip* (a quick, sharp, intelligent remark) + a soft, human ending.
-The brand promise is in the name: **a quick, sharp read on the news** — fast
-enough to act on, smart enough to trust.
+**Be The Puck** borrows hockey's oldest advice: don't chase where the puck is,
+go where it's headed. The brand promise is in the name: **read where a stock is
+going next** (the price where each play would get in or out, the setups with
+room to run) rather than where it has already been. (The site launched as
+Quiplee and moved to bethepuck.com in October 2026.)
 
 - **Essence:** *Sharp, fast, plain-spoken market intelligence.*
 - **Personality:** the sharpest analyst on the desk — quick, calm, never hyped,
@@ -46,7 +48,7 @@ enough to act on, smart enough to trust.
 | **The Thematic Investor** | Trades themes (AI, GLP-1, EVs, rates) | "Tell me when anything revenue-impacting hits my theme" | Story Screener + topic alerts |
 | **The Time-Poor Pro / RIA** | Analyst, advisor, junior PM | "I can't read 400 headlines; surface the 6 that matter" | Ranked feed, smart filters, lookback evidence |
 
-Secondary: finance creators/newsletters who cite Quiplee impact reads.
+Secondary: finance creators/newsletters who cite Be The Puck impact reads.
 
 ---
 
@@ -56,12 +58,12 @@ Secondary: finance creators/newsletters who cite Quiplee impact reads.
 
 Three things competitors (Benzinga, news terminals, raw alerts) don't combine:
 
-1. **Impact, not just alerts.** Everyone pushes headlines. Quiplee pushes a
+1. **Impact, not just alerts.** Everyone pushes headlines. Be The Puck pushes a
    **verdict**: revenue-impacting? direction? size? confidence? *why?*
 2. **Memory.** Every story is scored *against history* — "the last 6 times a chipmaker
    raised HBM guidance, peers moved +3.1% in 5 days." Lookback + similar-stories
    turn a headline into an evidence-backed expectation.
-3. **The Screener.** Watch a *topic*, not just a ticker. Quiplee notifies you when
+3. **The Screener.** Watch a *topic*, not just a ticker. Be The Puck notifies you when
    anything revenue-impacting hits your theme — and reports the affected stock.
 
 ---
@@ -87,7 +89,7 @@ hype account, not a compliance memo.
 | "Not financial advice. Confidence reflects model uncertainty." | (omitting the caveat) |
 
 **Tagline system**
-- Primary: **"News breaks. Quiplee tells you what it's worth."**
+- Primary: **"News breaks. Be The Puck tells you what it's worth."**
 - Product: *"Every story, priced in."*
 - Screener: *"Watch the theme. We'll watch the tape."*
 - Short/social: *"The 'so what' on every headline."*
@@ -97,10 +99,12 @@ hype account, not a compliance memo.
 ## 7. Visual identity direction
 
 - **Feel:** a modern newsroom × a trading terminal. Editorial clarity, terminal precision.
-- **Logo concept:** wordmark **quiplee** in a confident grotesque; the dot of a
-  speech/"quote" mark doubling as a rising tick — *a quip that moves the line.*
+- **Logo concept:** wordmark **be the puck** set as one word, with "the" in a
+  quieter grey, and a green rising tick; the icon is a puck with the tick ahead of
+  it. The idea is the old hockey wisdom of going where the puck is headed: read
+  where a stock is going next, not where it has been.
 - **Color:** near-black editorial canvas (`#0b0f17`), paper-white text, a single
-  electric **Quiplee Violet** (`#6c5cff`) accent; semantic **green/red** reserved
+  electric **violet** (`#6c5cff`) accent; semantic **green/red** reserved
   strictly for bullish/bearish impact so color = signal, never decoration.
 - **Type:** a sharp sans for UI (Inter / Geist); an editorial serif accent for
   story headlines to earn the "news feel."
@@ -120,7 +124,7 @@ hype account, not a compliance memo.
 
 ## 9. Content strategy
 
-Quiplee is a product **and** a media brand — the content *is* the marketing, and
+Be The Puck is a product **and** a media brand — the content *is* the marketing, and
 the marketing *is* the product surface. Content compounds into SEO, habit, and trust.
 
 ### Content pillars → formats
@@ -146,7 +150,7 @@ the marketing *is* the product surface. Content compounds into SEO, habit, and t
 - **Monthly:** accuracy/calibration transparency report.
 
 ### Channels & growth loop
-1. A story breaks → Quiplee posts a **verdict card** (X/LinkedIn/Threads) + Impact Note page.
+1. A story breaks → Be The Puck posts a **verdict card** (X/LinkedIn/Threads) + Impact Note page.
 2. The Impact Note ranks for *"what does X mean for {ticker}"* → organic traffic.
 3. Visitor hits a **Screener** CTA → "watch this theme, get the next one first" → **email capture**.
 4. Alerts build the **daily habit** → upgrade to real-time/pro.
@@ -160,10 +164,10 @@ the marketing *is* the product surface. Content compounds into SEO, habit, and t
 
 ## 10. Editorial & trust standards
 
-- **Not financial advice** — explicit, everywhere. Quiplee informs decisions; it doesn't make them.
+- **Not financial advice** — explicit, everywhere. Be The Puck informs decisions; it doesn't make them.
 - **Confidence is a first-class citizen** — every verdict shows model confidence; we publish how reads aged.
 - **Sourcing transparency** — story source + timestamp always visible.
-- **No conflicts** — Quiplee doesn't take positions in names it scores (stated policy).
+- **No conflicts** — Be The Puck doesn't take positions in names it scores (stated policy).
 - **Correct in public** — when a read is wrong, the lookback shows it. Credibility compounds.
 
 ---
@@ -180,10 +184,10 @@ the marketing *is* the product surface. Content compounds into SEO, habit, and t
 
 ## 12. First-90-days launch
 
-1. **Weeks 1–3:** ship the live feed + impact verdicts + screener (this prototype → quiplee.com).
+1. **Weeks 1–3:** ship the live feed + impact verdicts + screener (this prototype → bethepuck.com).
 2. **Weeks 3–6:** Impact-Note permalink pages live (SEO engine on) + daily digest email.
 3. **Weeks 6–10:** 4 Topic Desks (AI, GLP-1, EVs, Rates) + verdict social cards automated.
 4. **Weeks 10–13:** publish first accuracy/calibration report → earn trust → open paid tier.
 
-*Brand truth to protect at all costs: **Quiplee is fast, but Quiplee is honest.** The
+*Brand truth to protect at all costs: **Be The Puck is fast, but Be The Puck is honest.** The
 moment we trade calibration for hype, we're just another alerts account.*

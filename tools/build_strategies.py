@@ -1,4 +1,4 @@
-"""Build Quiplee's plays site from the cached prices.
+"""Build Be The Puck's plays site from the cached prices.
 
     pip install -r requirements.txt
     python tools/fetch_prices.py                 # refresh data/prices/ (network; nightly in CI)

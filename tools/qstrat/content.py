@@ -107,7 +107,7 @@ TICKERS = [
 GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Healthcare",
                "Financials", "Industrials & rentals", "Energy & power", "Metals & mining", "Crypto miners", "Micro caps"]
 
-# Tickers Quiplee doesn't cover, even if a reader asks for them
+# Tickers Be The Puck doesn't cover, even if a reader asks for them
 EXCLUDED = {"MGRC"}
 
 # Reader-requested tickers (added by the nightly queue; see tools/sync_requests.py)

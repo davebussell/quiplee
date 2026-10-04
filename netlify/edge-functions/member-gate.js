@@ -1,4 +1,4 @@
-/* member-gate.js: the Quiplee Members paywall.
+/* member-gate.js: the Be The Puck Members paywall.
  *
  * Runs in front of /picks/ and every report under /articles/ (the hub stays
  * open). With a valid member cookie the page is served as built. Without one,
@@ -59,10 +59,15 @@ async function memberState(req) {
 }
 
 const PRIVATE = { "cache-control": "private, no-store", vary: "cookie" };
+const OLD_HOSTS = new Set(["quiplee.com", "www.quiplee.com"]);
 
 export default async (req, context) => {
   const url = new URL(req.url);
   const path = url.pathname;
+  // the old domain forwards to the same page on bethepuck.com
+  if (OLD_HOSTS.has(url.hostname)) {
+    return new Response(null, { status: 301, headers: { location: "https://bethepuck.com" + path + url.search } });
+  }
   // directory pages always end in a slash (relative links depend on it)
   if (!path.endsWith("/") && !/\.[a-z0-9]{1,5}$/i.test(path)) {
     return new Response(null, { status: 301, headers: { location: path + "/" + url.search } });

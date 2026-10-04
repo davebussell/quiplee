@@ -1,6 +1,6 @@
 /* watchlist.js — the /watchlist/ app. Reads data/watch.json (every covered ticker's
  * calls), keeps the reader's list in localStorage (or a shared ?t= link), parses
- * pasted text and broker CSV exports in the browser, and posts tickers Quiplee
+ * pasted text and broker CSV exports in the browser, and posts tickers Be The Puck
  * doesn't cover yet to /api/watch so the nightly run can add them. */
 (function () {
   'use strict';
@@ -279,7 +279,7 @@
       if (!t) {
         var txt = { queued: 'In the queue: analysis ' + whenText() + ', ready the next day.', sending: 'Sending to the queue…', new: 'Not covered yet.',
           rejected: 'No price history found for this symbol. Check the ticker (Canadian names need .TO or .V).', error: "Couldn't reach the queue. ",
-          excluded: "Quiplee doesn't cover this name." }[s];
+          excluded: "Be The Puck doesn't cover this name." }[s];
         var cell = el('td', { colspan: String(head.length - 2), 'class': 'wl-status ' + s, text: txt });
         if (s === 'error' || s === 'new') cell.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'Send it again', on: { click: function () { delete posted[it.sym]; sendQueue([it.sym]); } } }));
         tb.appendChild(el('tr', { 'class': 'wl-pending' }, [el('td', {}, [el('b', { 'class': 'sym', text: it.sym }), el('span', { 'class': 'sym-sub', text: s === 'rejected' ? 'Not found' : s === 'excluded' ? 'Not covered' : 'Analysis pending' })]), cell, el('td', {}, [rm])]));
@@ -371,7 +371,7 @@
     var n = (mem.tickers || []).length;
     if (!mem.email) alMsg('This sign-in has no email on file, so no alerts can be sent. Subscribers get them at their PayPal email.');
     else if (!n) alMsg('Save your list once; after that it stays in step as you add or remove stocks.');
-    else alMsg('Saved: ' + n + ' stock' + (n === 1 ? '' : 's') + '. ' + (mem.alerts ? 'Alerts are on: Quiplee checks after each close and emails only when something changed.' : 'Alerts are off.'));
+    else alMsg('Saved: ' + n + ' stock' + (n === 1 ? '' : 's') + '. ' + (mem.alerts ? 'Alerts are on: Be The Puck checks after each close and emails only when something changed.' : 'Alerts are off.'));
   }
   function putList(extra) {
     var body = { tickers: st.items.map(function (x) { return x.sym; }) };
@@ -465,5 +465,5 @@
   }
 
   getJSON(BASE + 'data/watch.json').then(function (j) { D = j; init(); })
-    .catch(function (err) { if (window.console) console.error(err); msg("Couldn't load Quiplee's data. Refresh the page to try again.", "warn-text"); });
+    .catch(function (err) { if (window.console) console.error(err); msg("Couldn't load Be The Puck's data. Refresh the page to try again.", "warn-text"); });
 })();

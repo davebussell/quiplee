@@ -2,7 +2,7 @@
 
 The page is an app (assets/watchlist.js) over one export, data/watch.json, which
 carries every covered ticker's calls on every play, its trend and crash
-exposure, plus aliases for matching what people paste. Tickers Quiplee doesn't
+exposure, plus aliases for matching what people paste. Tickers Be The Puck doesn't
 cover yet are posted to /api/watch (netlify/functions/watch.mjs); the nightly
 job (tools/sync_requests.py) adds them, and the next build analyses them.
 Lists live in the reader's browser; the analysis of every ticker is public.
@@ -84,7 +84,7 @@ def watchlist_page(site):
     n_cov = len([t for t in TICKERS])
     body = f"""
 <section class="pair-head"><p class="eyebrow">Watchlist</p><h1 class="h1">Check your stocks against every play</h1>
-<p class="lede">Paste your tickers or upload a holdings file from Wealthsimple or another broker. Names Quiplee already covers show their full read at once. New names join the queue, get analysed after the next U.S. close, and are ready the next day, for you and everyone else.</p></section>
+<p class="lede">Paste your tickers or upload a holdings file from Wealthsimple or another broker. Names Be The Puck already covers show their full read at once. New names join the queue, get analysed after the next U.S. close, and are ready the next day, for you and everyone else.</p></section>
 
 <section class="wl" id="wl" data-base="{'../' * depth}" data-api="/api/watch" data-stock="{e(h('stocks/{u}/'))}" data-pair="{e(h('stocks/{u}/{s}/'))}">
 <div class="card wl-add">
@@ -96,10 +96,10 @@ def watchlist_page(site):
 <button type="button" class="btn" id="wl-share">Copy share link</button>
 <button type="button" class="linkish small" id="wl-clear">Clear list</button>
 </div>
-<p class="small muted" id="wl-msg" aria-live="polite">Your list is saved in this browser only. A file is read on your device: Quiplee keeps only the symbols, and sends just the ones it doesn't cover yet to the queue.</p>
+<p class="small muted" id="wl-msg" aria-live="polite">Your list is saved in this browser only. A file is read on your device: Be The Puck keeps only the symbols, and sends just the ones it doesn't cover yet to the queue.</p>
 </div>
 <div class="card wl-alerts" id="wl-alerts">
-<div class="wl-al-guest">{member_tag()}<span>Get an email after the close when a play gets in or out on one of your stocks, or a price nears where the rules would act. Part of <a href="{h('members/')}">Quiplee Members</a>, {PRICE} a month.</span></div>
+<div class="wl-al-guest">{member_tag()}<span>Get an email after the close when a play gets in or out on one of your stocks, or a price nears where the rules would act. Part of <a href="{h('members/')}">Be The Puck Members</a>, {PRICE} a month.</span></div>
 <div class="wl-al-mem" hidden>{member_tag()}
 <label class="wl-al-on"><input type="checkbox" id="wl-al-on" checked> Email me after the close when something changes on this list</label>
 <button type="button" class="btn sm" id="wl-al-save">Save this list for alerts</button>
@@ -117,8 +117,8 @@ def watchlist_page(site):
 <section class="split how">
 <div class="card prose"><p class="eyebrow">How it works</p><ol>
 <li><b>Add your tickers.</b> Type them, paste them or upload a CSV. Canadian listings use .TO (Toronto) or .V (Venture); a file's exchange column is read for you.</li>
-<li><b>Covered names answer at once.</b> Quiplee covers {n_cov} stocks, ETFs, indexes and coins, each with every play's call, its trend and its crash exposure.</li>
-<li><b>New names join the queue.</b> After the next U.S. close Quiplee checks each one has a price history, runs all {len(TIMED)} plays on it and publishes its page. The 20 core plays get a full page each.</li>
+<li><b>Covered names answer at once.</b> Be The Puck covers {n_cov} stocks, ETFs, indexes and coins, each with every play's call, its trend and its crash exposure.</li>
+<li><b>New names join the queue.</b> After the next U.S. close Be The Puck checks each one has a price history, runs all {len(TIMED)} plays on it and publishes its page. The 20 core plays get a full page each.</li>
 </ol></div>
 <div class="card prose"><p class="eyebrow">What the columns mean</p><ul>
 <li><b>Plays in:</b> how many of the plays you picked hold the stock now. Most in usually means a strong, broad trend; a split means the plays disagree.</li>
@@ -126,7 +126,7 @@ def watchlist_page(site):
 <li><b>Crash exposure:</b> the storm test of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
 <li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
 <li><b>Weight:</b> your share of the list by value, when your file includes quantities or market values. Otherwise every name counts equally.</li>
-</ul><p class="small muted">What published rules say, not advice. Quiplee doesn't know your goals, taxes or timeline.</p></div>
+</ul><p class="small muted">What published rules say, not advice. Be The Puck doesn't know your goals, taxes or timeline.</p></div>
 </section>
 <section id="wl-readers"></section>
 """

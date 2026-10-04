@@ -36,6 +36,7 @@ h1,h2,h3 { margin: 0; }
 
 /* logo */
 .logo { font-weight: 800; font-size: 26px; letter-spacing: -.5px; color: var(--text); }
+.logo-the { color: var(--muted); font-weight: 600; }
 .logo-tick { color: var(--bull); font-size: .55em; vertical-align: super; margin-left: 1px; }
 .logo-sm { font-size: 20px; }
 

@@ -1,8 +1,8 @@
-# Quiplee
+# Be The Puck
 
 **Pick a thinker. Pick a stock. See the next move.**
 
-Quiplee has two parts:
+Be The Puck has two parts:
 
 1. **The plays site** (home, `/strategies/` = Plays, `/thinkers/` = Analysts,
    `/stocks/`, `/learn/`, `/method/`): 59 published trading plays tied to the 52
@@ -71,7 +71,7 @@ it adds reader-requested tickers, fetches prices, macro series and fundamentals,
 and commits `data/`; that push triggers the Netlify build.
 
 **Bring your own stocks.** The watchlist keeps each reader's list in their
-browser. Tickers Quiplee doesn't cover are POSTed to `/api/watch` (symbols only).
+browser. Tickers Be The Puck doesn't cover are POSTed to `/api/watch` (symbols only).
 The nightly job validates up to 25 a night (300 in total), the build runs all
 plays on them, and core-play pages are published. Reader-requested names stay out
 of the cross-stock scoreboards.
@@ -138,7 +138,7 @@ Open <http://localhost:5060> (strategy site) or <http://localhost:5060/desk/> (l
 
 ## Deploy
 
-Static publish to Netlify (point quiplee.com at the site) — `git push` /
+Static publish to Netlify (point bethepuck.com at the site) — `git push` /
 `netlify deploy`, no build command.
 
 ## How it works
@@ -161,7 +161,7 @@ ship with hand-tuned verdicts and realized outcomes; live-generated stories are
 scored by the same `evaluate()` so the desk feels real in real time.
 
 **Alerts** (the spec's core): when a live story is revenue-impacting **and** hits a
-**watched ticker**, Quiplee reports the stock; when it hits an **armed topic**, it
+**watched ticker**, Be The Puck reports the stock; when it hits an **armed topic**, it
 fires the alert about the affected stock. Both land in **Alerts** + a toast.
 
 **Lookback & similar:** open any story → see how past stories moved that ticker and

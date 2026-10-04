@@ -61,6 +61,7 @@ p { margin: 0; }
 .head-row { display: flex; align-items: center; gap: 12px 28px; padding-block: 12px; flex-wrap: wrap; }
 .logo { font: 800 22px/1 var(--ui); letter-spacing: -.5px; color: var(--ink); }
 .logo:hover { text-decoration: none; }
+.logo-the { color: var(--muted); font-weight: 600; }
 .logo-tick { color: var(--in); font-size: .55em; vertical-align: super; margin-left: 1px; }
 .site-nav { display: flex; flex-wrap: wrap; gap: 4px 2px; }
 .site-nav a {

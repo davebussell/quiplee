@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download the macro series behind Quiplee's Crash Watch into data/macro/.
+"""Download the macro series behind Be The Puck's Crash Watch into data/macro/.
 
   - Shiller CAPE, monthly since 1871 (multpl.com table, built on Shiller's data)
   - FRED: UNRATE (Sahm rule), BAA10Y (Baa corporate minus 10-year Treasury),
@@ -20,7 +20,7 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "macro")
-UA = "Quiplee/1.0 (+https://quiplee.com)"
+UA = "Be The Puck/1.0 (+https://bethepuck.com)"
 FRED = ["UNRATE", "BAA10Y", "T10Y3M", "USREC"]
 MONTHS = {m: i for i, m in enumerate(["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
 

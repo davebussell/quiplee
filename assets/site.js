@@ -1,4 +1,4 @@
-/* site.js — renders Quiplee's strategy charts from embedded JSON and wires the
+/* site.js — renders Be The Puck's strategy charts from embedded JSON and wires the
  * home-page picker. Zero dependencies. Charts size to their container, redraw on
  * resize, and carry a crosshair + tooltip (mouse, touch and arrow keys). */
 (function () {

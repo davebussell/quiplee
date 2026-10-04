@@ -1,4 +1,4 @@
-/* paypal.mjs: PayPal subscriptions for Quiplee Members ($5 a month).
+/* paypal.mjs: PayPal subscriptions for Be The Puck Members ($5 a month).
  *
  * POST /api/paypal/subscribed {subscriptionID}
  *   Called by the PayPal button on /members/ after the buyer approves. Checks the
@@ -30,16 +30,16 @@ async function welcome(rec) {
   if (!rec.email || rec.welcomed) return rec;
   const link = linkFor(rec.id);
   const base = siteUrl();
-  const r = await mail.send(rec.email, "Welcome to Quiplee Members",
-    mail.shell("Welcome to Quiplee Members", `<p>Thanks for joining${rec.name ? ", " + mail.esc(rec.name.split(" ")[0]) : ""}. You're signed in on the device you joined from. On any other device, use this link (it works for 7 days; you can ask for a fresh one on the members page any time):</p>
+  const r = await mail.send(rec.email, "Welcome to Be The Puck Members",
+    mail.shell("Welcome to Be The Puck Members", `<p>Thanks for joining${rec.name ? ", " + mail.esc(rec.name.split(" ")[0]) : ""}. You're signed in on the device you joined from. On any other device, use this link (it works for 7 days; you can ask for a fresh one on the members page any time):</p>
 <p style="margin:18px 0"><a href="${mail.esc(link)}" style="background:#7c6cf5;color:#fff;padding:11px 18px;border-radius:9px;text-decoration:none;font-weight:600">Sign in</a></p>
 <ul style="padding-left:18px">
 <li><a href="${base}/picks/">The top-picks tracker</a>: five rule-based picks, reviewed after every Friday close.</li>
 <li><a href="${base}/articles/">The reports</a>: long reads, sector pieces and a brief on every covered stock.</li>
-<li><a href="${base}/watchlist/">Your watchlist</a>: save your stocks there and Quiplee emails you after the close when a play flips on one of them.</li>
+<li><a href="${base}/watchlist/">Your watchlist</a>: save your stocks there and Be The Puck emails you after the close when a play flips on one of them.</li>
 </ul>
 <p style="font-size:13px;color:#6b7385">$5 a month through PayPal. Cancel any time from your PayPal account (Settings, Payments, Automatic payments); access runs to the end of the month you paid for.</p>`),
-    `Welcome to Quiplee Members. Sign in on another device: ${link}`);
+    `Welcome to Be The Puck Members. Sign in on another device: ${link}`);
   return r.ok ? { ...rec, welcomed: new Date().toISOString() } : rec;
 }
 

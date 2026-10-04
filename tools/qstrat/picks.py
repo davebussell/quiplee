@@ -48,8 +48,18 @@ VERSION = 1
 # --------------------------------------------------------------------------
 # state storage
 # --------------------------------------------------------------------------
-def _state_url():
-    return os.environ.get("QUIPLEE_PICKS_URL") or (os.environ.get("URL") or "https://quiplee.com").rstrip("/") + "/api/picks-state"
+def _state_urls():
+    """Where /api/picks-state lives: the site's main address, then its netlify.app
+    address (always has a certificate, e.g. while a new domain's is being issued)."""
+    if os.environ.get("QUIPLEE_PICKS_URL"):
+        return [os.environ["QUIPLEE_PICKS_URL"]]
+    out = [(os.environ.get("URL") or "https://bethepuck.com").rstrip("/") + "/api/picks-state"]
+    if os.environ.get("SITE_NAME"):
+        out.append(f"https://{os.environ['SITE_NAME']}.netlify.app/api/picks-state")
+    return out
+
+
+_STORE = {"url": None}
 
 
 def load_state():
@@ -63,16 +73,21 @@ def load_state():
     tok = os.environ.get("PICKS_STATE_TOKEN")
     if not tok:
         return None, "none"
-    req = urllib.request.Request(_state_url(), headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=20) as r:
-            return json.loads(r.read().decode("utf-8")), "ok"
-    except urllib.error.HTTPError as ex:
-        if ex.code == 404:
-            return None, "missing"
-        print(f"picks: state read failed ({ex.code})")
-    except (urllib.error.URLError, OSError, ValueError) as ex:
-        print(f"picks: state read failed ({ex.__class__.__name__})")
+    for url in _state_urls():
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {tok}", "Accept": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                _STORE["url"] = url
+                return json.loads(r.read().decode("utf-8")), "ok"
+        except urllib.error.HTTPError as ex:
+            body = ex.read().decode("utf-8", "replace")[:200]
+            # only the store's own answer means "no history yet"; any other 404 is an error
+            if ex.code == 404 and "no history yet" in body:
+                _STORE["url"] = url
+                return None, "missing"
+            print(f"picks: state read from {url} failed ({ex.code})")
+        except (urllib.error.URLError, OSError, ValueError) as ex:
+            print(f"picks: state read from {url} failed ({ex.__class__.__name__})")
     return None, "error"
 
 
@@ -84,9 +99,9 @@ def save_state(state, status):
             f.write(body)
         return "file"
     tok = os.environ.get("PICKS_STATE_TOKEN")
-    if not tok or os.environ.get("CONTEXT") != "production" or status not in ("ok", "missing"):
+    if not tok or os.environ.get("CONTEXT") != "production" or status not in ("ok", "missing") or not _STORE["url"]:
         return "skipped"
-    req = urllib.request.Request(_state_url(), data=body.encode("utf-8"), method="PUT",
+    req = urllib.request.Request(_STORE["url"], data=body.encode("utf-8"), method="PUT",
                                  headers={"Authorization": f"Bearer {tok}", "Content-Type": "application/json"})
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
@@ -311,7 +326,7 @@ def picks_page(site, state, info):
     mkt, rk = info["mkt"], info["rk"]
     head = f"""<header class="pair-head"><p class="eyebrow">Members · Top picks</p><h1 class="h1">Top picks tracker</h1>
 <p class="lede">Five stocks picked by rule from the strongest setups and tracked from the close they go in. Reviewed after every Friday close; a pick stays while it ranks in the top {HOLD_RANK}.</p></header>"""
-    desc = "Five stocks picked by rule from Quiplee's strongest setups, tracked against the S&P 500 from the close they go in. For Quiplee Members."
+    desc = "Five stocks picked by rule from Be The Puck's strongest setups, tracked against the S&P 500 from the close they go in. For Be The Puck Members."
     locked_page(site, path, "Top picks tracker", desc, head, what="tracker",
                 crumbs=f'<nav class="crumbs"><a href="{h("stocks/")}">Stocks</a><span>/</span><span>Top picks</span></nav>')
 
@@ -434,6 +449,6 @@ def picks_page(site, state, info):
 <li><b>Five picks.</b> The model starts at 100 in five equal slots. A pick takes a slot and keeps whatever the slot is worth when it leaves.</li>
 <li><b>Weekly review.</b> After each Friday close. A pick stays while it ranks in the top {HOLD_RANK} and still qualifies; otherwise it leaves and the best-ranked name not held comes in.</li>
 <li><b>Prices.</b> In and out at the review day's close. No fees, taxes, dividends or slippage.</li>
-</ol><p class="small muted">A hypothetical model run by fixed rules, not advice and not a record of real trades. Quiplee takes no positions in the names it covers.</p></div>
+</ol><p class="small muted">A hypothetical model run by fixed rules, not advice and not a record of real trades. Be The Puck takes no positions in the names it covers.</p></div>
 </section>"""
     site.add(path, site.shell(path, "Top picks tracker", desc, body, active="stocks/", charts=True, scripts=("assets/members.js",)))

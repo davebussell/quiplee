@@ -268,7 +268,7 @@ def fundamentals_card(t, fund, price, learn="#"):
             f'<a class="small" href="{learn}">How to judge these numbers</a></div>{about}'
             f'<div class="fund-grid">{body}</div>'
             f'<p class="chart-note">Company figures from Yahoo Finance{", fetched " + pd.Timestamp(when).strftime("%b %-d, %Y") if when else ""}. '
-            f'Analyst targets are opinions, not forecasts Quiplee checks.</p></div>')
+            f'Analyst targets are opinions, not forecasts Be The Puck checks.</p></div>')
 
 
 # --------------------------------------------------------------------------

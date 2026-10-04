@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://quiplee.com/sitemap.xml
+Sitemap: https://bethepuck.com/sitemap.xml

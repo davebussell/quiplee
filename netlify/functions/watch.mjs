@@ -11,7 +11,7 @@
 import { getStore } from "@netlify/blobs";
 
 const MAX_PER_REQUEST = 25;
-// Tickers Quiplee doesn't cover even on request (kept in step with EXCLUDED in tools/qstrat/content.py)
+// Tickers Be The Puck doesn't cover even on request (kept in step with EXCLUDED in tools/qstrat/content.py)
 const EXCLUDED = new Set(["MGRC"]);
 const MAX_KEYS = 3000;
 // AAPL, BRK-B, SHOP.TO, LEAP.V, BTC-USD, ^GSPC, CTC-A.TO

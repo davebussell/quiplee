@@ -76,7 +76,7 @@ class Articles:
         depth = path.count("/")
         h = self.h(depth)
         bname = dict((k, n) for k, n, _ in BUCKETS)[bucket]
-        when = (f"Rebuilt with the {self.s.asof.strftime('%b %-d, %Y')} close" if live else f"Quiplee · {(date or WRITTEN).strftime('%b %-d, %Y')}")
+        when = (f"Rebuilt with the {self.s.asof.strftime('%b %-d, %Y')} close" if live else f"Be The Puck · {(date or WRITTEN).strftime('%b %-d, %Y')}")
         src = ""
         if sources:
             src = ('<section class="card prose art-sources"><p class="eyebrow">Sources</p><ol>'
@@ -86,7 +86,7 @@ class Articles:
 <article class="article">
 <header class="pair-head"><p class="eyebrow">{e(bname)} · {e(when)}</p><h1 class="h1">{title}</h1><p class="lede">{dek}</p></header>
 <div class="art-body">{body}</div>
-<p class="note-line">Education, not financial advice. Quiplee reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
+<p class="note-line">Education, not financial advice. Be The Puck reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
 {src}
 {related}
 </article>"""
@@ -197,8 +197,8 @@ class Articles:
                  f'<span class="name">The Hertz lesson: why a crash doesn\'t care about your revenue</span>'
                  f'<span class="muted small">How a car-rental giant fell 85% in a housing crash, and the five checks that sort survivors from casualties.</span></a>')
         body = f"""<section class="pair-head"><p class="eyebrow">Articles and stories</p><h1 class="h1">Read the market, then the stock</h1>
-<p class="lede">Plain-English pieces built on the same numbers as the rest of Quiplee. The live ones rebuild every night with the latest close, so they never go stale.</p>
-<p class="mem-note">{member_tag()} <span>The reports are for <a href="{h('members/')}">Quiplee Members</a>: {PRICE} a month, with the top-picks tracker and alerts on your stocks. The Hertz story stays free.</span></p>
+<p class="lede">Plain-English pieces built on the same numbers as the rest of Be The Puck. The live ones rebuild every night with the latest close, so they never go stale.</p>
+<p class="mem-note">{member_tag()} <span>The reports are for <a href="{h('members/')}">Be The Puck Members</a>: {PRICE} a month, with the top-picks tracker and alerts on your stocks. The Hertz story stays free.</span></p>
 <div class="chips fam-chips">{''.join(f'<a href="#{k}">{e(n)}</a>' for k, n, _ in BUCKETS)}</div></section>
 <section aria-labelledby="new-h"><div class="sec-head"><h2 class="h2" id="new-h">Start with these</h2><p>The long reads: bubbles, crashes, debt, positioning and the names the plays agree on.</p></div>
 <div class="grid grid-3">{feat}</div></section>
@@ -325,9 +325,9 @@ class Articles:
 <ol>
 <li><b>Valuation sets the size of the fall, not the date.</b> The most expensive markets (1929, 2000) fell furthest, but they stayed expensive for years first.</li>
 <li><b>Tight money is usually the trigger.</b> Rate rises came before 1929, Japan, 2000, 2007 and 2022. The exceptions, 1987 and 2020, were shocks that recovered fast.</li>
-<li><b>Debt decides who survives.</b> Companies and investors who had to sell at the bottom are the ones the crash destroyed. <a href="{h('articles/debt-and-crashes/')}">The storm test</a> applies this to every stock Quiplee covers.</li>
+<li><b>Debt decides who survives.</b> Companies and investors who had to sell at the bottom are the ones the crash destroyed. <a href="{h('articles/debt-and-crashes/')}">The storm test</a> applies this to every stock Be The Puck covers.</li>
 </ol>
-<p>All nine of Quiplee's gauges, with their history and readings at the last four tops, are on the <a href="{h('markets/')}">Markets page</a>.</p>
+<p>All nine of Be The Puck's gauges, with their history and readings at the last four tops, are on the <a href="{h('markets/')}">Markets page</a>.</p>
 </div>"""
         src = [("Federal Reserve History: Stock market crash of 1929", "https://www.federalreservehistory.org/essays/stock-market-crash-of-1929"),
                ("Yardeni Research: S&P 500 bear market tables", "https://archive.yardeni.com/pub/sp500corrbeartables.pdf"),
@@ -394,7 +394,7 @@ class Articles:
 {P("A few things stand out. Selling at the top and waiting a year sounds safe, but in 2020 it locked in a loss while the market raced back. A 60/40 mix fell roughly half as far as stocks in 2008, but in 2022 bonds fell with stocks, because rising rates hit both. The 10-month rule cut the 2008 loss sharply, but sold late and bought back late in the fast COVID drop. No plan wins every time; each trades one risk for another.")}
 <h2 class="h2">Why buckets exist</h2>
 {P("The bucket approach, popularised by planner Harold Evensky, doesn't try to dodge crashes. It sorts money by when you'll need it: one to two years of spending in cash, the next several years in bonds, and only long-term money in stocks. A crash then never forces you to sell stocks at the bottom to pay bills, and you refill the cash bucket from whichever bucket did well.",
-   "The size of each bucket is a personal decision about your income, spending and timeline, which is why Quiplee shows the trade-offs rather than a recommendation.")}
+   "The size of each bucket is a personal decision about your income, spending and timeline, which is why Be The Puck shows the trade-offs rather than a recommendation.")}
 <h2 class="h2">Try it yourself</h2>
 <p>The <a href="{h('markets/')}#positioning">simulator on the Markets page</a> lets you set your own mix, pick a crash and compare plans month by month.</p>
 <h2 class="h2">Questions worth answering before the next fall</h2>
@@ -405,7 +405,7 @@ class Articles:
 <li>Have a few winners grown into most of my portfolio? Rebalancing back to a target is the cheapest protection there is.</li>
 </ul>
 </div>"""
-        src = [("Quiplee calculation from SPY, TLT and ^IRX prices (Yahoo Finance)", "https://finance.yahoo.com/quote/SPY/"),
+        src = [("Be The Puck calculation from SPY, TLT and ^IRX prices (Yahoo Finance)", "https://finance.yahoo.com/quote/SPY/"),
                ("Meb Faber, A Quantitative Approach to Tactical Asset Allocation", "https://papers.ssrn.com/abstract=962461")]
         self.shell(path, "macro", "Cash, stay invested, or buckets?",
                    "What selling, holding, rebalancing and a simple trend rule would have done through 2008, 2020 and 2022, and why the bucket approach exists.",
@@ -434,7 +434,7 @@ class Articles:
                      f'<td data-v="{rk["score"]}"><span class="lvl lvl-{sv.LEVEL_CLASS[rk["level"]]}">{e(rk["level"])}</span></td></tr>')
         heavy_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}#crash">{e(t["short"])}</a>' for t in heavy[:10]) or "none"
         intro = P("A crash marks every stock down. What decides which companies come through it is mostly debt. A business that runs on borrowed money has to keep paying interest and refinancing loans whether sales hold up or not, so when a shock hits and lenders pull back, the debt comes due anyway. Revenue doesn't pay a bill that lenders won't roll over.",
-                  "Quiplee's <b>storm test</b> scores every covered stock on that question, alongside how hard it swings with the market, how it fared in past crashes and how far it has run up. The result is its crash exposure: Low, Moderate, High or Very high.")
+                  "Be The Puck's <b>storm test</b> scores every covered stock on that question, alongside how hard it swings with the market, how it fared in past crashes and how far it has run up. The result is its crash exposure: Low, Moderate, High or Very high.")
         light_txt = ", ".join(f'<a href="{h("stocks/" + t["slug"] + "/")}#crash">{e(t["short"])}</a>' for t in light[:10]) or "none"
         body = f"""
 <div class="prose">
@@ -444,7 +444,7 @@ class Articles:
 <li><b>Debt to equity:</b> borrowing against what shareholders own. Above about 1.5× is heavy; above 3×, or negative equity, is fragile.</li>
 <li><b>Net debt to EBITDA:</b> how many years of operating cash earnings it would take to pay off the debt after using the cash on hand. Above 4× leaves little room for a bad year.</li>
 <li><b>Interest cover:</b> operating profit divided by interest. Under 2× means a modest drop in profit makes the interest hard to pay.</li>
-<li><b>When it's due:</b> debt that must be refinanced in the next two years is the real danger, because that's when lenders can say no. Company reports list it; Quiplee doesn't track it yet.</li>
+<li><b>When it's due:</b> debt that must be refinanced in the next two years is the real danger, because that's when lenders can say no. Company reports list it; Be The Puck doesn't track it yet.</li>
 </ul>
 <h2 class="h2">Every covered stock, by balance sheet</h2>
 {P(f"Heaviest balance-sheet scores tonight: {heavy_txt}. Net cash and no debt flags: {light_txt}.")}
@@ -530,7 +530,7 @@ class Articles:
 </ul>
 <p class="small"><a href="{h('articles/stocks/' + t['slug'] + '/')}">Full brief</a> · <a href="{h('stocks/' + t['slug'] + '/')}">Every play</a></p></article>"""
         wx = M.get("weather", "–")
-        wx_par = P(f"Quiplee's market weather is <b>{e(wx)}</b> tonight. Strong stocks tend to fall hardest when a broad market fall comes, because they are where the crowd is. "
+        wx_par = P(f"Be The Puck's market weather is <b>{e(wx)}</b> tonight. Strong stocks tend to fall hardest when a broad market fall comes, because they are where the crowd is. "
                    f"See all nine gauges on the <a href='{h('markets/')}'>Markets page</a> and the longer argument in <a href='{h('articles/is-this-a-bubble/')}'>Is this a bubble?</a>")
         body = f"""
 <div class="prose">
@@ -676,7 +676,7 @@ class Articles:
 {"<h2 class='h2'>The business</h2>" + biz if biz else ""}
 {"<h2 class='h2'>If the market cracks</h2>" + crash if crash else ""}
 <h2 class="h2">The backdrop</h2>
-<p>Quiplee's market weather is <b>{e(wx or '–')}</b>. When the whole market falls, most stocks fall with it, whatever their own trend. <a href="{h('markets/')}">See the gauges</a>.</p>
+<p>Be The Puck's market weather is <b>{e(wx or '–')}</b>. When the whole market falls, most stocks fall with it, whatever their own trend. <a href="{h('markets/')}">See the gauges</a>.</p>
 <p><a class="btn" href="{h('stocks/' + t['slug'] + '/')}">Chart, every play and the record</a></p>
 </div>"""
         self.shell(path, "stocks", title, dek, body, live=True,
@@ -700,12 +700,12 @@ class Articles:
                          f'<td class="r">{sm["beat_sharpe"]}/{sm["graded"]}</td><td class="r">{sm["cut_dd"]}/{sm["graded"]}</td></tr>')
         body = f"""
 <div class="prose">
-{P(f"Quiplee tests {len(TIMED)} plays, which is more than anyone needs to follow. The core 20 are the ones a newcomer should learn first: the most widely published and followed rule from each corner of technical trading, covering all six families, from Meb Faber's 10-month average to Larry Connors' two-day RSI.",
+{P(f"Be The Puck tests {len(TIMED)} plays, which is more than anyone needs to follow. The core 20 are the ones a newcomer should learn first: the most widely published and followed rule from each corner of technical trading, covering all six families, from Meb Faber's 10-month average to Larry Connors' two-day RSI.",
    "Three tests picked them: the rule is published by a named practitioner or researcher, it is still widely used, and together the 20 cover every family without repeating the same idea. Reader-requested stocks get all 59 plays run on them, and a full page for each of the core 20.")}
 </div>
 <div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th>Play</th><th>In one line</th><th class="r">In now</th><th class="r">Beat buy &amp; hold (Sharpe)</th><th class="r">Cut drawdown</th></tr></thead><tbody>{rows}</tbody></table></div>
 <div class="prose">
-<p class="small muted">Counts are across the {len(self.s.universe)} names in Quiplee's main universe, graded against buying and holding each one over the same dates, after costs.</p>
+<p class="small muted">Counts are across the {len(self.s.universe)} names in Be The Puck's main universe, graded against buying and holding each one over the same dates, after costs.</p>
 <h2 class="h2">How to use them</h2>
 <ul>
 <li><b>As a census, not a signal.</b> When most of the 20 agree, the trend is broad. When they split, the market is undecided.</li>
@@ -765,7 +765,7 @@ class Articles:
 <div class="prose">
 {P("Trend plays and mean-reversion plays make opposite bets. Trend plays buy strength and sell weakness, expecting moves to continue. Mean-reversion plays buy weakness and sell strength, expecting moves to snap back. Each is right in a different kind of market, so the useful question isn't which is better, but when each one works.")}
 <h2 class="h2">How each family did, market by market</h2>
-{P("Median gap between each play and simply holding the same stock over each period, across every stock and ETF in Quiplee's main universe (crypto excluded). Positive means the play did better than holding.")}
+{P("Median gap between each play and simply holding the same stock over each period, across every stock and ETF in Be The Puck's main universe (crypto excluded). Positive means the play did better than holding.")}
 </div>
 <div class="tbl-wrap"><table class="tbl tops" data-nosort><thead><tr><th>Family</th>{head}</tr></thead><tbody>{rows}</tbody></table></div>
 <div class="prose">
@@ -825,7 +825,7 @@ class Articles:
         n = tot["n"]
         body = f"""
 <div class="prose">
-{P(f"Quiplee runs {len(TIMED)} published plays on {len(self.s.universe)} stocks, ETFs, indexes and coins, from 2005 or each one's first year of trading, after costs, earning T-bill interest while out. That is {n:,} backtests, each graded against buying and holding the same thing over the same dates.")}
+{P(f"Be The Puck runs {len(TIMED)} published plays on {len(self.s.universe)} stocks, ETFs, indexes and coins, from 2005 or each one's first year of trading, after costs, earning T-bill interest while out. That is {n:,} backtests, each graded against buying and holding the same thing over the same dates.")}
 <h2 class="h2">The headline</h2>
 <ul>
 <li><b>Higher return than buy and hold:</b> {tot['cg']:,} of {n:,} ({pc(tot['cg'] / n, 0, sign=False)}).</li>
@@ -843,7 +843,7 @@ class Articles:
 <li><b>Luck looks like skill.</b> With {n:,} combinations, some will look brilliant by chance. Trust a play that does reasonably well across many stocks over one that did spectacularly on one.</li>
 <li><b>Survivors only.</b> Every stock here still trades today. Companies that went to zero aren't in the test, which flatters buy and hold and every play alike.</li>
 <li><b>The skeptic's view.</b> Valeriy Zakamulin found moving-average timing showed no reliable edge in the second half of 155 years of U.S. data; the rules earned their keep in a few severe bear markets. <a href="{h('thinkers/valeriy-zakamulin/')}">His scoreboard</a>.</li>
-<li><b>Costs and taxes.</b> Quiplee's backtests deduct trading costs but not taxes. In a taxable account, frequent switching can cost more than any edge.</li>
+<li><b>Costs and taxes.</b> Be The Puck's backtests deduct trading costs but not taxes. In a taxable account, frequent switching can cost more than any edge.</li>
 </ul>
 <p>The <a href="{h('learn/reading-a-backtest/')}">backtest lesson</a> explains every column, and the <a href="{h('method/')}">method page</a> lists every assumption.</p>
 </div>"""
@@ -893,11 +893,11 @@ class Articles:
         hi = sum(1 for l in levels if l in ("High", "Very high"))
         body = f"""
 <div class="prose">
-<p>Across the {len(names)} {e(g.lower())} names Quiplee covers, the core plays are <b>{mood}</b>: on average {pc(avg, 0, sign=False)} of them hold each name tonight. {hi} of {len(levels)} names carry high crash exposure.</p>
+<p>Across the {len(names)} {e(g.lower())} names Be The Puck covers, the core plays are <b>{mood}</b>: on average {pc(avg, 0, sign=False)} of them hold each name tonight. {hi} of {len(levels)} names carry high crash exposure.</p>
 {etf_txt}{hot_txt}
 </div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Core plays in</th><th class="r">1 year</th><th class="r">2-yr run-up</th><th>Crash exposure</th><th></th></tr></thead><tbody>{rows}</tbody></table></div>
-<div class="prose"><p class="small muted">A sector is only as diversified as its holdings: names in one industry tend to fall together in a sell-off. Quiplee covers a sample of each sector, not all of it.</p></div>"""
+<div class="prose"><p class="small muted">A sector is only as diversified as its holdings: names in one industry tend to fall together in a sell-off. Be The Puck covers a sample of each sector, not all of it.</p></div>"""
         self.shell(path, "strategies", f"{e(g)}: what the plays say", f"Every covered {e(g.lower())} name through the same lenses: plays, trend, run-up and crash exposure.",
                    body, live=True, related=self.related(depth, ["articles/green-across-the-board/", "articles/debt-and-crashes/", "articles/trend-vs-reversion/"]))
 

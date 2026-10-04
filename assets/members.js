@@ -61,7 +61,7 @@
             if (res[0] && res[1].ok) { location.href = '/picks/?welcome=1'; return; }
             tell((res[1] && res[1].error) || 'We could not confirm the subscription yet. It can take a minute: refresh this page shortly.');
           })
-          .catch(function () { tell('We could not reach Quiplee to confirm. Your PayPal subscription is safe; refresh in a minute.'); });
+          .catch(function () { tell('We could not reach Be The Puck to confirm. Your PayPal subscription is safe; refresh in a minute.'); });
       },
       onError: function () { tell('PayPal reported a problem. Nothing was charged; please try again.'); }
     }).render('#pp-buttons');

@@ -1,4 +1,4 @@
-/* widgets.js — Quiplee's interactive pieces beyond the line charts in site.js:
+/* widgets.js — Be The Puck's interactive pieces beyond the line charts in site.js:
  *   [data-candles]   candlestick chart with volume, range buttons and overlay toggles
  *   [data-heatmap]   every play's call, week by week (canvas)
  *   [data-sim]       what-if positioning simulator (Markets)

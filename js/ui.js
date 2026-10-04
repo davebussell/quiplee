@@ -1,4 +1,4 @@
-/* ui.js — all rendering + view switching for Quiplee. */
+/* ui.js — all rendering + view switching for Be The Puck. */
 (function () {
   window.Q = window.Q || {};
   var $ = function (s) { return document.querySelector(s); };

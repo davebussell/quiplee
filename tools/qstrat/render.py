@@ -1,6 +1,6 @@
 """HTML renderer for the plays site. Pure functions over engine results.
 
-Links are relative so the same output works on quiplee.com and in a static
+Links are relative so the same output works on bethepuck.com and in a static
 preview; `preview=True` spells out index.html for hosts without directory
 indexes.
 """
@@ -33,12 +33,10 @@ def slugify_group(g):
 def plays_for(t):
     """Plays that get a page of their own on this ticker (core 20 for reader requests)."""
     return [p for p in TIMED if p.get("core")] if t.get("requested") else TIMED
-BASE = "https://quiplee.com/"
+BASE = "https://bethepuck.com/"
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
-ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' "
-        "fill='%230b0f17'/%3E%3Ctext x='13' y='44' font-family='Arial,sans-serif' font-size='38' font-weight='800' fill='%23e7edf7'%3Eq%3C/text%3E"
-        "%3Cpath d='M40 40 L48 26 L56 40 Z' fill='%231fd093'/%3E%3C/svg%3E")
+ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Cellipse cx='27' cy='44' rx='18' ry='7.5' fill='%235d6a82'/%3E%3Crect x='9' y='37' width='36' height='7' fill='%235d6a82'/%3E%3Cellipse cx='27' cy='37' rx='18' ry='7.5' fill='%23e7edf7'/%3E%3Cpath d='M44 27 L51.5 13 L59 27 Z' fill='%231fd093'/%3E%3C/svg%3E")
 NAV = [("markets/", "Markets"), ("stocks/", "Stocks"), ("watchlist/", "Watchlist"), ("strategies/", "Plays"),
        ("learn/", "Learn"), ("articles/", "Articles"), ("desk/", "Live desk")]
 NAV_ACTIVE = {"thinkers/": "strategies/"}   # analyst pages sit under Plays in the menu
@@ -56,7 +54,7 @@ def nav_menus():
                     ("stocks/?sort=score", "Strongest setups", "Most plays in, plus room to the analysts' targets"),
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
                     ("stocks/?view=families", "By play family", "Trend, breakout, momentum, reversion, volume, calendar"),
-                    ("watchlist/", "My watchlist", "Check your own stocks, or add ones Quiplee doesn't cover"),
+                    ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
                         ("articles/the-core-20/", "The core 20", "The plays to learn first"),
@@ -430,7 +428,7 @@ class Site:
                         f'<div class="dd"><div class="dd-in">{dd}</div></div></div>')
             else:
                 nav += f'<div class="nav-item"><a class="nav-top" href="{h(p)}"{cur}>{lab}</a></div>'
-        full_title = f"{title} · Quiplee" if path else title
+        full_title = f"{title} · Be The Puck" if path else title
         more = "".join(f'<script src="{h(sx)}?v={self.ver}" defer></script>\n' for sx in scripts)
         return f"""<!doctype html>
 <html lang="en">
@@ -455,7 +453,7 @@ class Site:
 {extra_head}</head>
 <body>
 <header class="site-head"><div class="wrap head-row">
-<a class="logo" href="{h('')}">quiplee<span class="logo-tick">▲</span></a>
+<a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
 <nav class="site-nav" aria-label="Main">{nav}</nav>
 <span class="head-meta">Closes to {dshort(self.asof)}</span>
 </div></header>
@@ -463,7 +461,7 @@ class Site:
 {body}
 </main>
 <footer class="site-foot"><div class="wrap foot-row">
-<p>Quiplee runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Quiplee takes no positions in the names it covers.</p>
+<p>Be The Puck runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Be The Puck takes no positions in the names it covers.</p>
 <p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a> · <a href="{h('members/')}">Members</a></p>
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
@@ -603,7 +601,7 @@ class Site:
   <div class="hero-copy">
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
     <h1 class="h1">See what the rules say about your stocks.</h1>
-    <p class="lede">Quiplee runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
+    <p class="lede">Be The Puck runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
     <div class="hero-links"><a class="btn primary" href="{h('learn/')}">New? Start with the basics</a><a class="btn" href="{h('markets/')}">Read the market</a></div>
   </div>
   <div class="card picker">
@@ -611,7 +609,7 @@ class Site:
       <label for="home-add" class="h3">Check your stocks</label>
       <input id="home-add" name="add" type="text" placeholder="NVDA, SHOP.TO, Apple…" autocomplete="off" spellcheck="false">
       <button type="submit">See the read</button>
-      <p class="picker-out">Or upload a Wealthsimple or broker CSV on the <a href="{h('watchlist/')}">watchlist</a>. Names Quiplee doesn't cover yet are analysed after the next close.</p>
+      <p class="picker-out">Or upload a Wealthsimple or broker CSV on the <a href="{h('watchlist/')}">watchlist</a>. Names Be The Puck doesn't cover yet are analysed after the next close.</p>
     </form>
     <form class="home-pick" id="picker" data-href="{e(tmpl)}">
       <p class="small muted">Or look up one play on one stock</p>
@@ -670,16 +668,16 @@ class Site:
 <section>
   <div class="card teaser">
     <div class="prose"><p class="eyebrow">Live desk</p><p class="h2" style="color:var(--ink)">News breaks. We tell you what it's worth.</p>
-    <p>The original Quiplee desk scores every market story for revenue impact and grades each call against the next day's move.</p></div>
+    <p>The live news desk scores every market story for revenue impact and grades each call against the next day's move.</p></div>
     <a class="btn primary" href="{h('desk/')}">Open the live desk</a>
   </div>
 </section>
 """
         ld = {"@context": "https://schema.org", "@graph": [
-            {"@type": "Organization", "@id": BASE + "#organization", "name": "Quiplee", "url": BASE, "logo": BASE + "og-default.png"},
-            {"@type": "WebSite", "@id": BASE + "#website", "name": "Quiplee", "url": BASE, "inLanguage": "en", "publisher": {"@id": BASE + "#organization"}}]}
+            {"@type": "Organization", "@id": BASE + "#organization", "name": "Be The Puck", "url": BASE, "logo": BASE + "og-default.png"},
+            {"@type": "WebSite", "@id": BASE + "#website", "name": "Be The Puck", "url": BASE, "inLanguage": "en", "publisher": {"@id": BASE + "#organization"}}]}
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
-        self.add(path, self.shell(path, "Quiplee · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
+        self.add(path, self.shell(path, "Be The Puck · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
 
     def board_html(self, depth):
         """Stocks x play families: how many plays in each family hold each stock."""
@@ -797,14 +795,14 @@ class Site:
         bh = PLAY["buy-and-hold"]
         body = f"""
 <section class="pair-head"><p class="eyebrow">Plays</p><h1 class="h1">{len(TIMED)} plays, one scorecard</h1>
-<p class="lede">Each play is written down exactly as Quiplee tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into six families.</p>
+<p class="lede">Each play is written down exactly as Be The Puck tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into six families.</p>
 <div class="chips fam-chips">{chips}</div></section>
 {secs}
 <section class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h3" style="color:var(--ink)">{e(bh['long'])}</p><p>{e(bh['short'])}</p></div>
 <a class="btn" href="{h('strategies/buy-and-hold/')}">Buy and hold by stock</a></section>
 <p class="muted small">Calls right: the share of closed calls where an in call was followed by a higher price, or an out call by a lower one. Trend plays often win well under half their calls and make it back on a few long trends. Switches per year is the median across stocks.</p>
 """
-        self.add(path, self.shell(path, "Plays", f"All {len(TIMED)} trading plays Quiplee tests, grouped into six families, with who they come from and how they have scored.", body, active="strategies/"))
+        self.add(path, self.shell(path, "Plays", f"All {len(TIMED)} trading plays Be The Puck tests, grouped into six families, with who they come from and how they have scored.", body, active="strategies/"))
 
     def strategy_page(self, s):
         path, depth = f"strategies/{s['slug']}/", 2
@@ -915,7 +913,7 @@ class Site:
 {secs}
 <section id="yardsticks" class="fam-sec"><div class="sec-head"><h2 class="h2">The yardsticks</h2><p>The benchmark every play is graded against, and the researcher who says timing rarely beats it.</p></div><div class="grid grid-3">{extra}</div></section>
 """
-        self.add(path, self.shell(path, "Analysts", f"The {n_an} traders, analysts and academics behind every play Quiplee tests, with verified bios, books and sources.", body, active="thinkers/"))
+        self.add(path, self.shell(path, "Analysts", f"The {n_an} traders, analysts and academics behind every play Be The Puck tests, with verified bios, books and sources.", body, active="thinkers/"))
 
     def thinker_page(self, th):
         path, depth = f"thinkers/{th['slug']}/", 2
@@ -942,7 +940,7 @@ class Site:
             for slug in th["strategies"]:
                 s = PLAY[slug]
                 if s.get("benchmark"):
-                    extra += f"""<section><div class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h2" style="color:var(--ink)">Every play on Quiplee is graded against buy and hold.</p></div>
+                    extra += f"""<section><div class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h2" style="color:var(--ink)">Every play on Be The Puck is graded against buy and hold.</p></div>
 <a class="btn" href="{h('strategies/' + slug + '/')}">See buy and hold by stock</a></div></section>"""
                     continue
                 sm = self.strat_summary(s)
@@ -965,7 +963,7 @@ class Site:
 <section class="pair-head"><p class="eyebrow">{e(th['role'])}</p><h1 class="h1">{e(th['name'])}</h1><p class="lede">{e(th['bio'])}</p></section>
 <section class="split"><div class="card prose"><p class="eyebrow">What they argue</p><ul>{argues}</ul></div>
 <div class="card prose"><p class="eyebrow">Sources</p><div class="sources">{srcs}</div>
-<p class="muted small">Summaries are Quiplee's paraphrase of public material. Quiplee has no affiliation with the people listed.</p></div></section>
+<p class="muted small">Summaries are Be The Puck's paraphrase of public material. Be The Puck has no affiliation with the people listed.</p></div></section>
 {f'<section class="split">{books_card}</section>' if books_card else ''}
 {extra}
 """
@@ -1023,7 +1021,7 @@ class Site:
         n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R])
         body = f"""
 <section class="pair-head"><p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and how many plays agree</h1>
-<p class="lede">All {n_names} stocks, ETFs, indexes and coins Quiplee covers, in one list: how many of the {len(TIMED)} plays hold each one, how far analysts' targets sit above the price, the combined score and how exposed it is to a crash. Sort by any column, filter by group, or open a name for its chart and every play.</p>
+<p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list: how many of the {len(TIMED)} plays hold each one, how far analysts' targets sit above the price, the combined score and how exposed it is to a crash. Sort by any column, filter by group, or open a name for its chart and every play.</p>
 <div class="seg seg-sm st-views" role="group" aria-label="View"><button type="button" aria-pressed="true" data-view="list">Stock list</button><button type="button" aria-pressed="false" data-view="families">By play family</button></div></section>
 
 <section class="st-list" id="list">
@@ -1037,7 +1035,7 @@ class Site:
 <th data-sort-first="desc">Core plays in</th><th class="r" data-sort-first="desc">All plays</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th class="r" data-sort-first="desc">Score</th><th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
-<p class="muted small">Score: half the share of plays in, half analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Quiplee doesn't cover yet.</p>
+<p class="muted small">Score: half the share of plays in, half analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
 
 <section class="st-fams" id="families" hidden>
@@ -1045,7 +1043,7 @@ class Site:
 {self.board_html(depth)}
 </section>"""
         self.add(path, self.shell(path, "Stocks · every stock and how many plays agree",
-                                  f"Every stock, ETF, index and coin Quiplee covers: how many of {len(TIMED)} plays hold it, analysts' upside, a combined score and crash exposure, sortable and filterable.",
+                                  f"Every stock, ETF, index and coin Be The Puck covers: how many of {len(TIMED)} plays hold it, analysts' upside, a combined score and crash exposure, sortable and filterable.",
                                   body, active="stocks/", scripts=("assets/stocks.js",)))
 
     def stock_page(self, t):
@@ -1120,12 +1118,12 @@ class Site:
                         f'<span class="tile-note">Target <b class="{dir_cls(ol["upside"])}">{pct(ol["upside"], d=0)}</b> from {ol["n_an"]} analysts; half the score is the plays.</span></a>')
         summary = f"""<section class="sum-tiles">
 <div class="card tile"><span class="tile-label">Core plays in</span><span class="tile-value">{kc}<small> / {nc}</small></span>{fill_bar(kc, nc)}<span class="tile-note">The 20 most-followed plays.</span></div>
-<div class="card tile"><span class="tile-label">All plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Quiplee tests.</span></div>
+<div class="card tile"><span class="tile-label">All plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Be The Puck tests.</span></div>
 {out_tile}{crash_tile}{trend_tile}
 </section>"""
         req_note = ""
         if t.get("requested"):
-            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Quiplee runs every play on it each night; '
+            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night; '
                         f'the 20 core plays get a full page each.</p>')
         idx_note = ""
         if t.get("index"):
@@ -1173,7 +1171,7 @@ class Site:
         links.append(("articles/is-this-a-bubble/", "Is this a bubble?", "The gauges in October 2026, and what history says about timing."))
         from .members import member_tag
         cards = "".join(f'<a class="card art-card" href="{h(u)}"><span class="name">{e(a)}</span><span class="muted small">{e(b)}</span>{member_tag()}</a>' for u, a, b in links)
-        return (f'<section><div class="sec-head"><h2 class="h2">Read more</h2><p>Reports for <a href="{h("members/")}">Quiplee Members</a>.</p></div>'
+        return (f'<section><div class="sec-head"><h2 class="h2">Read more</h2><p>Reports for <a href="{h("members/")}">Be The Puck Members</a>.</p></div>'
                 f'<div class="grid grid-4">{cards}</div></section>')
 
     def index_exposed(self, t, depth):
@@ -1196,7 +1194,7 @@ class Site:
                      f'<td data-v="{kc}">{count_in(kc, nc)}</td><td class="small muted why-col">{e("; ".join(rk.get("why") or [])[:140])}</td></tr>')
         market = "Canadian" if canada else "U.S."
         return f"""<section><div class="sec-head"><h2 class="h2">Who would feel a crash first</h2>
-<p>The {market} stocks Quiplee covers, ranked by crash exposure. Quiplee covers a sample of names, not the full index.</p></div>
+<p>The {market} stocks Be The Puck covers, ranked by crash exposure. Be The Puck covers a sample of names, not the full index.</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays</th><th>Why</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
 
     # -------------------------------------------------------------- pair
@@ -1338,7 +1336,7 @@ class Site:
         path, depth = "method/", 1
         h = lambda x: self.href(depth, x)
         body = f"""
-<section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Quiplee tests a play</h1>
+<section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Be The Puck tests a play</h1>
 <p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
@@ -1349,7 +1347,7 @@ class Site:
 <div class="card prose"><p class="eyebrow">Execution and costs</p><ul>
 <li>A call made on a close is acted on at the next session. Plays that buy on the signal day's close, like Connors' RSI(2), are tested the same way.</li>
 <li>Each switch in or out costs 0.05% for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</li>
-<li>No leverage, no shorting, no taxes. Every play is long or in T-bills, even where its author also sold short. Each play page lists where Quiplee's version differs from the original.</li>
+<li>No leverage, no shorting, no taxes. Every play is long or in T-bills, even where its author also sold short. Each play page lists where Be The Puck's version differs from the original.</li>
 </ul></div>
 </section>
 <section class="split">
@@ -1360,7 +1358,7 @@ class Site:
 <li>Every play is compared with buying and holding the same stock over exactly the same dates.</li>
 </ul></div>
 <div class="card prose"><p class="eyebrow">The next move</p><ul>
-<li>Quiplee asks each play what it would say after one more bar at a range of hypothetical closes, from about 30% below the latest close to 40% above (wider for crypto, micro caps and monthly plays), then narrows each point where the call flips to a fraction of a cent.</li>
+<li>Be The Puck asks each play what it would say after one more bar at a range of hypothetical closes, from about 30% below the latest close to 40% above (wider for crypto, micro caps and monthly plays), then narrows each point where the call flips to a fraction of a cent.</li>
 <li>For a daily play the next bar opens at today's close; its high and low are assumed to stretch only as far as the hypothetical close. Plays that use the day's high, low or volume are approximate on that point.</li>
 <li>Some plays can't flip on one close, for example when a crossover needs two days or an indicator is shifted forward in time. The page says so instead of showing a level. Calendar plays show the date of their next change.</li>
 <li>Daily plays check every close. Weekly plays check the Friday close (Sunday for crypto). Monthly plays check the last close of the month. Future dates use the U.S. market holiday calendar.</li>
@@ -1380,14 +1378,14 @@ class Site:
 <section class="card prose"><p class="eyebrow">Plays + analysts' upside score</p>
 <p>Used to rank the strongest setups on the home page and in Green across the board (which only include stocks at least half the plays hold), and to sort the watchlist. Half is the share of all {len(TIMED)} plays holding the stock. Half is the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic; the score is a ranking aid, not a forecast or a recommendation.</p></section>
 <section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
-<p>Tickers added on the watchlist that Quiplee doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each of the 20 core plays. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
+<p>Tickers added on the watchlist that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each of the 20 core plays. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
-<p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Quiplee's.</p></section>
+<p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Be The Puck's.</p></section>
 <section class="card prose"><p class="eyebrow">What this is not</p>
-<p>Quiplee reports what a published rule says. It does not know your goals, taxes or other holdings, and it is not financial advice. Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Quiplee's paraphrase of public material, and Quiplee has no affiliation with them.</p>
+<p>Be The Puck reports what a published rule says. It does not know your goals, taxes or other holdings, and it is not financial advice. Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Be The Puck's paraphrase of public material, and Be The Puck has no affiliation with them.</p>
 <p>Rebuilt automatically after each U.S. market close. <a href="{h('strategies/')}">See every play</a> or <a href="{h('thinkers/valeriy-zakamulin/')}">the case against timing</a>.</p></section>
 """
-        self.add(path, self.shell(path, "Method", "How Quiplee tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))
+        self.add(path, self.shell(path, "Method", "How Be The Puck tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))
 
     # ------------------------------------------------------------ exports
     def signals_json(self):

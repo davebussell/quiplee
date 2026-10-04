@@ -1,5 +1,5 @@
 /* live.js — pulls real headlines from the Netlify ingestion function and enriches
- * each one with Quiplee's own brain: classifyType() -> topic map -> evaluate().
+ * each one with Be The Puck's own brain: classifyType() -> topic map -> evaluate().
  * Returns scored stories in the same shape as the synthetic generator. If the
  * function isn't reachable (e.g. local `serve` with no functions), the caller
  * falls back to demo mode — this module just rejects. */

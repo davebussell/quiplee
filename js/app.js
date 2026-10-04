@@ -70,7 +70,7 @@
   function osNotify(alert) {
     if (!notifEnabled() || typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
     try {
-      new Notification('Quiplee — ' + (alert.trigger === 'stock' ? alert.match : alert.match), {
+      new Notification('Be The Puck — ' + (alert.trigger === 'stock' ? alert.match : alert.match), {
         body: alert.story.headline,
         tag: alert.story.id
       });

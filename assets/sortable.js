@@ -1,4 +1,4 @@
-/* sortable.js — makes every table on Quiplee sortable by clicking its column
+/* sortable.js — makes every table on Be The Puck sortable by clicking its column
  * headers. Zero dependencies; works on static pages and on tables the live desk
  * redraws (the chosen sort is re-applied after each redraw).
  *

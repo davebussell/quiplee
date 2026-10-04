@@ -47,7 +47,7 @@ TRACKS = [("basics", "Stock basics", "Start here if you're new. What a stock is,
           ("markets", "Markets and risk", "Indexes, bubbles and crashes, and how to position for a fall you can't time.")]
 
 PLAYS_TRACK = [
-    dict(slug="reading-a-page", title="How to read a Quiplee page", minutes=5,
+    dict(slug="reading-a-page", title="How to read a Be The Puck page", minutes=5,
          summary="What the IN/OUT call, the next move, the charts and the record on every page mean, using a live example."),
     dict(slug="moving-averages", title="Moving averages, explained", minutes=6,
          summary="The building block of most plays here: what a moving average is, simple versus exponential, and why they lag."),
@@ -68,7 +68,7 @@ PLAYS_TRACK = [
     dict(slug="reading-a-backtest", title="How to read a backtest", minutes=8,
          summary="Annual return, drawdown, volatility, Sharpe ratio and calls right, in plain English, plus the traps that make backtests look better than they are."),
     dict(slug="the-play-families", title="All the plays at a glance", minutes=6,
-         summary="Every play on Quiplee in one table: family, speed, and how often each one beat simply holding."),
+         summary="Every play on Be The Puck in one table: family, speed, and how often each one beat simply holding."),
     dict(slug="signal-to-plan", title="From signal to plan", minutes=6,
          summary="How people actually use plays like these with real money: core and satellite, position sizing, and taxes in Canada."),
     dict(slug="common-mistakes", title="Seven common mistakes", minutes=5,
@@ -88,7 +88,7 @@ def Q(q, a, c, why):
 QUIZZES = {
     "reading-a-page": [
         Q("A play page says OUT. What is the play doing?", ["Holding the stock", "Sitting in cash earning T-bill interest", "Selling the stock short", "Waiting for the market to open"], 1,
-          "OUT means the play has sold and holds cash, which Quiplee credits with the T-bill rate. No play on Quiplee ever sells short."),
+          "OUT means the play has sold and holds cash, which Be The Puck credits with the T-bill rate. No play on Be The Puck ever sells short."),
         Q("The next-move box says 'Stays in unless a daily close lands below $100.' The stock dips to $98 at noon and closes at $101. What happens?", ["The play sells at noon", "Nothing: only the close counts, and it closed above $100", "The play sells the next morning", "The level resets"], 1,
           "Every play here only reads finished closes. An intraday dip below the level doesn't count."),
         Q("What does the green shading on a play's price chart show?", ["Days the stock went up", "Days the play was IN", "Days with high volume", "The play's profit"], 1,
@@ -110,7 +110,7 @@ QUIZZES = {
           "Trend following reacts to price. It doesn't forecast or value anything."),
         Q("What is a whipsaw?", ["A sharp one-day crash", "Buying and selling repeatedly as price chops back and forth across the line, losing a little each time", "A very profitable trend", "A type of moving average"], 1,
           "In sideways markets, trend plays get whipsawed: in, out, in, out, each round trip costing a little."),
-        Q("Across Quiplee's tests, what do trend plays most often deliver compared with buy and hold?", ["Higher returns and lower drawdowns", "Smaller worst drawdowns but lower returns", "Higher returns and bigger drawdowns", "About the same on everything"], 1,
+        Q("Across Be The Puck's tests, what do trend plays most often deliver compared with buy and hold?", ["Higher returns and lower drawdowns", "Smaller worst drawdowns but lower returns", "Higher returns and bigger drawdowns", "About the same on everything"], 1,
           "The typical pattern is crash protection paid for with lower growth in good years."),
         Q("Which researchers showed in 2012 that an asset's past 12-month return helped predict its next month across many markets?", ["Bouman and Jacobsen", "Moskowitz, Ooi and Pedersen", "George and Hwang", "Lakonishok and Smidt"], 1,
           "Their Time Series Momentum paper appeared in the Journal of Financial Economics in 2012."),
@@ -170,8 +170,8 @@ QUIZZES = {
           "Chaikin weights volume by where the close lands in the day's range."),
         Q("The Money Flow Index is best described as…", ["A volume-weighted RSI", "A moving average of volume", "A breakout channel", "A calendar effect"], 0,
           "Quong and Soudack built it in 1989 by adding volume to the RSI idea."),
-        Q("Which of these is Quiplee's own choice rather than Granville's?", ["Adding volume on up days", "Using a 20-day average of OBV as the signal line", "Subtracting volume on down days", "Calling it on-balance volume"], 1,
-          "Granville read OBV's trend by eye. The 20-day signal line is Quiplee's mechanical stand-in."),
+        Q("Which of these is Be The Puck's own choice rather than Granville's?", ["Adding volume on up days", "Using a 20-day average of OBV as the signal line", "Subtracting volume on down days", "Calling it on-balance volume"], 1,
+          "Granville read OBV's trend by eye. The 20-day signal line is Be The Puck's mechanical stand-in."),
     ],
     "calendar": [
         Q("The Halloween indicator holds stocks during which months?", ["May to October", "November to April", "January only", "The last week of each month"], 1,
@@ -197,8 +197,8 @@ QUIZZES = {
           "Dip-buying plays are right often and take small profits."),
         Q("Which family ignores price entirely when deciding to be in or out?", ["Momentum", "Calendar", "Volume", "Breakouts"], 1,
           "Pure calendar plays like the Halloween indicator and the turn of the month only look at the date."),
-        Q("Why are some plays labelled 'Quiplee's choice' on parts of their rules?", ["To make them look better", "Their authors never specified that part, such as an exit for a buy-only signal", "Because the originals were illegal", "To speed up the site"], 1,
-          "Where an author left a gap, Quiplee fills it with a stated assumption so the play can be tested mechanically."),
+        Q("Why are some plays labelled 'Be The Puck's choice' on parts of their rules?", ["To make them look better", "Their authors never specified that part, such as an exit for a buy-only signal", "Because the originals were illegal", "To speed up the site"], 1,
+          "Where an author left a gap, Be The Puck fills it with a stated assumption so the play can be tested mechanically."),
     ],
     "signal-to-plan": [
         Q("In a core-and-satellite setup, which part follows a play?", ["The core", "The satellite", "Both equally", "Neither"], 1,
@@ -372,7 +372,7 @@ class Learn:
 </section>
 <section class="card prose"><p class="eyebrow">Words you'll see most</p><div class="chips">{chips}</div></section>
 <section class="card prose"><p class="eyebrow">A note before you start</p>
-<p>Quiplee teaches how published trading plays work and how they have behaved. It doesn't know your goals, your taxes or what else you own, so nothing here is advice to buy or sell anything.</p></section>
+<p>Be The Puck teaches how published trading plays work and how they have behaved. It doesn't know your goals, your taxes or what else you own, so nothing here is advice to buy or sell anything.</p></section>
 """
         self.s.add(path, self.s.shell(path, "Learn", f"{len(LESSONS)} short lessons, interactive practice on real charts, flashcards and a plain-English glossary for {len(TIMED)} trading plays.", body, active="learn/", scripts=["assets/learn.js"]))
 
@@ -395,13 +395,13 @@ class Learn:
         body = f"""
 <nav class="crumbs"><a href="{h('learn/')}">Learn</a><span>/</span><span>Glossary</span></nav>
 <section class="pair-head"><p class="eyebrow">Glossary</p><h1 class="h1">Every term, in plain English</h1>
-<p class="lede">{len(GLOSSARY)} words and phrases you'll meet on Quiplee, grouped by topic. Where a term gets a fuller explanation in a lesson, the entry links to it. Want to drill them? <a href="{h('learn/flashcards/')}?deck=terms">Flashcards</a>.</p></section>
+<p class="lede">{len(GLOSSARY)} words and phrases you'll meet on Be The Puck, grouped by topic. Where a term gets a fuller explanation in a lesson, the entry links to it. Want to drill them? <a href="{h('learn/flashcards/')}?deck=terms">Flashcards</a>.</p></section>
 <section class="gl-tools"><label for="gl-search" class="small muted">Find a term</label>
 <input id="gl-search" type="search" placeholder="Try drawdown, RSI, TFSA…" autocomplete="off">
 <div class="chips gl-topics">{nav}</div><p id="gl-empty" class="muted" hidden>No terms match. Try a shorter word.</p></section>
 {secs}
 """
-        self.s.add(path, self.s.shell(path, "Glossary", "Plain-English definitions of every trading, indicator, backtest and investing term used on Quiplee.", body, active="learn/", glossary=True))
+        self.s.add(path, self.s.shell(path, "Glossary", "Plain-English definitions of every trading, indicator, backtest and investing term used on Be The Puck.", body, active="learn/", glossary=True))
 
     # ------------------------------------------------------------- practice pages
     def call_it(self):
@@ -503,7 +503,7 @@ class Learn:
                              f'<td><a href="{h("thinkers/" + a["slug"] + "/")}">{a["name"]}</a></td>'
                              f'<td>{", ".join(PLAY[x]["name"] for x in a["strategies"])}</td></tr>')
             if rows:
-                secs += (f'<section><h2 class="h2">{name}</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Title</th><th>Year</th><th>Author</th><th>Plays on Quiplee</th></tr></thead>'
+                secs += (f'<section><h2 class="h2">{name}</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Title</th><th>Year</th><th>Author</th><th>Plays on Be The Puck</th></tr></thead>'
                          f'<tbody>{rows}</tbody></table></div></section>')
         other = ""
         for a in THINKERS:
@@ -516,11 +516,11 @@ class Learn:
         body = f"""
 <nav class="crumbs"><a href="{h('learn/')}">Learn</a><span>/</span><span>Reading list</span></nav>
 <section class="pair-head"><p class="eyebrow">Reading list</p><h1 class="h1">Go to the source</h1>
-<p class="lede">The books and papers behind the plays, as published by the analysts themselves. Years are first editions where they could be confirmed; a dash means the year couldn't be verified. Quiplee isn't affiliated with any author or publisher.</p></section>
+<p class="lede">The books and papers behind the plays, as published by the analysts themselves. Years are first editions where they could be confirmed; a dash means the year couldn't be verified. Be The Puck isn't affiliated with any author or publisher.</p></section>
 <section><h2 class="h2">Six to start with</h2><div class="grid grid-3">{picks}</div></section>
 {secs}
 """
-        self.s.add(path, self.s.shell(path, "Reading list", "The books and papers behind every trading play on Quiplee, from Wilder and Donchian to Antonacci and Clenow, with six to start with.", body, active="learn/"))
+        self.s.add(path, self.s.shell(path, "Reading list", "The books and papers behind every trading play on Be The Puck, from Wilder and Donchian to Antonacci and Clenow, with six to start with.", body, active="learn/"))
 
     # ------------------------------------------------------------- lessons
     def build(self):
@@ -560,17 +560,17 @@ class Learn:
         state = "IN" if x["state"] == 1 else "OUT"
         body = f"""
 <section class="prose">
-<p>Every page on Quiplee that pairs a play with a stock answers three questions: what does the play say right now, what would make it change its mind, and how has it done in the past? This lesson walks through a real one: <a href="{page}">Meb Faber's 10-month moving average on the S&amp;P 500 ETF (SPY)</a>. Open it in another tab and follow along.</p>
+<p>Every page on Be The Puck that pairs a play with a stock answers three questions: what does the play say right now, what would make it change its mind, and how has it done in the past? This lesson walks through a real one: <a href="{page}">Meb Faber's 10-month moving average on the S&amp;P 500 ETF (SPY)</a>. Open it in another tab and follow along.</p>
 </section>
 <section class="prose" id="call">
 <h2 class="h2">1. The call: IN or OUT</h2>
-<p>The first box tells you the play's current position. <b>IN</b> means the play holds the stock. <b>OUT</b> means it has sold and is sitting in cash, which Quiplee assumes earns the interest rate on US Treasury bills.</p>
+<p>The first box tells you the play's current position. <b>IN</b> means the play holds the stock. <b>OUT</b> means it has sold and is sitting in cash, which Be The Puck assumes earns the interest rate on US Treasury bills.</p>
 <p>Right now the 10-month play on SPY is <b>{state}</b>, and has been since {dlong(x['since'])}. The line underneath shows how much SPY has moved since that call, so you can see whether the call has been working.</p>
 </section>
 <section class="prose" id="next-move">
 <h2 class="h2">2. The next move</h2>
 <p>The second box is the most useful thing on the page. It gives the closing price that would flip the play's call at its next check. For SPY it currently reads: <i>"{nm['headline']}"</i></p>
-<p>Quiplee finds that number by asking the play itself what it would say at a range of possible closes. If SPY closes beyond it on the check date, the play changes its call; if not, nothing happens. The percentage beside it tells you how far the price would have to move. A level 1% away means the call is fragile; one 15% away means it would take a big move.</p>
+<p>Be The Puck finds that number by asking the play itself what it would say at a range of possible closes. If SPY closes beyond it on the check date, the play changes its call; if not, nothing happens. The percentage beside it tells you how far the price would have to move. A level 1% away means the call is fragile; one 15% away means it would take a big move.</p>
 <p>Some plays can't flip on a single close: an RSI crossover might need the indicator to dip first, and a calendar play only cares about the date. The box says so instead of showing a level.</p>
 <p>The box also tells you <b>when</b> the play next looks. This one only checks once a month, on the last trading day, so a dip below the line in the middle of the month doesn't count.</p>
 </section>
@@ -621,7 +621,7 @@ class Learn:
 <p>A <b>simple moving average</b> (SMA) treats every day equally. In a 21-day SMA, each close counts for 1/21, about 4.8%.</p>
 <p>An <b>exponential moving average</b> (EMA) gives the most recent days more weight. In a 21-day EMA, today's close counts for about 9%, yesterday's a little less, and so on back in time. That makes an EMA react faster when the price turns.</p>
 <p>There are more exotic versions too. Alan Hull's average combines weighted averages to cut lag further; Perry Kaufman's adaptive average speeds up when the price moves cleanly and slows down in chop; Patrick Mulloy's triple EMA strips out most of the lag of an ordinary EMA. Each is a different answer to the same trade-off.</p>
-<p>Neither is better. Faster averages give earlier signals and more false alarms. Slower ones give fewer, later signals. Many of the plays on Quiplee are really a choice about where to sit on that trade-off.</p>
+<p>Neither is better. Faster averages give earlier signals and more false alarms. Slower ones give fewer, later signals. Many of the plays on Be The Puck are really a choice about where to sit on that trade-off.</p>
 </section>
 {chart}
 <section class="prose" id="lag">
@@ -651,7 +651,7 @@ class Learn:
 <section class="prose" id="idea">
 <h2 class="h2">The idea</h2>
 <p>Trend following means owning something while its price is rising and stepping aside once it starts falling. It doesn't try to predict anything. It reacts. A trend follower doesn't ask "is this stock cheap?" or "will the economy slow down?" It asks one question: is the price above or below its trend line?</p>
-<p>It's the biggest family on Quiplee: {fs['plays']} plays, from Paul Tudor Jones's 200-day rule to the Ichimoku cloud. Breakout and momentum plays are close cousins. Mean-reversion and calendar plays work differently and get their own lessons.</p>
+<p>It's the biggest family on Be The Puck: {fs['plays']} plays, from Paul Tudor Jones's 200-day rule to the Ichimoku cloud. Breakout and momentum plays are close cousins. Mean-reversion and calendar plays work differently and get their own lessons.</p>
 </section>
 <section class="prose" id="why">
 <h2 class="h2">Why it can work</h2>
@@ -671,7 +671,7 @@ class Learn:
 </section>
 <section class="prose">
 <h2 class="h2">What it's really for</h2>
-<p>Across all {fs['graded']:,} trend-play-and-stock pairs on Quiplee, the play cut the worst drawdown in <b>{fs['cut_dd']:,}</b> cases but beat buy-and-hold's annual return in only <b>{fs['beat_cagr']:,}</b>. That's the honest summary: trend plays are mainly a way to limit how much you can lose in a crash, and you usually pay for it with lower growth in good years.</p>
+<p>Across all {fs['graded']:,} trend-play-and-stock pairs on Be The Puck, the play cut the worst drawdown in <b>{fs['cut_dd']:,}</b> cases but beat buy-and-hold's annual return in only <b>{fs['beat_cagr']:,}</b>. That's the honest summary: trend plays are mainly a way to limit how much you can lose in a crash, and you usually pay for it with lower growth in good years.</p>
 </section>
 <section class="card prose"><p class="eyebrow">Try it</p><p>Sort the table above by "Switches / yr", then by "Worst drawdown". Then read the <a href="{h('thinkers/valeriy-zakamulin/')}">skeptic's scoreboard</a> to see the same pattern across every play.</p></section>
 """
@@ -702,7 +702,7 @@ class Learn:
 <p>In 1983, commodity traders Richard Dennis and William Eckhardt settled a bet about whether trading could be taught. They recruited about two dozen novices through newspaper ads, taught them a breakout system in two weeks and gave them money to trade. Their rules, published by former Turtles in 2003, had two versions:</p>
 <ul><li><b>System 1:</b> buy a 20-day breakout and sell a 10-day low, but skip the next breakout if the last one would have been a winner (then wait for a 55-day breakout instead).</li>
 <li><b>System 2:</b> buy every 55-day breakout and sell a 20-day low.</li></ul>
-<p>Both used a stop two ATRs (the Turtles called it 2N) below the entry, sized every position by volatility and also sold short. Quiplee tests one long position at a time.</p>
+<p>Both used a stop two ATRs (the Turtles called it 2N) below the entry, sized every position by volatility and also sold short. Be The Puck tests one long position at a time.</p>
 </section>
 <section class="prose" id="highs">
 <h2 class="h2">New highs: Darvas and the 52-week high</h2>
@@ -711,7 +711,7 @@ class Learn:
 </section>
 <section class="prose" id="failed">
 <h2 class="h2">Failed breakouts</h2>
-<p>Most breakouts don't run. Across Quiplee's tests, breakout plays were right on about {fmt_pct(fs['bat'], 0).lstrip('+')} of their calls, against {fmt_pct(tf['bat'], 0).lstrip('+')} for trend plays. They make it back because a failed breakout is usually cut quickly while a real one can run for months. Some traders even trade the failures: Linda Bradford Raschke's "Turtle Soup" setup, from her 1995 book with Larry Connors, bets against breakouts to new 20-day extremes that quickly reverse.</p>
+<p>Most breakouts don't run. Across Be The Puck's tests, breakout plays were right on about {fmt_pct(fs['bat'], 0).lstrip('+')} of their calls, against {fmt_pct(tf['bat'], 0).lstrip('+')} for trend plays. They make it back because a failed breakout is usually cut quickly while a real one can run for months. Some traders even trade the failures: Linda Bradford Raschke's "Turtle Soup" setup, from her 1995 book with Larry Connors, bets against breakouts to new 20-day extremes that quickly reverse.</p>
 </section>
 <section>
 <div class="sec-head"><h2 class="h2">Every breakout play on the S&amp;P 500</h2><p>On SPY since 2005, after trading costs.</p></div>
@@ -775,12 +775,12 @@ class Learn:
         body = f"""
 <section class="prose" id="time-series">
 <h2 class="h2">Time-series momentum</h2>
-<p>Momentum is the tendency of rising prices to keep rising for a while. The simplest way to use it is to compare an asset with its own past: has it gone up over the last year, or at least beaten cash? If yes, own it; if not, sit in T-bills. That is <b>time-series momentum</b>, the rule behind Moskowitz, Ooi and Pedersen's 2012 paper and Quiplee's 12-month momentum play.</p>
+<p>Momentum is the tendency of rising prices to keep rising for a while. The simplest way to use it is to compare an asset with its own past: has it gone up over the last year, or at least beaten cash? If yes, own it; if not, sit in T-bills. That is <b>time-series momentum</b>, the rule behind Moskowitz, Ooi and Pedersen's 2012 paper and Be The Puck's 12-month momentum play.</p>
 </section>
 <section class="prose" id="cross-sectional">
 <h2 class="h2">Cross-sectional momentum</h2>
 <p>The older academic version compares stocks with each other. Robert Levy tested it in 1967 by buying stocks trading well above their 27-week average. Narasimhan Jegadeesh and Sheridan Titman's 1993 paper is the classic: ranking U.S. stocks by their past 3 to 12 months' return, recent winners kept beating recent losers over 1965–1989. Later researchers usually skip the most recent month, because very short-term returns tend to reverse; that's the "12-1" measure.</p>
-<p>Quiplee tests one stock at a time, so it can't rank a whole market. Its versions either ask whether the stock's own momentum is positive, or compare it with SPY as a stand-in for the ranking.</p>
+<p>Be The Puck tests one stock at a time, so it can't rank a whole market. Its versions either ask whether the stock's own momentum is positive, or compare it with SPY as a stand-in for the ranking.</p>
 </section>
 <section class="prose" id="relative-strength">
 <h2 class="h2">Relative strength and dual momentum</h2>
@@ -832,18 +832,18 @@ class Learn:
 <section class="prose" id="overbought">
 <h2 class="h2">Overbought, oversold and divergence</h2>
 <p>Readings near the top of the range are called <b>overbought</b> (RSI above 70) and near the bottom <b>oversold</b> (below 30). These words describe a stretched move, not a forecast. In a strong trend a stock can stay overbought for weeks while it keeps climbing.</p>
-<p>Wilder, Lane and Appel all said their best signal was a <b>divergence</b>: price makes a new high but the indicator doesn't. Divergences are hard to define mechanically, so Quiplee's versions use the simpler threshold crossings most traders know, and say so on each play page.</p>
+<p>Wilder, Lane and Appel all said their best signal was a <b>divergence</b>: price makes a new high but the indicator doesn't. Divergences are hard to define mechanically, so Be The Puck's versions use the simpler threshold crossings most traders know, and say so on each play page.</p>
 </section>
 {chart}
 <section class="prose" id="mean-reversion">
 <h2 class="h2">Mean reversion</h2>
 <p>Mean reversion is the opposite bet to trend following: a price that has moved unusually far, unusually fast, tends to snap partway back. Mean-reversion plays buy sharp dips and sell the bounce, often within days.</p>
 <p>Larry Connors and Cesar Alvarez added an important filter: only buy dips in stocks above their 200-day average, where the long trend is still up. Their RSI(2) play buys when a 2-day RSI drops below 10 and sells on the first close above the 5-day average; their Double 7s buys a close at a 7-day low and sells a 7-day high. In their tests, stop-losses hurt these short-term strategies, so the published rules don't use them.</p>
-<p>The profile is very different from trend following. Across Quiplee's tests, mean-reversion plays were right on about <b>{fmt_pct(fr['bat'], 0).lstrip('+')}</b> of their calls, against <b>{fmt_pct(ft['bat'], 0).lstrip('+')}</b> for trend plays. But each win is small, the plays sit in cash much of the time, and without a stop an unlucky entry can ride a long decline. The RSI(2) play switched a median of {r2['switches']:.0f} times a year per stock, so trading costs and taxes matter a lot.</p>
+<p>The profile is very different from trend following. Across Be The Puck's tests, mean-reversion plays were right on about <b>{fmt_pct(fr['bat'], 0).lstrip('+')}</b> of their calls, against <b>{fmt_pct(ft['bat'], 0).lstrip('+')}</b> for trend plays. But each win is small, the plays sit in cash much of the time, and without a stop an unlucky entry can ride a long decline. The RSI(2) play switched a median of {r2['switches']:.0f} times a year per stock, so trading costs and taxes matter a lot.</p>
 </section>
 <section class="prose" id="exhaustion">
 <h2 class="h2">Counting to exhaustion</h2>
-<p>Tom DeMark's approach counts closes. Nine in a row below the close four days earlier completes a "buy setup", a sign the selling may be spent; nine above completes a sell setup. His full TD Sequential method goes on to a 13-bar countdown with more conditions. Quiplee tests the popular nine-count shortcut and labels it that way.</p>
+<p>Tom DeMark's approach counts closes. Nine in a row below the close four days earlier completes a "buy setup", a sign the selling may be spent; nine above completes a sell setup. His full TD Sequential method goes on to a 13-bar countdown with more conditions. Be The Puck tests the popular nine-count shortcut and labels it that way.</p>
 </section>
 <section>
 <div class="sec-head"><h2 class="h2">Every mean-reversion play on the S&amp;P 500</h2><p>On SPY since 2005, after trading costs. Look at "Time in" and "Calls right" together.</p></div>
@@ -862,12 +862,12 @@ class Learn:
 <section class="prose" id="obv">
 <h2 class="h2">On-balance volume</h2>
 <p>Price tells you where a stock traded. <b>Volume</b> tells you how much traded there. Joseph Granville, a market-letter writer, argued in his 1963 book that volume moves before price: big money accumulates quietly before a rally and sells quietly before a fall.</p>
-<p>His <b>on-balance volume</b> (OBV) is a running total. On an up day, add that day's volume; on a down day, subtract it. If OBV climbs while the price goes sideways, buyers may be accumulating. Granville read OBV's trend by eye. Quiplee's mechanical version holds the stock while OBV is above its own 20-day average, and labels that signal line as its own choice.</p>
+<p>His <b>on-balance volume</b> (OBV) is a running total. On an up day, add that day's volume; on a down day, subtract it. If OBV climbs while the price goes sideways, buyers may be accumulating. Granville read OBV's trend by eye. Be The Puck's mechanical version holds the stock while OBV is above its own 20-day average, and labels that signal line as its own choice.</p>
 </section>
 {chart}
 <section class="prose" id="money-flow">
 <h2 class="h2">Money flow</h2>
-<p>OBV counts the whole day's volume as buying or selling based only on the close. Marc Chaikin refined that. His <b>Chaikin Money Flow</b> weighs each day's volume by where the close lands in the day's range: a close near the high counts mostly as buying, near the low mostly as selling. Above zero over 21 days means buying pressure; Quiplee uses ±0.05 as a buffer against whipsaws, as StockCharts suggests.</p>
+<p>OBV counts the whole day's volume as buying or selling based only on the close. Marc Chaikin refined that. His <b>Chaikin Money Flow</b> weighs each day's volume by where the close lands in the day's range: a close near the high counts mostly as buying, near the low mostly as selling. Above zero over 21 days means buying pressure; Be The Puck uses ±0.05 as a buffer against whipsaws, as StockCharts suggests.</p>
 <p>Gene Quong and Avrum Soudack's <b>Money Flow Index</b> (1989) folds volume into Wilder's RSI, so a rally on heavy volume pushes it higher than the same rally on light volume. It reads like the RSI: 80 and 20 are the usual overbought and oversold lines.</p>
 </section>
 <section class="prose" id="limits">
@@ -895,7 +895,7 @@ class Learn:
 <section class="prose" id="turn-of-month">
 <h2 class="h2">The turn of the month</h2>
 <p>Robert Ariel found in 1987 that U.S. stock gains were concentrated in the first half of each month, starting on the last trading day of the previous month. A year later, Josef Lakonishok and Seymour Smidt looked at 90 years of the Dow and narrowed it to a four-day window: the last trading day of a month and the first three of the next. One common explanation is money flowing in at month-end from paycheques and pension contributions.</p>
-<p>Quiplee's turn-of-the-month play holds SPY for just those four days a month, about {fmt_pct(tom['invested'], 0).lstrip('+')} of the time, and sits in T-bills otherwise.</p>
+<p>Be The Puck's turn-of-the-month play holds SPY for just those four days a month, about {fmt_pct(tom['invested'], 0).lstrip('+')} of the time, and sits in T-bills otherwise.</p>
 </section>
 <section class="prose" id="santa">
 <h2 class="h2">The Santa Claus rally</h2>
@@ -936,12 +936,12 @@ class Learn:
         body = f"""
 <section class="prose" id="what">
 <h2 class="h2">What a backtest is</h2>
-<p>A backtest runs a play on past prices to see what it would have done. Quiplee runs every play on every stock from January 2005 (or the stock's first trading day), and plays fair: it only uses closing prices that were already known, acts on the next trading day, deducts a trading cost on every switch, and earns T-bill interest while the play is out.</p>
+<p>A backtest runs a play on past prices to see what it would have done. Be The Puck runs every play on every stock from January 2005 (or the stock's first trading day), and plays fair: it only uses closing prices that were already known, acts on the next trading day, deducts a trading cost on every switch, and earns T-bill interest while the play is out.</p>
 <p>A backtest tells you how a play behaved, not what it will do next. Treat it like a car's crash-test rating. It's useful, but the road ahead will be different.</p>
 </section>
 <section class="prose" id="benchmark">
 <h2 class="h2">Always compare with doing nothing</h2>
-<p>A play that made 9% a year sounds good until you learn the stock itself made 11%. That's why every number on Quiplee sits next to buy-and-hold on the same stock over the same dates. A play has to beat simply owning the thing to be worth the effort.</p>
+<p>A play that made 9% a year sounds good until you learn the stock itself made 11%. That's why every number on Be The Puck sits next to buy-and-hold on the same stock over the same dates. A play has to beat simply owning the thing to be worth the effort.</p>
 </section>
 <section class="prose" id="return">
 <h2 class="h2">Annual return and total return</h2>
@@ -964,13 +964,13 @@ class Learn:
 </section>
 <section class="prose">
 <h2 class="h2">Switches, time invested and costs</h2>
-<p><b>Switches per year</b> counts how often the play changes its mind; every switch costs money and, in a taxable account, can create a tax bill. <b>Time invested</b> is the share of days the play held the stock. Quiplee's backtests deduct 0.05% per switch for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</p>
+<p><b>Switches per year</b> counts how often the play changes its mind; every switch costs money and, in a taxable account, can create a tax bill. <b>Time invested</b> is the share of days the play held the stock. Be The Puck's backtests deduct 0.05% per switch for stocks and ETFs, 0.10% for crypto and 0.30% for micro caps, whose buying and selling prices are far apart.</p>
 </section>
 <section class="prose" id="traps">
 <h2 class="h2">Three traps that flatter backtests</h2>
-<p><b>Overfitting.</b> Try enough settings and one will look brilliant by luck. That's why Quiplee uses each analyst's published settings rather than picking the best-looking ones, and shows results for every stock, not just the winners.</p>
+<p><b>Overfitting.</b> Try enough settings and one will look brilliant by luck. That's why Be The Puck uses each analyst's published settings rather than picking the best-looking ones, and shows results for every stock, not just the winners.</p>
 <p><b>In-sample results.</b> A play tuned on the same data it's tested on will look better than it really is. The fair test is out-of-sample: data the designer never saw. The "last 5 years" column on each page is a rough check, since most of these plays were published long before.</p>
-<p><b>Survivorship bias.</b> Quiplee tests stocks that still trade today. Companies that went bust aren't in the data, which makes every strategy, including buy-and-hold, look better than real life would have been.</p>
+<p><b>Survivorship bias.</b> Be The Puck tests stocks that still trade today. Companies that went bust aren't in the data, which makes every strategy, including buy-and-hold, look better than real life would have been.</p>
 </section>
 <section class="card prose"><p class="eyebrow">Try it</p><p>On <a href="{h('stocks/spy/ten-month-sma/')}">the SPY 10-month page</a>, compare the full-period and 5-year columns. Then try a fast play on a volatile stock, such as the <a href="{h('stocks/tsla/rsi-2-pullback/')}">RSI(2) pullback on Tesla</a>, and look at the switches and calls right.</p></section>
 """
@@ -999,7 +999,7 @@ class Learn:
                          f'<td class="r" data-v="{sm["beat_sharpe"] / max(1, sm["graded"])}">{sm["beat_sharpe"]} of {sm["graded"]}</td></tr>')
         body = f"""
 <section class="prose">
-<p>Quiplee tests {len(TIMED)} plays from {n_people()} analysts, plus the golden cross, which has no single author. They fall into six families that think about the market in different ways. Knowing the family tells you most of what to expect from a play before you look at its record.</p>
+<p>Be The Puck tests {len(TIMED)} plays from {n_people()} analysts, plus the golden cross, which has no single author. They fall into six families that think about the market in different ways. Knowing the family tells you most of what to expect from a play before you look at its record.</p>
 <ul>
 <li><b>Trend following</b>: hold while price is above a line; sell when it breaks. Many small losses, a few big wins, good crash protection.</li>
 <li><b>Breakouts &amp; channels</b>: buy new highs, sell on the opposite edge or a trailing stop. Similar profile, more trading.</li>
@@ -1014,7 +1014,7 @@ class Learn:
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Checks</th><th class="r">Switches / yr</th><th class="r">Calls right</th><th class="r">Cut drawdown</th><th class="r">Beat B&amp;H Sharpe</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 <section class="prose">
 <h2 class="h2">Gaps the authors left</h2>
-<p>Many of these plays were published as ideas, screens or buy signals rather than complete systems. Coppock defined a buy but no sell; Minervini's template is a screen, not an exit; Granville read on-balance volume by eye. Where Quiplee had to fill a gap to test a play mechanically, the play's page lists the choice under "How the play works", and the analyst's page links the original sources.</p>
+<p>Many of these plays were published as ideas, screens or buy signals rather than complete systems. Coppock defined a buy but no sell; Minervini's template is a screen, not an exit; Granville read on-balance volume by eye. Where Be The Puck had to fill a gap to test a play mechanically, the play's page lists the choice under "How the play works", and the analyst's page links the original sources.</p>
 </section>
 """
         self.lesson_shell("the-play-families", body)
@@ -1027,7 +1027,7 @@ class Learn:
 <section class="prose">
 <p>Knowing what a play says is one thing. Using it without hurting yourself is another. This lesson covers how people who use plays like these tend to set things up. It's general education, not advice for your situation.</p>
 <h2 class="h2">Decide what the play is for</h2>
-<p>The history on Quiplee says trend plays are mainly a seatbelt: they tend to limit losses in big crashes and give up some growth the rest of the time. Mean-reversion plays are a different tool: frequent small trades that need low costs and a tax-sheltered account. If you expect any play to beat the market every year, the evidence says it won't.</p>
+<p>The history on Be The Puck says trend plays are mainly a seatbelt: they tend to limit losses in big crashes and give up some growth the rest of the time. Mean-reversion plays are a different tool: frequent small trades that need low costs and a tax-sheltered account. If you expect any play to beat the market every year, the evidence says it won't.</p>
 </section>
 <section class="prose" id="core">
 <h2 class="h2">Core and satellite</h2>
@@ -1035,11 +1035,11 @@ class Learn:
 </section>
 <section class="prose">
 <h2 class="h2">Check on the close, act once</h2>
-<p>Pick a play and check it only when it checks: after the daily close, on Friday, or at month-end. Ignore intraday moves. Quiplee's next-move level tells you in advance what close would change the call, so you can set a price alert and stop watching the screen.</p>
+<p>Pick a play and check it only when it checks: after the daily close, on Friday, or at month-end. Ignore intraday moves. Be The Puck's next-move level tells you in advance what close would change the call, so you can set a price alert and stop watching the screen.</p>
 </section>
 <section class="prose" id="size">
 <h2 class="h2">Position sizing</h2>
-<p>How much goes into each holding matters more than which play you use. A common habit is to cap any single stock at a small share of the portfolio, and to keep speculative names, like the micro caps on Quiplee, smaller still. The Turtles sized every position by its ATR so that each one risked about the same amount. No play can protect you from a company that drops 80% overnight on bad news.</p>
+<p>How much goes into each holding matters more than which play you use. A common habit is to cap any single stock at a small share of the portfolio, and to keep speculative names, like the micro caps on Be The Puck, smaller still. The Turtles sized every position by its ATR so that each one risked about the same amount. No play can protect you from a company that drops 80% overnight on bad news.</p>
 </section>
 <section class="prose" id="tax">
 <h2 class="h2">Taxes in Canada</h2>
@@ -1070,7 +1070,7 @@ class Learn:
 <li><b>Quitting after a run of whipsaws.</b> Every trend play has stretches of small losses. Dropping it then usually means missing the one big call that pays for them.</li>
 <li><b>Treating a micro cap like an index.</b> Plays behave very differently on tiny companies: prices jump, trading is thin, and a single news story can wipe out half the value before any play can react.</li>
 <li><b>Confusing a good company with a good trend.</b> A play doesn't know whether a business is good. It only knows whether the price is behaving a certain way. Both can be true at once, or neither.</li>
-<li><b>Expecting timing to beat buy-and-hold.</b> Across Quiplee's tests, most plays earned less than simply holding but lost less in crashes. Judge a play by the job you hired it for.</li>
+<li><b>Expecting timing to beat buy-and-hold.</b> Across Be The Puck's tests, most plays earned less than simply holding but lost less in crashes. Judge a play by the job you hired it for.</li>
 </ol>
 </section>
 <section class="card prose"><p class="eyebrow">Where next</p><p>Put it into practice: <a href="{h('learn/call-it/')}">Call it</a> on real charts, drill the <a href="{h('learn/flashcards/')}">flashcards</a>, or head back to the <a href="{h('')}">signal board</a> and sort it by "All plays" to see which stocks most plays currently agree on.</p></section>

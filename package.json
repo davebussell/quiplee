@@ -1,7 +1,7 @@
 {
-  "name": "quiplee",
+  "name": "bethepuck",
   "private": true,
-  "description": "Netlify Functions for quiplee.com (the site itself is built by tools/build_strategies.py)",
+  "description": "Netlify Functions for bethepuck.com (the site itself is built by tools/build_strategies.py)",
   "dependencies": {
     "@netlify/blobs": "^11.0.0"
   }

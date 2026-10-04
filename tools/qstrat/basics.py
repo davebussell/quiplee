@@ -2,7 +2,7 @@
 
 Each lesson is a sequence of short steps with a hands-on widget (assets/lab.js)
 and a checkpoint question, then the usual end-of-lesson quiz. Widgets use real
-numbers from Quiplee's data: prices, company fundamentals and crash exposure.
+numbers from Be The Puck's data: prices, company fundamentals and crash exposure.
 """
 import html
 import json
@@ -73,7 +73,7 @@ QUIZZES = {
         Q("What is a limit order?", ["An order that fills at any price", "An order that names the worst price you'll accept", "An order to sell everything", "An order limited to 100 shares"], 1,
           "A limit buy won't pay more than your price, and a limit sell won't take less. It may not fill at all."),
         Q("Why does it usually cost more to buy and sell a tiny company's stock than a big one's?", ["Higher taxes", "The gap between the bid and the ask is much wider", "They trade fewer days a year", "Exchange rules"], 1,
-          "Few people trade tiny stocks, so the spread is wide and the order book is thin: you pay up to buy and take less to sell. That's why Quiplee's backtests assume 0.30% a trade for micro caps but 0.05% for big stocks."),
+          "Few people trade tiny stocks, so the spread is wide and the order book is thin: you pay up to buy and take less to sell. That's why Be The Puck's backtests assume 0.30% a trade for micro caps but 0.05% for big stocks."),
     ],
     "candlesticks": [
         Q("A candle's box runs from $10 to $12 and it is hollow (green). Where did the day open and close?", ["Opened $12, closed $10", "Opened $10, closed $12", "High $12, low $10", "You can't tell"], 1,
@@ -245,7 +245,7 @@ class Basics:
                  check("The best ask is $50.02 with 200 shares, the next is $50.04 with 500. You buy 400 at market. What happens?",
                        ["All 400 fill at $50.02", "200 fill at $50.02 and 200 at $50.04", "The order is rejected"], 1,
                        "A market order works through the book: 200 at the best ask, then the rest at the next price up.")),
-            step(prose("<b>Market or limit?</b> A market order fills now at whatever the book offers. A limit order names your worst price and waits. Limits protect you in thinly traded stocks, where the spread can be wide; that's why Quiplee's backtests assume each trade in a micro cap costs 0.30%, against 0.05% for a big stock.",
+            step(prose("<b>Market or limit?</b> A market order fills now at whatever the book offers. A limit order names your worst price and waits. Limits protect you in thinly traded stocks, where the spread can be wide; that's why Be The Puck's backtests assume each trade in a micro cap costs 0.30%, against 0.05% for a big stock.",
                        "<b>Volume</b> is how many shares changed hands. Big moves on heavy volume mean many people acted on new information; the <a href=\"" + h("learn/volume/") + "\">volume lesson</a> covers plays built on it.")),
             step(prose("<b>Why plays read only the close.</b> Prices swing all day. The closing price is the one everybody agrees on, it sets the next day's starting point, and it is what most published rules use. A dip below a level at noon that recovers by 4pm doesn't count.")),
         )
@@ -262,7 +262,7 @@ class Basics:
                                     note="Hover or tap any candle to read its open, high, low and close. Switch the range to 3M to see each candle clearly.", rng=63)
         steps = (
             step(prose("A <b>candlestick</b> squeezes a whole day of trading into one shape. It shows four prices: where the day <b>opened</b>, its <b>high</b>, its <b>low</b> and where it <b>closed</b>.",
-                       "The thick <b>body</b> spans the open and the close. The thin <b>wicks</b> reach up to the high and down to the low. On Quiplee a hollow body means it closed above the open (an up day) and a filled body means it closed below (a down day). Many sites use green and red instead.")),
+                       "The thick <b>body</b> spans the open and the close. The thin <b>wicks</b> reach up to the high and down to the low. On Be The Puck a hollow body means it closed above the open (an up day) and a filled body means it closed below (a down day). Many sites use green and red instead.")),
             step(lab("candle", None, "Build a candle", "Drag the four prices, or tap a preset. The name updates as you go.")),
             step(check("A candle opens at $20, rises to $25, falls to $19 and closes at $24. What does it look like?",
                        ["A hollow body from $20 to $24, wicks up to $25 and down to $19", "A filled body from $24 to $20", "No body at all"], 0,
@@ -270,7 +270,7 @@ class Basics:
             step(prose("<b>Reading a few common shapes.</b> A long hollow body says buyers were in control all day. A <b>doji</b>, where open and close are nearly equal, says the day was a stalemate. A <b>hammer</b>, with a long lower wick, says sellers pushed it down but buyers pushed it back. A <b>shooting star</b> is the mirror image near a high.",
                        "A word of caution: a 2006 study of the 30 Dow stocks (Marshall, Young and Rose) found that popular candlestick patterns didn't make money on their own. Candles are a fast way to see what happened, not a signal by themselves. Context, such as where a candle sits in a trend, matters more.")),
             step(real, prose("Look for the biggest down day in the last three months, then for a doji. Notice how volume, the bars at the bottom, usually jumps on the big days.")),
-            step(prose("<b>Timeframes.</b> The same idea works for any period: a weekly candle covers a week, a monthly candle a month. Quiplee's daily plays read daily closes, weekly plays the Friday close and monthly plays the last close of the month. Next: how to read the trend these candles make, in <a href=\"" + h("learn/trends-tops-bottoms/") + "\">trends, tops and bottoms</a>.")),
+            step(prose("<b>Timeframes.</b> The same idea works for any period: a weekly candle covers a week, a monthly candle a month. Be The Puck's daily plays read daily closes, weekly plays the Friday close and monthly plays the last close of the month. Next: how to read the trend these candles make, in <a href=\"" + h("learn/trends-tops-bottoms/") + "\">trends, tops and bottoms</a>.")),
         )
         self.shell("candlesticks", steps)
 
@@ -385,7 +385,7 @@ class Basics:
                        "<li><b>The engine.</b> Is revenue growing? Is it profitable?</li><li><b>The cushion.</b> Debt, interest cover and cash.</li>"
                        "<li><b>The trend.</b> Above or below its 200-day average? How many plays are in?</li><li><b>The storm test.</b> Its crash exposure.</li>"
                        "<li><b>Other opinions.</b> Analyst targets, held lightly.</li><li><b>Your plan.</b> Size, exit and what would change your mind.</li></ol>")),
-            step(lab("scorecard", data, "Run the check on a real stock", "Every number is live from Quiplee's data. Colours are rough guides, not verdicts.")),
+            step(lab("scorecard", data, "Run the check on a real stock", "Every number is live from Be The Puck's data. Colours are rough guides, not verdicts.")),
             step(check("A stock has a P/E of 12, falling sales, debt at 4× equity and most trend plays out. What's the most useful conclusion?",
                        ["It's a bargain", "It may be cheap for a reason; the risks need explaining before buying", "It will rebound soon"], 1,
                        "Cheap valuations often come with real problems. The other checks tell you whether the low price is an opportunity or a trap.")),
@@ -443,7 +443,7 @@ class Basics:
                        ["The index can still rise", "The index must fall", "The index is unchanged"], 0,
                        "If the giant's weight is big enough, its 20% rise outweighs the smaller companies' falls.")),
             step(prose("<b>Concentration.</b> When a few giants carry an index, it is less diversified than its name suggests. The top ten stocks were about 38% of the S&amp;P 500 in mid-2026, against about 27% at the 2000 peak. " + conc_txt,
-                       "Quiplee runs every play on the indexes too, and tracks concentration, valuation and seven other gauges on the <a href=\"" + h("markets/") + "\">Markets page</a>.")),
+                       "Be The Puck runs every play on the indexes too, and tracks concentration, valuation and seven other gauges on the <a href=\"" + h("markets/") + "\">Markets page</a>.")),
         )
         self.shell("indexes", steps)
 

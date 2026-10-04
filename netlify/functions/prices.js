@@ -6,7 +6,7 @@
  * most recent real daily moves (for the detail "recent price action" panel). */
 'use strict';
 
-var UA = 'Mozilla/5.0 (compatible; Quiplee/1.0; +https://quiplee.com)';
+var UA = 'Mozilla/5.0 (compatible; Be The Puck/1.0; +https://bethepuck.com)';
 function round2(n) { return Math.round(n * 100) / 100; }
 function chartUrl(sym) { return 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(sym) + '?range=6mo&interval=1d'; }
 

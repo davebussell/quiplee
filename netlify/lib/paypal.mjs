@@ -1,4 +1,4 @@
-/* paypal.mjs: the few PayPal REST calls Quiplee Members needs.
+/* paypal.mjs: the few PayPal REST calls Be The Puck Members needs.
  * Env: PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_PLAN_ID, PAYPAL_WEBHOOK_ID,
  *      PAYPAL_ENV ("sandbox" for testing, anything else is live).
  */
@@ -28,7 +28,7 @@ export async function getSubscription(id) {
   return r.json();
 }
 
-/** The member record Quiplee keeps for a subscription. */
+/** The member record Be The Puck keeps for a subscription. */
 export function recordFrom(sub, prev = {}) {
   const s = sub.subscriber || {};
   const name = s.name ? [s.name.given_name, s.name.surname].filter(Boolean).join(" ") : "";

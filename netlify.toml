@@ -13,6 +13,34 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# The site moved from quiplee.com to bethepuck.com in October 2026. Every old
+# address forwards to the same page on the new domain. (The member gate edge
+# function does the same for /picks/ and /articles/, since an edge function's
+# response takes the place of these rules on its paths.)
+[[redirects]]
+  from = "https://quiplee.com/*"
+  to = "https://bethepuck.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.quiplee.com/*"
+  to = "https://bethepuck.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://quiplee.com/*"
+  to = "https://bethepuck.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.quiplee.com/*"
+  to = "https://bethepuck.com/:splat"
+  status = 301
+  force = true
+
 # Lessons that were renamed when the site grew from 7 rules to 59 plays
 [[redirects]]
   from = "/learn/the-seven-rules/*"
