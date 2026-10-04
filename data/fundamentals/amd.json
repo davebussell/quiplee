@@ -14,7 +14,7 @@
  "equity": 62999000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-03",
+ "fetched": "2026-10-04",
  "fiftyTwoWeekHigh": 645.46,
  "fiftyTwoWeekLow": 188.22,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 10080000000,
  "operatingMargins": 0.1725,
  "payoutRatio": 0.0,
- "pegRatio": 0.62,
+ "pegRatio": 0.64,
  "priceToBook": 15.389525,
  "priceToSalesTrailing12Months": 25.053679,
  "profitMargins": 0.15577,
@@ -56,8 +56,8 @@
  "totalDebt": 4276000000,
  "totalRevenue": 41305001984,
  "total_debt_bs": 3847000000.0,
- "trailingEps": 3.93,
- "trailingPE": 161.30025,
+ "trailingEps": 4.06,
+ "trailingPE": 156.13547,
  "trailingPegRatio": 0.626,
  "website": "https://www.amd.com"
 }

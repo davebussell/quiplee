@@ -14,7 +14,7 @@
  "equity": 157293000000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-10-03",
+ "fetched": "2026-10-04",
  "fiftyTwoWeekHigh": 237.88,
  "fiftyTwoWeekLow": 164.27,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 134359998464,
  "operatingMargins": 0.66236997,
  "payoutRatio": 0.0354,
- "pegRatio": 0.28,
+ "pegRatio": 0.29,
  "priceToBook": 24.670464,
  "priceToSalesTrailing12Months": 18.646038,
  "profitMargins": 0.63663,
@@ -56,8 +56,8 @@
  "totalDebt": 38860001280,
  "totalRevenue": 302970011648,
  "total_debt_bs": 11040000000.0,
- "trailingEps": 8.02,
- "trailingPE": 29.17082,
+ "trailingEps": 7.91,
+ "trailingPE": 29.576487,
  "trailingPegRatio": 0.4791,
  "website": "https://www.nvidia.com"
 }

@@ -14,7 +14,7 @@
  "equity": 442387000000.0,
  "equity_date": "2026-06-30",
  "exchange": "NMS",
- "fetched": "2026-10-03",
+ "fetched": "2026-10-04",
  "fiftyTwoWeekHigh": 553.72,
  "fiftyTwoWeekLow": 349.2,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 182934994944,
  "operatingMargins": 0.45111,
  "payoutRatio": 0.1983,
- "pegRatio": 1.67,
+ "pegRatio": 1.68,
  "priceToBook": 8.688492,
  "priceToSalesTrailing12Months": 11.580745,
  "profitMargins": 0.40305,
@@ -56,8 +56,8 @@
  "totalDebt": 128812998656,
  "totalRevenue": 331839012864,
  "total_debt_bs": 56826000000.0,
- "trailingEps": 17.96,
- "trailingPE": 28.815704,
+ "trailingEps": 18.11,
+ "trailingPE": 28.57703,
  "trailingPegRatio": 1.6173,
  "website": "https://www.microsoft.com"
 }

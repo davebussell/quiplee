@@ -1,1 +1,10 @@
-{"tickers": [], "updated": "2026-10-03"}
+{
+ "tickers": [
+  {
+   "sym": "APPL",
+   "reason": "no price history found on Yahoo Finance",
+   "date": "2026-10-04"
+  }
+ ],
+ "updated": "2026-10-04"
+}
