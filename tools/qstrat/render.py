@@ -600,7 +600,7 @@ class Site:
 <section class="hero">
   <div class="hero-copy">
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
-    <h1 class="h1">See what the rules say about your stocks.</h1>
+    <h1 class="h1">Don't chase where the stock is. Chase where it's going.</h1>
     <p class="lede">Be The Puck runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
     <div class="hero-links"><a class="btn primary" href="{h('learn/')}">New? Start with the basics</a><a class="btn" href="{h('markets/')}">Read the market</a></div>
   </div>
