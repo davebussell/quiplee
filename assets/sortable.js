@@ -242,3 +242,161 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+/* Phone layout for tables. Any .tbl that is wider than its box on a narrow
+ * screen turns into stacked cards: the first cell becomes the card title and
+ * every other cell shows its column name above the value. Cells with nothing
+ * in them ("–") are dropped on phones so a card never reads as a row of
+ * dashes. Sortable tables get a "Sort by" menu, since the header row is hidden.
+ * Opt a table out with data-nostack. Works on the plays site (.tbl) and the
+ * live desk (.atable); the CSS is injected here so both stylesheets get it. */
+(function () {
+  'use strict';
+  var MAX = 640;
+  var NIL = /^(|–|—|-|n\/a)$/i;
+  var lastW = (typeof WeakMap === 'function') ? new WeakMap() : null;
+  var SEL = 'table.tbl, table.atable';
+  var CSS = '.stack-sort{display:none}@media (max-width:640px){.stack-sort{display:flex;align-items:center;gap:8px;align-self:flex-start;margin-bottom:8px;font-size:12.5px;color:var(--muted)}.stack-sort[hidden]{display:none}.stack-sort select{font:500 13px var(--ui,inherit);color:var(--ink,var(--text));background:var(--panel-2);border:1px solid var(--line-2,var(--border));border-radius:8px;padding:6px 8px;max-width:70vw}table.stacked thead{display:none}table.stacked,table.stacked tbody{display:block;width:100%}table.stacked tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--line,var(--border));position:relative}table.stacked tr:last-child{border-bottom:none}table.stacked td,table.stacked tbody th{display:block;min-width:0!important;padding:0;border:0;text-align:left;white-space:normal;position:static;background:none}table.stacked td::before,table.stacked tbody th::before{content:attr(data-label);display:block;margin-bottom:3px;font:600 10.5px/1.25 var(--data,ui-monospace,monospace);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}table.stacked td[data-label=""]::before,table.stacked tbody th[data-label=""]::before{content:none}table.stacked tr>:first-child{grid-column:1/-1;font-size:14px}table.stacked td.wide,table.stacked td.why-col{grid-column:1/-1}table.stacked td.nil{display:none}table.stacked tbody tr:hover td{background:none}table.stacked tr.stack-grp,table.stacked tr.grp{display:block;padding:0;background:var(--bg-2)}table.stacked tr.stack-grp td,table.stacked tr.grp td{display:block;padding:8px 14px}table.stacked tr.stack-grp td:empty,table.stacked tr.grp td:empty{display:none}table.stacked .consensus{display:flex;flex-direction:column;align-items:flex-start;gap:5px;white-space:nowrap}table.stacked .fam-cell a{display:flex;flex-direction:column;align-items:flex-start;gap:4px;white-space:normal}table.stacked .fillbar{width:100%;max-width:120px}table.stacked .stick{min-width:0}table.stacked td.nowrap,table.stacked td .nowrap,table.stacked td.r,table.stacked td.c{white-space:normal;text-align:left}table.stacked td:has(>.wl-x:only-child){position:absolute;top:10px;right:12px}table.stacked td:has(>.wl-x:only-child)::before{content:none}}';
+
+  function injectStyle() {
+    if (document.getElementById('stack-css')) return;
+    var st = document.createElement('style');
+    st.id = 'stack-css';
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+
+  function clean(t) { return (t || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim(); }
+
+  function headLabels(table) {
+    var head = table.tHead;
+    if (!head || !head.rows.length) return null;
+    var out = [];
+    [].forEach.call(head.rows[head.rows.length - 1].cells, function (th) {
+      var a = th.querySelector('a:not(.sort-btn)');
+      var txt;
+      if (a) txt = clean(a.textContent);
+      else {
+        var c = th.cloneNode(true);
+        [].forEach.call(c.querySelectorAll('.sort-ind, .sym-sub'), function (x) { x.remove(); });
+        txt = clean(c.textContent);
+      }
+      for (var i = 0; i < (th.colSpan || 1); i++) out.push(txt);
+    });
+    return out;
+  }
+
+  function label(table) {
+    var labels = headLabels(table);
+    if (!labels) return false;
+    [].forEach.call(table.tBodies, function (tb) {
+      [].forEach.call(tb.rows, function (tr) {
+        if (tr.dataset.stackLbl) return;
+        tr.dataset.stackLbl = '1';
+        var spans = [].some.call(tr.cells, function (c) { return (c.colSpan || 1) > 1; });
+        if (spans) { tr.classList.add('stack-grp'); return; }
+        var col = 0;
+        [].forEach.call(tr.cells, function (c) {
+          c.setAttribute('data-label', col === 0 ? '' : (labels[col] || ''));
+          var t = clean(c.textContent);
+          if (col > 0 && NIL.test(t) && !c.querySelector('input, select, button, img, svg, .fillbar, .pill')) c.classList.add('nil');
+          if (col > 0 && t.length > 26) c.classList.add('wide');
+          col += c.colSpan || 1;
+        });
+      });
+    });
+    return true;
+  }
+
+  function sortMenu(table) {
+    if (table.dataset.stackMenu || table.hasAttribute('data-nosort') || table.classList.contains('st-tbl')) return;
+    var ths = [].slice.call(table.querySelectorAll('thead th[data-sort-col]'));
+    if (ths.length < 2) return;
+    table.dataset.stackMenu = '1';
+    var wrap = table.closest('.tbl-wrap') || table;
+    var box = document.createElement('label');
+    box.className = 'stack-sort';
+    var sel = document.createElement('select');
+    sel.innerHTML = '<option value="">Original order</option>' + ths.map(function (th) {
+      var lb = clean((th.querySelector('a:not(.sort-btn)') || th).textContent.replace('↕', '').replace('↑', '').replace('↓', ''));
+      return '<option value="' + th.getAttribute('data-sort-col') + '">' + lb.replace(/</g, '&lt;') + '</option>';
+    }).join('');
+    sel.addEventListener('change', function () {
+      var on = table.querySelector('thead th[aria-sort]');
+      if (!sel.value) { for (var i = 0; on && i < 3; i++) { on.click(); on = table.querySelector('thead th[aria-sort]'); } return; }
+      var th = table.querySelector('thead th[data-sort-col="' + sel.value + '"]');
+      if (!th) return;
+      th.click();
+      if (!th.hasAttribute('aria-sort')) th.click();
+    });
+    box.appendChild(document.createTextNode('Sort by '));
+    box.appendChild(sel);
+    wrap.parentNode.insertBefore(box, wrap);
+  }
+
+  function fit(table) {
+    if (table.hasAttribute('data-nostack') || table.classList.contains('fund-tbl')) return;
+    var wrap = table.closest('.tbl-wrap') || table.parentElement;
+    if (!wrap || !wrap.clientWidth) return;
+    var was = table.classList.contains('stacked');
+    table.classList.remove('stacked');
+    var need = window.innerWidth <= MAX && table.scrollWidth > wrap.clientWidth + 4;
+    if (need && label(table)) {
+      table.classList.add('stacked');
+      sortMenu(table);
+    }
+    if (was !== table.classList.contains('stacked')) {
+      var m = wrap.previousElementSibling;
+      if (m && m.classList.contains('stack-sort')) m.hidden = !table.classList.contains('stacked');
+    }
+  }
+
+  var ro = window.ResizeObserver ? new ResizeObserver(function (ents) {
+    ents.forEach(function (en) {
+      var w = Math.round(en.contentRect.width);
+      if (lastW && lastW.get(en.target) === w) return;
+      if (lastW) lastW.set(en.target, w);
+      var t = en.target.querySelector(SEL);
+      if (t) fit(t);
+    });
+  }) : null;
+
+  function watch(table) {
+    if (!table.matches || !table.matches(SEL) || table.dataset.stackWatch) return;
+    table.dataset.stackWatch = '1';
+    var wrap = table.closest('.tbl-wrap') || table.parentElement;
+    if (ro && wrap) ro.observe(wrap);
+    fit(table);
+  }
+
+  function scan(root) {
+    if (root.nodeType !== 1) return;
+    if (root.tagName === 'TABLE') watch(root);
+    else [].forEach.call(root.querySelectorAll(SEL), watch);
+    if (root.tagName === 'TR' || root.tagName === 'TBODY') {        // rows added to a table already on the page
+      var t = root.closest(SEL);
+      if (t && !t.dataset.stackQ) {
+        t.dataset.stackQ = '1';
+        requestAnimationFrame(function () { delete t.dataset.stackQ; fit(t); if (t.classList.contains('stacked')) label(t); });
+      }
+    }
+  }
+
+  function init() {
+    injectStyle();
+    scan(document.body);
+    if (window.MutationObserver) {
+      new MutationObserver(function (muts) {
+        muts.forEach(function (m) { [].forEach.call(m.addedNodes, scan); });
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+    var tmr;
+    window.addEventListener('resize', function () {
+      clearTimeout(tmr);
+      tmr = setTimeout(function () { [].forEach.call(document.querySelectorAll(SEL), fit); }, 150);
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

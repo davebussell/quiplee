@@ -823,3 +823,10 @@ button.btn { cursor: pointer; }
 .wl-al-on { display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
 .wl-al-on input { width: 16px; height: 16px; accent-color: var(--violet); }
 #wl-al-msg { flex-basis: 100%; }
+
+/* ---------- phones: wide tables become stacked cards (rules injected by sortable.js) ---------- */
+@media (max-width: 640px) {
+  /* chip rows that scroll sideways show a fade so it's clear there is more */
+  .st-tools .chips.st-groups { -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+  .st-tools .chips.st-sorts { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0; }
+}
