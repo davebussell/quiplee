@@ -83,7 +83,9 @@ and in the output copies of `stories/*.html` and `desk/index.html`.
 live desk's feed from `data/glossary.json`.
 
 **Universe.** Market indexes, U.S. sector funds and the stock groups in
-`content.py`, plus reader requests. Micro caps carry a 0.30% switching cost.
+`content.py`, all 100 Nasdaq-100 companies (`NDX_NEW` / `NDX_COVERED`; the ones
+added in bulk get pages for the 20 core plays, like reader requests, but appear
+in every list), plus reader requests. Micro caps carry a 0.30% switching cost.
 
 **Open item.** The PB EMA's real lengths are unconfirmed (its TradingView page
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in `plays_fn.pb_ema`

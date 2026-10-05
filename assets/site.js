@@ -258,8 +258,12 @@
     var tmpl = f.getAttribute('data-href');
     f.addEventListener('submit', function (e) {
       e.preventDefault();
-      var s = document.getElementById('pick-strategy').value, t = document.getElementById('pick-stock').value;
-      location.href = tmpl.replace('{t}', t).replace('{s}', s);
+      var ps = document.getElementById('pick-strategy'), pt = document.getElementById('pick-stock');
+      var s = ps.value, t = pt.value;
+      // names added with the core plays only have pages for those: open the stock's page instead
+      var co = pt.selectedOptions && pt.selectedOptions[0] && pt.selectedOptions[0].hasAttribute('data-co');
+      var core = ps.selectedOptions && ps.selectedOptions[0] && ps.selectedOptions[0].hasAttribute('data-core');
+      location.href = (co && !core) ? tmpl.replace('{t}', t).replace('{s}/', '') : tmpl.replace('{t}', t).replace('{s}', s);
     });
   }
 

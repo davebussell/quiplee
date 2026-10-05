@@ -31,8 +31,9 @@ def slugify_group(g):
 
 
 def plays_for(t):
-    """Plays that get a page of their own on this ticker (core 20 for reader requests)."""
-    return [p for p in TIMED if p.get("core")] if t.get("requested") else TIMED
+    """Plays that get a page of their own on this ticker: the core 20 for reader
+    requests and the Nasdaq-100 names added in bulk, every play otherwise."""
+    return [p for p in TIMED if p.get("core")] if (t.get("requested") or t.get("core_only")) else TIMED
 BASE = "https://bethepuck.com/"
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
@@ -54,6 +55,7 @@ def nav_menus():
                     ("stocks/?sort=score", "Strongest setups", "Most plays in, plus room to the analysts' targets"),
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
                     ("stocks/?view=families", "By play family", "Trend, breakout, momentum, reversion, volume, calendar"),
+                    ("stocks/?group=ndx", "Nasdaq-100", "All 100 companies in the index, with the same reads"),
                     ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
@@ -70,6 +72,8 @@ def nav_menus():
                       ("articles/#macro", "Macro", "The bubble question, crash history, cash vs invested"),
                       ("members/", "Members", "The reports, the top picks and alerts on your stocks")],
     }
+CORE_ATTR = ' data-core="1"'
+CO_ATTR = ' data-co="1"'
 ROLE_VAR = {"s1": "--s1", "s2": "--s2", "s3": "--s3", "price": "--s-price", "bench": "--s-bench"}
 
 
@@ -410,6 +414,10 @@ class Site:
     def pair_path(self, t, s):
         return f"stocks/{t['slug']}/{s['slug']}/"
 
+    def pair_or_stock(self, t, s):
+        """The stock-and-play page when it exists, else the stock's own page."""
+        return self.pair_path(t, s) if (s.get("core") or not (t.get("requested") or t.get("core_only"))) else f"stocks/{t['slug']}/"
+
     def shell(self, path, title, desc, body, active=None, charts=False, extra_head="", lesson=None, glossary=False, scripts=(), link=True):
         depth = path.count("/")
         if link:
@@ -507,20 +515,26 @@ class Site:
     def meter(self, k, n):
         return count_in(k, n)
 
-    def play_options(self, selected=None, value=None):
+    def play_options(self, selected=None, value=None, core_only=False):
+        """core_only: just the 20 core plays (for a stock that only has those pages)."""
         out = ""
         for fk, fname, _ in FAMILIES:
-            opts = "".join(f'<option value="{e(value(p) if value else p["slug"])}"{" selected" if p["slug"] == selected else ""}>{e(p["name"])} · {e(credit(p))}</option>'
-                           for p in TIMED if p["family"] == fk)
-            out += f'<optgroup label="{e(fname)}">{opts}</optgroup>'
+            opts = "".join(f'<option value="{e(value(p) if value else p["slug"])}"{CORE_ATTR if p.get("core") else ""}'
+                           f'{" selected" if p["slug"] == selected else ""}>{e(p["name"])} · {e(credit(p))}</option>'
+                           for p in TIMED if p["family"] == fk and (p.get("core") or not core_only))
+            if opts:
+                out += f'<optgroup label="{e(fname)}">{opts}</optgroup>'
         return out
 
-    def stock_options(self, selected=None, value=None):
+    def stock_options(self, selected=None, value=None, full_only=False):
+        """full_only: leave out the names that only have the core-play pages."""
+        names = [t for t in universe() if not (full_only and t.get("core_only"))]
         out = ""
-        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in names)]:
             out += f'<optgroup label="{e(g)}">' + "".join(
-                f'<option value="{e(value(t) if value else t["slug"])}"{" selected" if t["sym"] == selected else ""}>{e(t["short"])} · {e(t["name"])}</option>'
-                for t in universe() if t["group"] == g) + "</optgroup>"
+                f'<option value="{e(value(t) if value else t["slug"])}"{CO_ATTR if t.get("core_only") else ""}'
+                f'{" selected" if t["sym"] == selected else ""}>{e(t["short"])} · {e(t["name"])}</option>'
+                for t in names if t["group"] == g) + "</optgroup>"
         return out
 
     # ======================================================================
@@ -569,7 +583,7 @@ class Site:
         tmpl = self.href(depth, "stocks/{t}/{s}/")
         fams = [(k, name, [p for p in TIMED if p["family"] == k]) for k, name, _ in FAMILIES]
 
-        board = self.board_html(depth)
+        board = self.board_html(depth, curated=True)
 
         # recent calls, spread across plays and stocks
         flips = []
@@ -589,7 +603,7 @@ class Site:
             if len(pick) >= 12:
                 break
         flip_html = "".join(
-            f'<li><a href="{h(self.pair_path(t, s))}"><span class="when">{dshort(d)}</span>{pill(c["state"])}'
+            f'<li><a href="{h(self.pair_or_stock(t, s))}"><span class="when">{dshort(d)}</span>{pill(c["state"])}'
             f'<span class="what"><b>{e(s["name"])} on {e(t["short"])}</b><span>{"Went in" if c["state"] == 1 else "Went out"} at {money(c["price"], t["cur"])} · {e(credit(s))}</span></span></a></li>'
             for d, _, t, s, c in pick) or '<li class="muted">No play changed its call in the last three weeks.</li>'
 
@@ -680,15 +694,17 @@ class Site:
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
         self.add(path, self.shell(path, "Be The Puck · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
 
-    def board_html(self, depth):
-        """Stocks x play families: how many plays in each family hold each stock."""
+    def board_html(self, depth, curated=False):
+        """Stocks x play families: how many plays in each family hold each stock.
+        curated=True leaves out the Nasdaq-100 names added in bulk (the home page)."""
         h = lambda x: self.href(depth, x)
+        names = [t for t in universe() if not (curated and t.get("core_only"))]
         fams = [(k, name, [p for p in TIMED if p["family"] == k]) for k, name, _ in FAMILIES]
         head = "".join(f'<th class="c" scope="col"><a href="{h("strategies/")}#fam-{k}">{e(name)}</a><span class="sym-sub">{len(ps)} plays</span></th>' for k, name, ps in fams)
         rows = ""
-        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in universe())]:
+        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in names)]:
             rows += f'<tr class="grp"><td class="stick">{e(g)}</td><td colspan="{len(fams) + 1}"></td></tr>'
-            for t in [x for x in universe() if x["group"] == g]:
+            for t in [x for x in names if x["group"] == g]:
                 cells = ""
                 for k, name, ps in fams:
                     kk, nn = self.consensus(t, ps)
@@ -837,7 +853,7 @@ class Site:
                 x = self.r(t["sym"], s["slug"])
                 nm = next_move(x, s, t)
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
-                link = h(self.pair_path(t, s))
+                link = h(self.pair_or_stock(t, s))
                 dv = abs(nm["dist"]) if nm["dist"] is not None else (nm.get("dist_days", 0) / 365 if nm.get("dist_days") is not None else None)
                 lvl = nm["short"] + (f' <span class="muted">({pct(nm["dist"])})</span>' if nm["dist"] is not None else "")
                 now_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
@@ -947,7 +963,7 @@ class Site:
                 sm = self.strat_summary(s)
                 score = lambda t: ((self.r(t["sym"], slug)["stats"]["full"]["strat"] or {}).get("sharpe") or -9) - ((self.r(t["sym"], slug)["stats"]["full"]["bh"] or {}).get("sharpe") or -9)
                 best = sorted(universe(), key=score, reverse=True)[:12]
-                chips = "".join(f'<a href="{h(self.pair_path(t, s))}">{e(t["short"])}{pill(self.r(t["sym"], slug)["state"])}</a>' for t in best)
+                chips = "".join(f'<a href="{h(self.pair_or_stock(t, s))}">{e(t["short"])}{pill(self.r(t["sym"], slug)["state"])}</a>' for t in best)
                 co = [a for a in s["analysts"] if a != th["slug"]]
                 with_ = (" · with " + ", ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in co)) if co else ""
                 extra += f"""<section><div class="sec-head"><h2 class="h2">{e(s['long'])}</h2><a class="btn" href="{h('strategies/' + slug + '/')}">Rule and full record</a></div>
@@ -1002,7 +1018,8 @@ class Site:
             up = ol["upside"] if ol["ok"] else None
             score = round(ol["score"] * 100) if ol["ok"] else None
             gslug = slugify_group(t["group"])
-            rows += (f'<tr data-group="{gslug}" data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
+            ndx_attr = ' data-ndx="1"' if t.get("ndx") else ""
+            rows += (f'<tr data-group="{gslug}"{ndx_attr} data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                      f'<td class="small muted grp-col">{e(t["group"])}</td>'
                      f'<td class="r mono">{money(x["price"], t["cur"])}</td>'
@@ -1014,7 +1031,8 @@ class Site:
                      f'<td class="r {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
                      f'<td class="r" data-v="{score if score is not None else ""}">{f"<b>{score}</b>" if score is not None else "–"}</td>'
                      f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
-        chips = '<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>' + "".join(
+        chips = ('<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>'
+                 '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>') + "".join(
             f'<button type="button" class="chip-btn" aria-pressed="false" data-group="{slugify_group(g)}">{e(g)}</button>' for g in groups)
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
                           for k, lab in [("score", "Strongest setups"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
@@ -1126,6 +1144,11 @@ class Site:
         if t.get("requested"):
             req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night; '
                         f'the 20 core plays get a full page each.</p>')
+        if t.get("core_only"):
+            req_note = ('<p class="note-line">In the Nasdaq-100. Be The Puck runs every play on it each night; '
+                        'the 20 core plays get a full page each.</p>')
+        elif t.get("ndx"):
+            req_note = '<p class="note-line">In the Nasdaq-100.</p>'
         idx_note = ""
         if t.get("index"):
             idx_note = ('<p class="note-line">An index is a scoreboard, not something you can buy directly. Investors hold it through an index fund or ETF, '
@@ -1179,8 +1202,9 @@ class Site:
         """On an index page: the covered names that trade on that market, by crash exposure."""
         h = lambda x: self.href(depth, x)
         canada = t["sym"] == "^GSPTSE"
+        ndx = t["sym"] == "^NDX"
         names = [x for x in universe() if not x.get("index") and not x["crypto"] and x["group"] not in ("Indexes & ETFs", "Sectors")
-                 and x["canadian"] == canada and self.meta.get(x["sym"], {}).get("risk")]
+                 and (x.get("ndx") if ndx else x["canadian"] == canada) and self.meta.get(x["sym"], {}).get("risk")]
         if not names:
             return ""
         names.sort(key=lambda x: (-self.meta[x["sym"]]["risk"]["score"], x["short"]))
@@ -1194,8 +1218,10 @@ class Site:
                      f'<td class="r" data-v="{sortv(rk.get("runup2y"))}">{pct(rk.get("runup2y"), d=0)}</td>'
                      f'<td data-v="{kc}">{count_in(kc, nc)}</td><td class="small muted why-col">{e("; ".join(rk.get("why") or [])[:140])}</td></tr>')
         market = "Canadian" if canada else "U.S."
+        lede = (f"All {len(names)} Nasdaq-100 companies, ranked by crash exposure." if ndx else
+                f"The {market} stocks Be The Puck covers, ranked by crash exposure. Be The Puck covers a sample of names, not the full index.")
         return f"""<section><div class="sec-head"><h2 class="h2">Who would feel a crash first</h2>
-<p>The {market} stocks Be The Puck covers, ranked by crash exposure. Be The Puck covers a sample of names, not the full index.</p></div>
+<p>{lede}</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays</th><th>Why</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
 
     # -------------------------------------------------------------- pair
@@ -1309,8 +1335,8 @@ class Site:
 <p class="muted small">An in call is right when the price rose before the next call; an out call is right when it fell. The latest {min(shown, len(x['calls']))} of {len(x['calls'])} calls shown.</p></section>""" if x["calls"] else ""
 
         by = " &amp; ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in s["analysts"])
-        play_sel = self.play_options(s["slug"])
-        stock_sel = self.stock_options(t["sym"])
+        play_sel = self.play_options(s["slug"], core_only=bool(t.get("requested") or t.get("core_only")))
+        stock_sel = self.stock_options(t["sym"], full_only=not s.get("core"))
         play_tmpl = e(h("stocks/" + t["slug"] + "/{v}/"))
         stock_tmpl = e(h("stocks/{v}/" + s["slug"] + "/"))
         body = f"""

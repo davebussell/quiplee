@@ -64,6 +64,8 @@ def watch_json(site):
             out[sym]["na"] = ol["n_an"]
         if t.get("requested"):
             out[sym]["req"] = t.get("since") or 1
+        if t.get("core_only"):
+            out[sym]["co"] = 1
         for a in {t["name"].upper(), t["short"].upper()}:
             if a and a != sym and a not in alias:
                 alias[a] = sym

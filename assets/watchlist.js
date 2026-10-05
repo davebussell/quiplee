@@ -308,7 +308,7 @@
         var p = D.plays[i], c = t.c[i];
         if (lastF !== null && p.f !== lastF) strip.appendChild(el('b'));
         lastF = p.f;
-        var a = el(p.c || !t.req ? 'a' : 'span', { 'class': c === '1' ? 'in' : c === '0' ? 'out' : 'na', title: p.n + ': ' + (c === '1' ? 'IN' : c === '0' ? 'OUT' : 'no call') + (t.m && t.m[p.s] ? ' · ' + t.m[p.s] : '') });
+        var a = el(p.c || !(t.req || t.co) ? 'a' : 'span', { 'class': c === '1' ? 'in' : c === '0' ? 'out' : 'na', title: p.n + ': ' + (c === '1' ? 'IN' : c === '0' ? 'OUT' : 'no call') + (t.m && t.m[p.s] ? ' · ' + t.m[p.s] : '') });
         if (a.tagName === 'A') a.href = PAIR.replace('{u}', t.u).replace('{s}', p.s);
         strip.appendChild(a);
       });

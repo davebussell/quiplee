@@ -1,7 +1,7 @@
 /* stocks.js — the /stocks/ list: search, group filter, one-click sorts and the
  * list / by-family switch. Column sorting itself comes from sortable.js; the
  * sort buttons press the right column header until it sorts high to low.
- * Supports ?sort=score|plays|upside|crash|year, ?group=<group> and ?view=families. */
+ * Supports ?sort=score|plays|upside|crash|year, ?group=<group> (or ndx for the Nasdaq-100) and ?view=families. */
 (function () {
   'use strict';
   var tbl = document.getElementById('st-tbl');
@@ -15,7 +15,8 @@
   function apply() {
     var shown = 0;
     rows.forEach(function (r) {
-      var ok = (!st.group || r.getAttribute('data-group') === st.group) && (!st.q || r.getAttribute('data-q').indexOf(st.q) >= 0)
+      var grp = !st.group || (st.group === 'ndx' ? r.getAttribute('data-ndx') === '1' : r.getAttribute('data-group') === st.group);
+      var ok = grp && (!st.q || r.getAttribute('data-q').indexOf(st.q) >= 0)
         && (+r.getAttribute('data-share') >= st.min);
       r.hidden = !ok;
       if (ok) shown++;

@@ -104,8 +104,50 @@ TICKERS = [
     {"sym": "LEAP.V", "name": "Quantum Critical Metals", "group": "Micro caps", "cur": "C$", "micro": True},
     {"sym": "QUTX", "name": "Quantum X", "group": "Micro caps", "cur": "$", "micro": True},
 ]
-GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Healthcare",
-               "Financials", "Industrials & rentals", "Energy & power", "Metals & mining", "Crypto miners", "Micro caps"]
+# Nasdaq-100 members (list as of Oct 5, 2026). Members already covered above are
+# tagged "ndx"; the rest are added here with full analysis and a page for each of
+# the 20 core plays ("core_only"), like reader-requested names but in every list.
+# GOOG (Alphabet class C) is covered by GOOGL and Shopify by its Toronto listing.
+NDX_COVERED = {"AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA", "AMD", "AVGO", "MU", "INTC", "SHOP.TO"}
+NDX_NEW = {
+    "Semiconductors": [("ASML", "ASML Holding"), ("LRCX", "Lam Research"), ("AMAT", "Applied Materials"), ("KLAC", "KLA"),
+                       ("ARM", "Arm Holdings"), ("TXN", "Texas Instruments"), ("MRVL", "Marvell Technology"), ("ADI", "Analog Devices"),
+                       ("QCOM", "Qualcomm"), ("MPWR", "Monolithic Power Systems"), ("NXPI", "NXP Semiconductors"), ("MCHP", "Microchip Technology"),
+                       ("ALAB", "Astera Labs"), ("TER", "Teradyne"), ("SNDK", "Sandisk")],
+    "Software & devices": [("PLTR", "Palantir"), ("CSCO", "Cisco"), ("PANW", "Palo Alto Networks"), ("CRWD", "CrowdStrike"),
+                           ("FTNT", "Fortinet"), ("DDOG", "Datadog"), ("CDNS", "Cadence Design Systems"), ("SNPS", "Synopsys"),
+                           ("ADBE", "Adobe"), ("INTU", "Intuit"), ("ADSK", "Autodesk"), ("WDAY", "Workday"), ("APP", "AppLovin"),
+                           ("ROP", "Roper Technologies"), ("TRI", "Thomson Reuters"), ("STX", "Seagate Technology"), ("WDC", "Western Digital"),
+                           ("LITE", "Lumentum"), ("NBIS", "Nebius Group"), ("CRWV", "CoreWeave"), ("MSTR", "Strategy (MicroStrategy)")],
+    "Consumer & retail": [("WMT", "Walmart"), ("COST", "Costco"), ("PEP", "PepsiCo"), ("MDLZ", "Mondelez"), ("MNST", "Monster Beverage"),
+                          ("KDP", "Keurig Dr Pepper"), ("CCEP", "Coca-Cola Europacific Partners"), ("BKNG", "Booking Holdings"),
+                          ("ABNB", "Airbnb"), ("MAR", "Marriott"), ("SBUX", "Starbucks"), ("DASH", "DoorDash"), ("ROST", "Ross Stores"),
+                          ("ORLY", "O'Reilly Automotive"), ("PDD", "PDD Holdings"), ("MELI", "MercadoLibre")],
+    "Media & telecom": [("NFLX", "Netflix"), ("TMUS", "T-Mobile US"), ("CMCSA", "Comcast"), ("WBD", "Warner Bros. Discovery"),
+                        ("TTWO", "Take-Two Interactive")],
+    "Healthcare": [("AMGN", "Amgen"), ("GILD", "Gilead Sciences"), ("VRTX", "Vertex Pharmaceuticals"), ("REGN", "Regeneron"),
+                   ("ALNY", "Alnylam Pharmaceuticals"), ("ISRG", "Intuitive Surgical"), ("IDXX", "IDEXX Laboratories"), ("DXCM", "DexCom"),
+                   ("GEHC", "GE HealthCare")],
+    "Financials": [("PYPL", "PayPal")],
+    "Industrials & materials": [("HON", "Honeywell"), ("HONA", "Honeywell Aerospace"), ("LIN", "Linde"), ("ADP", "ADP"), ("PAYX", "Paychex"),
+                                ("CTAS", "Cintas"), ("CPRT", "Copart"), ("CSX", "CSX"), ("ODFL", "Old Dominion Freight Line"), ("PCAR", "Paccar"),
+                                ("FAST", "Fastenal"), ("AXON", "Axon Enterprise"), ("FER", "Ferrovial"), ("RKLB", "Rocket Lab"), ("SPCX", "SpaceX")],
+    "Energy & power": [("CEG", "Constellation Energy"), ("AEP", "American Electric Power"), ("XEL", "Xcel Energy"), ("EXC", "Exelon"),
+                       ("BKR", "Baker Hughes"), ("FANG", "Diamondback Energy")],
+}
+for _t in TICKERS:
+    if _t["sym"] in NDX_COVERED:
+        _t["ndx"] = True
+_have = {t["sym"] for t in TICKERS}
+for _g, _names in NDX_NEW.items():
+    for _sym, _name in _names:
+        if _sym not in _have:
+            TICKERS.append({"sym": _sym, "name": _name, "group": _g, "cur": "$", "ndx": True, "core_only": True})
+            _have.add(_sym)
+
+GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tech", "Semiconductors", "Software & devices", "Consumer & retail",
+               "Media & telecom", "Healthcare", "Financials", "Industrials & materials", "Industrials & rentals", "Energy & power", "Metals & mining",
+               "Crypto miners", "Micro caps"]
 
 # Tickers Be The Puck doesn't cover, even if a reader asks for them
 EXCLUDED = {"MGRC"}
