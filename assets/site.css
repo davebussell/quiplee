@@ -830,3 +830,13 @@ button.btn { cursor: pointer; }
   .st-tools .chips.st-groups { -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
   .st-tools .chips.st-sorts { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0; }
 }
+
+/* ---------- v8: column-header hints ---------- */
+th[data-hint], th[data-hint] .sort-btn { cursor: help; text-decoration: underline dotted; text-decoration-color: var(--line-2); text-underline-offset: 4px; }
+th[data-hint]:hover, th[data-hint]:hover .sort-btn { text-decoration-color: var(--violet-ink); }
+.hint-bubble { position: fixed; z-index: 210; max-width: min(300px, calc(100vw - 24px)); padding: 10px 12px; border-radius: 10px;
+  background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); box-shadow: 0 16px 40px -14px rgba(0, 0, 0, .75);
+  font: 13px/1.5 var(--ui); text-transform: none; letter-spacing: 0; white-space: normal;
+  opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; pointer-events: none; }
+.hint-bubble.show { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .hint-bubble { transition: none; } }

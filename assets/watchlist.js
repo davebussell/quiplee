@@ -14,6 +14,18 @@
   var EXAMPLE = ['NVDA', 'AAPL', 'SHOP.TO', 'RY.TO', 'XIU.TO', 'HTZ', 'MU', 'BTC-USD'];
   var VALID = /^\^?[A-Z0-9]{1,6}(?:-[A-Z0-9]{1,2})?(?:[.-][A-Z0-9]{1,4})?$/;
   var D = null, queue = {}, rejected = {}, posted = {}, notes = {};
+  var HINTS = {
+    'Stock': 'The company, fund or index. Click a name for its chart and every play\u2019s call.',
+    'Price': 'The latest closing price.',
+    'Day': 'Change from the previous day\u2019s close.',
+    '1 year': 'Price change over the last 12 months.',
+    'vs 200-day': 'How far the price sits above (+) or below (\u2212) its average close of the last 200 trading days. Above usually means a long uptrend.',
+    'Plays in': 'How many of the plays you chose to count hold it right now.',
+    'Target': 'How far analysts\u2019 average 12-month price target sits above (+) or below (\u2212) today\u2019s price. Needs 3 or more analysts.',
+    'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
+    'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
+    'Weight': 'Its share of your list by value, from the quantities or values in your file.'
+  };
   var st = { items: [], example: false, shared: false, mode: 'core', pick: [] };
 
   function $(id) { return document.getElementById(id); }
@@ -264,7 +276,11 @@
     var showW = W.byValue;
     var head = ['Stock', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
-    var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) { return el('th', { 'class': i >= 1 && i <= 4 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd }); }))]);
+    var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) {
+      var at = { 'class': i >= 1 && i <= 4 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
+      if (HINTS[hd]) at['data-hint'] = HINTS[hd];
+      return el('th', at);
+    }))]);
     var tb = el('tbody');
     var rows = st.items.slice().sort(function (a, b) {
       var A = D.t[a.sym], B = D.t[b.sym];

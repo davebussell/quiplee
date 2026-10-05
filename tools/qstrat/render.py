@@ -472,7 +472,8 @@ class Site:
 """
 
     def add(self, path, html_):
-        self.pages[path] = html_
+        from .hints import annotate
+        self.pages[path] = annotate(html_, path)
 
     # ----- aggregates -----
     def strat_summary(self, s):

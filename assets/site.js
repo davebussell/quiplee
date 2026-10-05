@@ -285,7 +285,67 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeAll(); if (document.activeElement && document.activeElement.closest && document.activeElement.closest('.nav-item')) document.activeElement.blur(); } });
   }
 
-  function init() { initCharts(); initPicker(); initNav(); initMenus(); }
+  // column-header hints: <th data-hint="..."> shows a small bubble on hover, keyboard focus or tap
+  function initHints() {
+    var bubble = null, cur = null, showT = null, hideT = null;
+    var touch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    function thOf(t) { return t && t.closest ? t.closest('th[data-hint]') : null; }
+    function place(el) {
+      var r = el.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+      bubble.style.left = '0px'; bubble.style.top = '0px';
+      var bw = bubble.offsetWidth, bh = bubble.offsetHeight;
+      var left = Math.min(Math.max(12, r.left + r.width / 2 - bw / 2), vw - bw - 12);
+      var top = r.bottom + 8;
+      if (top + bh > vh - 8 && r.top - bh - 8 > 8) top = r.top - bh - 8;
+      bubble.style.left = left + 'px'; bubble.style.top = Math.max(8, top) + 'px';
+    }
+    function show(el) {
+      if (!bubble) {
+        bubble = document.createElement('div');
+        bubble.className = 'hint-bubble'; bubble.id = 'hint-bubble'; bubble.setAttribute('role', 'tooltip');
+        document.body.appendChild(bubble);
+      }
+      clearTimeout(hideT);
+      cur = el;
+      bubble.textContent = el.getAttribute('data-hint');
+      bubble.classList.add('show');
+      el.setAttribute('aria-describedby', 'hint-bubble');
+      place(el);
+    }
+    function hide() {
+      clearTimeout(showT);
+      if (!bubble) return;
+      bubble.classList.remove('show');
+      if (cur) cur.removeAttribute('aria-describedby');
+      cur = null;
+    }
+    document.addEventListener('mouseover', function (e) {
+      if (touch) return;
+      var el = thOf(e.target);
+      if (!el) return;
+      clearTimeout(hideT); clearTimeout(showT);
+      showT = setTimeout(function () { show(el); }, 250);
+    });
+    document.addEventListener('mouseout', function (e) {
+      if (touch) return;
+      var el = thOf(e.target);
+      if (!el || (e.relatedTarget && el.contains(e.relatedTarget))) return;
+      clearTimeout(showT);
+      hideT = setTimeout(hide, 120);
+    });
+    document.addEventListener('focusin', function (e) { var el = thOf(e.target); if (el) show(el); });
+    document.addEventListener('focusout', function (e) { if (thOf(e.target)) hide(); });
+    // on touch screens a tap on a header shows its hint for a few seconds (the tap still sorts)
+    document.addEventListener('click', function (e) {
+      var el = thOf(e.target);
+      if (el && touch) { show(el); clearTimeout(hideT); hideT = setTimeout(hide, 3500); }
+      else if (!el) hide();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+    window.addEventListener('scroll', function () { if (cur) hide(); }, { passive: true, capture: true });
+  }
+
+  function init() { initCharts(); initPicker(); initNav(); initMenus(); initHints(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
