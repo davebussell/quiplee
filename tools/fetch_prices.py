@@ -26,7 +26,7 @@ from qstrat.content import TICKERS  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "prices")
 START = "2004-01-01"
-EXTRA = ["^IRX", "^VIX", "^TNX", "RSP", "HYG", "IEF"]   # cash rate + macro gauges
+EXTRA = ["^IRX", "^VIX", "^TNX", "RSP", "HYG", "IEF", "CAD=X"]   # cash rate, macro gauges, USD/CAD (paper trading)
 ET = ZoneInfo("America/New_York")
 
 

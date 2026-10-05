@@ -7,6 +7,7 @@ indexes.
 import html
 import json
 import math
+import os
 
 import numpy as np
 import pandas as pd
@@ -56,6 +57,7 @@ def nav_menus():
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
                     ("stocks/?view=families", "By play family", "Trend, breakout, momentum, reversion, volume, calendar"),
                     ("stocks/?group=ndx", "Nasdaq-100", "All 100 companies in the index, with the same reads"),
+                    ("stocks/?group=tsx", "TSX stocks", f"The {n_tsx()} Toronto-listed companies, in Canadian dollars"),
                     ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
@@ -150,6 +152,11 @@ sig5 = sig
 def n_people():
     """Analysts behind at least one play (not the benchmark, not 'market tradition')."""
     return len([a for a in THINKERS if a["strategies"] and not a.get("benchmark") and a["slug"] != "market-tradition"])
+
+
+def n_tsx():
+    """Toronto-listed companies covered (the TSX filter on the stock list)."""
+    return len([t for t in universe() if t.get("tsx")])
 
 
 def fill_bar(k, n):
@@ -391,7 +398,8 @@ class Site:
         self.prices = prices
         self.irx = irx
         self.asof = max(r["asof"] for r in results.values())
-        self.pages = {}   # path -> html
+        self.pages = {}   # path -> html (or None once written to self.out)
+        self.out = None   # set to a folder to write each page as it is made (keeps memory flat)
         self.ver = self.asof.strftime("%Y%m%d")
         self._sum = {}
         from .learn import Learn
@@ -481,7 +489,14 @@ class Site:
 
     def add(self, path, html_):
         from .hints import annotate
-        self.pages[path] = annotate(html_, path)
+        page = annotate(html_, path)
+        if self.out:
+            d = os.path.join(self.out, path)
+            os.makedirs(d, exist_ok=True)
+            with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
+                f.write(page)
+            page = None
+        self.pages[path] = page
 
     # ----- aggregates -----
     def strat_summary(self, s):
@@ -537,6 +552,20 @@ class Site:
                 for t in names if t["group"] == g) + "</optgroup>"
         return out
 
+    def stock_select(self, sel_id, tmpl, t, depth, full_only=False):
+        """A jump-to-stock select that ships with just the current name; site.js fills in
+        the rest from data/names.json (one cached file instead of ~380 options per page)."""
+        src = self.href(depth, "data/names.json") + "?v=" + self.ver
+        return (f'<select id="{sel_id}" data-nav data-tmpl="{tmpl}" data-names="{e(src)}"{" data-full-only" if full_only else ""}>'
+                f'<option value="{e(t["slug"])}" selected>{e(t["short"])} · {e(t["name"])}</option></select>')
+
+    def names_json(self):
+        """Every covered name by group for the jump-to-stock selects: [group, [[slug, label, core_only]]]."""
+        names = universe()
+        groups = [[g, [[t["slug"], f'{t["short"]} · {t["name"]}', 1 if t.get("core_only") else 0] for t in names if t["group"] == g]]
+                  for g in GROUP_ORDER if any(t["group"] == g for t in names)]
+        return json.dumps({"groups": groups}, ensure_ascii=False, separators=(",", ":"))
+
     # ======================================================================
     # pages
     # ======================================================================
@@ -588,8 +617,8 @@ class Site:
         # recent calls, spread across plays and stocks
         flips = []
         for t, s, x in timed_pairs:
-            if x["calls"] and x["calls"][-1]["date"] >= self.asof - pd.Timedelta(days=21):
-                c = x["calls"][-1]
+            c = x["last_call"]
+            if c and c["date"] >= self.asof - pd.Timedelta(days=21):
                 flips.append((c["date"], self.strat_summary(s)["switches"] or 99, t, s, c))
         flips.sort(key=lambda z: (z[0], -z[1]), reverse=True)
         per_s, per_t, pick = {}, {}, []
@@ -696,9 +725,9 @@ class Site:
 
     def board_html(self, depth, curated=False):
         """Stocks x play families: how many plays in each family hold each stock.
-        curated=True leaves out the Nasdaq-100 names added in bulk (the home page)."""
+        curated=True leaves out the Nasdaq-100 and TSX names added in bulk (the home page)."""
         h = lambda x: self.href(depth, x)
-        names = [t for t in universe() if not (curated and t.get("core_only"))]
+        names = [t for t in universe() if not (curated and t.get("bulk"))]
         fams = [(k, name, [p for p in TIMED if p["family"] == k]) for k, name, _ in FAMILIES]
         head = "".join(f'<th class="c" scope="col"><a href="{h("strategies/")}#fam-{k}">{e(name)}</a><span class="sym-sub">{len(ps)} plays</span></th>' for k, name, ps in fams)
         rows = ""
@@ -1018,7 +1047,7 @@ class Site:
             up = ol["upside"] if ol["ok"] else None
             score = round(ol["score"] * 100) if ol["ok"] else None
             gslug = slugify_group(t["group"])
-            ndx_attr = ' data-ndx="1"' if t.get("ndx") else ""
+            ndx_attr = (' data-ndx="1"' if t.get("ndx") else "") + (' data-tsx="1"' if t.get("tsx") else "")
             rows += (f'<tr data-group="{gslug}"{ndx_attr} data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                      f'<td class="small muted grp-col">{e(t["group"])}</td>'
@@ -1032,7 +1061,8 @@ class Site:
                      f'<td class="r" data-v="{score if score is not None else ""}">{f"<b>{score}</b>" if score is not None else "–"}</td>'
                      f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
         chips = ('<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>'
-                 '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>') + "".join(
+                 '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>'
+                 '<button type="button" class="chip-btn" aria-pressed="false" data-group="tsx">TSX</button>') + "".join(
             f'<button type="button" class="chip-btn" aria-pressed="false" data-group="{slugify_group(g)}">{e(g)}</button>' for g in groups)
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
                           for k, lab in [("score", "Strongest setups"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
@@ -1103,7 +1133,7 @@ class Site:
         rows += (f'<tr class="grp"><td colspan="6">Benchmark</td></tr><tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
                  f'<td>{pill(1)}</td><td class="nowrap">{dlong(bh["stats"]["start"])}</td><td class="muted">Always in</td>'
                  f'<td class="r">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td></tr>')
-        others = self.stock_options(t["sym"])
+        others = self.stock_select("jump-stock", e(h("stocks/{v}/")), t, depth)
         start_y = bh['stats']['start'].year if bh['stats']['start'] is not None else ""
 
         # price facts
@@ -1149,6 +1179,9 @@ class Site:
                         'the 20 core plays get a full page each.</p>')
         elif t.get("ndx"):
             req_note = '<p class="note-line">In the Nasdaq-100.</p>'
+        elif t.get("tsx"):
+            req_note = ('<p class="note-line">Listed on the Toronto Stock Exchange; prices in Canadian dollars. '
+                        f'<a href="{h("stocks/?group=tsx")}">All {n_tsx()} TSX stocks</a>.</p>')
         idx_note = ""
         if t.get("index"):
             idx_note = ('<p class="note-line">An index is a scoreboard, not something you can buy directly. Investors hold it through an index fund or ETF, '
@@ -1180,7 +1213,7 @@ class Site:
 {deep}
 {exposed}
 {arts}
-<section class="jump"><label class="small muted" for="jump-stock">Another stock</label><select id="jump-stock" data-nav data-tmpl="{e(h('stocks/{v}/'))}">{others}</select></section>
+<section class="jump"><label class="small muted" for="jump-stock">Another stock</label>{others}</section>
 """
         self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js",)))
 
@@ -1219,6 +1252,7 @@ class Site:
                      f'<td data-v="{kc}">{count_in(kc, nc)}</td><td class="small muted why-col">{e("; ".join(rk.get("why") or [])[:140])}</td></tr>')
         market = "Canadian" if canada else "U.S."
         lede = (f"All {len(names)} Nasdaq-100 companies, ranked by crash exposure." if ndx else
+                f"All {len(names)} Canadian stocks Be The Puck covers, ranked by crash exposure." if canada else
                 f"The {market} stocks Be The Puck covers, ranked by crash exposure. Be The Puck covers a sample of names, not the full index.")
         return f"""<section><div class="sec-head"><h2 class="h2">Who would feel a crash first</h2>
 <p>{lede}</p></div>
@@ -1336,9 +1370,8 @@ class Site:
 
         by = " &amp; ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in s["analysts"])
         play_sel = self.play_options(s["slug"], core_only=bool(t.get("requested") or t.get("core_only")))
-        stock_sel = self.stock_options(t["sym"], full_only=not s.get("core"))
+        stock_sel = self.stock_select("jump-stock", e(h("stocks/{v}/" + s["slug"] + "/")), t, depth, full_only=not s.get("core"))
         play_tmpl = e(h("stocks/" + t["slug"] + "/{v}/"))
-        stock_tmpl = e(h("stocks/{v}/" + s["slug"] + "/"))
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><a href="{h('stocks/' + t['slug'] + '/')}">{e(t['short'])}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])} rule · {e(t['group'])}</p>
@@ -1352,7 +1385,7 @@ class Site:
 {calls_sec}
 <section class="split">{self.rule_card(s)}{self.against_card(depth)}</section>
 <section class="jump split"><div><label class="small muted" for="jump-play">Another play on {e(t['short'])}</label><select id="jump-play" data-nav data-tmpl="{play_tmpl}">{play_sel}</select></div>
-<div><label class="small muted" for="jump-stock">{e(s['name'])} on another stock</label><select id="jump-stock" data-nav data-tmpl="{stock_tmpl}">{stock_sel}</select></div></section>
+<div><label class="small muted" for="jump-stock">{e(s['name'])} on another stock</label>{stock_sel}</div></section>
 """
         title = f"{s['name']} on {t['short']}: the play says {st_word}"
         desc = f"{credit(s)}'s {s['long']} applied to {t['name']} ({t['short']}) since {start_y}: {st_word} since {dlong(x['since'])}. {nm['headline']}"

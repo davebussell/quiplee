@@ -27,7 +27,8 @@ BUCKETS = [("stocks", "Stocks", "A brief on every covered name, rebuilt each nig
            ("strategies", "Strategies & sectors", "What the plays are, when each family works, what the backtests really say, and a brief on each sector."),
            ("macro", "Macro", "Bubbles, crashes and the gauges that came before them, and how to think about cash versus staying invested.")]
 SECTOR_ETF = {"Semiconductors": "SMH", "Big tech": "XLK", "Software & devices": "XLK", "Healthcare": "XLV", "Financials": "XLF",
-              "Industrials & rentals": "XLI", "Energy & power": "XLE", "Metals & mining": "XLB", "Crypto miners": "BTC-USD"}
+              "Industrials & rentals": "XLI", "Energy & power": "XLE", "Metals & mining": "XLB", "Crypto miners": "BTC-USD",
+              "Consumer & retail": "XLY", "Media & telecom": "XLC", "Industrials & materials": "XLI", "Real estate": "XLRE"}
 
 
 def _js(obj):
@@ -613,8 +614,8 @@ class Articles:
         flips = []
         for p in TIMED:
             r = s.R.get((sym, p["slug"]))
-            if r and r["calls"] and r["calls"][-1]["date"] >= s.asof - pd.Timedelta(days=30):
-                c = r["calls"][-1]
+            c = r["last_call"] if r else None
+            if c and c["date"] >= s.asof - pd.Timedelta(days=30):
                 flips.append((c["date"], p, c))
         flips.sort(key=lambda z: z[0], reverse=True)
         from .render import plays_for

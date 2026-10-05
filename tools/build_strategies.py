@@ -19,6 +19,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +36,7 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -125,24 +126,30 @@ def main():
     t0 = time.time()
     prices, irx, now = engine.load_all()
     print(f"loaded {len(prices)} tickers (closes to {max(d.index[-1] for d in prices.values()).date()})")
-    results = engine.run(prices, irx, now, workers=args.workers)
+    # the bulky part of each result (chart windows, call lists) waits on disk until its page is made
+    spill = os.environ.get("QSTRAT_SPILL") or tempfile.mkdtemp(prefix="qstrat-spill-")
+    results = engine.run(prices, irx, now, workers=args.workers, spill=spill)
     meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
     print(f"evaluated {len(results)} play x ticker pairs in {time.time() - t0:.0f}s")
 
-    t1 = time.time()
-    site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
-    pages = site.build()
-    print(f"rendered {len(pages)} pages in {time.time() - t1:.0f}s")
-
+    # the hand-written files go in first; each generated page is then written as it is made
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
     copy_static(out)
-    write_pages(pages, out)
+
+    t1 = time.time()
+    site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
+    site.out = out
+    pages = site.build()
+    print(f"rendered and wrote {len(pages)} pages in {time.time() - t1:.0f}s")
+    write_pages({k: v for k, v in pages.items() if v is not None}, out)
     os.makedirs(os.path.join(out, "data"), exist_ok=True)
     with open(os.path.join(out, "data", "signals.json"), "w") as f:
         f.write(site.signals_json())
     with open(os.path.join(out, "data", "glossary.json"), "w", encoding="utf-8") as f:
         f.write(glossary_json())
+    with open(os.path.join(out, "data", "names.json"), "w", encoding="utf-8") as f:
+        f.write(site.names_json())
     from qstrat.watchlist import watch_json
     with open(os.path.join(out, "data", "watch.json"), "w", encoding="utf-8") as f:
         f.write(watch_json(site))
@@ -154,6 +161,8 @@ def main():
     with open(os.path.join(out, "sitemap.xml"), "w") as f:
         f.write(site.sitemap())
     print("glossary-linked:", ", ".join(link_static_pages(out)))
+    if not os.environ.get("QSTRAT_SPILL"):
+        shutil.rmtree(spill, ignore_errors=True)
     print(f"wrote the site to {out} in {time.time() - t0:.0f}s")
 
 

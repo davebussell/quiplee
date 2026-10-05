@@ -22,6 +22,35 @@ GRADE_START = pd.Timestamp("2005-01-01")
 COST_BPS = {"crypto": 10, "micro": 30, "default": 5}   # per position change
 PRICE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "prices")
 BENCH = "SPY"
+HEAVY = ("window", "calls")   # the bulky parts of a result: the chart window and the full call list
+
+
+class Result(dict):
+    """One play x ticker result. With run(spill=folder), the bulky parts (HEAVY)
+    are kept in one file per ticker instead of in memory, and load on first use;
+    "last_call" and "n_calls" stay in memory for the cross-stock pages."""
+    __slots__ = ()
+
+    def __missing__(self, key):
+        path = dict.get(self, "_spill")
+        if key in HEAVY and path:
+            return _heavy(path)[self["strategy"]][key]
+        raise KeyError(key)
+
+
+_HEAVY_CACHE = {}
+
+
+def _heavy(path):
+    """The spilled parts of one ticker's results (the last ticker read stays cached)."""
+    hit = _HEAVY_CACHE.get(path)
+    if hit is None:
+        import pickle
+        with open(path, "rb") as f:
+            hit = pickle.load(f)
+        _HEAVY_CACHE.clear()
+        _HEAVY_CACHE[path] = hit
+    return hit
 
 
 # --------------------------------------------------------------------------
@@ -383,7 +412,7 @@ def evaluate(t, play, d, bench_close, irx, now, future):
         wk = st_d.groupby(st_d.index.to_period("W-FRI")).last().iloc[-104:]
         hist = "".join("-" if pd.isna(v) else str(int(v)) for v in wk.values)
 
-    return {
+    return Result({
         "sym": t["sym"], "strategy": play["slug"], "asof": asof, "price": live,
         "state": cur_state, "since": cur_call["date"] if cur_call else stats["start"],
         "since_price": cur_call["price"] if cur_call else None,
@@ -391,7 +420,8 @@ def evaluate(t, play, d, bench_close, irx, now, future):
         "bar_complete": complete, "stats": stats, "calls": calls, "batting": bat,
         "equity": equity, "window": {"price": win, "lines": lines, "panel": pnl, "pos": pos_win},
         "periods": periods, "hist": hist,
-    }
+        "last_call": calls[-1] if calls else None, "n_calls": len(calls),
+    })
 
 
 # --------------------------------------------------------------------------
@@ -418,11 +448,48 @@ def _run_ticker(sym):
         "weeks": [w.end_time.normalize() for w in weeks],
         "first": d.index[0],
     }
+    _share(out)
+    if _G.get("spill"):
+        _spill(sym, out, _G["spill"])
     return out
 
 
-def run(prices, irx, now, plays=None, tickers=None, workers=None):
-    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS, fund=risk.load_fundamentals(TICKERS))
+def _share(out):
+    """Plays on the same ticker often have identical equity dates and buy-and-hold
+    curves; point them all at one copy."""
+    import hashlib
+    seen = {}
+    for k, r in out.items():
+        if k[1] == "__meta":
+            continue
+        eq = r["equity"]
+        for f in ("dates", "bh"):
+            v = eq[f]
+            raw = v.asi8.tobytes() if f == "dates" else np.ascontiguousarray(v).tobytes()
+            eq[f] = seen.setdefault((f, hashlib.blake2b(raw, digest_size=16).digest()), v)
+
+
+def _spill(sym, out, folder):
+    """Move each result's bulky parts into one file for the ticker (buy and hold keeps
+    its price window in memory: the stock lists read its one-year change)."""
+    import pickle
+    path = os.path.join(folder, sym.replace("^", "_").replace("/", "_") + ".pkl")
+    heavy = {}
+    for k, r in out.items():
+        if k[1] == "__meta" or k[1] == "buy-and-hold":
+            continue
+        heavy[k[1]] = {f: r.pop(f) for f in HEAVY}
+        r["_spill"] = path
+    with open(path, "wb") as f:
+        pickle.dump(heavy, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def run(prices, irx, now, plays=None, tickers=None, workers=None, spill=None):
+    """Every play on every ticker. spill: a folder for the bulky parts of each result
+    (see Result), which keeps the build's memory flat as the universe grows."""
+    if spill:
+        os.makedirs(spill, exist_ok=True)
+    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS, fund=risk.load_fundamentals(TICKERS), spill=spill)
     syms = [t["sym"] for t in (tickers or TICKERS)]
     workers = workers or max(1, min(len(syms), os.cpu_count() or 1))
     results = {}

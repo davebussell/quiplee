@@ -247,8 +247,30 @@
     [].forEach.call(document.querySelectorAll('select[data-nav]'), function (sel) {
       var tmpl = sel.getAttribute('data-tmpl');
       sel.addEventListener('change', function () { if (sel.value) location.href = tmpl ? tmpl.replace('{v}', sel.value) : sel.value; });
+      if (sel.hasAttribute('data-names')) fillNames(sel);
     });
   }
+
+  // jump-to-stock selects ship with the current name only; the full list is one cached file
+  var namesReq = {};
+  function fillNames(sel) {
+    var src = sel.getAttribute('data-names'), fullOnly = sel.hasAttribute('data-full-only'), cur = sel.value;
+    if (!window.fetch) return;
+    namesReq[src] = namesReq[src] || fetch(src).then(function (r) { return r.json(); });
+    namesReq[src].then(function (j) {
+      var out = '';
+      j.groups.forEach(function (g) {
+        var opts = g[1].filter(function (x) { return !(fullOnly && x[2]); }).map(function (x) {
+          return '<option value="' + escHtml(x[0]) + '"' + (x[0] === cur ? ' selected' : '') + '>' + escHtml(x[1]) + '</option>';
+        }).join('');
+        if (opts) out += '<optgroup label="' + escHtml(g[0]) + '">' + opts + '</optgroup>';
+      });
+      if (out.indexOf('value="' + cur + '"') < 0) out = sel.innerHTML + out;   // a name outside the list (reader request)
+      sel.innerHTML = out;
+      sel.value = cur;
+    }).catch(function () { /* keep the current name only */ });
+  }
+  function escHtml(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   window.QChart = { draw: draw };
 

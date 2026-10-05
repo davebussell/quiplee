@@ -7,8 +7,8 @@ Be The Puck has two parts:
 1. **The plays site** (home, `/strategies/` = Plays, `/thinkers/` = Analysts,
    `/stocks/`, `/learn/`, `/method/`): 59 published trading plays tied to the 52
    analysts behind them (bios and rules checked against their books, papers and
-   interviews), run on 64 stocks, ETFs and coins since 2005, every call graded,
-   and the close that flips each play next.
+   interviews), run on about 380 stocks, ETFs, indexes and coins since 2005,
+   every call graded, and the close that flips each play next.
 2. **The live desk** (`/desk/`): real-time news scored for revenue impact
    (documented below).
 
@@ -85,7 +85,10 @@ live desk's feed from `data/glossary.json`.
 **Universe.** Market indexes, U.S. sector funds and the stock groups in
 `content.py`, all 100 Nasdaq-100 companies (`NDX_NEW` / `NDX_COVERED`; the ones
 added in bulk get pages for the 20 core plays, like reader requests, but appear
-in every list), plus reader requests. Micro caps carry a 0.30% switching cost.
+in every list), the 218 Toronto-listed companies on Proud to Work's TSX tracker
+(`TSX_NEW` / `TSX_COVERED`, prices in C$, a page for every play; the TSX filter
+on `/stocks/`), plus reader requests. Names added in bulk (`bulk`) stay off the
+home page's board. Micro caps carry a 0.30% switching cost.
 
 **Open item.** The PB EMA's real lengths are unconfirmed (its TradingView page
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in `plays_fn.pb_ema`
