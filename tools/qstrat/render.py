@@ -39,7 +39,7 @@ BASE = "https://bethepuck.com/"
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Cellipse cx='27' cy='44' rx='18' ry='7.5' fill='%235d6a82'/%3E%3Crect x='9' y='37' width='36' height='7' fill='%235d6a82'/%3E%3Cellipse cx='27' cy='37' rx='18' ry='7.5' fill='%23e7edf7'/%3E%3Cpath d='M44 27 L51.5 13 L59 27 Z' fill='%231fd093'/%3E%3C/svg%3E")
-NAV = [("markets/", "Markets"), ("stocks/", "Stocks"), ("watchlist/", "Watchlist"), ("strategies/", "Plays"),
+NAV = [("markets/", "Markets"), ("stocks/", "Stocks"), ("watchlist/", "Watchlist"), ("paper/", "Paper trading"), ("strategies/", "Plays"),
        ("learn/", "Learn"), ("articles/", "Articles"), ("desk/", "Live desk")]
 NAV_ACTIVE = {"thinkers/": "strategies/"}   # analyst pages sit under Plays in the menu
 
@@ -60,6 +60,8 @@ def nav_menus():
                     ("stocks/?group=tsx", "TSX stocks", f"The {n_tsx()} Toronto-listed companies, in Canadian dollars"),
                     ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
+        "paper/": [("paper/", "Play the game", "US$100,000 of play money to trade the names Be The Puck covers"),
+                   ("paper/leaders/", "Leaderboard", "Shared portfolios ranked by return since they started")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
                         ("articles/the-core-20/", "The core 20", "The plays to learn first"),
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
@@ -579,6 +581,8 @@ class Site:
         from .members import members_page
         from . import picks
         members_page(self)
+        from .paper import paper_pages
+        paper_pages(self)
         state, info = picks.run(self)
         picks.picks_page(self, state, info)
         self.home()
@@ -1194,6 +1198,8 @@ class Site:
         exposed = self.index_exposed(t, depth) if t.get("index") else ""
         arts = self.articles_for(t, depth)
         watch_btn = (f'<button type="button" class="btn sm" data-watch-add="{e(sym)}" data-watch-href="{e(h("watchlist/"))}">+ Add to my watchlist</button>')
+        if not t.get("index"):
+            watch_btn = (f'<span class="read-acts">{watch_btn}<a class="btn sm" href="{e(h("paper/"))}?t={e(t["slug"])}">Paper trade {e(t["short"])}</a></span>')
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><span>{e(t['short'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
@@ -1463,7 +1469,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "paper/player/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

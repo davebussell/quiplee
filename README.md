@@ -35,11 +35,13 @@ tools/qstrat/render.py       HTML for home, plays, analysts, stocks, pairs, meth
 tools/qstrat/stockview.py    stock-page blocks: candlesticks, heatmap, the read, fundamentals, crash card
 tools/qstrat/markets.py      /markets/: weather, index and sector tables, gauges, past tops, simulator
 tools/qstrat/watchlist.py    /watchlist/ page and data/watch.json
+tools/qstrat/paper.py        /paper/ (paper trading), data/paper.json and the nightly portfolio snapshot
 tools/qstrat/articles.py     /articles/: macro pieces, stock and sector briefs (rebuilt nightly)
 tools/qstrat/learn.py        Learn hub, 13 play lessons, glossary, Call it, flashcards, play quiz, reading list
 tools/qstrat/basics.py       Track 1 (stock basics) and Track 3 (markets and risk) lessons with widgets
 tools/qstrat/practice.py     the Call it chart scenarios (data/practice.json) and play-quiz bank
 netlify/functions/watch.mjs  the request queue (Netlify Function + Blobs) behind /api/watch
+netlify/functions/paper.mjs  paper-trading accounts, trades, quotes and leaderboard (/api/paper/*)
 assets/site.js, learn.js     line charts; quizzes, flashcards, Call it (progress in localStorage)
 assets/widgets.js            candlesticks, plays heatmap, positioning simulator, core toggle
 assets/lab.js, watchlist.js  Learn widgets and step-by-step lessons; the watchlist app
@@ -114,6 +116,22 @@ reviewed after each Friday close, held while in the top 10. The history lives in
 Netlify Blobs behind `/api/picks-state` (token `PICKS_STATE_TOKEN`), not in this
 repo; only the production build writes it. Locally, set `QUIPLEE_PICKS_FILE` to a
 JSON file.
+
+**Paper trading.** `/paper/` is a free game: sign up with a username and
+password (no email), start with US$100,000 of play money and trade any covered
+name (indexes excepted) at Yahoo's latest price, delayed up to 15 minutes, or
+the last close when the market is shut. TSX names trade in C$ at the live
+USD/CAD rate; the account is in US dollars. Long only, whole shares (coins in
+fractions), no fees, no dividends. `netlify/functions/paper.mjs` holds the
+accounts (PBKDF2 hashes, signed `pt` cookie with `QM_SECRET`), portfolios and
+trades in the Blobs store `paper`; `tools/qstrat/paper.py` builds the pages,
+`data/paper.json` (the tradable names) and, in the production build, the
+nightly snapshot: every portfolio valued at the close for its chart, and the
+leaderboard of shared portfolios (`/paper/leaders/`, profiles at
+`/paper/player/?u=`). Moderation: `POST /api/paper/admin/hide {"u": "name"}`
+with `Authorization: Bearer $PICKS_STATE_TOKEN` takes a portfolio off the board
+and its public page (`"hidden": false` puts it back). Known gap: stock splits
+aren't applied to held shares yet.
 
 ---
 
