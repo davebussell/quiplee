@@ -14,7 +14,7 @@
  "equity": 415265000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 408.61,
  "fiftyTwoWeekLow": 235.84,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 120790999040,
  "totalRevenue": 445865984000,
  "total_debt_bs": 59291000000.0,
- "trailingEps": 19.92,
- "trailingPE": 17.243977,
+ "trailingEps": 19.93,
+ "trailingPE": 17.235323,
  "trailingPegRatio": 1.2549,
  "website": "https://abc.xyz"
 }

@@ -14,7 +14,7 @@
  "equity": 217243000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 779.82,
  "fiftyTwoWeekLow": 520.26,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 112317997056,
  "totalRevenue": 228246994944,
  "total_debt_bs": 83897000000.0,
- "trailingEps": 26.65,
- "trailingPE": 27.320076,
+ "trailingEps": 26.54,
+ "trailingPE": 27.433308,
  "trailingPegRatio": 0.9846,
  "website": "https://www.meta.com"
 }

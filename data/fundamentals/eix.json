@@ -14,7 +14,7 @@
  "equity": 17579000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NYQ",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 81.62,
  "fiftyTwoWeekLow": 51.1,
  "financialCurrency": "USD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 14,
  "operatingCashflow": 6391000064,
  "operatingMargins": 0.26899,
- "payoutRatio": 0.35709998,
+ "payoutRatio": 0.35669997,
  "pegRatio": 2.39,
  "priceToBook": 1.1886014,
  "priceToSalesTrailing12Months": 1.0676839,
@@ -56,8 +56,8 @@
  "totalDebt": 43540000768,
  "totalRevenue": 19423000576,
  "total_debt_bs": 41549000000.0,
- "trailingEps": 9.69,
- "trailingPE": 5.5614038,
+ "trailingEps": 9.7,
+ "trailingPE": 5.5556703,
  "trailingPegRatio": 2.3775,
  "website": "https://www.edison.com"
 }

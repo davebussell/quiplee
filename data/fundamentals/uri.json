@@ -14,7 +14,7 @@
  "equity": 8968000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NYQ",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 1179.18,
  "fiftyTwoWeekLow": 701.59,
  "financialCurrency": "USD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 21,
  "operatingCashflow": 5742000128,
  "operatingMargins": 0.25986,
- "payoutRatio": 0.18090001,
+ "payoutRatio": 0.1808,
  "pegRatio": 1.4,
  "priceToBook": 7.305904,
  "priceToSalesTrailing12Months": 3.9975417,
@@ -56,8 +56,8 @@
  "totalDebt": 15384999936,
  "totalRevenue": 16832000000,
  "total_debt_bs": 15670000000.0,
- "trailingEps": 41.57,
- "trailingPE": 26.005293,
+ "trailingEps": 41.59,
+ "trailingPE": 25.992788,
  "trailingPegRatio": 1.3403,
  "website": "https://www.unitedrentals.com"
 }

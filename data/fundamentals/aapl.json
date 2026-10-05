@@ -14,7 +14,7 @@
  "equity": 73733000000.0,
  "equity_date": "2025-09-30",
  "exchange": "NMS",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 345.34,
  "fiftyTwoWeekLow": 243.42,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 84343996416,
  "totalRevenue": 466822987776,
  "total_debt_bs": 98657000000.0,
- "trailingEps": 8.71,
- "trailingPE": 38.31114,
+ "trailingEps": 8.72,
+ "trailingPE": 38.2672,
  "trailingPegRatio": 2.706,
  "website": "https://www.apple.com"
 }

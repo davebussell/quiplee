@@ -14,7 +14,7 @@
  "equity": 81292000000.0,
  "equity_date": "2025-10-31",
  "exchange": "NMS",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 495.0,
  "fiftyTwoWeekLow": 289.96,
  "financialCurrency": "USD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 47,
  "operatingCashflow": 40653000704,
  "operatingMargins": 0.54307,
- "payoutRatio": 0.324,
+ "payoutRatio": 0.32439998,
  "pegRatio": 0.35,
  "priceToBook": 17.006992,
  "priceToSalesTrailing12Months": 19.026161,
@@ -56,8 +56,8 @@
  "totalDebt": 59419000832,
  "totalRevenue": 89103998976,
  "total_debt_bs": 65136000000.0,
- "trailingEps": 7.85,
- "trailingPE": 45.24077,
+ "trailingEps": 7.83,
+ "trailingPE": 45.356323,
  "trailingPegRatio": 0.361,
  "website": "https://www.broadcom.com"
 }

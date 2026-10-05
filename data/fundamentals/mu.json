@@ -14,7 +14,7 @@
  "equity": 54165000000.0,
  "equity_date": "2025-08-31",
  "exchange": "NMS",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 1255.0,
  "fiftyTwoWeekLow": 179.61,
  "financialCurrency": "USD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 46,
  "operatingCashflow": 89674997760,
  "operatingMargins": 0.80678004,
- "payoutRatio": 0.0070999996,
+ "payoutRatio": 0.0112,
  "pegRatio": 0.16,
  "priceToBook": 12.048311,
  "priceToSalesTrailing12Months": 9.114736,
@@ -56,8 +56,8 @@
  "totalDebt": 5178999808,
  "totalRevenue": 133188001792,
  "total_debt_bs": 15278000000.0,
- "trailingEps": 74.38,
- "trailingPE": 14.451332,
+ "trailingEps": 74.33,
+ "trailingPE": 14.461052,
  "trailingPegRatio": 0.1598,
  "website": "https://www.micron.com"
 }

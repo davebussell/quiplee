@@ -14,7 +14,7 @@
  "equity": 49463000000.0,
  "equity_date": "2026-04-30",
  "exchange": "NYQ",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 106.33,
  "fiftyTwoWeekLow": 73.31,
  "financialCurrency": "USD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 24,
  "operatingCashflow": 8034999808,
  "operatingMargins": 0.19332,
- "payoutRatio": 0.70199996,
+ "payoutRatio": 0.70019996,
  "pegRatio": 1.55,
  "priceToBook": 2.201213,
  "priceToSalesTrailing12Months": 2.943155,
@@ -56,8 +56,8 @@
  "totalDebt": 28152999936,
  "totalRevenue": 37541998592,
  "total_debt_bs": 27961000000.0,
- "trailingEps": 4.06,
- "trailingPE": 21.275862,
+ "trailingEps": 4.07,
+ "trailingPE": 21.223585,
  "trailingPegRatio": 1.6044,
  "website": "https://www.medtronic.com"
 }

@@ -14,7 +14,7 @@
  "equity": 11002200000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-04",
+ "fetched": "2026-10-05",
  "fiftyTwoWeekHigh": 19.39,
  "fiftyTwoWeekLow": 10.08,
  "financialCurrency": "CAD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 19,
  "operatingCashflow": 4388100096,
  "operatingMargins": 0.51787996,
- "payoutRatio": 0.65139997,
+ "payoutRatio": 0.6236,
  "pegRatio": 7.07,
  "priceToBook": 2.0204287,
  "priceToSalesTrailing12Months": 3.0229974,
@@ -56,8 +56,8 @@
  "totalDebt": 2773799936,
  "totalRevenue": 7239900160,
  "total_debt_bs": 3767200000.0,
- "trailingEps": 1.12,
- "trailingPE": 16.071428,
+ "trailingEps": 1.17,
+ "trailingPE": 15.384616,
  "trailingPegRatio": 7.0673,
  "website": "https://www.wcap.ca"
 }
