@@ -27,7 +27,7 @@
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
   };
-  var st = { items: [], example: false, shared: false, mode: 'core', pick: [] };
+  var st = { items: [], example: false, shared: false, mode: 'all', pick: [] };
 
   function $(id) { return document.getElementById(id); }
   function msg(t, kind) { var m = $('wl-msg'); m.textContent = t; m.className = 'small ' + (kind || 'muted'); }
@@ -39,7 +39,7 @@
     if (mem && mem.synced) { clearTimeout(syncTimer); syncTimer = setTimeout(function () { putList({}); }, 800); }
   }
   function loadMode() {
-    try { var m = JSON.parse(localStorage.getItem(MODE_KEY) || 'null'); if (m) { st.mode = m.mode || 'core'; st.pick = m.pick || []; } } catch (e) {}
+    try { var m = JSON.parse(localStorage.getItem(MODE_KEY) || 'null'); if (m) { st.mode = m.mode === 'pick' ? 'pick' : 'all'; st.pick = m.pick || []; } } catch (e) {}
   }
   function saveMode() { try { localStorage.setItem(MODE_KEY, JSON.stringify({ mode: st.mode, pick: st.pick })); } catch (e) {} }
 
@@ -352,7 +352,7 @@
           if (cb.checked) st.pick.push(p.s);
           saveMode(); render();
         });
-        g.appendChild(el('label', {}, [cb, p.n, p.c ? el('span', { 'class': 'core-tag', text: 'core' }) : null]));
+        g.appendChild(el('label', {}, [cb, p.n]));
       });
       box.appendChild(g);
     });
@@ -468,7 +468,7 @@
       if (navigator.clipboard) navigator.clipboard.writeText(url).then(done, function () { msg(url); }); else msg(url);
     });
     $('wl-clear').addEventListener('click', function () { st.items = []; st.example = false; st.shared = false; Q.watchSet({ items: [] }); history.replaceState(null, '', location.pathname); render(); msg('List cleared.'); });
-    if (st.mode !== 'core') setMode(st.mode); else render();
+    setMode(st.mode);
     memberInit();
     var add = params.get('add');
     if (add && !shared) { addEntries(parseText(add)); history.replaceState(null, '', location.pathname); }

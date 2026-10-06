@@ -1058,3 +1058,5 @@ details.pt-import > *:not(summary) { margin-top: 10px; }
 .ru-key { margin: 0; }
 .ru-example { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
 .ru-example p, .ru-example .h3 { margin: 0; }
+.tbl.stacked tr.ru-diff td, .tbl.stacked tr.ru-diff td:first-child { background: transparent; box-shadow: none; }
+.tbl.stacked tr.ru-diff { background: rgba(124, 108, 245, .08); box-shadow: inset 3px 0 0 var(--violet); }

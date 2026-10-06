@@ -13,7 +13,11 @@ const fmtDate = (iso) => new Date(iso + "T12:00:00Z").toLocaleDateString("en-US"
 /** Where each listed stock stands at this close, and what changed since `prev`. */
 export function compare(D, tickers, prev) {
   const core = D.plays.map((p, i) => (p.c ? i : -1)).filter((i) => i >= 0);
-  const snap = { asof: D.asof, s: {} };
+  // calls are compared by play, not by position, so adding plays never fakes a flip;
+  // a snapshot from before plays were recorded (no prev.plays) only records tonight's calls
+  const slugs = core.map((i) => D.plays[i].s);
+  const was = prev && Array.isArray(prev.plays) ? Object.fromEntries(prev.plays.map((s, j) => [s, j])) : null;
+  const snap = { asof: D.asof, plays: slugs, s: {} };
   const out = [];
   for (const sym of tickers) {
     const t = D.t[sym];
@@ -32,7 +36,8 @@ export function compare(D, tickers, prev) {
     const old = prev && prev.s && prev.s[sym];
     if (old) {
       core.forEach((pi, j) => {
-        const a = old.c[j], b = c[j];
+        if (!was || was[slugs[j]] === undefined) return;
+        const a = old.c[was[slugs[j]]], b = c[j];
         if (a === b || (a !== "0" && a !== "1") || (b !== "0" && b !== "1")) return;
         items.push({ kind: b === "1" ? "in" : "out", text: `${D.plays[pi].n} ${b === "1" ? "got in" : "got out"}` });
       });

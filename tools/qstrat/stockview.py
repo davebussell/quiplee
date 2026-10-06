@@ -107,7 +107,7 @@ def heatmap_block(site, t, meta, href, cid="hm"):
             f'<div class="legend-row"><span class="key"><s style="background:var(--in)"></s>In</span>'
             f'<span class="key"><s style="background:var(--out)"></s>Out</span><span class="key"><i style="background:var(--violet-ink)"></i>Share of plays in</span></div></div>'
             f'<div class="heatmap" data-heatmap="{cid}"></div><script type="application/json" id="{cid}">{_js(spec)}</script>'
-            f'<p class="chart-note">One row per play, grouped by family; core plays in bold. When most rows turn green at once, the trend is broad. '
+            f'<p class="chart-note">One row per play, grouped by family. When most rows turn green at once, the trend is broad. '
             f'When they split, the plays disagree and the stock is usually chopping sideways.</p></div>')
 
 
@@ -115,7 +115,7 @@ def heatmap_block(site, t, meta, href, cid="hm"):
 # the plain-English read
 # --------------------------------------------------------------------------
 FAM_WORD = {"trend": "trend-following", "breakout": "breakout", "momentum": "momentum", "reversion": "mean-reversion",
-            "volume": "volume", "calendar": "calendar"}
+            "volume": "volume", "pattern": "pattern", "calendar": "calendar"}
 
 
 def _lean(k, n):
@@ -128,13 +128,10 @@ def _lean(k, n):
 def read_lines(site, t, meta, fund):
     """Two to four short sentences that say what matters on this name now."""
     sym, short = t["sym"], t["short"]
-    core = [p for p in TIMED if p.get("core")]
-    kc, nc = site.consensus(t, core)
     ka, na = site.consensus(t)
     lines = []
-    if nc:
-        lead = (f"{kc} of the {nc} core plays hold {short} right now" + (f" ({ka} of {na} across every play)." if na > nc else "."))
-        lines.append(lead)
+    if na:
+        lines.append(f"{ka} of the {na} plays hold {short} right now.")
     # which families agree, which don't
     leans = []
     for fk, fname, _ in FAMILIES:

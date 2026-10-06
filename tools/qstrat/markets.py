@@ -117,7 +117,6 @@ def summary_sentence(M):
 
 def market_rows(site, tickers, depth):
     h = lambda x: site.href(depth, x)
-    core = [p for p in TIMED if p.get("core")]
     rows = ""
     for t in tickers:
         x = site.R.get((t["sym"], "buy-and-hold"))
@@ -128,7 +127,6 @@ def market_rows(site, tickers, depth):
         day = float(c.iloc[-1] / c.iloc[-2] - 1) if len(c) > 1 else None
         gap = float(c.iloc[-1] / c.iloc[-200:].mean() - 1) if len(c) >= 200 else None
         y1 = site.one_year(t)
-        kc, nc = site.consensus(t, core)
         k, n = site.consensus(t)
         rk = meta.get("risk") or {}
         lvl = rk.get("level")
@@ -139,8 +137,7 @@ def market_rows(site, tickers, depth):
                  f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
                  f'<td class="r {dir_cls(y1)}" data-v="{sortv(y1)}">{pct(y1, d=0)}</td>'
                  f'<td class="r {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
-                 f'<td data-v="{kc / nc if nc else ""}">{count_in(kc, nc)}</td>'
-                 f'<td class="r" data-v="{k / n if n else ""}">{k}/{n}</td>'
+                 f'<td data-v="{k / n if n else ""}">{count_in(k, n)}</td>'
                  f'<td class="r" data-v="{sortv(rk.get("runup2y"))}">{pct(rk.get("runup2y"), d=0)}</td>'
                  f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else "–") + "</td></tr>")
     return rows
@@ -148,7 +145,7 @@ def market_rows(site, tickers, depth):
 
 def market_table(rows):
     return (f'<div class="tbl-wrap"><table class="tbl mkt-tbl"><thead><tr><th>Market</th><th class="r">Level</th><th class="r">Day</th><th class="r">1 year</th>'
-            f'<th class="r">vs 200-day</th><th>Core plays in</th><th class="r">All plays</th><th class="r">2-yr run-up</th><th>Crash exposure</th></tr></thead>'
+            f'<th class="r">vs 200-day</th><th>Plays in</th><th class="r">2-yr run-up</th><th>Crash exposure</th></tr></thead>'
             f'<tbody>{rows}</tbody></table></div>')
 
 
@@ -250,11 +247,10 @@ def markets_page(site):
     eq = [t for t in site.universe if not t.get("index") and not t["crypto"] and t["group"] not in ("Indexes & ETFs", "Sectors")
           and (site.meta.get(t["sym"]) or {}).get("risk")]
     eq.sort(key=lambda t: (-site.meta[t["sym"]]["risk"]["score"], t["short"]))
-    core = [p for p in TIMED if p.get("core")]
     crows = ""
     for t in eq[:15]:
         rk = site.meta[t["sym"]]["risk"]
-        kc, nc = site.consensus(t, core)
+        kc, nc = site.consensus(t)
         crows += (f'<tr><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}#crash">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                   f'<td data-v="{rk["score"]}"><span class="lvl lvl-{sv.LEVEL_CLASS[rk["level"]]}">{e(rk["level"])}</span> <span class="muted">{rk["score"]}/10</span></td>'
                   f'<td class="r" data-v="{sortv(rk.get("beta"))}">{ratio(rk.get("beta"))}</td>'
@@ -295,7 +291,7 @@ def markets_page(site):
 
 <section aria-labelledby="ex-h"><div class="sec-head"><h2 class="h2" id="ex-h">Who would feel a crash first</h2>
 <p>The covered stocks with the highest crash exposure: how hard they swing with the market, how they fared in past crashes, their debt and their run-up. This is the storm test: shocks hurt most where debt is heavy.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays in</th><th>Why</th></tr></thead><tbody>{crows}</tbody></table></div>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Plays in</th><th>Why</th></tr></thead><tbody>{crows}</tbody></table></div>
 <p class="muted small">Every stock page has its full crash card. Index pages list every covered name on that market. <a href="{h('articles/debt-and-crashes/')}">How the storm test works</a></p></section>
 
 <section aria-labelledby="pos-h" id="positioning"><div class="sec-head"><h2 class="h2" id="pos-h">Cash, stay in, or buckets?</h2>

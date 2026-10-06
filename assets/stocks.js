@@ -9,7 +9,7 @@
   var rows = [].slice.call(tbl.tBodies[0].rows);
   var q = document.getElementById('st-q'), count = document.getElementById('st-count');
   var st = { group: '', q: '', min: 0 };
-  var COL = { score: 10, plays: 8, upside: 9, crash: 11, year: 5, light: 1 };
+  var COL = { score: 9, plays: 7, upside: 8, crash: 10, year: 5, light: 1 };
   var params = new URLSearchParams(location.search);
 
   function apply() {

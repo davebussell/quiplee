@@ -1,7 +1,7 @@
 """/guides/: which kinds of prediction work, family by family and play by play.
 
 Free and rebuilt every night from the backtests:
-  /guides/                 what kinds of prediction work (the six bets compared)
+  /guides/                 what kinds of prediction work (the seven bets compared)
   /guides/<family>/        one family: the bet, the evidence, when and where it worked
   /guides/<play>/          one play: does it work, when, on what, and how to use it
 
@@ -22,7 +22,7 @@ WINDOWS = [("2008 crash", "2007-10-09", "2009-03-09"), ("Recovery 2009–19", "2
            ("2020–21 rally", "2020-03-23", "2022-01-03"), ("2022 bear", "2022-01-03", "2022-10-12"), ("Since Oct 2022", "2022-10-12", None)]
 
 LESSON = {"trend": "trend-following", "breakout": "breakouts", "momentum": "momentum", "reversion": "oscillators",
-          "volume": "volume", "calendar": "calendar"}
+          "volume": "volume", "pattern": "candlesticks", "calendar": "calendar"}
 
 # ---------------------------------------------------------------------------
 # The idea behind each family, and what research has found (written by hand).
@@ -63,6 +63,8 @@ FAMILY_GUIDE = {
             "Moskowitz, Ooi and Pedersen (2012) found 'time-series momentum', an asset's own past 12-month return, predicted its next month across 58 futures markets.",
             "George and Hwang (2004) found nearness to the 52-week high explained much of momentum's profit.",
             "Daniel and Moskowitz (2016) documented 'momentum crashes': after a market bottom, last year's losers can rebound violently and momentum suffers its worst months.",
+            "Cooper, Gutierrez and Hameed (2004) found momentum paid only after the market had risen over the previous three years, and lost money after it had fallen.",
+            "Da, Gurun and Warachka (2014) found momentum built from many small gains lasted longer than momentum from a few big jumps: the 'frog in the pan'.",
         ],
         "fails": "At sharp turning points. When a falling market reverses, momentum is still positioned for the old trend and misses the start of the rebound, or is caught holding last year's leaders as they reverse.",
         "use": ["Momentum is about relative strength: a stock can show momentum against the market while both fall.",
@@ -94,12 +96,28 @@ FAMILY_GUIDE = {
         "use": ["Use volume to confirm a price signal rather than on its own.",
                 "Index and ETF volume is often distorted by fund flows; it reads best on actively traded single stocks."],
     },
+    "pattern": {
+        "bet": "A short pattern of bars can show a move running out of steam. Pattern plays look for a turn in the last day or few days, like a candle that swallows the one before it or a breakout that fails and snaps back, and trade the reversal.",
+        "why": "A failed move traps the traders who bet on it. When a break below an old low reverses the next day, or a big up candle erases a down day, those traders rush to get out and add fuel to the turn.",
+        "evidence": [
+            "Steve Nison's Japanese Candlestick Charting Techniques (1991) brought candle patterns, used in Japanese rice trading since the 1700s, to Western traders.",
+            "Caginalp and Laurent (1998) found some three-day candlestick reversal patterns predicted S&P 500 stocks over 1992 to 1996.",
+            "Marshall, Young and Rose (2006) tested candlestick rules on the Dow stocks from 1992 to 2002 and found they added no value after accounting for chance.",
+            "Lo, Mamaysky and Wang (2000) measured classic chart patterns with statistics and found they carried some information about the next few days' returns, mostly small.",
+        ],
+        "fails": "Patterns are common and most of them mean nothing: the same candle shape appears in random data. In a strong trend, a reversal pattern is usually just a pause before the trend carries on.",
+        "use": ["Treat a pattern as a reason to look, not a reason to trade: the evidence that patterns alone pay is thin.",
+                "Pattern plays hold for days, not months, so trading costs and slippage matter a lot.",
+                "A pattern that agrees with the longer trend (a bullish turn inside an uptrend) has a better record than one that fights it."],
+    },
     "calendar": {
         "bet": "Some parts of the year and month have been reliably stronger than others. Calendar plays hold only through those windows and sit in cash the rest of the time.",
         "why": "Pay-day and pension flows arrive at month ends, holidays lift mood and thin selling, and fund managers dress up portfolios at year end. Whether those causes still hold is part of the debate.",
         "evidence": [
             "Bouman and Jacobsen (2002) found returns from November to April beat May to October in 36 of 37 countries: the Halloween indicator, or 'sell in May'.",
             "Ariel (1987) and Lakonishok and Smidt (1988) found most of the market's gains came around the turn of the month and before holidays.",
+            "French (1980) found the S&P 500 fell on average from Friday's close to Monday's close from 1953 to 1977: the weekend effect.",
+            "Lucca and Moench (2015) found that from 1994 the S&P 500 made a large share of its excess return in the 24 hours before scheduled Fed announcements.",
             "McLean and Pontiff (2016) found published market anomalies lose much of their edge after publication, which matters most for well-known calendar effects.",
         ],
         "fails": "A calendar play can't see the market. It holds through a crash that happens inside its window and misses a rally outside it, and well-known effects get traded away.",
@@ -116,6 +134,9 @@ BOOKS = [
     ("Faber (2007)", "A quantitative approach to tactical asset allocation", "Journal of Wealth Management"),
     ("Bouman & Jacobsen (2002)", "The Halloween indicator, 'Sell in May and go away': another puzzle", "American Economic Review"),
     ("McLean & Pontiff (2016)", "Does academic research destroy stock return predictability?", "Journal of Finance"),
+    ("Lo, Mamaysky & Wang (2000)", "Foundations of technical analysis", "Journal of Finance"),
+    ("Marshall, Young & Rose (2006)", "Candlestick technical trading strategies: can they create value for investors?", "Journal of Banking & Finance"),
+    ("Lucca & Moench (2015)", "The pre-FOMC announcement drift", "Journal of Finance"),
 ]
 
 
@@ -371,12 +392,12 @@ class Guides:
         refs = "".join(f"<li><b>{e(a)}</b>, {e(b)}. <i>{e(c)}</i>.</li>" for a, b, c in BOOKS)
         body = f"""
 <section class="pair-head"><p class="eyebrow">Guides</p><h1 class="h1">Which predictions actually work?</h1>
-<p class="lede">Every trading play is a prediction about what a price will do next. They come in six kinds: trends continue, breakouts run, strength persists, dips snap back, volume leads price, and the calendar matters. Be The Puck runs all {len(TIMED)} plays on {len(self.univ)} stocks, funds and coins every night. Here is what the record says about each kind of bet, with a guide to every family and every play.</p></section>
+<p class="lede">Every trading play is a prediction about what a price will do next. They come in seven kinds: trends continue, breakouts run, strength persists, dips snap back, volume leads price, patterns warn of a turn, and the calendar matters. Be The Puck runs all {len(TIMED)} plays on {len(self.univ)} stocks, funds and coins every night. Here is what the record says about each kind of bet, with a guide to every family and every play.</p></section>
 
 <section><div class="sec-head"><h2 class="h2">Five things {allm['n']:,} backtests say</h2><p>Each play against simply holding the same stock over the same dates since 2005, after costs, as of the {dlong(self.s.asof)} close.</p></div>
 <ol class="g-findings">{"".join(f"<li>{x}</li>" for x in findings)}</ol></section>
 
-<section><div class="sec-head"><h2 class="h2">The six bets</h2><p>Open a family for what it predicts, the research behind it, when it works and when it fails.</p></div>
+<section><div class="sec-head"><h2 class="h2">The seven bets</h2><p>Open a family for what it predicts, the research behind it, when it works and when it fails.</p></div>
 <div class="grid grid-3">{cards}</div></section>
 
 <section><div class="sec-head"><h2 class="h2">The scorecard</h2><p>Share of play-and-stock tests where the family's plays did better than holding. Click a column to sort.</p></div>

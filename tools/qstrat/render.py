@@ -32,9 +32,8 @@ def slugify_group(g):
 
 
 def plays_for(t):
-    """Plays that get a page of their own on this ticker: the core 20 for reader
-    requests and the Nasdaq-100 names added in bulk, every play otherwise."""
-    return [p for p in TIMED if p.get("core")] if (t.get("requested") or t.get("core_only")) else TIMED
+    """Plays that get a page of their own on this ticker: every play, on every stock."""
+    return TIMED
 BASE = "https://bethepuck.com/"
 DISCLAIMER = ("This analysis does not constitute trading advice. Please meet with an advisor or independently review sources "
               "before making any decision.")
@@ -91,9 +90,9 @@ def nav_menus():
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "paper/": [("paper/", "Play the game", "US$100,000 of play money to trade the names Be The Puck covers"),
                    ("paper/leaders/", "Leaderboard", "Shared portfolios ranked by return since they started")],
-        "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
+        "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Seven families, what each says now and its record"),
                         ("guides/", "Which predictions work?", "Guides to every family and every play, from the backtests"),
-                        ("articles/the-core-20/", "The core 20", "The plays to learn first"),
+                        ("articles/the-core-20/", "The 20 to learn first", "Where a newcomer should start"),
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
                         ("learn/call-it/", "Practise: Call it", "Read the plays on real charts")],
         "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
@@ -103,7 +102,7 @@ def nav_menus():
                    ("learn/glossary/", "Glossary", "Every term in plain English")],
         "articles/": [("articles/#new-h", "Long reads", "Bubbles, crashes, debt and positioning"),
                       ("articles/#stocks", "Stock briefs", "A plain-English brief on every covered name"),
-                      ("articles/#strategies", "Strategies and sectors", "The core 20, regimes, backtests, sector briefs"),
+                      ("articles/#strategies", "Strategies and sectors", "The 20 to learn first, regimes, backtests, sector briefs"),
                       ("articles/#macro", "Macro", "The bubble question, crash history, cash vs invested"),
                       ("members/", "Members", "The reports, the top picks and alerts on your stocks")],
     }
@@ -229,6 +228,26 @@ WAIT = {
     "seasonal-timing-strategy": "The window is open, but MACD would need to cross its signal line, which takes more than one day from here.",
     "cci-100": "It needs the CCI to cross +100, which takes more than one day from here.",
     "elder-impulse": "It needs the 13-day EMA and the MACD histogram to move together, which takes more than one day from here.",
+    # the plays added in October 2026
+    "frog-in-the-pan": "It is decided at month-end from returns that stop a month earlier, so the next close can't change it.",
+    "january-barometer": "Only SPY's January return decides this call, at the last close of January; a December close puts it back in.",
+    "market-state-momentum": "It needs the stock's 12-1 return and SPY's 3-year return both above zero at a month-end.",
+    "short-term-reversal": "It is decided at month-end from the month's return against SPY's.",
+    "connorsrsi-pullback": "It needs a strong trend, a one-day drop of 4% or more and ConnorsRSI under 10, all on the same day.",
+    "connors-percent-b": "It needs %b under 0.2 for three closes in a row while the stock holds above its 200-day average.",
+    "negative-volume-index": "The index moves only on days when volume falls, and it sits too far from its average for one day to cross it.",
+    "volume-flow-indicator": "One day's volume moves the VFI only a little, not enough to cross zero from here.",
+    "engulfing-switch": "It needs an engulfing candle after a decline (to buy) or after a rise (to sell).",
+    "hikkake": "It needs an inside day, a false break and a close back through the inside day's range within 3 days.",
+    "turtle-soup-plus-one": "It needs a close under an old 20-day low, then a close back above it the next day.",
+    "raschke-holy-grail": "It needs a strong trend (ADX above 30) and a pullback to the 20-day EMA first, then a close above the pullback day's high.",
+    "elder-triple-screen": "The weekly MACD histogram has to be rising and a daily dip (Force Index below zero) has to set up the buy first.",
+    "ttm-squeeze": "It needs the Bollinger Bands to squeeze inside the Keltner Channel and then fire with momentum above zero and rising.",
+    "bollinger-squeeze": "It needs the bands at their narrowest in 125 days within the last 5 days, then a close above the upper band.",
+    "headley-acceleration-bands": "It needs two closes in a row above the upper acceleration band.",
+    "crabel-nr7": "It needs a close beyond the latest narrow-range (NR7) day's high or low.",
+    "pf-double-top-breakout": "The point-and-figure chart needs a column that breaks past the last column's top (to buy) or bottom (to sell).",
+    "ehlers-zero-lag": "The error-corrected line has to cross its 32-day EMA while sitting more than 0.75% from the close, more than one close can do from here.",
 }
 
 
@@ -602,7 +621,7 @@ class Site:
         return count_in(k, n)
 
     def play_options(self, selected=None, value=None, core_only=False):
-        """core_only: just the 20 core plays (for a stock that only has those pages)."""
+        """core_only: just the core plays (every play is core now, so this keeps them all)."""
         out = ""
         for fk, fname, _ in FAMILIES:
             opts = "".join(f'<option value="{e(value(p) if value else p["slug"])}"{CORE_ATTR if p.get("core") else ""}'
@@ -613,7 +632,7 @@ class Site:
         return out
 
     def stock_options(self, selected=None, value=None, full_only=False):
-        """full_only: leave out the names that only have the core-play pages."""
+        """full_only: leave out names without a page for every play (none, now every play is core)."""
         names = [t for t in universe() if not (full_only and t.get("core_only"))]
         out = ""
         for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in names)]:
@@ -629,6 +648,12 @@ class Site:
         src = self.href(depth, "data/names.json") + "?v=" + self.ver
         return (f'<select id="{sel_id}" data-nav data-tmpl="{tmpl}" data-names="{e(src)}"{" data-full-only" if full_only else ""}>'
                 f'<option value="{e(t["slug"])}" selected>{e(t["short"])} · {e(t["name"])}</option></select>')
+
+    def plays_json(self):
+        """Every play by family for the jump-to-play selects on pair pages, in names.json's shape."""
+        groups = [[fname, [[p["slug"], f'{p["name"]} · {credit(p)}', 0] for p in TIMED if p["family"] == fk]]
+                  for fk, fname, _ in FAMILIES if any(p["family"] == fk for p in TIMED)]
+        return json.dumps({"groups": groups}, ensure_ascii=False, separators=(",", ":"))
 
     def names_json(self):
         """Every covered name by group for the jump-to-stock selects: [group, [[slug, label, core_only]]]."""
@@ -854,14 +879,13 @@ class Site:
         from .markets import fmt_val
         wcls = {"Calm": "calm", "Mostly calm": "calm", "Unsettled": "watch", "Stormy": "warning"}[M["weather"]]
         chips = "".join(f'<a class="gchip {g["status"]}" href="{h("markets/")}#g-{g["key"]}"><i></i><span>{e(g["name"])}</span><b>{fmt_val(g, g["value"])}</b></a>' for g in M["gauges"])
-        core = [p for p in TIMED if p.get("core")]
         idx = ""
         for t in [x for x in TICKERS if x.get("index")]:
-            kc, nc = self.consensus(t, core)
+            kc, nc = self.consensus(t)
             y1 = self.one_year(t)
             idx += (f'<a class="card idx-card" href="{h("stocks/" + t["slug"] + "/")}"><span class="sym">{e(t["short"])}</span>'
                     f'<span class="px mono">{money(self.r(t["sym"], "buy-and-hold")["price"], "")}</span><span class="small {dir_cls(y1)}">{pct(y1, d=0)} in a year</span>'
-                    f'{count_in(kc, nc, "core in")}</a>')
+                    f'{count_in(kc, nc, "plays in")}</a>')
         return f"""<section aria-labelledby="mkt-h"><div class="sec-head"><h2 class="h2" id="mkt-h">Market weather: <span class="wx {wcls}">{e(M['weather'])}</span></h2>
 <p>{M['counts']['warning']} of {len(M['gauges'])} crash gauges flash a warning. <a href="{h('markets/')}">Read the market</a> · <a href="{h('articles/is-this-a-bubble/')}">Is this a bubble?</a></p></div>
 <div class="gchips">{chips}</div><div class="idx-row">{idx}</div></section>"""
@@ -942,14 +966,14 @@ class Site:
         bh = PLAY["buy-and-hold"]
         body = f"""
 <section class="pair-head"><p class="eyebrow">Plays</p><h1 class="h1">{len(TIMED)} plays, one scorecard</h1>
-<p class="lede">Each play is written down exactly as Be The Puck tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into six families.</p>
+<p class="lede">Each play is written down exactly as Be The Puck tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into seven families.</p>
 <div class="chips fam-chips">{chips}</div></section>
 {secs}
 <section class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h3" style="color:var(--ink)">{e(bh['long'])}</p><p>{e(bh['short'])}</p></div>
 <a class="btn" href="{h('strategies/buy-and-hold/')}">Buy and hold by stock</a></section>
 <p class="muted small">Calls right: the share of closed calls where an in call was followed by a higher price, or an out call by a lower one. Trend plays often win well under half their calls and make it back on a few long trends. Switches per year is the median across stocks.</p>
 """
-        self.add(path, self.shell(path, "Plays", f"All {len(TIMED)} trading plays Be The Puck tests, grouped into six families, with who they come from and how they have scored.", body, active="strategies/"))
+        self.add(path, self.shell(path, "Plays", f"All {len(TIMED)} trading plays Be The Puck tests, grouped into seven families, with who they come from and how they have scored.", body, active="strategies/"))
 
     def strategy_page(self, s):
         path, depth = f"strategies/{s['slug']}/", 2
@@ -1024,8 +1048,10 @@ class Site:
     def rule_card(self, s):
         rules = "".join(f"<li>{e(x)}</li>" for x in s["rules"])
         ass = "".join(f"<p>{e(x)}</p>" for x in s["assumptions"])
+        src = "".join(f'<li><a href="{e(u)}" rel="noopener">{e(t)}</a></li>' for t, u in s.get("sources") or [])
         return (f'<div class="card rule-card prose"><p class="eyebrow">How the play works</p><ol>{rules}</ol>'
-                + (f'<div class="assume">{ass}</div>' if ass else "") + "</div>")
+                + (f'<div class="assume">{ass}</div>' if ass else "")
+                + (f'<p class="small muted rule-src-h">Where the rules come from</p><ul class="small rule-src">{src}</ul>' if src else "") + "</div>")
 
     def against_card(self, depth):
         h = lambda x: self.href(depth, x)
@@ -1145,7 +1171,6 @@ class Site:
     def stocks_index(self):
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
-        core = [p for p in TIMED if p.get("core")]
         groups = [g for g in GROUP_ORDER if any(t["group"] == g for t in TICKERS)]
         rows = ""
         for t in TICKERS:
@@ -1157,7 +1182,6 @@ class Site:
             day = float(c.iloc[-1] / c.iloc[-2] - 1) if c is not None and len(c) > 1 else None
             gap = float(c.iloc[-1] / c.iloc[-200:].mean() - 1) if c is not None and len(c) >= 200 else None
             y1 = self.one_year(t)
-            kc, nc = self.consensus(t, core)
             k, n = self.consensus(t)
             ol = sv.outlook(self, t)
             rk = meta.get("risk") or {}
@@ -1175,8 +1199,7 @@ class Site:
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
                      f'<td class="r {dir_cls(y1)}" data-v="{sortv(y1)}">{pct(y1, d=0)}</td>'
                      f'<td class="r {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
-                     f'<td data-v="{sortv(kc / nc if nc else None)}">{count_in(kc, nc)}</td>'
-                     f'<td class="r" data-v="{sortv(k / n if n else None)}">{k}/{n}</td>'
+                     f'<td data-v="{sortv(k / n if n else None)}">{count_in(k, n)}</td>'
                      f'<td class="r {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
                      f'<td class="r" data-v="{score if score is not None else ""}">{f"<b>{score}</b>" if score is not None else "–"}</td>'
                      f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
@@ -1201,7 +1224,7 @@ class Site:
 </div>
 <div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl"><thead><tr>
 <th class="stick">Stock</th><th data-sort-first="asc">Light</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
-<th data-sort-first="desc">Core plays in</th><th class="r" data-sort-first="desc">All plays</th><th class="r" data-sort-first="desc">Analysts' target</th>
+<th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th class="r" data-sort-first="desc">Score</th><th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
 <p class="muted small">Score: half the share of plays in, half analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
@@ -1223,9 +1246,7 @@ class Site:
         meta = self.meta.get(sym) or {}
         fund = self.fund.get(sym)
         rk = meta.get("risk")
-        core = [p for p in TIMED if p.get("core")]
         k, n = self.consensus(t)
-        kc, nc = self.consensus(t, core)
         own_pages = {p["slug"] for p in plays_for(t)}
         tiles, rows = "", ""
         for fk, fname, _ in FAMILIES:
@@ -1233,8 +1254,7 @@ class Site:
             kk, nn = self.consensus(t, ps)
             tiles += (f'<a class="card fam-tile" href="#fam-{fk}"><span class="tile-label">{e(fname)}</span>'
                       f'<span class="fam-n"><b>{kk}</b> of {nn} in</span>{fill_bar(kk, nn)}</a>')
-            has_core = any(p.get("core") for p in ps)
-            rows += f'<tr class="grp{"" if has_core else " nc"}" id="fam-{fk}"><td colspan="6">{e(fname)}</td></tr>'
+            rows += f'<tr class="grp" id="fam-{fk}"><td colspan="6">{e(fname)}</td></tr>'
             for s in ps:
                 x = self.r(sym, s["slug"])
                 nm = next_move(x, s, t)
@@ -1244,8 +1264,7 @@ class Site:
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
                 name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages else f'<b>{e(s["name"])}</b>')
-                core_tag = ' <span class="core-tag" title="One of the 20 core plays">core</span>' if s.get("core") else ""
-                rows += (f'<tr class="{"" if s.get("core") else "nc"}"><td>{name}{core_tag}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
+                rows += (f'<tr><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
                          f'<td>{pill(x["state"])}{band}</td><td class="nowrap" data-v="{pd.Timestamp(x["since"]).strftime("%Y-%m-%d") if x["since"] is not None else ""}">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
                          f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td><td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
                          f'<td class="r nowrap" data-v="{sortv(a.get("maxdd"))}">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td></tr>')
@@ -1286,17 +1305,13 @@ class Site:
                         f'<span class="tile-value">{round(ol["score"] * 100)}<small> / 100</small></span>{fill_bar(round(ol["score"] * 100), 100)}'
                         f'<span class="tile-note">Target <b class="{dir_cls(ol["upside"])}">{pct(ol["upside"], d=0)}</b> from {ol["n_an"]} analysts; half the score is the plays.</span></a>')
         summary = f"""<section class="sum-tiles">
-<div class="card tile"><span class="tile-label">Core plays in</span><span class="tile-value">{kc}<small> / {nc}</small></span>{fill_bar(kc, nc)}<span class="tile-note">The 20 most-followed plays.</span></div>
-<div class="card tile"><span class="tile-label">All plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Be The Puck tests.</span></div>
+<div class="card tile"><span class="tile-label">Plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Be The Puck tests, in {len(FAMILIES)} families.</span></div>
 {out_tile}{crash_tile}{trend_tile}
 </section>"""
         req_note = ""
         if t.get("requested"):
-            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night; '
-                        f'the 20 core plays get a full page each.</p>')
-        if t.get("core_only"):
-            req_note = ('<p class="note-line">In the Nasdaq-100. Be The Puck runs every play on it each night; '
-                        'the 20 core plays get a full page each.</p>')
+            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night, '
+                        f'with a full page for each.</p>')
         elif t.get("ndx"):
             req_note = '<p class="note-line">In the Nasdaq-100.</p>'
         elif t.get("tsx"):
@@ -1328,11 +1343,10 @@ class Site:
 {summary}
 {chart}
 {heat}
-<section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2>
-<div class="seg seg-sm" role="group" aria-label="Which plays" data-coretoggle="plays-tbl"><button type="button" aria-pressed="true" data-v="core">Core 20</button><button type="button" aria-pressed="false" data-v="all">All {len(TIMED)}</button></div></div>
+<section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p>All {len(TIMED)} plays, by family.</p></div>
 <div class="fam-tiles">{tiles}</div>
 <p class="muted small">Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p>
-<div class="tbl-wrap core-only" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+<div class="tbl-wrap" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 {deep}
 {exposed}
 {arts}
@@ -1367,7 +1381,7 @@ class Site:
         rows = ""
         for x in names:
             rk = self.meta[x["sym"]]["risk"]
-            kc, nc = self.consensus(x, [p for p in TIMED if p.get("core")])
+            kc, nc = self.consensus(x)
             rows += (f'<tr><td><a class="sym" href="{h("stocks/" + x["slug"] + "/")}">{e(x["short"])}</a><span class="sym-sub">{e(x["name"])}</span></td>'
                      f'<td data-v="{rk["score"]}"><span class="lvl lvl-{sv.LEVEL_CLASS[rk["level"]]}">{e(rk["level"])}</span> <span class="muted">{rk["score"]}/10</span></td>'
                      f'<td class="r" data-v="{sortv(rk.get("beta"))}">{ratio(rk.get("beta"))}</td>'
@@ -1379,7 +1393,7 @@ class Site:
                 f"The {market} stocks Be The Puck covers, ranked by crash exposure. Be The Puck covers a sample of names, not the full index.")
         return f"""<section><div class="sec-head"><h2 class="h2">Who would feel a crash first</h2>
 <p>{lede}</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Core plays</th><th>Why</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th data-sort-first="desc">Exposure</th><th class="r">Beta</th><th class="r">2-yr change</th><th>Plays in</th><th>Why</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
 
     # -------------------------------------------------------------- pair
     def render_pairs(self, workers=None):
@@ -1492,7 +1506,9 @@ class Site:
 <p class="muted small">An in call is right when the price rose before the next call; an out call is right when it fell. The latest {min(shown, len(x['calls']))} of {len(x['calls'])} calls shown.</p></section>""" if x["calls"] else ""
 
         by = " &amp; ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in s["analysts"])
-        play_sel = self.play_options(s["slug"], core_only=bool(t.get("requested") or t.get("core_only")))
+        # ships with the current play only; site.js fills in the rest from data/plays.json
+        play_sel = f'<option value="{e(s["slug"])}" selected>{e(s["name"])} · {e(credit(s))}</option>'
+        plays_src = h("data/plays.json") + "?v=" + self.ver
         stock_sel = self.stock_select("jump-stock", e(h("stocks/{v}/" + s["slug"] + "/")), t, depth, full_only=not s.get("core"))
         play_tmpl = e(h("stocks/" + t["slug"] + "/{v}/"))
         body = f"""
@@ -1507,7 +1523,7 @@ class Site:
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>The play against buying and holding {e(t['short'])} over exactly the same dates, after costs.</p></div>{stats_tbl}</section>
 {calls_sec}
 <section class="split">{self.rule_card(s)}{self.against_card(depth)}</section>
-<section class="jump split"><div><label class="small muted" for="jump-play">Another play on {e(t['short'])}</label><select id="jump-play" data-nav data-tmpl="{play_tmpl}">{play_sel}</select></div>
+<section class="jump split"><div><label class="small muted" for="jump-play">Another play on {e(t['short'])}</label><select id="jump-play" data-nav data-tmpl="{play_tmpl}" data-names="{e(plays_src)}">{play_sel}</select></div>
 <div><label class="small muted" for="jump-stock">{e(s['name'])} on another stock</label>{stock_sel}</div></section>
 """
         title = f"{s['name']} on {t['short']}: the play says {st_word}"
@@ -1564,7 +1580,7 @@ class Site:
 <section class="card prose"><p class="eyebrow">Plays + analysts' upside score</p>
 <p>Used to rank the strongest setups on the home page and in Green across the board (which only include stocks at least half the plays hold), and to sort the watchlist. Half is the share of all {len(TIMED)} plays holding the stock. Half is the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic; the score is a ranking aid, not a forecast or a recommendation.</p></section>
 <section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
-<p>Tickers added on the watchlist that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each of the 20 core plays. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
+<p>Tickers added on the watchlist that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
 <p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Be The Puck's.</p></section>
 <section class="card prose"><p class="eyebrow">What this is not</p>

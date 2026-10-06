@@ -105,8 +105,7 @@ TICKERS = [
     {"sym": "QUTX", "name": "Quantum X", "group": "Micro caps", "cur": "$", "micro": True},
 ]
 # Nasdaq-100 members (list as of Oct 5, 2026). Members already covered above are
-# tagged "ndx"; the rest are added here with full analysis and a page for each of
-# the 20 core plays ("core_only"), like reader-requested names but in every list.
+# tagged "ndx"; the rest are added here with full analysis and a page for every play.
 # GOOG (Alphabet class C) is covered by GOOGL and Shopify by its Toronto listing.
 NDX_COVERED = {"AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "NVDA", "AMD", "AVGO", "MU", "INTC", "SHOP.TO"}
 NDX_NEW = {
@@ -379,7 +378,7 @@ _have = {t["sym"] for t in TICKERS}
 for _g, _names in NDX_NEW.items():
     for _sym, _name in _names:
         if _sym not in _have:
-            TICKERS.append({"sym": _sym, "name": _name, "group": _g, "cur": "$", "ndx": True, "core_only": True, "bulk": True})
+            TICKERS.append({"sym": _sym, "name": _name, "group": _g, "cur": "$", "ndx": True, "bulk": True})
             _have.add(_sym)
 for _g, _names in TSX_NEW.items():
     for _sym, _name, _short in _names:
@@ -434,7 +433,7 @@ INDEXES = [t for t in TICKERS if t.get("index")]
 import json as _json
 import os as _os
 
-from .plays import PLAYS, PLAY, TIMED, CORE, CORE_SLUGS, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
+from .plays import PLAYS, PLAY, TIMED, STARTER, STARTER_SLUGS, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
 
 with open(_os.path.join(_os.path.dirname(__file__), "analysts.json"), encoding="utf-8") as _f:
     THINKERS = _json.load(_f)

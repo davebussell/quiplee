@@ -2,7 +2,7 @@
 
   Stocks              a brief for every covered name (generated nightly), the
                       names most plays agree on, the debt lens on crashes
-  Strategies & sectors the core 20 plays, trend vs mean reversion by regime,
+  Strategies & sectors the 20 plays to learn first, trend vs mean reversion by regime,
                       what thousands of backtests say, a brief per sector
   Macro               bubbles and crashes, is this a bubble, cash vs invested
 
@@ -60,7 +60,11 @@ class Articles:
         return lambda x: self.s.href(depth, x)
 
     def core(self):
+        """Every play (all of them are core); the starter 20 are self.starter()."""
         return [p for p in TIMED if p.get("core")]
+
+    def starter(self):
+        return [p for p in TIMED if p.get("starter")]
 
     def equities(self, univ=True):
         base = self.s.universe if univ else TICKERS
@@ -132,8 +136,8 @@ class Articles:
                   "The storm test on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.", "live", None))
         L.append(("stocks", "articles/green-across-the-board/", "Green across the board, with room to run",
                   "The stocks scored half on how many plays hold them and half on analysts' upside: where the room is, what the backdrop says, and where the rules would get out.", "live", None))
-        L.append(("strategies", "articles/the-core-20/", "The 20 core plays, and why these 20",
-                  "Out of 59 plays, these 20 cover every family and the rules traders actually follow. One page on each, with how it has scored.", "live", None))
+        L.append(("strategies", "articles/the-core-20/", "The 20 plays to learn first, and why these 20",
+                  f"Out of {len(TIMED)} plays, these 20 are the rules traders actually follow, across the main families. One page on each, with how it has scored.", "live", None))
         L.append(("strategies", "articles/trend-vs-reversion/", "Trend or mean reversion? It depends on the market",
                   "How each family of plays did through the 2008 crash, the COVID drop, the 2022 bear market and the long bull markets in between.", "live", None))
         L.append(("strategies", "articles/what-backtests-say/", "What thousands of backtests say about timing the market",
@@ -504,9 +508,9 @@ class Articles:
             ex_txt = ""
             if exits:
                 near = exits[:3]
-                ex_txt = "Nearest exits among core plays: " + "; ".join(f'{e(p["name"])} below {t["cur"]}{lvl:,.2f} ({pc(d, 1)})' for p, lvl, d in near) + "."
+                ex_txt = "Nearest exits: " + "; ".join(f'{e(p["name"])} below {t["cur"]}{lvl:,.2f} ({pc(d, 1)})' for p, lvl, d in near) + "."
                 n10 = sum(1 for _, _, d in exits if d >= -0.10)
-                ex_txt += f" A close 10% lower would trip {n10} of the {len(exits)} core plays that are in."
+                ex_txt += f" A close 10% lower would trip {n10} of the {len(exits)} plays that are in."
             val = []
             pe, fpe = sv.num(fund.get("trailingPE")), sv.num(fund.get("forwardPE"))
             if pe and pe > 0:
@@ -527,7 +531,7 @@ class Articles:
 <ul class="green-facts">
 <li><b>Room to grow?</b> {e(("; ".join(room))[:1].upper() + ("; ".join(room))[1:] + ".") if room else "No analyst coverage or valuation data."}{(" Valued at " + e(" and ".join(val)) + ".") if val else ""}</li>
 <li><b>Crash exposure:</b> <span class="lvl lvl-{sv.LEVEL_CLASS[rk['level']] if rk.get('level') else 'calm'}">{e(rk.get('level', '–'))}</span>{(". It " + e(rk['why'][0]) + ".") if rk.get('why') else "."}</li>
-<li><b>Where the rules get out:</b> {ex_txt or "No price-based exit level among the core plays right now."}</li>
+<li><b>Where the rules get out:</b> {ex_txt or "No price-based exit level among the plays right now."}</li>
 </ul>
 <p class="small"><a href="{h('articles/stocks/' + t['slug'] + '/')}">Full brief</a> · <a href="{h('stocks/' + t['slug'] + '/')}">Every play</a></p></article>"""
         wx = M.get("weather", "–")
@@ -538,7 +542,7 @@ class Articles:
 {P(f"A strong trend and room to run are two different things. A stock can have almost every play in and already sit above where analysts think it's worth. So this list ranks each name half on how many of the {len(TIMED)} plays hold it after the {self.s.asof.strftime('%B %-d')} close, and half on how far analysts' average 12-month price target sits above the price.")}
 <h2 class="h2">How the score works</h2>
 <ul>
-<li><b>Half: the plays.</b> The share of all {len(TIMED)} plays holding the stock. 46 of 59 in gives 78% of this half.</li>
+<li><b>Half: the plays.</b> The share of all {len(TIMED)} plays holding the stock. 78 of 100 in gives 78% of this half.</li>
 <li><b>Half: analysts' upside.</b> The gap to the average 12-month target, scored in a straight line from 20% below the price (nothing) to 50% above it (full marks). A price sitting right on the target earns 29% of this half.</li>
 <li><b>Guards.</b> Only names at least half the plays hold make the list. At least {sv.MIN_ANALYSTS} analysts must cover the stock, and a target more than double the price is ignored as stale, which usually happens after a share consolidation. ETFs, indexes and coins have no targets, so they aren't scored.</li>
 </ul>
@@ -559,7 +563,7 @@ class Articles:
 {wx_par}
 <h2 class="h2">Managing the risk</h2>
 <ul>
-<li><b>Know your exit before you enter.</b> Each card lists where the core plays would sell. Decide in advance which rule you'd follow.</li>
+<li><b>Know your exit before you enter.</b> Each card lists where the plays would sell. Decide in advance which rule you'd follow.</li>
 <li><b>Size by the exit, not the excitement.</b> If the exit is 15% below and you're willing to lose 1% of your account on one idea, the position can be at most about 7% of the account.</li>
 <li><b>Mind the theme.</b> Several of these names may ride the same story. Five stocks on one theme behave like one big position in a sell-off.</li>
 <li><b>Stage in.</b> Buying in two or three steps reduces the cost of being wrong about timing.</li>
@@ -572,7 +576,7 @@ class Articles:
                    live=True, related=self.related(depth, ["articles/debt-and-crashes/", "articles/is-this-a-bubble/", "articles/the-core-20/"]))
 
     def exit_levels(self, t):
-        """(play, level, distance) for core plays that are in and have a price exit, nearest first."""
+        """(play, level, distance) for plays that are in and have a price exit, nearest first."""
         from .render import next_move
         out = []
         for p in self.core():
@@ -634,12 +638,12 @@ class Articles:
         levels = ""
         if exits:
             n10 = sum(1 for _, _, d in exits if d >= -0.10)
-            levels += f"<p>Of the {len(exits)} core plays holding {e(t['short'])} with a price exit, {n10} would sell on a close 10% or less below tonight's. The nearest:</p><ul>{lvl_list(exits, 'sells below')}</ul>"
+            levels += f"<p>Of the {len(exits)} plays holding {e(t['short'])} with a price exit, {n10} would sell on a close 10% or less below tonight's. The nearest:</p><ul>{lvl_list(exits, 'sells below')}</ul>"
         if entries:
             n10 = sum(1 for _, _, d in entries if d <= 0.10)
-            levels += f"<p>Of the {len(entries)} core plays out with a price entry, {n10} would buy on a close up to 10% higher. The nearest:</p><ul>{lvl_list(entries, 'buys above')}</ul>"
+            levels += f"<p>Of the {len(entries)} plays out with a price entry, {n10} would buy on a close up to 10% higher. The nearest:</p><ul>{lvl_list(entries, 'buys above')}</ul>"
         if not levels:
-            levels = "<p>None of the core plays has a single-close trigger level right now.</p>"
+            levels = "<p>None of the plays has a single-close trigger level right now.</p>"
         rk = meta.get("risk") or {}
         crash = ""
         if rk:
@@ -667,7 +671,7 @@ class Articles:
         wx = M.get("weather")
         y1 = s.one_year(t)
         trend_word = "uptrend" if kc / nc >= 0.6 else "downtrend" if kc / nc <= 0.3 else "mixed picture"
-        title = f"{e(t['name'])} ({e(t['short'])}): {kc} of {nc} core plays in"
+        title = f"{e(t['name'])} ({e(t['short'])}): {kc} of {nc} plays in"
         dek = f"What the plays, the trend and the business say about {e(t['short'])} after the {s.asof.strftime('%b %-d')} close: a {trend_word}, {pc(y1)} over a year."
         body = f"""
 <div class="prose">
@@ -681,16 +685,17 @@ class Articles:
 <p><a class="btn" href="{h('stocks/' + t['slug'] + '/')}">Chart, every play and the record</a></p>
 </div>"""
         self.shell(path, "stocks", title, dek, body, live=True,
-                   desc=f"{t['name']} ({t['short']}) brief: {kc} of {nc} core plays in, the levels where plays would buy or sell, the business and crash exposure. Updated nightly.",
+                   desc=f"{t['name']} ({t['short']}) brief: {kc} of {nc} plays in, the levels where plays would buy or sell, the business and crash exposure. Updated nightly.",
                    related=self.related(depth, ["articles/green-across-the-board/", "articles/debt-and-crashes/", "articles/is-this-a-bubble/"]))
 
     # ================================================================ strategies
     def core20(self):
         path, depth = "articles/the-core-20/", 2
         h = self.h(depth)
+        guides_link = f'<a href="{h("guides/")}">guides</a>'
         rows = ""
         for fk, fname, _ in FAMILIES:
-            ps = [p for p in self.core() if p["family"] == fk]
+            ps = [p for p in self.starter() if p["family"] == fk]
             if not ps:
                 continue
             rows += f'<tr class="grp"><td colspan="5">{e(fname)}</td></tr>'
@@ -701,8 +706,8 @@ class Articles:
                          f'<td class="r">{sm["beat_sharpe"]}/{sm["graded"]}</td><td class="r">{sm["cut_dd"]}/{sm["graded"]}</td></tr>')
         body = f"""
 <div class="prose">
-{P(f"Be The Puck tests {len(TIMED)} plays, which is more than anyone needs to follow. The core 20 are the ones a newcomer should learn first: the most widely published and followed rule from each corner of technical trading, covering all six families, from Meb Faber's 10-month average to Larry Connors' two-day RSI.",
-   "Three tests picked them: the rule is published by a named practitioner or researcher, it is still widely used, and together the 20 cover every family without repeating the same idea. Reader-requested stocks get all 59 plays run on them, and a full page for each of the core 20.")}
+{P(f"Be The Puck tests {len(TIMED)} plays, and every one runs on every stock it covers, with a page of its own. That is more than anyone needs to follow. These 20 are the ones a newcomer should learn first: the most widely published and followed rule from each corner of technical trading, from Meb Faber's 10-month average to Larry Connors' two-day RSI.",
+   'Three tests picked them: the rule is published by a named practitioner or researcher, it is still widely used, and together the 20 cover the main families without repeating the same idea. Once these make sense, the ' + guides_link + ' show which kinds of prediction have worked best.')}
 </div>
 <div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th>Play</th><th>In one line</th><th class="r">In now</th><th class="r">Beat buy &amp; hold (Sharpe)</th><th class="r">Cut drawdown</th></tr></thead><tbody>{rows}</tbody></table></div>
 <div class="prose">
@@ -714,8 +719,8 @@ class Articles:
 <li><b>Learn them by doing:</b> the <a href="{h('learn/')}">Learn track</a> covers every family, and <a href="{h('learn/call-it/')}">Call it</a> lets you practise reading them on real charts.</li>
 </ul>
 </div>"""
-        self.shell(path, "strategies", "The 20 core plays, and why these 20",
-                   "Out of 59 plays, these 20 cover every family and the rules traders actually follow. One page on each, with how it has scored.",
+        self.shell(path, "strategies", "The 20 plays to learn first, and why these 20",
+                   f"Out of {len(TIMED)} plays, these 20 are the rules traders actually follow, across the main families. One page on each, with how it has scored.",
                    body, live=True, related=self.related(depth, ["articles/trend-vs-reversion/", "articles/what-backtests-say/", "articles/green-across-the-board/"]))
 
     def regime_table(self):
@@ -883,7 +888,7 @@ class Articles:
         if etf_t and (etf, "buy-and-hold") in self.s.R:
             sh, kc, nc = self.share(etf_t, core)
             rk = self.risk(etf_t)
-            etf_txt = (f"<p>The broader fund, <a href=\"{h('stocks/' + etf_t['slug'] + '/')}\">{e(etf_t['short'])}</a>, has {kc} of {nc} core plays in"
+            etf_txt = (f"<p>The broader fund, <a href=\"{h('stocks/' + etf_t['slug'] + '/')}\">{e(etf_t['short'])}</a>, has {kc} of {nc} plays in"
                        + (f" and is {pc(rk.get('runup2y'))} over two years" if rk.get("runup2y") is not None else "") + ".</p>")
         hot = sorted(runs, key=lambda z: -z[1])
         hot_txt = ""
@@ -894,10 +899,10 @@ class Articles:
         hi = sum(1 for l in levels if l in ("High", "Very high"))
         body = f"""
 <div class="prose">
-<p>Across the {len(names)} {e(g.lower())} names Be The Puck covers, the core plays are <b>{mood}</b>: on average {pc(avg, 0, sign=False)} of them hold each name tonight. {hi} of {len(levels)} names carry high crash exposure.</p>
+<p>Across the {len(names)} {e(g.lower())} names Be The Puck covers, the plays are <b>{mood}</b>: on average {pc(avg, 0, sign=False)} of them hold each name tonight. {hi} of {len(levels)} names carry high crash exposure.</p>
 {etf_txt}{hot_txt}
 </div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Core plays in</th><th class="r">1 year</th><th class="r">2-yr run-up</th><th>Crash exposure</th><th></th></tr></thead><tbody>{rows}</tbody></table></div>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Plays in</th><th class="r">1 year</th><th class="r">2-yr run-up</th><th>Crash exposure</th><th></th></tr></thead><tbody>{rows}</tbody></table></div>
 <div class="prose"><p class="small muted">A sector is only as diversified as its holdings: names in one industry tend to fall together in a sell-off. Be The Puck covers a sample of each sector, not all of it.</p></div>"""
         self.shell(path, "strategies", f"{e(g)}: what the plays say", f"Every covered {e(g.lower())} name through the same lenses: plays, trend, run-up and crash exposure.",
                    body, live=True, related=self.related(depth, ["articles/green-across-the-board/", "articles/debt-and-crashes/", "articles/trend-vs-reversion/"]))

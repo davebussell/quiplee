@@ -1861,5 +1861,975 @@
   ],
   "confidence": "low",
   "notes": "Correction to the draft: Jegadeesh & Titman describe Levy's measure as the current price against the average price over the past 27 weeks, not 26. German 'RSL nach Levy' tools also default to 27 weeks. Jensen & Bennington (1970) argued Levy's result reflected selection bias and that his rule did not beat buy-and-hold in their sample. I could not verify sample size, years or Levy's exact buy/sell rank cutoffs. He is probably the Robert A. Levy who earned a business PhD at American University in 1966, founded CDA Investment Technologies and later chaired the Cato Institute, but no source I saw links him to this paper, so this stays out of the bio."
+ },
+ {
+  "slug": "matt-radtke",
+  "name": "Matt Radtke",
+  "role": "Researcher and author at Connors Research",
+  "bio": "Matt Radtke has been associated with the Connors Group family of companies as a student, then as a consultant, researcher and author, after about 25 years in software development at firms including Hewlett-Packard and Bell Northern Research. He co-wrote An Introduction to ConnorsRSI (Connors Research, 2012) with Larry Connors and Cesar Alvarez.",
+  "argues": [
+   "Price momentum, the length of an up/down streak and the size of today's move relative to recent moves each measure overbought/oversold, and averaging them into one 0-100 oscillator works better than any one alone.",
+   "Exit rules matter as much as entries: stricter, quantified exits (such as waiting for ConnorsRSI to close above 70) raise the average profit per trade."
+  ],
+  "sources": [
+   [
+    "CMT Association: Matt Radtke",
+    "https://cmtassociation.org/?p=6104"
+   ],
+   [
+    "An Introduction to ConnorsRSI (Connors Research guidebook, 2012)",
+    "https://c.mql5.com/forextsd/forum/119/connorsrsi-pullbacks-guidebook.pdf"
+   ]
+  ],
+  "books": [
+   {
+    "title": "An Introduction to ConnorsRSI (with Larry Connors and Cesar Alvarez)",
+    "year": 2012
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Bio facts are from his CMT Association speaker page. The guidebook cover lists Laurence Connors, Cesar Alvarez and Matt Radtke under Connors Research, LLC, copyright 2012."
+ },
+ {
+  "slug": "john-ehlers",
+  "name": "John F. Ehlers",
+  "role": "Engineer who brought digital signal processing to trading; founder of MESA Software",
+  "bio": "John F. Ehlers holds BSEE and MSEE degrees from the University of Missouri, was a Senior Engineering Fellow at Raytheon, and has been a private trader since 1976. He founded MESA Software and pioneered applying digital signal processing, starting with maximum entropy spectrum analysis, to market data.",
+  "argues": [
+   "Prices are not normally distributed, so transforming them (for example with the Fisher transform) makes turning points sharp and easy to see.",
+   "Prices contain cycles and noise that fixed-length averages handle badly, so a filter should adapt its speed to what the market is measurably doing."
+  ],
+  "sources": [
+   [
+    "CMT Association: John Ehlers",
+    "https://cmtassociation.org/?p=3088"
+   ],
+   [
+    "Wiley: Rocket Science for Traders - author information (July 2001)",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471405671,descCd-authorInfo.html"
+   ],
+   [
+    "Wiley: Cybernetic Analysis for Stocks and Futures - table of contents (March 2004)",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471463078,descCd-tableOfContents.html"
+   ],
+   [
+    "Ehlers: Time Warp - Without Space Travel (MESA Software)",
+    "https://mesasoftware.com/papers/TimeWarp.pdf"
+   ],
+   [
+    "Ehlers, MAMA - The Mother of Adaptive Moving Averages (PDF)",
+    "https://www.mesasoftware.com/papers/MAMA.pdf"
+   ],
+   [
+    "Ehlers, FRAMA - Fractal Adaptive Moving Average (PDF, lists his books)",
+    "https://www.mesasoftware.com/papers/FRAMA.pdf"
+   ]
+  ],
+  "books": [
+   {
+    "title": "MESA and Trading Market Cycles",
+    "year": null
+   },
+   {
+    "title": "Rocket Science for Traders: Digital Signal Processing Applications",
+    "year": 2001
+   },
+   {
+    "title": "Cybernetic Analysis for Stocks and Futures",
+    "year": 2004
+   }
+  ],
+  "confidence": "high",
+  "notes": "His 2002 S&C Fisher article says 'private trader since 1978'; Wiley and CMT say 1976. MESA and Trading Market Cycles has more than one edition; year left null as not verified. Credited on two plays (MAMA/FAMA and the Zero Lag cross with Ric Way), so the role names his adaptive filters in general. The book list comes from his FRAMA paper."
+ },
+ {
+  "slug": "jack-hutson",
+  "name": "Jack K. Hutson",
+  "role": "Founder and editor of Technical Analysis of Stocks & Commodities",
+  "bio": "Jack K. Hutson, a Boeing engineer who had traded since the late 1960s, founded the Seattle-based magazine Technical Analysis of Stocks & Commodities, whose first issue appeared in October 1982. He introduced TRIX in the magazine's first volume in 1983, crediting the idea to an anonymous full-time trader friend who called it the derivative of triple exponential smoothing.",
+  "argues": [
+   "Triple exponential smoothing filters out random market noise while still giving a timely signal.",
+   "The smoothing length should be matched to the market's own cycle, which can be found with Fourier analysis."
+  ],
+  "sources": [
+   [
+    "Wikipedia: Technical Analysis of Stocks & Commodities",
+    "https://en.wikipedia.org/wiki/Technical_Analysis_of_Stocks_%26_Commodities"
+   ],
+   [
+    "Traders.com: A 30-Year Lookback (S&C, October 2012)",
+    "https://www.traders.com/Documentation/FEEDbk_docs/2012/10/Wasserman.html"
+   ],
+   [
+    "Hutson: Good Trix, S&C V.1:5 (1983)",
+    "https://c.mql5.com/forextsd/forum/64/trix_jack_huton.pdf"
+   ]
+  ],
+  "books": [],
+  "confidence": "medium",
+  "notes": "Boeing background is from Wikipedia ('Boeing mechanical engineer'). A second article, 'TRIX: Triple Exponential Smoothing Oscillator', appeared in S&C V.2:3 (1984) per the Traders.com store."
+ },
+ {
+  "slug": "william-blau",
+  "name": "William Blau",
+  "role": "Trader and author specialising in momentum indicators",
+  "bio": "William Blau is a trader with expertise in momentum indicators who founded an engineering firm before trading, and holds degrees in electrical engineering from NYU and systems engineering from the University of Pennsylvania. He introduced the True Strength Index in Stocks & Commodities in November 1991 and expanded his work in Momentum, Direction, and Divergence (Wiley, 1995).",
+  "argues": [
+   "Double-smoothing price changes gives a momentum line stripped of high-frequency noise that still shows trend direction, size of moves and turning points.",
+   "TSI can be seen as a cross between an RSI and a MACD that keeps desirable properties of each."
+  ],
+  "sources": [
+   [
+    "Wiley: Momentum, Direction, and Divergence - author information",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0471027294,descCd-authorInfo.html"
+   ],
+   [
+    "Traders.com: True Strength Index, S&C V.9:11 (1991)",
+    "https://store.traders.com/-v09-c11-truestr-pdf.html"
+   ],
+   [
+    "Traders.com: Trading With The True Strength Index, S&C V.10:5 (1992)",
+    "https://store.traders.com/-v10-c05-trading-pdf.html"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Momentum, Direction, and Divergence",
+    "year": 1995
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Wiley lists the book as March 1995."
+ },
+ {
+  "slug": "keller-keuning",
+  "name": "Wouter J. Keller & Jan Willem Keuning",
+  "role": "Authors of momentum-based tactical asset-allocation papers",
+  "bio": "Wouter J. Keller and Jan Willem Keuning have published a series of SSRN papers on momentum-driven asset allocation, including Vigilant Asset Allocation (VAA, July 2017), Defensive Asset Allocation (DAA, July 2018) and Hybrid Asset Allocation (HAA, February 2023). Keller had earlier co-written the Flexible Asset Allocation (FAA) paper with Hugo van Putten, reviewed by Alpha Architect in January 2013.",
+  "argues": [
+   "Momentum should lean on recent months: their 13612W filter averages annualised 1-, 3-, 6- and 12-month returns, which weights the shortest look-backs most.",
+   "Crash protection comes from breadth: when enough risky or 'canary' assets show negative momentum, move to cash or bonds."
+  ],
+  "sources": [
+   [
+    "CXO Advisory: Conservative breadth rule for asset class momentum crash protection (VAA, July 2017)",
+    "https://www.cxoadvisory.com/technical-trading/conservative-breadth-rule-for-asset-class-momentum-crash-protection/"
+   ],
+   [
+    "CXO Advisory: Multi-class momentum portfolio with canary crash protection (DAA, July 2018)",
+    "https://www.cxoadvisory.com/strategic-allocation/multi-class-momentum-portfolio-with-canary-crash-protection/"
+   ],
+   [
+    "CXO Advisory: Hybrid Asset Allocation (HAA, February 2023)",
+    "https://cxoadvisory.com/momentum-investing/simplified-offensive-defensive-and-risk-mode-identification-momentum-strategy"
+   ],
+   [
+    "Alpha Architect: Flexible Asset Allocation (Keller & van Putten)",
+    "https://alphaarchitect.com/2013/01/flexible-asset-allocation/"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Breadth Momentum and Vigilant Asset Allocation (VAA): Winning More by Losing Less (SSRN)",
+    "year": 2017
+   },
+   {
+    "title": "Breadth Momentum and the Canary Universe: Defensive Asset Allocation (DAA) (SSRN)",
+    "year": 2018
+   }
+  ],
+  "confidence": "medium",
+  "notes": "No institutional affiliations were confirmed for either author, so none are stated. The SSRN pages themselves were not opened; paper titles and dates come from CXO Advisory reviews."
+ },
+ {
+  "slug": "stanley-kroll",
+  "name": "Stanley Kroll",
+  "role": "Futures trader and author; co-author of The New Technical Trader",
+  "bio": "Stanley Kroll worked as a commodity specialist at Merrill Lynch and ran his own commodity clearing firm; Stocks & Commodities reported that he turned an $18,000 stake into $1 million during the 1970s. He wrote Kroll on Futures Trading Strategy (Dow Jones-Irwin, 1988) and co-wrote The New Technical Trader (Wiley, 1994) with Tushar Chande, which introduced StochRSI.",
+  "argues": [
+   "Trade only strongly trending markets, because the big wins come from taking part in major bull or bear moves.",
+   "Big profits come from patience and sitting with a winning trend; he liked to quote Jesse Livermore that 'big profits are made by sitting'."
+  ],
+  "sources": [
+   [
+    "Traders.com: Quick Scans - Kroll on Futures Trading Strategy (S&C V.8:13)",
+    "https://store.traders.com/v81350quicsc11.html"
+   ],
+   [
+    "Goodreads: The New Technical Trader (Chande & Kroll, 1994)",
+    "https://www.goodreads.com/book/show/2436274"
+   ],
+   [
+    "StockCharts ChartSchool: StochRSI",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/stochrsi"
+   ],
+   [
+    "Stocks & Commodities V.6:8, Kroll on Futures Trading Strategy, review by Alexander Elder",
+    "https://store.traders.com/-v06-c08-kroll-pdf.html"
+   ],
+   [
+    "Finance Magnates: The Wisdom of a Professional Commodity Trader - Stanley Kroll",
+    "https://www.financemagnates.com/forex/analysis/the-wisdom-of-a-professional-commodity-trader-stanley-kroll/"
+   ],
+   [
+    "Deltavalue: Chande Kroll Stop (book and parameters)",
+    "https://www.deltavalue.de/?p=48945"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Kroll on Futures Trading Strategy",
+    "year": 1988
+   },
+   {
+    "title": "The New Technical Trader (with Tushar S. Chande)",
+    "year": 1994
+   }
+  ],
+  "confidence": "medium",
+  "notes": "The second 'argues' point is StockCharts' account of why Chande and Kroll built StochRSI."
+ },
+ {
+  "slug": "cooper-gutierrez-hameed",
+  "name": "Michael J. Cooper, Roberto C. Gutierrez Jr. & Allaudeen Hameed",
+  "role": "Finance academics who linked momentum to the state of the market",
+  "bio": "Michael J. Cooper, Roberto C. Gutierrez Jr. and Allaudeen Hameed published 'Market States and Momentum' in the Journal of Finance (vol. 59, 2004, pp. 1345-1365). Gutierrez, who holds a PhD in finance from the University of North Carolina (1999), is an associate professor of finance at the University of Oregon's Lundquist College of Business.",
+  "argues": [
+   "Momentum profits depend on the state of the market: from 1929 to 1995 they averaged 0.93% a month after UP markets and -0.37% a month after DOWN markets.",
+   "UP is defined by a positive lagged 36-month market return; overconfidence is higher after market gains, which feeds momentum that later reverses."
+  ],
+  "sources": [
+   [
+    "SUFE academic newsletter: Market states and momentum (abstract)",
+    "https://academicnewsletter.sufe.edu.cn/info/361185"
+   ],
+   [
+    "EFN China: Market States and Momentum (abstract)",
+    "https://efnchina.com/content-7-62222-1.html"
+   ],
+   [
+    "Roberto Gutierrez CV (University of Oregon)",
+    "https://profile.uoregon.edu/sites/default/files/cv/rcg-cv.pdf"
+   ],
+   [
+    "Waikato thesis restating the CGH market-state definition",
+    "https://researchcommons.waikato.ac.nz/bitstreams/20849f32-e124-4a23-8d14-832cbc4b28a8/download"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Market States and Momentum, Journal of Finance 59: 1345-1365",
+    "year": 2004
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Cooper's and Hameed's current affiliations were not checked, so none are stated. The 36-month UP/DOWN definition is quoted from a later paper describing CGH; 24- and 12-month versions were robustness checks."
+ },
+ {
+  "slug": "alexander-pagonidis",
+  "name": "Alexander S. Pagonidis",
+  "role": "Author of 'The IBS Effect' paper",
+  "bio": "Alexander Soffronow Pagonidis wrote 'The IBS Effect: Mean Reversion in Equity ETFs', listed among the 2014 entries for NAAIM's Founders Award for Advances in Active Investment Management. Later academic work on internal bar strength cites his paper as the source of the 0.2 and 0.8 thresholds.",
+  "argues": [
+   "Where a day's close sits within its high-low range predicts the next day's return for equity ETFs.",
+   "Closes in the bottom fifth of the range (IBS below 0.2) tend to be followed by a rise, and closes in the top fifth (above 0.8) by a fall."
+  ],
+  "sources": [
+   [
+    "NAAIM: Founders Award paper list 2009-2018",
+    "https://www.naaim.org/wp-content/uploads/2018/05/ALL-founders-award-paper-list_2009-2018_web.pdf"
+   ],
+   [
+    "arXiv: Using Internal Bar Strength as a Key Indicator for Trading Country ETFs (Pandey & Joshi, 2023)",
+    "https://arxiv.org/html/2306.12434v1"
+   ]
+  ],
+  "books": [
+   {
+    "title": "The IBS Effect: Mean Reversion in Equity ETFs (NAAIM Founders Award entry)",
+    "year": 2014
+   }
+  ],
+  "confidence": "low",
+  "notes": "Almost no biographical information is public. NAAIM lists the paper under 2014; the arXiv paper cites it as 2013 (data to 2013). The paper itself was not opened."
+ },
+ {
+  "slug": "da-gurun-warachka",
+  "name": "Zhi Da, Umit G. Gurun & Mitch Warachka",
+  "role": "Finance academics who studied how information flow shapes momentum",
+  "bio": "Zhi Da (University of Notre Dame), Umit G. Gurun (University of Texas at Dallas) and Mitch Warachka (Chapman University) are finance academics. Their paper 'Frog in the Pan: Continuous Information and Momentum' appeared in The Review of Financial Studies in July 2014 (vol. 27, no. 7, pp. 2171-2218).",
+  "argues": [
+   "Investors underreact to information that arrives in many small, steady pieces, like a frog in slowly heating water, so momentum built that way lasts longer.",
+   "Momentum ran 5.94% for stocks with continuous information versus -2.07% for stocks with discrete information and similar past returns, and the continuous kind does not reverse in the long run."
+  ],
+  "sources": [
+   [
+    "Da, Gurun & Warachka: Frog in the Pan (paper PDF, Notre Dame)",
+    "https://academicweb.nd.edu/~zda/Frog.pdf"
+   ],
+   [
+    "Chapman University Digital Commons: Frog in the Pan (citation and abstract)",
+    "https://digitalcommons.chapman.edu/business_articles/115"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Frog in the Pan: Continuous Information and Momentum, Review of Financial Studies 27(7): 2171-2218",
+    "year": 2014
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "carl-swenlin",
+  "name": "Carl Swenlin",
+  "role": "Founder of DecisionPoint",
+  "bio": "Carl Swenlin has been engaged in market analysis since 1981 and founded DecisionPoint.com, an early online technical-analysis service known for its market indicators and charts. After DecisionPoint merged with StockCharts.com in 2013 he became a consulting technical analyst and blog contributor there.",
+  "argues": [
+   "Momentum is best read from a twice-smoothed rate of change, and because the PMO is an internal ratio its readings can rank stocks, funds and indexes against one another.",
+   "Always know the trend in three timeframes: the long-term trend sets the strategic stance and the short term is where tactical moves are made."
+  ],
+  "sources": [
+   [
+    "StockCharts: Carl Swenlin bio",
+    "https://stockcharts.com/articles/bios/carl-swenlin.html"
+   ],
+   [
+    "StockCharts ChartSchool: DecisionPoint Price Momentum Oscillator (PMO)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/decisionpoint-price-momentum-oscillator-pmo"
+   ],
+   [
+    "StockCharts ChartSchool: DecisionPoint Trend Model",
+    "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/decisionpoint-trend-model"
+   ]
+  ],
+  "books": [],
+  "confidence": "medium",
+  "notes": "The year the PMO was created was not found. The 'argues' points come from the DecisionPoint ChartSchool article. No books found."
+ },
+ {
+  "slug": "jegadeesh-lehmann",
+  "name": "Narasimhan Jegadeesh & Bruce N. Lehmann",
+  "role": "Finance academics who documented short-term return reversals",
+  "bio": "Narasimhan Jegadeesh, Dean's Distinguished Chair of Finance at Emory University's Goizueta Business School (PhD, Columbia), showed one-month return reversals in the Journal of Finance in 1990. Bruce N. Lehmann (PhD, University of Chicago, 1983), professor of economics and finance at UC San Diego until his death in 2018, showed weekly reversals in the Quarterly Journal of Economics the same year.",
+  "argues": [
+   "Short-horizon returns reverse: last week's (Lehmann) or last month's (Jegadeesh) losers tend to beat last period's winners in the next period.",
+   "Lehmann found that buying last week's losers and selling last week's winners made money in each of 49 six-month periods from 1962 to 1986, which he read as an inefficiency in supplying liquidity around large price moves."
+  ],
+  "sources": [
+   [
+    "Emory Goizueta: Narasimhan Jegadeesh",
+    "https://goizueta.emory.edu/faculty/profiles/narasimhan-jegadeesh"
+   ],
+   [
+    "UC San Diego GPS: Bruce Lehmann",
+    "https://gps.ucsd.edu/_archive/bruce-lehmann.html"
+   ],
+   [
+    "RePEc/IDEAS: Lehmann, QJE 105(1), 1990",
+    "https://ideas.repec.org/a/oup/qjecon/v105y1990i1p1-28..html"
+   ],
+   [
+    "NBER Working Paper 2533: Fads, Martingales, and Market Efficiency",
+    "https://www.nber.org/papers/w2533.pdf"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Jegadeesh: Evidence of Predictable Behavior of Security Returns, Journal of Finance 45(3): 881-898",
+    "year": 1990
+   },
+   {
+    "title": "Lehmann: Fads, Martingales, and Market Efficiency, Quarterly Journal of Economics 105(1): 1-28",
+    "year": 1990
+   }
+  ],
+  "confidence": "high",
+  "notes": "Jegadeesh already appears on the site as half of 'jegadeesh-titman'. This pairing is for the two independent 1990 reversal papers. The caller may prefer to credit Jegadeesh alone (M bars) and treat Lehmann's weekly version as a variant."
+ },
+ {
+  "slug": "ric-way",
+  "name": "Ric Way",
+  "role": "Co-author of the Zero Lag strategy",
+  "bio": "Ric Way co-authored 'Zero Lag (Well, Almost)' with John Ehlers in the November 2010 issue of Technical Analysis of Stocks & Commodities. The article supplied the EasyLanguage code for the error-correcting filter and its trading strategy, tested on Microsoft.",
+  "argues": [
+   "Removing a selected amount of lag from an EMA gives earlier crossover signals while keeping most of the smoothing.",
+   "A threshold on the filter's remaining error should screen out weak crossings to cut whipsaw trades."
+  ],
+  "sources": [
+   [
+    "Ehlers & Way, Zero Lag (Well, Almost) (PDF)",
+    "https://www.mesasoftware.com/papers/ZeroLag.pdf"
+   ],
+   [
+    "Stocks & Commodities V.28:11, Zero Lag (Well, Almost)",
+    "https://store.traders.com/stcov283zela.html"
+   ]
+  ],
+  "books": [],
+  "confidence": "low",
+  "notes": "Known only as co-author of the November 2010 Stocks & Commodities article. No further biography was found, so the bio stays with the article. The second 'argues' line is worded to match the published strategy code, which tests the gap between the corrected line and the close (not between the two lines)."
+ },
+ {
+  "slug": "doug-schaff",
+  "name": "Doug Schaff",
+  "role": "Creator of the Schaff Trend Cycle; founder of FX-Strategy",
+  "bio": "Doug Schaff is the founder and president of FX-Strategy, Inc. and a former senior FX trader at Bankers Trust (New York and Paris) and chief dealer at Merrill Lynch Bank, where he set up the currency-options desk. He has traded on his own account since 1987 and released the code of his Schaff Trend Cycle publicly in February 2008.",
+  "argues": [
+   "Currency trends accelerate and decelerate in cycles, so running a MACD line through a double-smoothed stochastic spots trend turns earlier than a MACD crossover.",
+   "The low-risk entry is at a trend-cycle low inside an established trend, confirmed when price takes out the setup bar."
+  ],
+  "sources": [
+   [
+    "Doug Schaff, Releasing the Code to the Schaff Trend Cycle (2008, PDF)",
+    "https://c.mql5.com/forextsd/forum/40/schaff_code.pdf"
+   ],
+   [
+    "Doug Schaff, Catching Currency Moves with the Schaff Trend Cycle Indicator (2002, PDF)",
+    "https://c.mql5.com/forextsd/forum/153/schaff_trend_cycle.pdf"
+   ],
+   [
+    "Brian Twomey, The Schaff Trend Cycle (PDF)",
+    "https://c.mql5.com/forextsd/forum/70/the_schaff_trend_cycle.pdf"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Getting Ready to Trade FX (with Terry Schaff)",
+    "year": null
+   },
+   {
+    "title": "The Forex Strategy Manual (with Terry Schaff)",
+    "year": null
+   }
+  ],
+  "confidence": "high",
+  "notes": "Publication years for the two FX books could not be found and are left empty. The 1999 code copyright and the February 2008 release come from his released-code PDF."
+ },
+ {
+  "slug": "erin-swenlin",
+  "name": "Erin Swenlin",
+  "role": "DecisionPoint vice president; documents the trend-model signals",
+  "bio": "Erin Swenlin is Vice President of DecisionPoint.com and launched the DecisionPoint daily blog with Carl Swenlin in 2009. She writes StockCharts' DecisionPoint articles that define the BUY, Neutral and SELL trend-model signals.",
+  "argues": [
+   "A 20/50-EMA upside crossover is always an Intermediate-Term BUY, while a downside crossover is Neutral or SELL depending on the 50/200-EMA long-term model.",
+   "Trend models are mechanical price flags that should be qualified by chart analysis."
+  ],
+  "sources": [
+   [
+    "StockCharts: The DecisionPoint Thrust/Trend Model - Part I (Erin Swenlin, 2016)",
+    "https://articles.stockcharts.com/article/articles-decisionpoint-2016-03-the-decisionpoint-thrusttrend-model---part-i/"
+   ],
+   [
+    "StockCharts: The DecisionPoint Trend Model Picture for 2015",
+    "https://articles.stockcharts.com/article/articles-chartwatchers-2015-01-the-big-picture-for-2015/"
+   ]
+  ],
+  "books": [],
+  "confidence": "medium",
+  "notes": "Credited because her StockCharts articles define the BUY, Neutral and SELL trend-model signals the play uses."
+ },
+ {
+  "slug": "a-w-cohen",
+  "name": "A.W. Cohen",
+  "role": "Originator of the three-point reversal point & figure method",
+  "bio": "A.W. Cohen is credited with the classic three-box-reversal point & figure chart drawn with X's and O's, set out in his 1947 book on the three-point reversal method. He was the editor of ChartCraft, the chart service Wikipedia says he founded, and wrote several books on the method.",
+  "argues": [
+   "Only price moves of at least one full box matter, and a trend changes column only after a three-box reversal; time and small wiggles are noise.",
+   "A column of X's breaking above the prior X column is the basic buy signal, and an O column breaking below the prior O column the basic sell signal."
+  ],
+  "sources": [
+   [
+    "StockCharts ChartSchool: Introduction to Point & Figure Charts",
+    "https://chartschool.stockcharts.com/table-of-contents/chart-analysis/point-and-figure-charts/point-and-figure-basics/introduction-to-point-and-figure-charts"
+   ],
+   [
+    "Wikipedia: Point and figure chart",
+    "https://en.wikipedia.org/wiki/Point_and_figure_chart"
+   ]
+  ],
+  "books": [
+   {
+    "title": "How to Use the Three-Point Reversal Method of Point & Figure Stock Market Trading",
+    "year": 1947
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Little personal biography is available. Wikipedia is the only source for his founding ChartCraft, so the bio hedges it."
+ },
+ {
+  "slug": "thomas-dorsey",
+  "name": "Thomas J. Dorsey",
+  "role": "Popularised modern point & figure signals",
+  "bio": "Tom Dorsey co-founded Dorsey, Wright & Associates in 1987, a point & figure research firm that Nasdaq acquired in 2015. His book Point & Figure Charting, first published in 1995, popularised ChartCraft's box-size table and three-box-reversal signals.",
+  "argues": [
+   "A standard box-size table (bigger boxes at higher prices) keeps P&F charts comparable across stocks.",
+   "The double-top breakout and double-bottom breakdown are the core buy and sell signals from which wider patterns are built."
+  ],
+  "sources": [
+   [
+    "Nasdaq: Tom Dorsey",
+    "https://www.nasdaq.com/about/our-people/tom-dorsey"
+   ],
+   [
+    "Goodreads: Point and Figure Charting (Thomas J. Dorsey)",
+    "https://www.goodreads.com/book/show/574641"
+   ],
+   [
+    "StockCharts ChartSchool: P&F Scaling and Timeframes",
+    "https://chartschool.stockcharts.com/table-of-contents/chart-analysis/point-and-figure-charts/point-and-figure-basics/point-and-figure-scaling-and-timeframes"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Point & Figure Charting: The Essential Application for Forecasting and Tracking Market Prices",
+    "year": 1995
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "price-headley",
+  "name": "Price Headley",
+  "role": "Creator of Acceleration Bands; founder of BigTrends",
+  "bio": "Price Headley is the founder and chief analyst of BigTrends.com, a Duke University graduate, a CFA charterholder and a member of the Market Technicians Association. He wrote Big Trends in Trading (Wiley, 2002) and developed the Acceleration Bands indicator.",
+  "argues": [
+   "The biggest gains come from stocks in an acceleration phase, so capital should rotate into the fastest movers and out again when acceleration ends.",
+   "Two consecutive closes outside the band mark a runaway move; one close back inside says the acceleration period is probably over."
+  ],
+  "sources": [
+   [
+    "MoneyShow: Indicator in Focus: Acceleration Bands (Price Headley, 2015)",
+    "https://moneyshow.com/articles/daytraders-28080"
+   ],
+   [
+    "Stocks & Commodities interview: Price Headley (2003)",
+    "https://www.traders.com/Documentation/FEEDbk_docs/2003/06/Abstracts_new/Interview/interview.html"
+   ],
+   [
+    "Stocks & Commodities Books for Traders, August 2002 (Big Trends in Trading)",
+    "https://traders.com/documentation/feedbk_docs/2002/08/Books/Books.html"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Big Trends in Trading: Strategies to Master Major Market Moves",
+    "year": 2002
+   }
+  ],
+  "confidence": "high",
+  "notes": "Headley's own MoneyShow article gives the 20-bar setting and the two-close rules but not the band formula, which comes from TC2000 and LuxAlgo."
+ },
+ {
+  "slug": "john-carter",
+  "name": "John F. Carter",
+  "role": "Creator of the TTM Squeeze",
+  "bio": "John F. Carter is a veteran day trader and educator who founded TradeTheMarkets.com, now Simpler Trading. His book Mastering the Trade (2005; second edition 2012) sets out the Squeeze, his signature volatility-breakout indicator.",
+  "argues": [
+   "Markets alternate between quiet consolidation and trending expansion, so the best entries come when a volatility squeeze releases.",
+   "Momentum direction at the release says which way to trade, and fading momentum says when to take profits."
+  ],
+  "sources": [
+   [
+    "StockCharts ChartSchool: TTM Squeeze",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze"
+   ],
+   [
+    "McGraw-Hill: Mastering the Trade, Second Edition",
+    "https://www.mheducation.com/highered/mhp/product/mastering-trade-second-edition-proven-techniques-profiting-intraday-swing-trading-setups.html"
+   ],
+   [
+    "Simpler Trading: Mastering the Trade - The Squeeze",
+    "https://www.simplertrading.com/squeeze"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Mastering the Trade",
+    "year": 2005
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "toby-crabel",
+  "name": "Toby Crabel",
+  "role": "Originator of the NR4/NR7 narrow-range patterns",
+  "bio": "Toby Crabel founded Crabel Capital Management in 1997 as the successor to his trading sole proprietorship. He wrote Day Trading With Short Term Price Patterns and Opening Range Breakout (1990), the source of the NR4 and NR7 patterns, and is also a former NCAA Division II All-American tennis player.",
+  "argues": [
+   "Volatility contraction, such as the narrowest range in seven days, tends to be followed by volatility expansion.",
+   "Short-term breakout trades must work right away; Crabel took profits quickly, often at the first close or first profitable close."
+  ],
+  "sources": [
+   [
+    "Wikipedia: Toby Crabel",
+    "https://en.wikipedia.org/wiki/Toby_Crabel"
+   ],
+   [
+    "StockCharts ChartSchool: Narrow Range Day NR7",
+    "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/narrow-range-day-nr7"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Day Trading With Short Term Price Patterns and Opening Range Breakout",
+    "year": 1990
+   }
+  ],
+  "confidence": "high",
+  "notes": ""
+ },
+ {
+  "slug": "norman-fosback",
+  "name": "Norman Fosback",
+  "role": "Turned Dysart's volume indexes into a tested bull/bear signal",
+  "bio": "Norman G. Fosback wrote Stock Market Logic (1976), published by the Institute for Econometric Research in Fort Lauderdale, Florida, a book built on statistically tested market indicators. He was Glen King Parker's partner at the Institute, which published the Market Logic newsletter, and his mid-1970s seasonality model was later tracked by the Hulbert Financial Digest.",
+  "argues": [
+   "Indicators should be tested statistically and judged by the probabilities they deliver, not by anecdotes.",
+   "When the Negative Volume Index is above its one-year average, the odds that a bull market is under way are about 96%."
+  ],
+  "sources": [
+   [
+    "Wikipedia: Negative volume index",
+    "https://en.wikipedia.org/wiki/Negative_volume_index"
+   ],
+   [
+    "Texas A&M library record: Stock Market Logic (1976)",
+    "https://libcat.library.tamu.edu/Record/in00000348468"
+   ],
+   [
+    "Christian Science Monitor (1984): newsletter guide naming Fosback and the Institute for Econometric Research",
+    "https://csmonitor.com/1984/0316/031632.html"
+   ],
+   [
+    "CXO Advisory: Fosback's seasonality rules and Hulbert tracking",
+    "https://www.cxoadvisory.com/?p=3021"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Stock Market Logic",
+    "year": 1976
+   }
+  ],
+  "confidence": "medium",
+  "notes": "The 96% (bull) and 53% (bear) odds are as quoted by Wikipedia and StockCharts; the text of Stock Market Logic was not seen. Research confidence: medium."
+ },
+ {
+  "slug": "paul-dysart",
+  "name": "Paul Dysart",
+  "role": "Originator of the negative and positive volume indexes",
+  "bio": "Paul L. Dysart Jr., an Iowa native who worked on Chicago's LaSalle Street, published the weekly Trendway letter from 1933 to 1969. In 1936 he began keeping separate advance-decline series for days of falling and of rising volume; he called the falling-volume series AMOMET, 'A Measure Of Major Economic Trend', the ancestor of today's NVI.",
+  "argues": [
+   "Market action on quiet, falling-volume days should be tracked separately from action on busy days.",
+   "The falling-volume series is a guide to the major trend, hence his name for it, 'A Measure Of Major Economic Trend'."
+  ],
+  "sources": [
+   [
+    "Wikipedia: Negative volume index (history section)",
+    "https://en.wikipedia.org/wiki/Negative_volume_index"
+   ],
+   [
+    "StockCharts ChartSchool: Negative Volume Index (NVI)",
+    "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/negative-volume-index-nvi"
+   ],
+   [
+    "Fidelity Learning Center: Negative Volume Index",
+    "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/nvi"
+   ]
+  ],
+  "books": [],
+  "confidence": "medium",
+  "notes": "Biography rests mainly on the history section of Wikipedia's Negative volume index article. No book by Dysart was found. Research confidence: medium."
+ },
+ {
+  "slug": "buff-dormeier",
+  "name": "Buff Dormeier",
+  "role": "Volume analyst; creator of Buff Averages and the VPCI",
+  "bio": "Buff Pelz Dormeier, CMT, is Chief Technical Analyst at Kingsview Wealth Management and earlier managed portfolios as a Managing Director of Investments at Wells Fargo Advisors. He won the 2007 Charles H. Dow Award for his Volume Price Confirmation Indicator paper, and his book Investing with Volume Analysis was named Technical Analyst's Book of the Year in 2013.",
+  "argues": [
+   "Modifying a simple moving average with volume information improves its signals.",
+   "Volume confirms or contradicts price; when the two agree a trend is healthier than when they diverge."
+  ],
+  "sources": [
+   [
+    "CMT Association: Buff Dormeier, CMT",
+    "https://cmtassociation.org/?p=1559"
+   ],
+   [
+    "Traders.com: Dormeier, 'Buff Up Your Moving Averages' (S&C, February 2001)",
+    "https://traders.com/Documentation/FEEDbk_docs/2001/02/Abstracts_new/Dormeier/Dormeier.html"
+   ],
+   [
+    "CMT Association: Volume Price Confirmation Indicator (Dow Award paper)",
+    "https://cmtassociation.org/?p=74895"
+   ],
+   [
+    "InformIT: Buff Pelz Dormeier author bio",
+    "https://www.informit.com/authors/bio/3869ce24-690d-4e6a-bf7d-c2141d7acb4d"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Investing with Volume Analysis",
+    "year": 2011
+   }
+  ],
+  "confidence": "high",
+  "notes": "Research confidence: high."
+ },
+ {
+  "slug": "kenneth-french",
+  "name": "Kenneth French",
+  "role": "Documented the weekend effect in U.S. stocks",
+  "bio": "Kenneth R. French is the Roth Family Distinguished Professor of Finance at the Tuck School of Business at Dartmouth, with a PhD in finance from the University of Rochester (1983), and earlier taught at MIT Sloan, Yale and Chicago Booth. With Eugene Fama he is known for the value effect and the Fama-French multi-factor asset pricing models.",
+  "argues": [
+   "From 1953 to 1977 the S&P 500's average Monday return, which spans the weekend, was significantly negative, while Friday's was the highest of the week.",
+   "Average returns are explained by exposures to a few common factors such as size and value."
+  ],
+  "sources": [
+   [
+    "Tuck School of Business: Kenneth R. French biography",
+    "https://mba.tuck.dartmouth.edu/pages/faculty/ken.French/biography.html"
+   ],
+   [
+    "International Journal of Financial Studies (MDPI) paper citing French (1980) and his results",
+    "https://www.mdpi.com/2227-7072/4/2/7"
+   ],
+   [
+    "ASU W. P. Carey: research finds the weekend effect disappeared",
+    "https://news.wpcarey.asu.edu/20171204-research-debunks-myth-stock-market-weekend-effect"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": "The MDPI paper quotes French's 1953-77 Monday mean as -14 basis points and Friday's as +20; textbooks often cite -0.168% for Monday from French's own table. The figure is left out of the 'argues' line until the 1980 paper itself is checked. Research confidence: high."
+ },
+ {
+  "slug": "lucca-moench",
+  "name": "David Lucca & Emanuel Moench",
+  "role": "Documented the pre-FOMC announcement drift",
+  "bio": "David O. Lucca is an economist in the Research and Statistics Group of the Federal Reserve Bank of New York, with a PhD in economics from Northwestern University (2006). Emanuel Moench (Mönch), formerly a research officer at the New York Fed, head of research at the Deutsche Bundesbank and a professor at Goethe University Frankfurt, is Professor of Financial and Monetary Economics at the Frankfurt School of Finance & Management.",
+  "argues": [
+   "More than 80% of the U.S. equity premium since 1994 was earned in the 24 hours before scheduled FOMC announcements.",
+   "The drift does not appear in Treasuries or money-market futures, nor before other major economic releases."
+  ],
+  "sources": [
+   [
+    "Federal Reserve Bank of New York Staff Report 512: The Pre-FOMC Announcement Drift",
+    "https://www.newyorkfed.org/medialibrary/media/research/staff_reports/sr512.html"
+   ],
+   [
+    "Liberty Street Economics: Lucca & Moench on the pre-FOMC drift",
+    "https://libertystreeteconomics.newyorkfed.org/?p=1112"
+   ],
+   [
+    "David O. Lucca CV (New York Fed)",
+    "https://www.newyorkfed.org/medialibrary/media/research/economists/lucca/lucca_cv.pdf"
+   ],
+   [
+    "Frankfurt School: Emanuel Mönch",
+    "https://www.frankfurt-school.de/en/research-and-faculty/faculty/faculty-directory/emanuel-moench"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": "Combined credit for the two authors of the pre-FOMC drift paper (NY Fed Staff Report 512, 2011; Journal of Finance 2015). Research confidence: high."
+ },
+ {
+  "slug": "yuan-zheng-zhu",
+  "name": "Kathy Yuan, Lu Zheng & Qiaoqiao Zhu",
+  "role": "Documented lower stock returns around full moons in 48 countries",
+  "bio": "Kathy Yuan, Lu Zheng and Qiaoqiao Zhu wrote 'Are Investors Moonstruck? Lunar Phases and Stock Returns' at the University of Michigan (Yuan and Zheng at the business school, Zhu in economics), published in the Journal of Empirical Finance in 2006. The paper is held in the research repositories of the London School of Economics and the Australian National University, where Yuan and Zhu later worked.",
+  "argues": [
+   "Stock returns are lower on the days around a full moon than around a new moon, by 3% to 5% a year across 48 countries.",
+   "The lunar effect is not explained by macroeconomic announcements or by known calendar anomalies such as the January and day-of-week effects."
+  ],
+  "sources": [
+   [
+    "LSE Research Online: 'Are investors moonstruck?' (Journal of Empirical Finance, 2006)",
+    "https://researchonline.lse.ac.uk/id/eprint/39409"
+   ],
+   [
+    "ANU Research Portal: 'Are investors moonstruck?'",
+    "https://researchportalplus.anu.edu.au/en/publications/are-investors-moonstruck-lunar-phases-and-stock-returns/"
+   ],
+   [
+    "University of Michigan working-paper version (author affiliations, window definitions)",
+    "https://www.bus.umich.edu/pdf/mitsui/workshopdocs/ZhengMoonstruck.pdf"
+   ]
+  ],
+  "books": [],
+  "confidence": "medium",
+  "notes": "Combined credit for the three authors of 'Are Investors Moonstruck?' (Journal of Empirical Finance, 2006). Research confidence: medium."
+ },
+ {
+  "slug": "markos-katsanos",
+  "name": "Markos Katsanos",
+  "role": "Trading-systems analyst; creator of the Volume Flow Indicator",
+  "bio": "Markos Katsanos, CMT, is a technical analyst and trading-system developer with degrees in civil and structural engineering who has traded stocks and commodities since 1987. He introduced the Volume Flow Indicator in Technical Analysis of Stocks & Commodities in June 2004 and wrote Intermarket Trading Strategies (Wiley, 2009).",
+  "argues": [
+   "On-balance volume is improved by ignoring tiny price moves and capping freak volume spikes.",
+   "A VFI above zero is bullish, a cross above zero is the buy trigger, and divergences are the strongest signals."
+  ],
+  "sources": [
+   [
+    "Wiley: Markos Katsanos author information",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0470758104,descCd-authorInfo.html"
+   ],
+   [
+    "CMT Association: Markos Katsanos",
+    "https://cmtassociation.org/presenter/markos-katsanos/"
+   ],
+   [
+    "StockCharts Store: Intermarket Trading Strategies (Wiley, 2009)",
+    "https://store.stockcharts.com/products/intermarket-trading-strategies"
+   ],
+   [
+    "Traders.com: Katsanos, 'Using Money Flow To Stay With The Trend' (S&C, June 2004)",
+    "https://traders.com/Documentation/FEEDbk_docs/2004/06/Abstracts_new/Katsanos/kats.html"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Intermarket Trading Strategies",
+    "year": 2009
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Research confidence: medium."
+ },
+ {
+  "slug": "stephen-klinger",
+  "name": "Stephen J. Klinger",
+  "role": "Creator of the Klinger Volume Oscillator",
+  "bio": "Stephen J. Klinger, CMT, is a technical analyst who designed the Klinger Volume Oscillator to track long-term money flow while staying responsive to short-term swings in volume. He described it in 'Identifying Trends With Volume Analysis' in Technical Analysis of Stocks & Commodities in December 1997.",
+  "argues": [
+   "Volume is a proxy for money flow and reveals the internal strengths and weaknesses of price action.",
+   "The most powerful signal is an extreme reading above or below zero that reverses, warning that the trend is exhausted."
+  ],
+  "sources": [
+   [
+    "Traders.com store: Klinger, 'Identifying Trends with Volume Analysis', S&C V.15:12 (December 1997)",
+    "https://store.traders.com/-v15-c12-identif-pdf.html"
+   ],
+   [
+    "Traders.com: article excerpt (December 1997)",
+    "https://traders.com/Documentation/FEEDbk_docs/1997/12/Abstracts_new/Klinger9712/Kinger.html"
+   ],
+   [
+    "Wikipedia: Volume analysis (Klinger Volume Oscillator)",
+    "https://en.wikipedia.org/wiki/Volume_analysis"
+   ]
+  ],
+  "books": [],
+  "confidence": "low",
+  "notes": "Little is published about Klinger beyond the December 1997 S&C article and the indicator's descriptions. Research confidence: low."
+ },
+ {
+  "slug": "steve-nison",
+  "name": "Steve Nison",
+  "role": "Introduced Japanese candlestick charting to the West",
+  "bio": "Steve Nison, CMT, was the first to bring Japanese candlestick charts to Western traders, after a Japanese colleague at a New York brokerage sparked his interest in the 1980s; he later worked as a senior technical analyst at Merrill Lynch and a senior vice president at Daiwa Securities. He wrote Japanese Candlestick Charting Techniques (1991) and Beyond Candlesticks (1994) and heads CandleCharts.com.",
+  "argues": [
+   "A candle pattern's meaning depends on context: a bullish engulfing pattern at major support deserves far more weight than one in isolation.",
+   "The more signals confirm a support or resistance level, the more likely a reversal there."
+  ],
+  "sources": [
+   [
+    "Traders.com: S&C interview with Steve Nison (April 2003)",
+    "https://traders.com/Documentation/FEEDbk_docs/2003/04/Abstracts_new/Interview/interview.html"
+   ],
+   [
+    "Wiley-VCH: Beyond Candlesticks (December 1994), author information",
+    "https://www.wiley-vch.de/en/areas-interest/finance-economics-law/beyond-candlesticks-978-0-471-00720-3"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Japanese Candlestick Charting Techniques",
+    "year": 1991
+   },
+   {
+    "title": "Beyond Candlesticks",
+    "year": 1994
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Research confidence: medium."
+ },
+ {
+  "slug": "thomas-bulkowski",
+  "name": "Thomas N. Bulkowski",
+  "role": "Measured how candle and chart patterns actually perform",
+  "bio": "Thomas N. Bulkowski (born 1957) was a hardware and software engineer at Raytheon, Tracor Westronics and Tandy before retiring at 36 in 1993 to invest full time. He measures chart and candlestick patterns statistically in books including Encyclopedia of Chart Patterns (2000) and Encyclopedia of Candlestick Charts (2008).",
+  "argues": [
+   "A bullish engulfing acts as a reversal 63% of the time, but its follow-through ranks only 84th of 103 candle types.",
+   "A bearish engulfing reverses 79% of the time, but the move after it is short-lived."
+  ],
+  "sources": [
+   [
+    "Encyclopedia.com: Bulkowski, Thomas N. 1957-",
+    "https://www.encyclopedia.com/arts/educational-magazines/bulkowski-thomas-n-1957"
+   ],
+   [
+    "Wiley: Thomas N. Bulkowski author information",
+    "https://gov.wiley.com/WileyCDA/WileyTitle/productCd-0470182016,descCd-authorInfo.html"
+   ],
+   [
+    "Ex Libris: Encyclopedia of Candlestick Charts (Wiley, March 2008)",
+    "https://www.exlibris.ch/de/buecher-buch/english-books/thomas-n-bulkowski/encyclopedia-of-candlestick-charts/id/9780470182017"
+   ],
+   [
+    "ThePatternSite: Bullish Engulfing statistics",
+    "https://www.thepatternsite.com/BullEngulfing.html"
+   ]
+  ],
+  "books": [
+   {
+    "title": "Encyclopedia of Chart Patterns",
+    "year": 2000
+   },
+   {
+    "title": "Trading Classic Chart Patterns",
+    "year": 2002
+   },
+   {
+    "title": "Encyclopedia of Candlestick Charts",
+    "year": 2008
+   }
+  ],
+  "confidence": "high",
+  "notes": "Engulfing statistics are from ThePatternSite (Bulkowski's own site). Research confidence: high."
+ },
+ {
+  "slug": "daniel-chesler",
+  "name": "Daniel L. Chesler",
+  "role": "Creator of the hikkake pattern",
+  "bio": "Daniel L. Chesler, CMT, is a registered Commodity Trading Advisor and former trader and price-risk manager for the Louis Dreyfus Group who runs Chesler Analytics, a technical research firm for energy traders in Wellington, Florida. He introduced the hikkake pattern in a series of articles in 2004, including in Technical Analysis of Stocks & Commodities and Active Trader.",
+  "argues": [
+   "False breakouts from an inside bar trap traders, and the reversal that follows can be traded.",
+   "A hikkake must be confirmed within three bars, or the pattern is ignored."
+  ],
+  "sources": [
+   [
+    "Chesler Analytics: Who we are",
+    "https://chesler.us/about/whoweare.htm"
+   ],
+   [
+    "Wikipedia: Hikkake pattern",
+    "https://en.wikipedia.org/wiki/Hikkake_pattern"
+   ],
+   [
+    "Chesler, 'Trading False Moves with the Hikkake Pattern', Active Trader (April 2004), PDF",
+    "https://c.mql5.com/forextsd/forum/34/hikkake.pdf"
+   ]
+  ],
+  "books": [],
+  "confidence": "high",
+  "notes": "Research confidence: high."
  }
 ]

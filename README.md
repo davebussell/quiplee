@@ -5,8 +5,8 @@
 Be The Puck has two parts:
 
 1. **The plays site** (home, `/strategies/` = Plays, `/thinkers/` = Analysts,
-   `/stocks/`, `/learn/`, `/method/`): 59 published trading plays tied to the 52
-   analysts behind them (bios and rules checked against their books, papers and
+   `/stocks/`, `/learn/`, `/method/`): 100 published trading plays tied to the 84
+   analyst records behind them (bios and rules checked against their books, papers and
    interviews), run on about 380 stocks, ETFs, indexes and coins since 2005,
    every call graded, and the close that flips each play next.
 2. **The live desk** (`/desk/`): real-time news scored for revenue impact
@@ -23,8 +23,10 @@ tools/fetch_macro.py         CAPE (multpl) and FRED series (UNRATE, BAA10Y, T10Y
 tools/fetch_fundamentals.py  company fundamentals (Yahoo) into data/fundamentals/<slug>.json
 tools/sync_requests.py       turns watchlist requests (/api/watch) into data/universe/requested.json
 tools/build_strategies.py    builds the whole site from data/ into _site/ (no network)
-tools/qstrat/plays.py        the 59 plays (20 flagged core): family, analysts, rules, assumptions
-tools/qstrat/plays_fn.py     each play's rule as code (state 1/0 per finished bar)
+tools/qstrat/plays.py        the 100 plays in seven families (all core; 20 flagged "starter"): analysts, rules, assumptions, sources
+tools/qstrat/plays_fn.py     each play's rule as code (state 1/0 per finished bar); the 41 added in
+                             October 2026 live in plays_fn_mr.py, plays_fn_tb.py and plays_fn_vcp.py
+tools/qstrat/calendar_data.py FOMC statement dates (to Dec 2027: add 2028 when the Fed publishes it) and full moons (to 2030)
 tools/qstrat/ind.py          indicator library (EMA, RSI, ATR, MACD, ADX, PSAR, Supertrend, ...)
 tools/qstrat/analysts.json   verified bios, arguments, books and sources for every analyst
 tools/qstrat/content.py      the universe (indexes, sectors, stocks, reader requests); loads plays and analysts
@@ -75,7 +77,7 @@ and commits `data/`; that push triggers the Netlify build.
 **Bring your own stocks.** The watchlist keeps each reader's list in their
 browser. Tickers Be The Puck doesn't cover are POSTed to `/api/watch` (symbols only).
 The nightly job validates up to 25 a night (300 in total), the build runs all
-plays on them, and core-play pages are published. Reader-requested names stay out
+plays on them, and a page for every play is published. Reader-requested names stay out
 of the cross-stock scoreboards.
 
 **Learn + glossary.** Terms live in `tools/qstrat/glossary.py`;
@@ -86,8 +88,7 @@ live desk's feed from `data/glossary.json`.
 
 **Universe.** Market indexes, U.S. sector funds and the stock groups in
 `content.py`, all 100 Nasdaq-100 companies (`NDX_NEW` / `NDX_COVERED`; the ones
-added in bulk get pages for the 20 core plays, like reader requests, but appear
-in every list), the 218 Toronto-listed companies on Proud to Work's TSX tracker
+added in bulk appear in every list), the 218 Toronto-listed companies on Proud to Work's TSX tracker
 (`TSX_NEW` / `TSX_COVERED`, prices in C$, a page for every play; the TSX filter
 on `/stocks/`), plus reader requests. Names added in bulk (`bulk`) stay off the
 home page's board. Micro caps carry a 0.30% switching cost.

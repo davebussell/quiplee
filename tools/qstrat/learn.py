@@ -209,7 +209,7 @@ QUIZZES = {
           "Fast plays that sell and re-buy can run into it in a regular account."),
     ],
     "common-mistakes": [
-        Q("With 59 plays and 64 stocks, why shouldn't you pick the single best-looking backtest?", ["It's too slow", "With thousands of combinations, some look great by luck", "The best one is always wrong", "Costs aren't included"], 1,
+        Q("With 100 plays and hundreds of stocks, why shouldn't you pick the single best-looking backtest?", ["It's too slow", "With thousands of combinations, some look great by luck", "The best one is always wrong", "Costs aren't included"], 1,
           "Look for plays that do reasonably well across many stocks rather than brilliantly on one."),
         Q("A play has had six small losing trades in a row. What does the history suggest about quitting now?", ["Quit immediately", "It often means missing the big call that pays for the small losses", "Double the position", "Switch to a faster play"], 1,
           "Every trend play has whipsaw stretches. Dropping it then usually means missing the trend that pays for them."),
@@ -999,13 +999,14 @@ class Learn:
                          f'<td class="r" data-v="{sm["beat_sharpe"] / max(1, sm["graded"])}">{sm["beat_sharpe"]} of {sm["graded"]}</td></tr>')
         body = f"""
 <section class="prose">
-<p>Be The Puck tests {len(TIMED)} plays from {n_people()} analysts, plus the golden cross, which has no single author. They fall into six families that think about the market in different ways. Knowing the family tells you most of what to expect from a play before you look at its record.</p>
+<p>Be The Puck tests {len(TIMED)} plays from {n_people()} analysts, plus the golden cross, which has no single author. They fall into seven families that think about the market in different ways. Knowing the family tells you most of what to expect from a play before you look at its record.</p>
 <ul>
 <li><b>Trend following</b>: hold while price is above a line; sell when it breaks. Many small losses, a few big wins, good crash protection.</li>
 <li><b>Breakouts &amp; channels</b>: buy new highs, sell on the opposite edge or a trailing stop. Similar profile, more trading.</li>
 <li><b>Momentum</b>: own what has risen most, measured over months. Slow, few trades, late to turn.</li>
 <li><b>Mean reversion</b>: buy dips, sell bounces. Right often, small wins, often in cash.</li>
 <li><b>Volume &amp; money flow</b>: read buying and selling pressure from volume.</li>
+<li><b>Candles &amp; chart patterns</b>: read a turn from a short pattern of bars, like an engulfing candle or a failed breakout. Short holds, often in cash.</li>
 <li><b>Calendar</b>: in or out by date alone.</li>
 </ul>
 </section>

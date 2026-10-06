@@ -50,7 +50,7 @@ def watch_json(site):
         rk = meta.get("risk") or {}
         moves = {}
         for p in TIMED:
-            if not p.get("core"):
+            if not p.get("starter"):      # the next-move tooltips: the 20 to learn first keep the file small
                 continue
             x = site.R.get((sym, p["slug"]))
             if x is not None:
@@ -113,7 +113,7 @@ def watchlist_page(site):
 </div>
 <noscript><p class="note-line">The watchlist needs JavaScript. Every covered stock also has its own page under <a href="{h('stocks/')}">Stocks</a>.</p></noscript>
 <div class="wl-plays"><span class="small muted">Plays to count</span>
-<div class="seg seg-sm" role="group" aria-label="Plays to count" id="wl-mode"><button type="button" data-v="core" aria-pressed="true">Core 20</button><button type="button" data-v="all" aria-pressed="false">All {len(TIMED)}</button><button type="button" data-v="pick" aria-pressed="false">Pick plays</button></div>
+<div class="seg seg-sm" role="group" aria-label="Plays to count" id="wl-mode"><button type="button" data-v="all" aria-pressed="true">All {len(TIMED)}</button><button type="button" data-v="pick" aria-pressed="false">Pick plays</button></div>
 <a class="small" href="{h('rules/')}">Your own Start/Stop rules and portfolio limits (members)</a>
 </div>
 <div class="card wl-picker" id="wl-picker" hidden></div>
@@ -125,7 +125,7 @@ def watchlist_page(site):
 <div class="card prose"><p class="eyebrow">How it works</p><ol>
 <li><b>Add your tickers.</b> Type them, paste them or upload a CSV. Canadian listings use .TO (Toronto) or .V (Venture); a file's exchange column is read for you.</li>
 <li><b>Covered names answer at once.</b> Be The Puck covers {n_cov} stocks, ETFs, indexes and coins, each with every play's call, its trend and its crash exposure.</li>
-<li><b>New names join the queue.</b> After the next U.S. close Be The Puck checks each one has a price history, runs all {len(TIMED)} plays on it and publishes its page. The 20 core plays get a full page each.</li>
+<li><b>New names join the queue.</b> After the next U.S. close Be The Puck checks each one has a price history, runs all {len(TIMED)} plays on it and publishes its page, with a full page for every play.</li>
 </ol></div>
 <div class="card prose"><p class="eyebrow">What the columns mean</p><ul>
 <li><b>Plays in:</b> how many of the plays you picked hold the stock now. Most in usually means a strong, broad trend; a split means the plays disagree.</li>
@@ -138,5 +138,5 @@ def watchlist_page(site):
 <section id="wl-readers"></section>
 """
     site.add(path, site.shell(path, "Watchlist · check your stocks against every play",
-                              "Paste tickers or upload a Wealthsimple or broker CSV. See what 59 published trading plays, the trend and crash exposure say about each name; new names are analysed after the next close.",
+                              f"Paste tickers or upload a Wealthsimple or broker CSV. See what {len(TIMED)} published trading plays, the trend and crash exposure say about each name; new names are analysed after the next close.",
                               body, active="watchlist/", scripts=("assets/widgets.js", "assets/watchlist.js")))
