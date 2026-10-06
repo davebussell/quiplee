@@ -10,7 +10,7 @@
   var STOCK = app.getAttribute('data-stock') || '';
   var PLAYER = app.getAttribute('data-player') || '';
   var U = null;            // data/paper.json
-  var BY_SLUG = {};
+  var BY_SLUG = {}, BY_SHORT = {};
   var ME = null;
   var sel = null;          // the symbol in the trade ticket
   var side = 'buy';
@@ -60,7 +60,7 @@
     if (!src) return Promise.resolve(null);
     return fetch(src).then(function (r) { return r.json(); }).then(function (j) {
       U = j;
-      Object.keys(j.names).forEach(function (s) { BY_SLUG[j.names[s][2]] = s; });
+      Object.keys(j.names).forEach(function (s) { BY_SLUG[j.names[s][2]] = s; BY_SHORT[j.names[s][0].toUpperCase()] = BY_SHORT[j.names[s][0].toUpperCase()] || s; });
       return j;
     }).catch(function () { return null; });
   }
@@ -181,11 +181,12 @@
       '<button type="button" class="linkbtn" data-pt-act="logout">Sign out</button></div>' +
       tiles(d, true) +
       '<div class="pt-grid">' + ticket() + ideas() + '</div>' + chartCard() +
-      holdings(d, true) + trades(d, true) + settings(d, link);
+      (d.rows.length ? '' : importCard(true)) + holdings(d, true) + trades(d, true) + (d.rows.length ? importCard(false) : '') + settings(d, link);
     box.hidden = false;
     drawChart(d);
     wireTicket();
     wireSettings(link);
+    wireImport();
     $$('[data-pt-pick]', box).forEach(function (b) {
       b.addEventListener('click', function () {
         choose(b.getAttribute('data-pt-pick'));
@@ -357,6 +358,76 @@
       estimate();
     }).catch(function () { var w = $('[data-pt-when]'); if (w) w.textContent = 'No live price right now.'; });
     estimate();
+  }
+
+  // ---------------------------------------------------------------- copy in real holdings
+  function wlItems() {
+    try {
+      var v = JSON.parse(localStorage.getItem('quiplee.watch.v1') || 'null');
+      return (v && v.items || []).filter(function (x) { return meta(x.sym); });
+    } catch (e) { return []; }
+  }
+  function importCard(first) {
+    var wl = wlItems();
+    var inner = '<p class="small muted">Paper-trade the names you really own. Type them with share counts, like <span class="mono">NVDA 20, TD.TO 50, BTC 0.1</span>, ' +
+      'or use your watchlist (it reads a broker CSV: upload one on the <a href="' + esc(STOCK.replace('stocks/{s}/', 'watchlist/')) + '">watchlist</a>).</p>' +
+      '<textarea data-pt-imp rows="3" spellcheck="false" placeholder="NVDA 20, TD.TO 50, BTC 0.1"></textarea>' +
+      (wl.length ? '<p><button type="button" class="btn sm" data-pt-impwl>Use my watchlist (' + wl.length + ' name' + (wl.length === 1 ? '' : 's') + ')</button></p>' : '') +
+      '<div class="al-chips" data-pt-impprev></div>' +
+      '<div class="pt-impmode" data-pt-impmode hidden><label class="pt-check"><input type="radio" name="impmode" value="count" checked> Match my share counts (scaled down if they cost more than my cash)</label>' +
+      '<label class="pt-check"><input type="radio" name="impmode" value="split"> Split my cash evenly instead</label></div>' +
+      '<button type="button" class="btn primary" data-pt-impgo disabled>Buy them</button><p class="pt-msg" role="alert" data-pt-impmsg></p>';
+    return first ? '<section class="card pt-import"><h2 class="h3">Start from your real stocks</h2>' + inner + '</section>'
+      : '<details class="card pt-import"><summary class="h3">Copy in more of your real stocks</summary>' + inner + '</details>';
+  }
+  function parseImport(text) {
+    var out = [], bad = [];
+    String(text || '').split(/[\n,;]+/).forEach(function (piece) {
+      var w = piece.trim().split(/\s+/);
+      if (!w[0]) return;
+      var u = w[0].toUpperCase(), q = w[1] != null ? parseFloat(String(w[1]).replace(/[,$]/g, '')) : null;
+      var sym = meta(u) ? u : BY_SHORT[u] || BY_SHORT[u.replace(/\.TO$/, '')] || (meta(u + '.TO') ? u + '.TO' : null) || BY_SLUG[w[0].toLowerCase()];
+      if (!sym) { bad.push(w[0]); return; }
+      if (!out.some(function (x) { return x.sym === sym; })) out.push({ sym: sym, qty: q > 0 ? q : null });
+    });
+    return { items: out, bad: bad };
+  }
+  function wireImport() {
+    var ta = $('[data-pt-imp]');
+    if (!ta) return;
+    var prev = $('[data-pt-impprev]'), mode = $('[data-pt-impmode]'), go = $('[data-pt-impgo]'), out = $('[data-pt-impmsg]');
+    function show() {
+      var p = parseImport(ta.value), counts = p.items.length && p.items.every(function (x) { return x.qty; });
+      prev.innerHTML = p.items.map(function (x) { var m = meta(x.sym); return '<span class="al-chip"><b>' + esc(m[0]) + '</b><span>' + (x.qty ? qty(x.qty) + ' sh' : esc(m[1])) + '</span></span>'; }).join('') +
+        (p.bad.length ? '<p class="small down">Not covered: ' + esc(p.bad.join(', ')) + '</p>' : '');
+      mode.hidden = !counts;
+      go.disabled = !p.items.length;
+      go.textContent = p.items.length ? 'Buy ' + p.items.length + ' name' + (p.items.length === 1 ? '' : 's') : 'Buy them';
+    }
+    ta.addEventListener('input', show);
+    var wb = $('[data-pt-impwl]');
+    if (wb) wb.addEventListener('click', function () {
+      ta.value = wlItems().map(function (x) { return meta(x.sym)[0] + (x.qty ? ' ' + x.qty : ''); }).join(', ');
+      show();
+    });
+    go.addEventListener('click', function () {
+      var p = parseImport(ta.value);
+      if (!p.items.length) return;
+      var split = !mode.hidden && (mode.querySelector('input[value=split]') || {}).checked;
+      var items = p.items.map(function (x) { return { sym: x.sym, qty: split ? null : x.qty }; });
+      go.disabled = true;
+      msg(out, 'Buying at the latest prices…', true);
+      api('import', { items: items }).then(function (j) {
+        go.disabled = false;
+        if (!j.ok) { msg(out, j.error || "That didn't go through."); return; }
+        var spent = j.bought.reduce(function (a, t) { return a + t.usd; }, 0);
+        var note = 'Bought ' + j.bought.length + ' name' + (j.bought.length === 1 ? '' : 's') + ' for ' + usd(spent) + '.' +
+          (j.scaled ? ' Share counts were scaled to ' + Math.round(j.scaled * 100) + '% to fit your cash.' : '') +
+          (j.skipped && j.skipped.length ? ' Skipped: ' + j.skipped.map(function (x) { return x.sym + ' (' + x.why + ')'; }).join(', ') + '.' : '');
+        refresh().then(function () { var o = $('[data-pt-impmsg]'); if (o) msg(o, note, true); var t = $('#pt-ticket'); if (t) t.scrollIntoView({ block: 'start' }); msg($('[data-pt-ordermsg]'), note, true); });
+      }).catch(function () { go.disabled = false; msg(out, "Couldn't reach the server. Try again."); });
+    });
+    show();
   }
 
   function settings(d, link) {

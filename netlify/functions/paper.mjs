@@ -11,6 +11,7 @@
  *   POST /api/paper/logout
  *   GET  /api/paper/me                                  -> the portfolio, valued live
  *   POST /api/paper/trade     {sym, side, qty}          -> fills at the latest price
+ *   POST /api/paper/import    {items: [{sym, qty?}], amount?} -> buy a list at once (real holdings, or an even split)
  *   POST /api/paper/share     {on}                      -> show it on the leaderboard
  *   POST /api/paper/password  {old, password}
  *   POST /api/paper/reset     {confirm: "RESET"}        -> back to $100,000 (once a day)
@@ -318,6 +319,72 @@ async function trade(req, s, sess) {
   return json({ ok: true, trade: out.tr, cash: out.port.cash });
 }
 
+/** Buy a list of names in one go: the player's real holdings (share counts, scaled to fit the cash)
+ * or an even split of an amount. body {items: [{sym, qty?}], amount?} */
+async function importHoldings(req, s, sess) {
+  const b = await readBody(req);
+  let U;
+  try { U = await universe(req); } catch (e) { return json({ error: "Trading is unavailable right now. Try again in a minute." }, 503); }
+  const seen = new Set(), items = [], skipped = [];
+  for (const it of Array.isArray(b.items) ? b.items.slice(0, 60) : []) {
+    const sym = String((it && it.sym) || "").toUpperCase().trim();
+    if (!sym || seen.has(sym)) continue;
+    seen.add(sym);
+    if (!U.names[sym]) { skipped.push({ sym, why: "not covered" }); continue; }
+    const q = Number(it.qty);
+    items.push({ sym, qty: q > 0 && isFinite(q) ? q : null });
+  }
+  if (!items.length) return json({ error: "None of those are names Be The Puck covers." }, 400);
+  if (items.length > 50) return json({ error: "Up to 50 names at a time." }, 400);
+  const byCount = items.every((x) => x.qty);
+  const quotes = await Promise.all(items.map(async (x) => {
+    const crypto = U.names[x.sym][5] === "crypto";
+    try { const q = await quote(x.sym, crypto); return { q, fx: await usdPer(q.cur, U), crypto }; } catch (e) { return null; }
+  }));
+  const at = new Date().toISOString();
+  const out = await update(s, sess.u, (port) => {
+    const sk = skipped.slice();
+    const cash = port.cash;
+    const budget = byCount ? cash : Math.min(cash, Number(b.amount) > 0 ? Number(b.amount) : cash);
+    const live = items.map((x, i) => ({ ...x, ...(quotes[i] || {}) })).filter((x, i) => {
+      if (!quotes[i]) { sk.push({ sym: x.sym, why: "no live price" }); return false; }
+      return true;
+    });
+    if (!live.length) return { error: "No live prices right now, so nothing was bought. Try again shortly.", status: 503 };
+    // share counts: scale down to fit the cash; even split: the same dollars in each
+    let scale = 1;
+    if (byCount) {
+      const want = live.reduce((a, x) => a + x.qty * x.q.price * x.fx, 0);
+      scale = want > budget ? budget / want : 1;
+    }
+    const per = budget / live.length;
+    const bought = [];
+    let spent = 0;
+    for (const x of live) {
+      const each = x.q.price * x.fx;
+      let qty = byCount ? x.qty * scale : per / each;
+      qty = x.crypto ? Math.floor(qty * 1e6) / 1e6 : Math.floor(qty + 1e-9);
+      const usd = r2(qty * each);
+      if (!(qty > 0) || spent + usd > budget + 0.01) { sk.push({ sym: x.sym, why: "too dear for the cash left" }); continue; }
+      spent = r2(spent + usd);
+      const pos = port.pos[x.sym] || { q: 0, cost: 0, first: at };
+      pos.q = x.crypto ? Math.round((pos.q + qty) * 1e6) / 1e6 : pos.q + qty;
+      pos.cost = r2(pos.cost + usd);
+      port.pos[x.sym] = pos;
+      const tr = { t: at, sym: x.sym, side: "buy", q: qty, px: x.q.price, cur: x.q.cur, fx: Math.round(x.fx * 1e6) / 1e6, usd, open: x.q.open, via: "import" };
+      port.trades = (port.trades || []).concat([tr]).slice(-MAX_TRADES_KEPT);
+      port.n_trades = (port.n_trades || 0) + 1;
+      bought.push(tr);
+    }
+    if (!bought.length) return { error: "Nothing fit in the cash you have.", status: 400 };
+    port.cash = r2(port.cash - spent);
+    port.recent = (port.recent || []).filter((t) => Date.now() - t < 600000).concat([Date.now()]);
+    return { port, bought, scale, sk };
+  });
+  if (out.error) return json({ error: out.error }, out.status || 400);
+  return json({ ok: true, bought: out.bought, skipped: out.sk, scaled: out.scale < 1 ? out.scale : null, cash: out.port.cash });
+}
+
 async function setShare(req, s, sess) {
   const b = await readBody(req);
   const on = b.on === true || b.on === "true" || b.on === "on";
@@ -473,6 +540,7 @@ export default async (req, context) => {
     if (!sess) return json({ error: "Sign in first.", signed_in: false }, 401);
     if (route === "trade") return await trade(req, s, sess);
     if (route === "share") return await setShare(req, s, sess);
+    if (route === "import") return await importHoldings(req, s, sess);
     if (route === "password") return await changePassword(req, s, sess);
     if (route === "reset") return await reset(req, s, sess);
     if (route === "delete") return await remove(req, s, sess);

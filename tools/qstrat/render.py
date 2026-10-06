@@ -91,10 +91,12 @@ def nav_menus():
         "paper/": [("paper/", "Play the game", "US$100,000 of play money to trade the names Be The Puck covers"),
                    ("paper/leaders/", "Leaderboard", "Shared portfolios ranked by return since they started")],
         "strategies/": [("strategies/", f"All {len(TIMED)} plays", "Six families, what each says now and its record"),
+                        ("guides/", "Which predictions work?", "Guides to every family and every play, from the backtests"),
                         ("articles/the-core-20/", "The core 20", "The plays to learn first"),
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
                         ("learn/call-it/", "Practise: Call it", "Read the plays on real charts")],
-        "learn/": [("learn/#track-basics", "Track 1: Stock basics", "Shares, candlesticks, trends, P/E, debt and risk"),
+        "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
+                   ("learn/#track-basics", "Track 1: Stock basics", "Shares, candlesticks, trends, P/E, debt and risk"),
                    ("learn/#track-plays", "Track 2: The plays", "How each family of trading rules works"),
                    ("learn/#track-markets", "Track 3: Markets and risk", "Indexes, bubbles, crashes and positioning"),
                    ("learn/glossary/", "Glossary", "Every term in plain English")],
@@ -666,6 +668,8 @@ class Site:
         for s in TIMED:            # warm the per-play summaries before forking
             self.strat_summary(s)
         self.render_pairs()
+        from .guides import Guides
+        Guides(self).build()
         self.learn.build()
         self.method_page()
         return self.pages
@@ -995,7 +999,7 @@ class Site:
 <section class="pair-head">
   <p class="eyebrow">{e(fam)} · {e(BAR_WORD[s['bar']])} rule{" · " + e(s['flag']) if s.get('flag') else ""}</p>
   <h1 class="h1">{e(s['long'])}</h1>
-  <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}</div>
+  <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}<span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Guide: does it work?</a></div>
   <p class="lede">{e(s['short'])}</p>
 </section>
 <section><div class="tiles">
@@ -1491,7 +1495,7 @@ class Site:
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><a href="{h('stocks/' + t['slug'] + '/')}">{e(t['short'])}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])} rule · {e(t['group'])}</p>
 <h1 class="h1">{e(s['name'])} on {e(t['name'])}</h1>
-<div class="byline"><span>Play from {by}</span><span>·</span><a href="{h('strategies/' + s['slug'] + '/')}">How it works</a><span>·</span><a href="{h('learn/reading-a-page/')}">How to read this page</a>{flag_tag(s)}</div></section>
+<div class="byline"><span>Play from {by}</span><span>·</span><a href="{h('strategies/' + s['slug'] + '/')}">How it works</a><span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Does it work?</a><span>·</span><a href="{h('learn/reading-a-page/')}">How to read this page</a>{flag_tag(s)}</div></section>
 {verdict}
 {pchart}
 {panel_html}
