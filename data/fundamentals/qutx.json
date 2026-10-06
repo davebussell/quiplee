@@ -1,6 +1,6 @@
 {
- "beta": -3.181,
- "bookValue": -0.0,
+ "beta": -3.269,
+ "bookValue": null,
  "cash_bs": 227585.0,
  "country": "United States",
  "currency": "USD",
@@ -10,11 +10,11 @@
  "earningsGrowth": null,
  "ebit": -98324.0,
  "ebitda": -2900981,
- "enterpriseValue": 9728486,
+ "enterpriseValue": 9343599,
  "equity": -1946073.0,
  "equity_date": "2025-12-31",
  "exchange": "OID",
- "fetched": "2026-10-05",
+ "fetched": "2026-10-06",
  "fiftyTwoWeekHigh": 0.005,
  "fiftyTwoWeekLow": 0.0001,
  "financialCurrency": "USD",
@@ -57,7 +57,7 @@
  "totalRevenue": null,
  "total_debt_bs": 1124208.0,
  "trailingEps": 0.0,
- "trailingPE": "Infinity",
+ "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://twohandsgroup.com"
 }
