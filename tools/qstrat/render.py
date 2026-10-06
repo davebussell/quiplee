@@ -428,7 +428,7 @@ class Site:
         """The stock-and-play page when it exists, else the stock's own page."""
         return self.pair_path(t, s) if (s.get("core") or not (t.get("requested") or t.get("core_only"))) else f"stocks/{t['slug']}/"
 
-    def shell(self, path, title, desc, body, active=None, charts=False, extra_head="", lesson=None, glossary=False, scripts=(), link=True):
+    def shell(self, path, title, desc, body, active=None, charts=False, extra_head="", lesson=None, glossary=False, scripts=(), link=True, og="og-default.png"):
         depth = path.count("/")
         if link:
             body = link_terms(body, self.learn.href_for(depth, "glossary" if glossary else lesson))
@@ -460,7 +460,7 @@ class Site:
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{BASE}{path}">
 <meta property="og:type" content="website">
-<meta property="og:image" content="{BASE}og-default.png">
+<meta property="og:image" content="{BASE}{og}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0f17">
 <link rel="icon" type="image/svg+xml" href="{ICON}">
@@ -650,7 +650,7 @@ class Site:
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
     <h1 class="h1">Don't chase where the stock is. Chase where it's going.</h1>
     <p class="lede">Be The Puck runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
-    <div class="hero-links"><a class="btn primary" href="{h('learn/')}">New? Start with the basics</a><a class="btn" href="{h('markets/')}">Read the market</a></div>
+    <div class="hero-links"><a class="btn primary" href="{h('paper/')}">Play: trade US$100,000 of play money</a><a class="btn" href="{h('learn/')}">New? Start with the basics</a></div>
   </div>
   <div class="card picker">
     <form class="home-check" action="{h('watchlist/')}" method="get">
@@ -667,6 +667,7 @@ class Site:
     </form>
   </div>
 </section>
+{self.home_paper(depth)}
 {self.home_market(depth)}
 {self.home_signals(depth)}
 <section aria-labelledby="reads-h"><div class="sec-head"><h2 class="h2" id="reads-h">Long reads</h2><p><a href="{h('articles/')}">All articles and stories</a></p></div>
@@ -726,6 +727,26 @@ class Site:
             {"@type": "WebSite", "@id": BASE + "#website", "name": "Be The Puck", "url": BASE, "inLanguage": "en", "publisher": {"@id": BASE + "#organization"}}]}
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
         self.add(path, self.shell(path, "Be The Puck · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
+
+    def home_paper(self, depth):
+        """The paper-trading game, near the top of the home page, with quick picks where the plays agree."""
+        h = lambda x: self.href(depth, x)
+        stocks = [t for t in universe() if not t.get("index") and not t["crypto"] and t["group"] not in ("Indexes & ETFs", "Sectors")]
+        ranked = []
+        for t in stocks:
+            k, n = self.consensus(t)
+            if n:
+                ranked.append((-k / n, t["short"], t, k, n))
+        ranked.sort(key=lambda z: (z[0], z[1]))
+        picks = "".join(f'<a class="pt-idea" href="{h("paper/")}?t={e(t["slug"])}"><b>{e(t["short"])}</b><span>{e(t["name"])}</span><i>{k}/{n}</i></a>'
+                        for _, _, t, k, n in ranked[:6])
+        n_names = len([t for t in TICKERS if not t.get("index")])
+        return f"""<section class="card pt-promo" aria-labelledby="pt-promo-h">
+<div class="pt-promo-copy"><p class="eyebrow">New · Paper trading</p><h2 class="h2" id="pt-promo-h">Trade US$100,000 of play money</h2>
+<p>Pick a username, then buy and sell any of the {n_names} stocks, funds and coins Be The Puck covers at the latest price. See if you can beat the S&amp;P 500, and put your portfolio on the leaderboard if you like. Free, no email, no real money.</p>
+<div class="hero-links"><a class="btn primary" href="{h('paper/')}">Get my US$100,000</a><a class="btn" href="{h('paper/leaders/')}">See the leaderboard</a></div></div>
+<div class="pt-promo-ideas"><p class="small muted">Where the plays agree right now. Tap one to trade it.</p><div class="pt-idea-list">{picks}</div></div>
+</section>"""
 
     def board_html(self, depth, curated=False):
         """Stocks x play families: how many plays in each family hold each stock.

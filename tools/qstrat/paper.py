@@ -191,7 +191,7 @@ def _game(site, n):
 """
     site.add(path, site.shell(path, "Paper trading: US$100,000 of play money",
                               f"Trade the {n} stocks, funds and coins Be The Puck covers with US$100,000 of play money, track your returns against the S&P 500 and share your portfolio.",
-                              body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False))
+                              body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False, og="og-paper.png"))
 
 
 def _leaders(site):
@@ -207,7 +207,7 @@ def _leaders(site):
 <p class="muted small">Only portfolios whose owners chose to share them appear here. Returns are price changes only (no dividends) and are hypothetical.</p>
 """
     site.add(path, site.shell(path, "Paper trading leaderboard", "The shared paper-trading portfolios on Be The Puck, ranked by return since they started with US$100,000.",
-                              body, active="paper/", scripts=("assets/paper.js",), link=False))
+                              body, active="paper/", scripts=("assets/paper.js",), link=False, og="og-paper.png"))
 
 
 def _player(site):
@@ -221,5 +221,5 @@ def _player(site):
 <p class="muted small">Play money, not advice. Holdings are valued at the latest price, delayed up to 15 minutes.</p>
 """
     page = site.shell(path, "A paper-trading portfolio", "A shared paper-trading portfolio on Be The Puck: holdings, trades and returns against the S&P 500.",
-                      body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False)
+                      body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False, og="og-paper.png")
     site.add(path, page.replace('<meta name="description"', '<meta name="robots" content="noindex">\n<meta name="description"', 1))

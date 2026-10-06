@@ -916,3 +916,14 @@ label.pt-check { flex-direction: row; align-items: center; gap: 9px; font-size: 
 .pt-empty p { margin: 0; }
 .pt-ex-label { margin: 6px 0 -12px; }
 .pt-example { opacity: .55; pointer-events: none; }
+.pt-promo { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 20px 28px; align-items: center;
+  border-color: rgba(124, 108, 245, .45); background: linear-gradient(135deg, rgba(124, 108, 245, .12), rgba(124, 108, 245, 0) 60%), var(--panel); }
+.pt-promo-copy { display: flex; flex-direction: column; gap: 12px; }
+.pt-promo-copy p { margin: 0; color: var(--ink-2); max-width: 60ch; }
+.pt-promo-copy .eyebrow { color: var(--violet-ink); }
+.pt-promo-ideas { display: flex; flex-direction: column; gap: 10px; }
+.pt-promo-ideas p { margin: 0; }
+.pt-promo .pt-idea-list { grid-template-columns: 1fr 1fr; }
+a.pt-idea { text-decoration: none; }
+@media (max-width: 860px) { .pt-promo { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .pt-promo .pt-idea-list { grid-template-columns: 1fr; } .pt-promo .pt-idea:nth-child(n+5) { display: none; } }
