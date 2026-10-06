@@ -31,6 +31,7 @@ HINTS = {
     "To analysts' target": "How far analysts' average 12-month price target sits above (+) or below (−) today's price.",
     "Average analyst target": "Analysts' average 12-month price target.",
     "Analysts": "How many analysts publish a price target for it.",
+    "Light": "Start or Stop, summing up every play: Start when 60% or more hold it, Stop once that falls to 40% or less.",
     "Score": "0 to 100: half how many plays hold it, half how far analysts' target sits above the price. Higher means a stronger setup.",
     "Rank": "Its position on today's score ranking.",
     "Crash exposure": STORM,

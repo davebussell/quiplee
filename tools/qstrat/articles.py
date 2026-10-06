@@ -87,7 +87,7 @@ class Articles:
 <article class="article">
 <header class="pair-head"><p class="eyebrow">{e(bname)} · {e(when)}</p><h1 class="h1">{title}</h1><p class="lede">{dek}</p></header>
 <div class="art-body">{body}</div>
-<p class="note-line">Education, not financial advice. Be The Puck reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
+<p class="note-line">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
 {src}
 {related}
 </article>"""

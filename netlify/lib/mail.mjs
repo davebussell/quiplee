@@ -25,6 +25,6 @@ export function shell(title, bodyHtml, footer) {
 <p style="margin:0 0 14px;font-weight:800;font-size:18px">be<span style="color:#6b7385;font-weight:600">the</span>puck<span style="color:#1fa274">&#9650;</span></p>
 <h1 style="font:600 21px/1.3 Georgia,serif;margin:0 0 14px">${esc(title)}</h1>
 ${bodyHtml}
-<p style="margin:22px 0 0;font-size:12px;color:#6b7385">${footer || "Education, not financial advice. Be The Puck reports what published trading rules say; it doesn't know your goals, taxes or timeline."}</p>
+<p style="margin:22px 0 0;font-size:12px;color:#6b7385">${footer || "This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck reports what published trading rules say; it doesn't know your goals, taxes or timeline."}</p>
 </div></body></html>`;
 }

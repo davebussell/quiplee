@@ -23,6 +23,7 @@
     'Plays in': 'How many of the plays you chose to count hold it right now.',
     'Target': 'How far analysts\u2019 average 12-month price target sits above (+) or below (\u2212) today\u2019s price. Needs 3 or more analysts.',
     'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
+    'Light': 'Start or Stop, summing up every play: Start when 60% or more hold it, Stop once that falls to 40% or less.',
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
   };
@@ -274,10 +275,10 @@
 
     // rows
     var showW = W.byValue;
-    var head = ['Stock', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var head = ['Stock', 'Light', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
     var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) {
-      var at = { 'class': i >= 1 && i <= 4 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
+      var at = { 'class': i >= 2 && i <= 5 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
       if (HINTS[hd]) at['data-hint'] = HINTS[hd];
       return el('th', at);
     }))]);
@@ -316,6 +317,7 @@
       var sub = t.n + (notes[it.sym] ? ' · ' + notes[it.sym] : '') + (t.req ? ' · added by a reader' : '');
       var cells = [
         el('td', {}, [el('a', { 'class': 'sym', href: href, text: t.s }), el('span', { 'class': 'sym-sub', text: sub })]),
+        el('td', {}, [t.L == null ? el('span', { 'class': 'muted', text: '–' }) : el('a', { 'class': 'light-pill ' + (t.L ? 'start' : 'stop'), href: href, title: 'Start when 60% or more of the plays hold it; Stop once that falls to 40% or less.' }, [el('i'), t.L ? 'Start' : 'Stop'])]),
         el('td', { 'class': 'r mono', text: Q.money(t.p, t.cur) }),
         el('td', { 'class': 'r ' + cls(t.d1), text: Q.pct(t.d1) }),
         el('td', { 'class': 'r ' + cls(t.y1), text: Q.pct(t.y1, 0) }),

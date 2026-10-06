@@ -36,6 +36,33 @@ def plays_for(t):
     requests and the Nasdaq-100 names added in bulk, every play otherwise."""
     return [p for p in TIMED if p.get("core")] if (t.get("requested") or t.get("core_only")) else TIMED
 BASE = "https://bethepuck.com/"
+DISCLAIMER = ("This analysis does not constitute trading advice. Please meet with an advisor or independently review sources "
+              "before making any decision.")
+# The Click Shift mark (cursor + yellow shift key, as on clickshift.ca) and a gold maple leaf for the footer.
+CS_MARK = ('<span class="cs-mark" role="img" aria-label="Click Shift"><span class="cs-click" aria-hidden="true"><svg viewBox="0 0 24 24">'
+           '<path fill="#ffffff" d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"/>'
+           '</svg></span><span class="cs-shift" aria-hidden="true">shift</span></span>')
+MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>')
+FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
+                '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
+FOOT_DISCLAIM = f'<p class="foot-disclaim"><b>Not trading advice.</b> {DISCLAIMER}</p>'
+# The Start/Stop light: one call per stock from all the plays. It turns to Start when this
+# share of the plays with a call hold the stock, and back to Stop only when the share falls
+# to LIGHT_OFF, so a stock hovering near half doesn't flicker.
+LIGHT_ON, LIGHT_OFF = 0.6, 0.4
+LIGHT_HOW = (f"Start when {round(LIGHT_ON * 100)}% or more of the plays hold it; it stays Start until that falls to "
+             f"{round(LIGHT_OFF * 100)}% or less, then turns Stop (and back again at {round(LIGHT_ON * 100)}%).")
+
+
+def light_badge(L, href=None, big=False):
+    """The Start/Stop pill for a light dict (see Site.light)."""
+    if not L or not L.get("state"):
+        return '<span class="light-pill">–</span>'
+    word = "Start" if L["state"] == "start" else "Stop"
+    inner = f'<i aria-hidden="true"></i>{word}'
+    cls = f'light-pill {L["state"]}{" lg" if big else ""}'
+    tip = e(f'{L["k"]} of {L["n"]} plays in. {LIGHT_HOW}')
+    return f'<a class="{cls}" href="{href}" title="{tip}">{inner}</a>' if href else f'<span class="{cls}" title="{tip}">{inner}</span>'
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Cellipse cx='27' cy='44' rx='18' ry='7.5' fill='%235d6a82'/%3E%3Crect x='9' y='37' width='36' height='7' fill='%235d6a82'/%3E%3Cellipse cx='27' cy='37' rx='18' ry='7.5' fill='%23e7edf7'/%3E%3Cpath d='M44 27 L51.5 13 L59 27 Z' fill='%231fd093'/%3E%3C/svg%3E")
@@ -59,6 +86,7 @@ def nav_menus():
                     ("stocks/?group=ndx", "Nasdaq-100", "All 100 companies in the index, with the same reads"),
                     ("stocks/?group=tsx", "TSX stocks", f"The {n_tsx()} Toronto-listed companies, in Canadian dollars"),
                     ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
+                    ("alerts/", "Free email alerts", "An email with the analysis when the light flips on your stocks"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "paper/": [("paper/", "Play the game", "US$100,000 of play money to trade the names Be The Puck covers"),
                    ("paper/leaders/", "Leaderboard", "Shared portfolios ranked by return since they started")],
@@ -479,8 +507,10 @@ class Site:
 {body}
 </main>
 <footer class="site-foot"><div class="wrap foot-row">
-<p>Be The Puck runs published trading rules on real prices and shows what each one says now. These are rule outputs, not financial advice, and Be The Puck takes no positions in the names it covers.</p>
+{FOOT_DISCLAIM}
+<p>Be The Puck runs published trading rules on real prices and shows what each one says now. It takes no positions in the names it covers.</p>
 <p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a> · <a href="{h('members/')}">Members</a></p>
+{FOOT_CREDITS}
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
@@ -523,6 +553,42 @@ class Site:
             "med_dd_gap": float(np.median([a["maxdd"] - b["maxdd"] for a, b in ok])) if ok else None,
         }
         self._sum[s["slug"]] = out
+        return out
+
+    def light(self, t):
+        """{"state": "start"|"stop"|None, "share", "k", "n", "since"}: the latched Start/Stop
+        for a stock, walked through two years of weekly calls and then today's."""
+        sym = t["sym"]
+        cache = self.__dict__.setdefault("_lights", {})
+        if sym in cache:
+            return cache[sym]
+        hs = [(self.R.get((sym, p["slug"])) or {}).get("hist") or "" for p in TIMED]
+        L = max((len(h) for h in hs), default=0)
+        weeks = (self.meta.get(sym) or {}).get("weeks") or []
+        state, since = None, None
+
+        def step(k, n, when):
+            nonlocal state, since
+            if n < 5:
+                return
+            sh = k / n
+            new = state
+            if state is None:
+                new = "start" if sh >= 0.5 else "stop"
+            elif state == "stop" and sh >= LIGHT_ON:
+                new = "start"
+            elif state == "start" and sh <= LIGHT_OFF:
+                new = "stop"
+            if new != state:
+                state, since = new, when
+        for j in range(-L, 0):          # weeks, aligned on the latest
+            col = [h[j] for h in hs if len(h) >= -j]
+            k, n = sum(1 for c in col if c == "1"), sum(1 for c in col if c in "01")
+            step(k, n, weeks[j] if len(weeks) >= -j else None)
+        k, n = self.consensus(t)
+        step(k, n, self.r(sym, "buy-and-hold")["asof"])
+        out = {"state": state, "share": (k / n) if n else None, "k": k, "n": n, "since": since}
+        cache[sym] = out
         return out
 
     def consensus(self, t, plays=None):
@@ -583,6 +649,8 @@ class Site:
         members_page(self)
         from .paper import paper_pages
         paper_pages(self)
+        from .alerts import alerts_page
+        alerts_page(self)
         state, info = picks.run(self)
         picks.picks_page(self, state, info)
         self.home()
@@ -815,7 +883,7 @@ class Site:
                    f'Strong trend, little room left on the targets.</p>') if stretched else ""
         r = "".join(card(t, f'<span class="small lvl-{sv.LEVEL_CLASS[self.meta[t["sym"]]["risk"]["level"]]}">{e(self.meta[t["sym"]]["risk"]["level"])} crash exposure</span>') for t in risky)
         return f"""<section aria-labelledby="sig-h"><div class="sec-head"><h2 class="h2" id="sig-h">Strongest setups</h2>
-<p>Stocks at least half the plays hold, scored half on the plays and half on how far analysts' average 12-month target sits above the price. Not a recommendation. <a href="{h('articles/green-across-the-board/')}">How the score works, and where the rules get out</a></p></div>
+<p>Stocks at least half the plays hold, scored half on the plays and half on how far analysts' average 12-month target sits above the price. Not trading advice. <a href="{h('articles/green-across-the-board/')}">How the score works, and where the rules get out</a></p></div>
 <div class="grid grid-3">{g}</div>
 <p class="mem-note"><span class="tag mem">Members</span> <span>The <a href="{h('picks/')}">top-picks tracker</a> holds the top five of this list by rule, reviewed every Friday, and tracks each pick against the S&amp;P 500.</span></p>
 {st_html}
@@ -1049,6 +1117,23 @@ class Site:
         past = w[w.index <= x["asof"] - pd.DateOffset(years=1)]
         return (x["price"] / float(past.iloc[-1]) - 1) if len(past) else None
 
+    def light_block(self, t, depth):
+        """The Start/Stop light on a stock page, with an email-alert button."""
+        h = lambda x: self.href(depth, x)
+        L = self.light(t)
+        if not L["state"]:
+            return ""
+        since = f' since {dlong(L["since"])}' if L.get("since") is not None else ""
+        word = "Start" if L["state"] == "start" else "Stop"
+        nxt = (f'Turns Stop if the share falls to {round(LIGHT_OFF * 100)}%.' if L["state"] == "start"
+               else f'Turns Start if it reaches {round(LIGHT_ON * 100)}%.')
+        alert = ""
+        if not t.get("index"):
+            alert = (f'<a class="btn sm light-alert" href="{h("alerts/")}?t={e(t["slug"])}">Email me when it flips</a>')
+        return (f'<div class="light-box {L["state"]}">{light_badge(L, big=True)}'
+                f'<div class="light-txt"><b>{word}{since}.</b> {L["k"]} of {L["n"]} plays hold {e(t["short"])} ({pct(L["share"], sign=False, d=0)}). '
+                f'{nxt} <a href="{h("method/")}#light">How the light works</a></div>{alert}</div>')
+
     def stocks_index(self):
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
@@ -1072,9 +1157,11 @@ class Site:
             up = ol["upside"] if ol["ok"] else None
             score = round(ol["score"] * 100) if ol["ok"] else None
             gslug = slugify_group(t["group"])
+            lt = self.light(t)
             ndx_attr = (' data-ndx="1"' if t.get("ndx") else "") + (' data-tsx="1"' if t.get("tsx") else "")
             rows += (f'<tr data-group="{gslug}"{ndx_attr} data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
+                     f'<td data-v="{0 if lt["state"] == "start" else 1 if lt["state"] == "stop" else 2}">{light_badge(lt)}</td>'
                      f'<td class="small muted grp-col">{e(t["group"])}</td>'
                      f'<td class="r mono">{money(x["price"], t["cur"])}</td>'
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
@@ -1090,7 +1177,7 @@ class Site:
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="tsx">TSX</button>') + "".join(
             f'<button type="button" class="chip-btn" aria-pressed="false" data-group="{slugify_group(g)}">{e(g)}</button>' for g in groups)
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
-                          for k, lab in [("score", "Strongest setups"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
+                          for k, lab in [("light", "Start first"), ("score", "Strongest setups"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
                                          ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
         n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R])
         body = f"""
@@ -1105,7 +1192,7 @@ class Site:
 <div class="chips st-groups">{chips}</div>
 </div>
 <div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl"><thead><tr>
-<th class="stick">Stock</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
+<th class="stick">Stock</th><th data-sort-first="asc">Light</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
 <th data-sort-first="desc">Core plays in</th><th class="r" data-sort-first="desc">All plays</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th class="r" data-sort-first="desc">Score</th><th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
@@ -1226,9 +1313,10 @@ class Site:
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
 <div class="byline"><span class="mono" style="color:var(--ink);font-size:18px">{money(bh['price'], t['cur'])}</span>
 <span class="{dir_cls(day_ch)}">{pct(day_ch)} on the day</span><span>·</span><span class="{dir_cls(y1)}">{pct(y1)} in a year</span><span>·</span><span>close {dlong(bh['asof'])}</span></div>
+{self.light_block(t, depth)}
 {idx_note}{req_note}</section>
 <section class="card read-card"><div class="read-top"><p class="eyebrow">The read</p>{watch_btn}</div><ul class="read">{read_html}</ul>
-<p class="muted small">What published rules and the numbers say, not a recommendation. <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
+<p class="muted small">{DISCLAIMER} <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
 {summary}
 {chart}
 {heat}
@@ -1425,6 +1513,9 @@ class Site:
         body = f"""
 <section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Be The Puck tests a play</h1>
 <p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
+<section class="card prose" id="light"><p class="eyebrow">The Start/Stop light</p>
+<p>Every stock gets one light that sums up all {len(TIMED)} plays. It reads <b>Start</b> when {round(LIGHT_ON * 100)}% or more of the plays with a call hold the stock, and stays Start until the share falls to {round(LIGHT_OFF * 100)}% or less, when it turns <b>Stop</b>. It turns back to Start only at {round(LIGHT_ON * 100)}% again. The gap in the middle keeps a stock that hovers around half from flipping every few days. The light's history is walked through the last two years of weekly calls, then today's close.</p>
+<p>Each play counts once, whatever its family or how often it trades. Members can choose which plays count and where the thresholds sit. {DISCLAIMER}</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>
@@ -1469,7 +1560,7 @@ class Site:
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
 <p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Be The Puck's.</p></section>
 <section class="card prose"><p class="eyebrow">What this is not</p>
-<p>Be The Puck reports what a published rule says. It does not know your goals, taxes or other holdings, and it is not financial advice. Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Be The Puck's paraphrase of public material, and Be The Puck has no affiliation with them.</p>
+<p>Be The Puck reports what a published rule says. It does not know your goals, taxes or other holdings. {DISCLAIMER} Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Be The Puck's paraphrase of public material, and Be The Puck has no affiliation with them.</p>
 <p>Rebuilt automatically after each U.S. market close. <a href="{h('strategies/')}">See every play</a> or <a href="{h('thinkers/valeriy-zakamulin/')}">the case against timing</a>.</p></section>
 """
         self.add(path, self.shell(path, "Method", "How Be The Puck tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))

@@ -202,7 +202,7 @@
     var list = Object.keys(U.names).filter(function (s) { var m = U.names[s]; return m[5] === 'stock' && m[7]; })
       .sort(function (a, b) { var x = U.names[a], y = U.names[b]; return (y[6] / y[7]) - (x[6] / x[7]) || x[0].localeCompare(y[0]); }).slice(0, 10);
     return '<div class="card pt-ideas"><h2 class="h3">Where the plays agree</h2><p class="small muted">The stocks most of the ' + (U.names[list[0]] ? U.names[list[0]][7] : '') +
-      ' plays hold right now. A place to start looking, not a recommendation.</p><div class="pt-idea-list">' +
+      ' plays hold right now. A place to start looking, not trading advice: meet with an advisor or independently review sources before making any decision.</p><div class="pt-idea-list">' +
       list.map(function (s) { var m = U.names[s]; return '<button type="button" class="pt-idea" data-pt-pick="' + esc(s) + '"><b>' + esc(m[0]) + '</b><span>' + esc(m[1]) + '</span><i>' + m[6] + '/' + m[7] + '</i></button>'; }).join('') +
       '</div><p class="small"><a href="' + esc(STOCK.replace('{s}/', '')) + '?sort=score">All the strongest setups</a></p></div>';
   }
@@ -337,7 +337,8 @@
     form.hidden = false;
     if (!keepMsg) { msg($('[data-pt-ordermsg]'), ''); $('#pt-qty').value = ''; }
     var href = stockHref(m[2]);
-    var plays = m[7] ? '<b>' + m[6] + ' of ' + m[7] + '</b> plays hold it now' : '';
+    var plays = (m[9] != null ? '<span class="light-pill ' + (m[9] ? 'start' : 'stop') + '"><i></i>' + (m[9] ? 'Start' : 'Stop') + '</span> ' : '') +
+      (m[7] ? '<b>' + m[6] + ' of ' + m[7] + '</b> plays hold it now' : '');
     box.innerHTML = '<div class="pt-q-head"><span class="sym">' + esc(m[0]) + '</span><span class="muted">' + esc(m[1]) + '</span></div>' +
       '<div class="pt-q-px"><b data-pt-px>' + px(m[4], m[3]) + '</b> <span class="muted small" data-pt-when>last close · loading the latest price…</span></div>' +
       '<p class="small">' + plays + (href ? (plays ? ' · ' : '') + '<a href="' + esc(href) + '">See the full analysis</a>' : '') + '</p>';

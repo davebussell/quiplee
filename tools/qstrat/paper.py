@@ -57,7 +57,9 @@ def paper_json(site):
         x = site.r(t["sym"], "buy-and-hold")
         k, n = site.consensus(t)
         kind = "crypto" if t["crypto"] else ("fund" if t["group"] in ("Indexes & ETFs", "Sectors") else "stock")
-        names[t["sym"]] = [t["short"], t["name"], t["slug"], "CAD" if t["cur"] == "C$" else "USD", sig(x["price"], 6), kind, k, n, t["group"]]
+        lt = site.light(t)
+        names[t["sym"]] = [t["short"], t["name"], t["slug"], "CAD" if t["cur"] == "C$" else "USD", sig(x["price"], 6), kind, k, n, t["group"],
+                           None if not lt["state"] else (1 if lt["state"] == "start" else 0)]
     fx = cad_per_usd()
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "start": START, "fx": {"CAD": fx} if fx else {}, "names": names},
                       ensure_ascii=False, separators=(",", ":"))
@@ -187,7 +189,7 @@ def _game(site, n):
 </div>
 
 <section class="card prose pt-how"><h2 class="h3">How it works</h2><ul>{_how_html()}</ul>
-<p class="muted small">A game for learning, not financial advice. Be The Puck shows what published trading rules say about each name; it doesn't know your goals, taxes or timeline.</p></section>
+<p class="muted small">A game for learning. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></section>
 """
     site.add(path, site.shell(path, "Paper trading: US$100,000 of play money",
                               f"Trade the {n} stocks, funds and coins Be The Puck covers with US$100,000 of play money, track your returns against the S&P 500 and share your portfolio.",
@@ -218,7 +220,7 @@ def _player(site):
 <p class="pt-loading muted" data-pt-loading>Loading the portfolio…</p>
 <section class="pt-in" data-pt-in hidden></section>
 </div>
-<p class="muted small">Play money, not advice. Holdings are valued at the latest price, delayed up to 15 minutes.</p>
+<p class="muted small">Play money. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Holdings are valued at the latest price, delayed up to 15 minutes.</p>
 """
     page = site.shell(path, "A paper-trading portfolio", "A shared paper-trading portfolio on Be The Puck: holdings, trades and returns against the S&P 500.",
                       body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False, og="og-paper.png")

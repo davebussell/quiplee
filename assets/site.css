@@ -927,3 +927,54 @@ label.pt-check { flex-direction: row; align-items: center; gap: 9px; font-size: 
 a.pt-idea { text-decoration: none; }
 @media (max-width: 860px) { .pt-promo { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .pt-promo .pt-idea-list { grid-template-columns: 1fr; } .pt-promo .pt-idea:nth-child(n+5) { display: none; } }
+
+/* ---------- footer credits and disclaimer ---------- */
+.foot-row .foot-disclaim { flex: 1 1 100%; max-width: none; color: var(--ink-2); font-size: 13px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.foot-disclaim b { color: var(--ink); }
+.foot-credits { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 26px; padding-top: 8px; border-top: 1px solid var(--line); }
+.foot-credits a { display: inline-flex; align-items: center; gap: 9px; color: var(--ink-2); font-size: 13px; text-decoration: none; }
+.foot-credits a:hover { color: var(--ink); text-decoration: none; }
+.cs-mark { display: inline-flex; align-items: center; gap: 6px; line-height: 1; }
+.cs-click svg { width: 17px; height: 17px; display: block; transform: translateY(-1px); }
+.cs-shift { display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px/1 var(--data); letter-spacing: .5px; color: #0c0d10; background: #ffd400;
+  border-radius: 7px; padding: 5px 10px 6px; box-shadow: 0 2px 0 #b89700, inset 0 1px 0 rgba(255, 255, 255, .35); transition: transform .12s, box-shadow .12s; }
+.cs-shift::before { content: "\21E7"; font-size: 13px; }
+.cs-credit:hover .cs-shift { transform: translateY(2px); box-shadow: 0 0 0 #b89700, inset 0 1px 0 rgba(255, 255, 255, .35); }
+.ca-credit .maple { width: 17px; height: 17px; color: #e0b13a; filter: drop-shadow(0 0 6px rgba(224, 177, 58, .35)); }
+
+/* ---------- Start/Stop light ---------- */
+.light-pill { display: inline-flex; align-items: center; gap: 7px; font: 700 11.5px/1 var(--data); letter-spacing: .08em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 999px; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); white-space: nowrap; text-decoration: none; }
+.light-pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+.light-pill.start { color: var(--in); background: var(--in-wash); box-shadow: inset 0 0 0 1px var(--in-edge); }
+.light-pill.stop { color: var(--out); background: var(--out-wash); box-shadow: inset 0 0 0 1px var(--out-edge); }
+.light-pill.lg { font-size: 15px; padding: 10px 16px; }
+.light-pill.lg i { width: 12px; height: 12px; }
+a.light-pill:hover { text-decoration: none; filter: brightness(1.15); }
+.light-box { margin-top: 14px; display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); }
+.light-box.start { border-color: var(--in-edge); }
+.light-box.stop { border-color: var(--out-edge); }
+.light-txt { flex: 1 1 320px; font-size: 14px; color: var(--ink-2); }
+.light-txt b { color: var(--ink); }
+.light-alert { flex: none; cursor: pointer; }
+
+/* ---------- free email alerts (/alerts/) ---------- */
+.al-app { display: flex; flex-direction: column; gap: 16px; max-width: 760px; }
+.al-card { display: flex; flex-direction: column; gap: 12px; }
+.al-card textarea { font: 500 15px var(--ui); color: var(--ink); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 10px; padding: 11px 12px; min-height: 84px; resize: vertical; width: 100%; }
+.al-card textarea:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 108, 245, .2); }
+.al-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.al-chips:empty { display: none; }
+.al-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-2); color: var(--ink); text-decoration: none; font-size: 13px; }
+.al-chip:hover { border-color: var(--line-2); text-decoration: none; }
+.al-chip .light-pill { padding: 4px 8px; font-size: 10.5px; }
+.al-chip span { color: var(--muted); }
+.al-chips p { flex: 1 1 100%; margin: 0; }
+.al-ok { color: var(--ink-2); }
+.al-example { max-width: 760px; display: flex; flex-direction: column; gap: 10px; }
+.al-subj { margin: 0; font-size: 14px; color: var(--ink-2); }
+.al-mail { border: 1px solid var(--line-2); border-radius: 12px; padding: 16px 18px; background: var(--bg-2); }
+.al-mail p, .al-mail ul { margin: 0 0 10px; }
+.al-mail ul { padding-left: 20px; color: var(--ink-2); }
+.al-head { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; }
+.linkbtn.al-wl { margin-left: 0; }

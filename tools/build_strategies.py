@@ -35,8 +35,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "paper"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "paper.json"}
+             "picks", "members", "locked", "paper", "alerts"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "paper.json", "reads.json"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -80,6 +80,43 @@ def copy_static(out):
             shutil.copy2(src, dst)
 
 
+def reads_json(site):
+    """Each covered name's Start/Stop light and its plain-English read, for the alert emails."""
+    from qstrat import stockview as sv
+    from qstrat.content import TICKERS
+    out = {}
+    for t in TICKERS:
+        sym = t["sym"]
+        if t.get("index") or (sym, "buy-and-hold") not in site.R:
+            continue
+        L = site.light(t)
+        meta = site.meta.get(sym)
+        try:
+            read = sv.read_lines(site, t, meta, site.fund.get(sym)) if meta else []
+        except Exception:
+            read = []
+        out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),
+                    "L": None if not L["state"] else (1 if L["state"] == "start" else 0), "k": L["k"], "of": L["n"],
+                    "since": L["since"].strftime("%Y-%m-%d") if L.get("since") is not None else None, "read": read}
+    return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "t": out}, ensure_ascii=False, separators=(",", ":"))
+
+
+def static_footer():
+    """The site footer (disclaimer, Click Shift credit, Proudly Canadian) for the hand-written
+    pages, with its own styles since they use a different stylesheet."""
+    from qstrat.render import FOOT_DISCLAIM, FOOT_CREDITS
+    css = ("<style>.bp-foot{border-top:1px solid #232d42;background:#0b0f17;color:#8a95a9;font:13px/1.55 Geist,-apple-system,'Segoe UI',Roboto,sans-serif}"
+           ".bp-foot .in{max-width:1160px;margin:0 auto;padding:20px 16px 36px;display:flex;flex-direction:column;gap:12px}"
+           ".bp-foot p{margin:0}.bp-foot .foot-disclaim{color:#c3cad8;padding:12px 14px;border:1px solid #232d42;border-radius:10px;background:#131927}"
+           ".bp-foot .foot-disclaim b{color:#eef2f9}.bp-foot .foot-credits{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px}"
+           ".bp-foot .foot-credits a{display:inline-flex;align-items:center;gap:9px;color:#c3cad8;text-decoration:none}"
+           ".bp-foot .cs-mark{display:inline-flex;align-items:center;gap:6px;line-height:1}.bp-foot .cs-click svg{width:17px;height:17px;display:block}"
+           ".bp-foot .cs-shift{display:inline-flex;align-items:center;gap:5px;font:600 11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.5px;color:#0c0d10;"
+           "background:#ffd400;border-radius:7px;padding:5px 10px 6px;box-shadow:0 2px 0 #b89700,inset 0 1px 0 rgba(255,255,255,.35)}"
+           ".bp-foot .cs-shift:before{content:'\\21E7';font-size:13px}.bp-foot .maple{width:17px;height:17px;color:#e0b13a}</style>")
+    return f'{css}<footer class="bp-foot"><div class="in">{FOOT_DISCLAIM}{FOOT_CREDITS}</div></footer>'
+
+
 def link_static_pages(out):
     """Glossary-link the Stories pages and the live desk shell (in the output copy)."""
     done = []
@@ -100,6 +137,9 @@ def link_static_pages(out):
             if "glossary.js" not in new:
                 j = new.rfind("</body>")
                 new = new[:j] + f'<script src="{script_src}" defer></script>\n' + new[j:]
+            if "bp-foot" not in new:
+                j = new.rfind("</body>")
+                new = new[:j] + static_footer() + "\n" + new[j:]
             if new != html:
                 with open(fp, "w", encoding="utf-8") as f:
                     f.write(new)
@@ -150,6 +190,8 @@ def main():
         f.write(glossary_json())
     with open(os.path.join(out, "data", "names.json"), "w", encoding="utf-8") as f:
         f.write(site.names_json())
+    with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
+        f.write(reads_json(site))
     from qstrat import paper
     with open(os.path.join(out, "data", "paper.json"), "w", encoding="utf-8") as f:
         f.write(paper.paper_json(site))

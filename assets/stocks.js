@@ -1,7 +1,7 @@
 /* stocks.js — the /stocks/ list: search, group filter, one-click sorts and the
  * list / by-family switch. Column sorting itself comes from sortable.js; the
  * sort buttons press the right column header until it sorts high to low.
- * Supports ?sort=score|plays|upside|crash|year, ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
+ * Supports ?sort=score|plays|upside|crash|year|light, ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
 (function () {
   'use strict';
   var tbl = document.getElementById('st-tbl');
@@ -9,7 +9,7 @@
   var rows = [].slice.call(tbl.tBodies[0].rows);
   var q = document.getElementById('st-q'), count = document.getElementById('st-count');
   var st = { group: '', q: '', min: 0 };
-  var COL = { score: 9, plays: 7, upside: 8, crash: 10, year: 4 };
+  var COL = { score: 10, plays: 8, upside: 9, crash: 11, year: 5, light: 1 };
   var params = new URLSearchParams(location.search);
 
   function apply() {
@@ -32,7 +32,8 @@
     var th = tbl.tHead.rows[0].cells[COL[key]];
     var btn = th && (th.querySelector('.sort-btn') || th);
     if (!btn) return;
-    for (var i = 0; i < 3 && th.getAttribute('aria-sort') !== 'descending'; i++) btn.click();
+    var want = key === 'light' ? 'ascending' : 'descending';
+    for (var i = 0; i < 3 && th.getAttribute('aria-sort') !== want; i++) btn.click();
     var b = document.querySelector('.st-sorts [data-sort="' + key + '"]');
     if (b) setPressed('.st-sorts [data-sort]', b);
   }

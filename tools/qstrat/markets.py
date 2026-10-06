@@ -299,7 +299,7 @@ def markets_page(site):
 <p class="muted small">Every stock page has its full crash card. Index pages list every covered name on that market. <a href="{h('articles/debt-and-crashes/')}">How the storm test works</a></p></section>
 
 <section aria-labelledby="pos-h" id="positioning"><div class="sec-head"><h2 class="h2" id="pos-h">Cash, stay in, or buckets?</h2>
-<p>What different choices would have done through real crashes. Pick a period, a mix and a plan. Educational, not advice: the right mix depends on when you need the money.</p></div>
+<p>What different choices would have done through real crashes. Pick a period, a mix and a plan. The right mix depends on when you need the money. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
 {sim}
 <div class="grid grid-3 buckets">
 <div class="card prose"><p class="eyebrow">Bucket 1 · cash</p><p class="h3" style="color:var(--ink)">What you'll spend in the next year or two</p><p>Held in savings or T-bills, so a crash never forces you to sell stocks at the bottom to pay the bills.</p></div>

@@ -68,7 +68,7 @@ def locked_page(site, path, title, desc, head_html, what="report", active=None, 
 <article class="article is-locked">
 {head_html}
 {lock_card(site, depth, path, what)}
-<p class="note-line">Education, not financial advice. Be The Puck reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
+<p class="note-line">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck reports what published rules and public data say; it doesn't know your goals, taxes or timeline.</p>
 </article>"""
     # the base keeps relative links right if the locked copy is ever opened at /locked/<path>
     page = site.shell(path, title, desc, body, active=active, scripts=("assets/members.js",), link=False)
@@ -125,7 +125,7 @@ def members_page(site):
 <li><b>What the picks are.</b> The top five names on Be The Puck's public <a href="{h('stocks/?sort=score')}">strongest-setups list</a>, held by a fixed rule and tracked from the close they go in. A rule, not anyone's opinion, and not advice for you.</li>
 <li><b>What stays free.</b> Every stock page, every play, the markets page, the watchlist and the Learn tracks.</li>
 <li><b>Privacy.</b> Be The Puck keeps your email, your PayPal subscription id and your saved list, and nothing else. Payments are handled by PayPal; Be The Puck never sees your card.</li>
-</ul><p class="small muted">Education, not financial advice. Be The Puck doesn't know your goals, taxes or timeline, and takes no positions in the names it covers.</p></section>"""
+</ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck doesn't know your goals, taxes or timeline, and takes no positions in the names it covers.</p></section>"""
     site.add(path, site.shell(path, "Members · the picks, the reports and alerts on your stocks",
                               f"Be The Puck Members: the top-picks tracker, every report and stock brief, and nightly alerts on your own stocks. {PRICE} a month through PayPal.",
                               body, scripts=("assets/members.js",)))

@@ -58,6 +58,9 @@ def watch_json(site):
         out[sym] = {"n": t["name"], "s": t["short"], "g": t["group"], "u": t["slug"], "cur": t["cur"],
                     "p": _r(bh["price"], 6), "d1": _r(d1, 4), "y1": _r(site.one_year(t), 4), "ma": _r(ma, 4), "c": states,
                     "r": [rk.get("score"), rk.get("level")] if rk.get("level") else None, "m": moves}
+        lt = site.light(t)
+        if lt["state"]:
+            out[sym]["L"] = 1 if lt["state"] == "start" else 0
         ol = sv.outlook(site, t)
         if ol["ok"]:
             out[sym]["up"] = _r(ol["upside"], 4)
@@ -96,6 +99,7 @@ def watchlist_page(site):
 <button type="button" class="btn primary" id="wl-go">Add to my list</button>
 <label class="btn" for="wl-file">Upload a CSV<input type="file" id="wl-file" accept=".csv,text/csv,text/plain" hidden></label>
 <button type="button" class="btn" id="wl-share">Copy share link</button>
+<a class="btn" href="{h('alerts/')}?from=watchlist">Email me when these flip</a>
 <button type="button" class="linkish small" id="wl-clear">Clear list</button>
 </div>
 <p class="small muted" id="wl-msg" aria-live="polite">Your list is saved in this browser only. A file is read on your device: Be The Puck keeps only the symbols, and sends just the ones it doesn't cover yet to the queue.</p>
@@ -128,7 +132,7 @@ def watchlist_page(site):
 <li><b>Crash exposure:</b> the storm test of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
 <li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
 <li><b>Weight:</b> your share of the list by value, when your file includes quantities or market values. Otherwise every name counts equally.</li>
-</ul><p class="small muted">What published rules say, not advice. Be The Puck doesn't know your goals, taxes or timeline.</p></div>
+</ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck doesn't know your goals, taxes or timeline.</p></div>
 </section>
 <section id="wl-readers"></section>
 """

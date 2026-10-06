@@ -449,6 +449,6 @@ def picks_page(site, state, info):
 <li><b>Five picks.</b> The model starts at 100 in five equal slots. A pick takes a slot and keeps whatever the slot is worth when it leaves.</li>
 <li><b>Weekly review.</b> After each Friday close. A pick stays while it ranks in the top {HOLD_RANK} and still qualifies; otherwise it leaves and the best-ranked name not held comes in.</li>
 <li><b>Prices.</b> In and out at the review day's close. No fees, taxes, dividends or slippage.</li>
-</ol><p class="small muted">A hypothetical model run by fixed rules, not advice and not a record of real trades. Be The Puck takes no positions in the names it covers.</p></div>
+</ol><p class="small muted">A hypothetical model run by fixed rules, not a record of real trades. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck takes no positions in the names it covers.</p></div>
 </section>"""
     site.add(path, site.shell(path, "Top picks tracker", desc, body, active="stocks/", charts=True, scripts=("assets/members.js",)))

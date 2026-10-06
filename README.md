@@ -133,6 +133,23 @@ with `Authorization: Bearer $PICKS_STATE_TOKEN` takes a portfolio off the board
 and its public page (`"hidden": false` puts it back). Known gap: stock splits
 aren't applied to held shares yet.
 
+**Start/Stop light.** Every stock gets one light from all the plays
+(`Site.light` in `render.py`): Start at 60% or more of the plays in, Stop once
+that falls to 40% or less, walked through two years of weekly calls so it
+doesn't flicker. Shown on stock pages, the stock list (sort "Start first"), the
+watchlist and in the game; `data/reads.json` carries each light and read.
+
+**Free email alerts.** `/alerts/` signs people up (email + stocks, confirmed by
+a link). `netlify/functions/alerts.mjs` stores them in the Blobs store
+`alerts`; `alerts-nightly.mjs` runs hourly and, once a new close is in
+`data/reads.json`, emails each subscriber one message listing every light that
+flipped on their stocks, with the read. Sending needs `RESEND_API_KEY` and the
+bethepuck.com domain verified in Resend; until then sign-ups are kept and their
+confirm links go out on the first run after the key is set. Every email
+carries the disclaimer, the sender (Click Shift Marketing), a manage link and
+one-click unsubscribe; set `QM_MAIL_ADDRESS` to add the postal address
+Canada's anti-spam law asks for.
+
 ---
 
 ## Live desk (`/desk/`)
