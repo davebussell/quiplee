@@ -9,6 +9,8 @@
  *                             short and /api/member/refresh renews it while the
  *                             subscription is active
  *   {k: "ml",  id, exp}       a one-time sign-in link sent by email (not a cookie)
+ *   {k: "acct", u, iat, exp}  a Be The Puck account (netlify/lib/account.mjs): member tools
+ *                             are free for every account with an email until Jan 1, 2027
  * netlify/edge-functions/member-gate.js checks the same format (Deno, Web Crypto).
  */
 import { createHmac, createHash, pbkdf2, timingSafeEqual } from "node:crypto";
@@ -95,8 +97,11 @@ export function member(req) {
     return { ok: live && !!stored && p.h === pwTag(stored), kind: "pw", id: "owner", payload: p };
   }
   if (p.k === "sub" && p.id) return { ok: live, kind: "sub", id: p.id, payload: p, expired: !live };
+  if (p.k === "acct" && p.u) return { ok: live && Date.now() < FREE_UNTIL_MS, kind: "acct", id: "acct:" + p.u, u: p.u, payload: p };
   return { ok: false };
 }
+// member tools are free for every account until midnight, January 1, 2027 (Toronto); see account.mjs
+export const FREE_UNTIL_MS = Date.UTC(2027, 0, 1, 5, 0, 0);
 
 export const redirect = (location, cookie, status = 303) => {
   const headers = { location, "cache-control": "no-store" };

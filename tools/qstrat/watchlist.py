@@ -105,7 +105,7 @@ def watchlist_page(site):
 <p class="small muted" id="wl-msg" aria-live="polite">Your list is saved in this browser only. A file is read on your device: Be The Puck keeps only the symbols, and sends just the ones it doesn't cover yet to the queue.</p>
 </div>
 <div class="card wl-alerts" id="wl-alerts">
-<div class="wl-al-guest">{member_tag()}<span>Get an email after the close when a play gets in or out on one of your stocks, or a price nears where the rules would act. Part of <a href="{h('members/')}">Be The Puck Members</a>, {PRICE} a month.</span></div>
+<div class="wl-al-guest">{member_tag()}<span>Get an email after the close when a play gets in or out on one of your stocks, or a price nears where the rules would act. Free with a <a href="{h('me/')}">Be The Puck account</a> until January 1, 2027, then {PRICE} a month as part of Members.</span> <a class="btn sm primary" href="{h('me/')}">Create a free account</a></div>
 <div class="wl-al-mem" hidden>{member_tag()}
 <label class="wl-al-on"><input type="checkbox" id="wl-al-on" checked> Email me after the close when something changes on this list</label>
 <button type="button" class="btn sm" id="wl-al-save">Save this list for alerts</button>

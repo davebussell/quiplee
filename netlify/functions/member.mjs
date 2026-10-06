@@ -20,6 +20,7 @@ import {
   setCookie, clearCookie, safeNext, member, redirect, json, readBody, activeRecord, linkFor,
 } from "../lib/qm.mjs";
 import * as paypal from "../lib/paypal.mjs";
+import { store as acctStore, updateAccount, cleanRules, MAX_FOLLOW } from "../lib/account.mjs";
 import * as mail from "../lib/mail.mjs";
 
 const MAX_TRIES = 8;          // wrong passwords per connection per window
@@ -139,28 +140,28 @@ function cleanList(tickers) {
   return out;
 }
 
-/** A member's own rule (the /rules/ page): which plays count toward the Start/Stop light
- * (a ready-made preset, or their own list of play slugs), the two thresholds, and four
- * portfolio limits as fractions (null = not checked). */
-const LIMITS = ["pos", "group", "start", "crash"];
-function cleanRules(r) {
-  if (!r || typeof r !== "object") return null;
-  const plays = (Array.isArray(r.plays) ? r.plays : []).map((x) => String(x || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60)).filter(Boolean).slice(0, 200);
-  let preset = /^[a-z]{1,16}$/.test(String(r.preset || "")) ? String(r.preset) : "all";
-  if (preset === "custom" && !plays.length) preset = "all";
-  let on = Number(r.on), off = Number(r.off);
-  if (!(on >= 0.5 && on <= 0.95)) on = 0.6;
-  if (!(off >= 0.05 && off < on)) off = Math.min(0.4, on - 0.05);
-  const lim = {};
-  const src = r.lim && typeof r.lim === "object" ? r.lim : {};
-  for (const k of LIMITS) {
-    const v = src[k] === null || src[k] === undefined || src[k] === "" ? NaN : Number(src[k]);
-    lim[k] = v >= 0 && v <= 1 ? Math.round(v * 1000) / 1000 : null;
+/** An account's list lives on the account itself (netlify/lib/account.mjs): follow, alerts, rules. */
+async function accountList(req, m) {
+  const s = acctStore();
+  const acct = await s.get("u/" + m.u, { type: "json" });
+  if (!acct) return json({ error: "Sign in again." }, 401);
+  if (req.method === "GET") {
+    return json({ tickers: acct.follow || [], alerts: (acct.alerts || {}).on === true, email: !!acct.email, updated: null, rules: acct.rules || null, account: true });
   }
-  return { preset, plays: preset === "custom" ? [...new Set(plays)] : [], on: Math.round(on * 100) / 100, off: Math.round(off * 100) / 100, lim };
+  const body = await readBody(req);
+  const out = await updateAccount(s, m.u, (a) => ({
+    ...a,
+    follow: body.tickers !== undefined ? cleanList(body.tickers).slice(0, MAX_FOLLOW) : a.follow || [],
+    alerts: body.alerts !== undefined ? { ...(a.alerts || { level: "all" }), on: !!body.alerts } : a.alerts || { on: false, level: "all" },
+    rules: body.rules !== undefined ? cleanRules(body.rules) : a.rules || null,
+  }));
+  if (out.error) return json({ error: out.error }, out.status || 400);
+  const a = out.acct;
+  return json({ ok: true, tickers: a.follow, alerts: a.alerts.on === true, email: !!a.email, rules: a.rules || null, account: true });
 }
 
 async function list(req, m) {
+  if (m.kind === "acct") return accountList(req, m);
   const s = store("qm-lists");
   const cur = (await s.get(m.id, { type: "json" })) || { tickers: [], alerts: true };
   let email = "";
@@ -190,6 +191,7 @@ export default async (req, context) => {
     const m = member(req);
     if (route === "me") {
       if (m.ok && m.kind === "sub") return json({ member: true, kind: "sub" });
+      if (m.ok && m.kind === "acct") return json({ member: true, kind: "acct", free_until: "2027-01-01" });
       if (m.ok) return json({ member: true, kind: m.kind });
       return json({ member: false, renew: !!m.expired });
     }

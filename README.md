@@ -140,6 +140,38 @@ that falls to 40% or less, walked through two years of weekly calls so it
 doesn't flicker. Shown on stock pages, the stock list (sort "Start first"), the
 watchlist and in the game; `data/reads.json` carries each light and read.
 
+**One account and My Puck.** A Be The Puck account (email or username plus a
+password) is shared by the game, My Puck (`/me/`), the stocks a person follows,
+their emails and the member tools. Accounts live in the Blobs store `paper`
+(`u/<name>`, with `e/<hash>` mapping an email to its account); the logic is in
+`netlify/lib/account.mjs` and the routes in `netlify/functions/account.mjs`
+(`/api/account/*`: sign-up, sign-in, follow, alerts, email, confirm, forgot/reset
+password, unsubscribe, delete). Old username-only game accounts keep working and
+can add an email in My Puck. Signing in sets the HttpOnly `pt` session, a readable
+`bp_name` cookie for the header, and, for accounts with an email, a `qm` cookie of
+kind `acct` that opens the member pages. **Member tools are free for every account
+until midnight on January 1, 2027 (Toronto)**: `FREE_UNTIL` in `netlify/lib/account.mjs`,
+`FREE_UNTIL_MS` in `netlify/lib/qm.mjs` and `FREE_UNTIL` in the edge gate must stay
+the same date. After it, an `acct` cookie no longer opens member pages and the
+locked versions ask for the $5/month membership; the game, the Start/Stop light and
+its flip emails stay free. `/members/`, every lock card and a bar on member pages
+say so.
+
+**Emails (Resend).** All mail goes through Resend (`netlify/lib/mail.mjs`,
+`freealerts.mjs`, `accountmail.mjs`). To switch it on: make a Resend account,
+add the domain `bethepuck.com` there and copy the DNS records it gives you
+(a DKIM TXT record, an SPF TXT and an MX record on the `send` subdomain) into
+Netlify DNS for bethepuck.com; once Resend shows the domain verified, create an
+API key with sending access and set `RESEND_API_KEY` in Netlify (Site configuration →
+Environment variables). Optional: `QM_FROM` (default `Be The Puck <alerts@bethepuck.com>`)
+and `QM_MAIL_ADDRESS` (the postal address Canada's anti-spam law asks for, shown in
+every email footer). Until the key is set, sign-ups work and confirm links queue;
+`alerts-nightly.mjs` (hourly) sends them on its first run after the key is in, then
+sends each account one "your stocks tonight" email per close when something changed:
+Start/Stop flips (free) and, for members, every play that got in or out and prices
+near a play's line. Resend's free tier is 3,000 emails a month and 100 a day; past
+that, its Pro plan.
+
 **Members' own rules.** `/rules/` (`tools/qstrat/rules.py`, `assets/rules.js`)
 lets a member choose which plays count toward the light (all, "Best record" and
 "Crash protection" from the guides' nightly rankings, a family preset, or their

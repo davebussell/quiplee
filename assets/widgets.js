@@ -402,14 +402,37 @@
     var sym = b.getAttribute('data-watch-add'), href = b.getAttribute('data-watch-href');
     var link = el('a', { 'class': 'small', href: href, text: 'Open my watchlist', hidden: '' });
     b.parentNode.insertBefore(link, b.nextSibling);
-    function has() { return watchGet().items.some(function (x) { return x.sym === sym; }); }
-    function paint() { var on = has(); b.classList.toggle('is-on', on); b.textContent = on ? '✓ On your watchlist' : '+ Add to my watchlist'; link.hidden = !on; }
+    // signed in: following lives on the account (and gets the emails); signed out: this browser's watchlist
+    var acct = window.BPAuth && window.BPAuth.signedIn(), following = null;
+    if (acct) link.href = '/me/#stocks';
+    function has() { return following != null ? following : watchGet().items.some(function (x) { return x.sym === sym; }); }
+    function paint() {
+      var on = has(); b.classList.toggle('is-on', on);
+      var short = !!(b.closest && b.closest('.act-bar'));
+      b.textContent = acct || short ? (on ? '✓ ' + (acct ? 'Following' : 'Watching') : '+ ' + (acct ? 'Follow' : 'Watch')) : (on ? '✓ On your watchlist' : '+ Add to my watchlist');
+      link.textContent = acct ? 'Open My Puck' : 'Open my watchlist';
+      link.hidden = !on;
+    }
     b.addEventListener('click', function () {
-      var w = watchGet();
-      if (has()) w.items = w.items.filter(function (x) { return x.sym !== sym; });
-      else w.items.push({ sym: sym });
-      watchSet(w); paint();
+      var w = watchGet(), on = has();
+      if (on) w.items = w.items.filter(function (x) { return x.sym !== sym; });
+      else if (!w.items.some(function (x) { return x.sym === sym; })) w.items.push({ sym: sym });
+      watchSet(w);
+      if (acct) {
+        tell(!on);
+        window.BPAuth.follow(sym, !on).then(function (j) { if (!j.ok) tell(on); });
+        return;
+      }
+      tell(!on);
     });
+    // keep every button for this stock on the page in step (the read card and the mobile action bar)
+    function tell(on) { document.dispatchEvent(new CustomEvent('bp:follow', { detail: { sym: sym, on: on } })); }
+    document.addEventListener('bp:follow', function (ev) {
+      if (!ev.detail || ev.detail.sym !== sym) return;
+      if (acct) following = ev.detail.on;
+      paint();
+    });
+    if (acct) window.BPAuth.me().then(function (a) { if (a && a.signed_in) { following = (a.follow || []).indexOf(sym) >= 0; paint(); } });
     paint();
   }
 

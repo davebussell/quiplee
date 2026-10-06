@@ -65,7 +65,7 @@ export function digest(D, changes) {
   const subject = `Be The Puck: ${nItems} change${nItems === 1 ? "" : "s"} on your stocks after the ${fmtDate(D.asof)} close`;
   const color = { in: "#14946a", out: "#d23c55", near: "#a8740f", risk: "#a8740f", move: "#141821" };
   const blocks = changes.map((c) => `<div style="padding:12px 0;border-top:1px solid #e3e6ee">
-<p style="margin:0 0 6px"><a href="${base}/stocks/${mail.esc(c.slug)}/" style="color:#141821;font-weight:700;text-decoration:none">${mail.esc(c.short)}</a> <span style="color:#6b7385">${mail.esc(c.name)} · ${c.k} of ${c.n} core plays in</span></p>
+<p style="margin:0 0 6px"><a href="${base}/stocks/${mail.esc(c.slug)}/" style="color:#141821;font-weight:700;text-decoration:none">${mail.esc(c.short)}</a> <span style="color:#6b7385">${mail.esc(c.name)} · ${c.k} of ${c.n} plays in</span></p>
 <ul style="margin:0;padding-left:18px">${c.items.map((i) => `<li style="color:${color[i.kind]}">${mail.esc(i.text)}</li>`).join("")}</ul></div>`).join("");
   const html = mail.shell(`What changed on your stocks after the ${fmtDate(D.asof)} close`, `${blocks}
 <p style="margin:16px 0 0"><a href="${base}/watchlist/">Open your watchlist</a> · <a href="${base}/picks/">Top picks</a></p>

@@ -51,6 +51,7 @@ def alerts_page(site):
 
 <div id="al-app" class="al-app" data-api="/api/alerts/" data-universe="{e(uni)}" data-stock="{e(h('stocks/{s}/'))}">
 <section class="card al-card" data-al-signup>
+<p class="al-acct" data-signed-in hidden>You're signed in: manage the stocks you follow and your emails in <a href="{h('me/')}#alerts">My Puck</a>.</p>
 <h2 class="h3">Your stocks</h2>
 <form class="pt-form" data-al-form novalidate>
 <label>Stocks to follow<textarea name="tickers" rows="3" placeholder="NVDA, TD.TO, Shopify, BTC…" spellcheck="false"></textarea></label>
@@ -61,6 +62,7 @@ def alerts_page(site):
 <button class="btn primary" type="submit">Email me the flips</button>
 <p class="pt-msg" role="alert" data-al-msg></p>
 <p class="small muted">We'll send one email to confirm. After that you only hear from us when a light on your list flips: one email per close at most, with every change in it.</p>
+<p class="small">Want the game, play-by-play emails and the member tools too? <a href="{h('me/')}">Create a free account</a> instead; member tools are free until January 1, 2027.</p>
 </form>
 </section>
 <section class="card al-card" data-al-manage hidden></section>

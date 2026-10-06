@@ -151,6 +151,21 @@ def paper_pages(site):
     _player(site)
 
 
+def _ideas_preview(site, depth):
+    """Tonight's names with the most plays in: what the game's idea list will show."""
+    from .render import light_badge
+    h = lambda x: site.href(depth, x)
+    best = []
+    for t in tradable(site):
+        L = site.light(t)
+        if L["n"] and not t.get("bulk"):
+            best.append((L["k"] / L["n"], t, L))
+    best.sort(key=lambda z: (-z[0], z[1]["short"]))
+    rows = "".join(f'<li><a href="{h("stocks/" + t["slug"] + "/")}"><span class="mp-sym"><b>{e(t["short"])}</b><span>{e(t["name"])}</span></span>'
+                   f'{light_badge(L)}<span class="mono small">{L["k"]}/{L["n"]}</span></a></li>' for _, t, L in best[:5])
+    return f'<div class="card pt-ideas-prev"><p class="eyebrow">Most plays in tonight</p><ul class="mp-list pt-prev-list">{rows}</ul></div>'
+
+
 def _game(site, n):
     path, depth = "paper/", 1
     h = lambda x: site.href(depth, x)
@@ -160,29 +175,18 @@ def _game(site, n):
 <p class="lede">Pick from the {n} stocks, funds and coins Be The Puck covers, buy and sell at the latest price, and see how you do against the S&amp;P 500. Share your portfolio on the <a href="{h('paper/leaders/')}">leaderboard</a> if you like. No real money, ever.</p></section>
 
 <div id="pt-app" class="pt-app" data-api="/api/paper/" data-universe="{e(uni)}" data-stock="{e(tmpl)}" data-player="{e(h('paper/player/'))}" data-mode="game">
-<p class="pt-loading muted" data-pt-loading>Loading your portfolio…</p>
+<div class="me-skel pt-loading" data-pt-loading><div></div><div></div></div>
 
-<section class="pt-auth" data-pt-out hidden>
-<div class="card pt-card">
-<h2 class="h3">Start playing</h2>
-<form class="pt-form" data-pt-form="signup" novalidate>
-<label>Username<input name="name" autocomplete="username" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]{{3,20}}" placeholder="3 to 20 letters, numbers or _"></label>
-<label>Password<input name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters"></label>
-<label class="pt-check"><input type="checkbox" name="share"> Show my portfolio on the leaderboard</label>
-<button class="btn primary" type="submit">Get my US$100,000</button>
-<p class="pt-msg" role="alert" data-pt-msg></p>
-<p class="muted small">No email needed, so a lost password can't be reset. Keep it somewhere safe.</p>
-</form>
-</div>
-<div class="card pt-card">
-<h2 class="h3">Sign in</h2>
-<form class="pt-form" data-pt-form="login" novalidate>
-<label>Username<input name="name" autocomplete="username" required></label>
-<label>Password<input name="password" type="password" autocomplete="current-password" required></label>
-<button class="btn btn-ghost" type="submit">Sign in</button>
-<p class="pt-msg" role="alert" data-pt-msg></p>
-</form>
-</div>
+<section class="pt-auth pt-land" data-pt-out hidden>
+<div class="card pt-join"><p class="eyebrow">Free, for good</p><h2 class="h2">Get your US$100,000</h2>
+<div data-auth data-auth-context="game" data-auth-next="reload"></div></div>
+<div class="pt-why"><ul class="check-list">
+<li>Buy and sell {n} stocks, funds and coins at the latest price</li>
+<li>See your return against the S&amp;P 500, day by day</li>
+<li>Copy your real holdings in with one paste or a broker file</li>
+<li>Share your portfolio on the leaderboard, or keep it private</li></ul>
+{_ideas_preview(site, depth)}
+<p class="small muted">Already playing with a username? Sign in with it; you can add an email later in <a href="{h('me/')}">My Puck</a> to reset your password and get alerts.</p></div>
 </section>
 
 <section class="pt-in" data-pt-in hidden></section>
@@ -196,17 +200,41 @@ def _game(site, n):
                               body, active="paper/", charts=True, scripts=("assets/paper.js",), link=False, og="og-paper.png"))
 
 
+GAME_START = "2026-10-05"        # the close the game opened on
+HOUSE = [("SPY", "S&P 500 fund (SPY)"), ("QQQ", "Nasdaq-100 fund (QQQ)"), ("XIU.TO", "TSX 60 fund (XIU)"), ("GLD", "Gold (GLD)"), ("BTC-USD", "Bitcoin")]
+
+
+def house_rows(site):
+    """Benchmarks to beat on the leaderboard: US$100,000 in one fund since the game opened,
+    clearly marked as the house (no fake players). Price change only, in the fund's own currency."""
+    out = []
+    for sym, label in HOUSE:
+        meta = site.meta.get(sym) or {}
+        oh = meta.get("ohlc")
+        if oh is None or not len(oh):
+            continue
+        c = oh["close"]
+        base = c[c.index >= GAME_START]
+        if not len(base):
+            continue
+        ret = float(c.iloc[-1] / base.iloc[0] - 1)
+        out.append({"name": label, "ret": round(ret, 5), "value": round(START * (1 + ret), 2), "since": GAME_START, "house": 1})
+    return out
+
+
 def _leaders(site):
     path, depth = "paper/leaders/", 2
     h = lambda x: site.href(depth, x)
+    house = json.dumps(house_rows(site), separators=(",", ":"))
     body = f"""<nav class="crumbs"><a href="{h('paper/')}">Paper trading</a><span>/</span><span>Leaderboard</span></nav>
 <section class="pair-head"><p class="eyebrow">Paper trading</p><h1 class="h1">Leaderboard</h1>
 <p class="lede">Shared portfolios ranked by return since they started, valued at each night's close. Everyone began with US$100,000 of play money. <a href="{h('paper/')}">Start your own</a>.</p></section>
 <div id="pt-app" class="pt-app" data-api="/api/paper/" data-player="{e(h('paper/player/'))}" data-stock="{e(h('stocks/{s}/'))}" data-mode="board">
 <p class="pt-loading muted" data-pt-loading>Loading the leaderboard…</p>
 <section data-pt-board></section>
+<script type="application/json" id="pt-house">{house}</script>
 </div>
-<p class="muted small">Only portfolios whose owners chose to share them appear here. Returns are price changes only (no dividends) and are hypothetical.</p>
+<p class="muted small">Only portfolios whose owners chose to share them appear here, next to the house benchmarks: US$100,000 put into one fund on the day the game opened. Returns are price changes only (no dividends) and are hypothetical.</p>
 """
     site.add(path, site.shell(path, "Paper trading leaderboard", "The shared paper-trading portfolios on Be The Puck, ranked by return since they started with US$100,000.",
                               body, active="paper/", scripts=("assets/paper.js",), link=False, og="og-paper.png"))

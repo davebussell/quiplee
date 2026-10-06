@@ -53,6 +53,16 @@ LIGHT_HOW = (f"Start when {round(LIGHT_ON * 100)}% or more of the plays hold it;
              f"{round(LIGHT_OFF * 100)}% or less, then turns Stop (and back again at {round(LIGHT_ON * 100)}%).")
 
 
+def foot_cta(h):
+    """The closing call to action above the footer (site.js hides it once signed in)."""
+    return (f'<section class="foot-cta" data-signed-out><div class="wrap foot-cta-in"><div><p class="eyebrow">Free account</p>'
+            f'<p class="foot-cta-h">Know the moment the light flips on your stocks.</p>'
+            f'<p class="muted">Follow your stocks, play the game with US$100,000 and get an email with the analysis after the close. '
+            f'Member tools are free until January 1, 2027.</p></div>'
+            f'<div class="foot-cta-act"><a class="btn primary glow" href="{h("me/")}">Create your free account</a>'
+            f'<a class="btn" href="{h("paper/")}">Play with US$100k</a></div></div></section>')
+
+
 def light_badge(L, href=None, big=False):
     """The Start/Stop pill for a light dict (see Site.light)."""
     if not L or not L.get("state"):
@@ -498,6 +508,9 @@ class Site:
                 nav += f'<div class="nav-item"><a class="nav-top" href="{h(p)}"{cur}>{lab}</a></div>'
         full_title = f"{title} · Be The Puck" if path else title
         more = "".join(f'<script src="{h(sx)}?v={self.ver}" defer></script>\n' for sx in scripts)
+        from .members import is_locked, free_bar
+        banner = free_bar(self, depth) if is_locked(path) and not path.startswith("locked/") else ""
+        cta = "" if path.startswith(("me/", "locked/")) else foot_cta(h)
         return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -520,23 +533,34 @@ class Site:
 <link rel="stylesheet" href="{h('assets/site.css')}?v={self.ver}">
 {extra_head}</head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="site-head"><div class="wrap head-row">
 <a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
-<nav class="site-nav" aria-label="Main">{nav}</nav>
-<span class="head-meta">Closes to {dshort(self.asof)}</span>
-</div></header>
-<main class="wrap">
+<nav class="site-nav" id="site-nav" aria-label="Main">{nav}<a class="nav-me" href="{h('me/')}">My Puck</a></nav>
+<span class="head-meta" data-mkt data-asof="{self.asof.strftime('%Y-%m-%d')}"><i aria-hidden="true"></i><span data-mkt-txt>{dshort(self.asof)} close</span></span>
+<a class="acct-btn" href="{h('me/')}" data-acct-btn><span class="acct-ava" aria-hidden="true"></span><span data-acct-label>Sign in</span></a>
+<button type="button" class="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Menu"><span></span><span></span><span></span></button>
+</div><div class="scroll-bar" aria-hidden="true"></div></header>
+{banner}<main class="wrap" id="main">
 {body}
 </main>
-<footer class="site-foot"><div class="wrap foot-row">
+{cta}<footer class="site-foot"><div class="wrap">
+<div class="foot-cols">
+<div class="foot-brand"><a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
+<p>{len(TIMED)} published trading plays run on real prices after every U.S. close, with the price that would change each one's mind. It takes no positions in the names it covers.</p></div>
+<div><p class="foot-h">Stocks</p><a href="{h('stocks/')}">All stocks</a><a href="{h('watchlist/')}">Watchlist</a><a href="{h('markets/')}">Markets</a><a href="{h('desk/')}">Live desk</a></div>
+<div><p class="foot-h">Play</p><a href="{h('paper/')}">Paper trading</a><a href="{h('paper/leaders/')}">Leaderboard</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}">My Puck</a></div>
+<div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
+<div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
+</div>
 {FOOT_DISCLAIM}
-<p>Be The Puck runs published trading rules on real prices and shows what each one says now. It takes no positions in the names it covers.</p>
-<p>Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close · <a href="{h('method/')}">How we test</a> · <a href="{h('articles/')}">Articles and stories</a> · <a href="{h('members/')}">Members</a></p>
+<p class="foot-meta">Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close</p>
 {FOOT_CREDITS}
 </div></footer>
 <script src="{h('assets/site.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/glossary.js')}?v={self.ver}" defer></script>
+<script src="{h('assets/account.js')}?v={self.ver}" defer></script>
 {more}</body>
 </html>
 """
@@ -679,6 +703,8 @@ class Site:
         paper_pages(self)
         from .alerts import alerts_page
         alerts_page(self)
+        from .me import me_page
+        me_page(self)
         state, info = picks.run(self)
         picks.picks_page(self, state, info)
         self.home()
@@ -714,10 +740,7 @@ class Site:
         cg = sum(1 for a, b in graded if a["cagr"] > b["cagr"])
         sh = sum(1 for a, b in graded if (a["sharpe"] or -9) > (b["sharpe"] or -9))
 
-        tmpl = self.href(depth, "stocks/{t}/{s}/")
-        fams = [(k, name, [p for p in TIMED if p["family"] == k]) for k, name, _ in FAMILIES]
-
-        board = self.board_html(depth, curated=True)
+        board = self.board_html(depth, curated=True, top=10)
 
         # recent calls, spread across plays and stocks
         flips = []
@@ -745,30 +768,49 @@ class Site:
         cards = "".join(self.thinker_card(THINKER[x], depth) for x in featured if x in THINKER)
         n_an = n_people()
 
+        feat = self.home_feature()
+        steps = [("1", f"{len(TIMED)} plays vote", "Each published rule, from the Turtles' breakouts to Meb Faber's 10-month average, either holds the stock tonight or doesn't."),
+                 ("2", "The light flips", f"Start when {round(LIGHT_ON * 100)}% or more of the plays hold it; Stop once that falls to {round(LIGHT_OFF * 100)}%. The gap stops a stock that hovers near half from flickering."),
+                 ("3", "You hear about it", "Follow your stocks in My Puck and get an email the same evening a light flips, with the analysis.")]
+        steps_html = "".join(f'<li class="card step"><span class="step-n">{n}</span><b>{e(t)}</b><span class="muted">{e(d)}</span></li>' for n, t, d in steps)
+        from .me import _preview
         body = f"""
-<section class="hero">
+<section class="hero hero-v2">
+  <div class="hero-glow" aria-hidden="true"></div>
   <div class="hero-copy">
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
-    <h1 class="h1">Don't chase where the stock is. Chase where it's going.</h1>
-    <p class="lede">Be The Puck runs {len(TIMED)} trading plays from {n_an} named analysts, from the Turtles' breakouts to Meb Faber's 10-month average, on {len(universe())} stocks, ETFs, indexes and coins. For each one you get which way the plays lean, the price that would change their mind, how exposed it is to a crash, and how the whole market looks.</p>
-    <div class="hero-links"><a class="btn primary" href="{h('paper/')}">Play: trade US$100,000 of play money</a><a class="btn" href="{h('learn/')}">New? Start with the basics</a></div>
+    <h1 class="hero-h1">Don't chase where the stock is. Chase where it's <em>going</em>.</h1>
+    <p class="lede">{len(TIMED)} trading plays from {n_an} named analysts, run after every close on {len(universe())} stocks, funds and coins. One Start/Stop light per stock, the price that would flip each play, and an email when it changes.</p>
+    <div class="hero-links"><a class="btn primary glow" href="{h('me/')}" data-signed-out>Create your free account</a><a class="btn primary glow" href="{h('me/')}" data-signed-in hidden>Open My Puck</a><a class="btn" href="{h('paper/')}">Play with US$100,000</a></div>
+    <p class="hero-fine">Free. Member tools are free until January 1, 2027.</p>
   </div>
-  <div class="card picker">
-    <form class="home-check" action="{h('watchlist/')}" method="get">
-      <label for="home-add" class="h3">Check your stocks</label>
-      <input id="home-add" name="add" type="text" placeholder="NVDA, SHOP.TO, Apple…" autocomplete="off" spellcheck="false">
-      <button type="submit">See the read</button>
-      <p class="picker-out">Or upload a Wealthsimple or broker CSV on the <a href="{h('watchlist/')}">watchlist</a>. Names Be The Puck doesn't cover yet are analysed after the next close.</p>
-    </form>
-    <form class="home-pick" id="picker" data-href="{e(tmpl)}">
-      <p class="small muted">Or look up one play on one stock</p>
-      <label for="pick-strategy">Play<select id="pick-strategy">{self.play_options("200-day-rule")}</select></label>
-      <label for="pick-stock">Stock<select id="pick-stock">{self.stock_options("NVDA")}</select></label>
-      <button type="submit" class="secondary">Show the call</button>
-    </form>
-  </div>
+  {feat}
 </section>
+
+<section class="proof" aria-label="Be The Puck in numbers">
+  <div><b data-count="{len(TIMED)}">{len(TIMED)}</b><span>published plays</span></div>
+  <div><b data-count="{n_an}">{n_an}</b><span>analysts behind them</span></div>
+  <div><b data-count="{len(universe())}">{len(universe())}</b><span>stocks, funds and coins</span></div>
+  <div><b data-count="{total}">{total:,}</b><span>backtests since 2005</span></div>
+  <div><b>Nightly</b><span>rebuilt after each U.S. close</span></div>
+</section>
+
+<section aria-labelledby="how-h"><div class="sec-head"><h2 class="h2" id="how-h">How the light works</h2><p><a href="{h('method/')}#light">The method in full</a></p></div>
+<ol class="steps">{steps_html}</ol></section>
+
+<section class="mock-sec" aria-labelledby="mock-h">
+  <div class="mock-copy"><p class="eyebrow">My Puck</p><h2 class="h2" id="mock-h">What you see when you sign in</h2>
+  <p class="muted">Your stocks with tonight's lights, your paper portfolio, your email alerts and every member tool, in one place. Free, and member tools stay free until January 1, 2027.</p>
+  <ul class="check-list"><li>Tonight's light on every stock you follow</li><li>An email the evening a light flips, with the analysis</li><li>Your US$100,000 paper portfolio on any device</li><li>Top picks, reports and your own rules</li></ul>
+  <div class="hero-links"><a class="btn primary glow" href="{h('me/')}">Create your free account</a></div></div>
+  {_preview(self, depth)}
+</section>
+
 {self.home_paper(depth)}
+<section aria-labelledby="flips-h">
+  <div class="sec-head"><h2 class="h2" id="flips-h">Fresh calls</h2><p>Recent changes of mind, one per play, slower plays first.</p></div>
+  <ul class="flips">{flip_html}</ul>
+</section>
 {self.home_market(depth)}
 {self.home_signals(depth)}
 <section aria-labelledby="reads-h"><div class="sec-head"><h2 class="h2" id="reads-h">Long reads</h2><p><a href="{h('articles/')}">All articles and stories</a></p></div>
@@ -799,14 +841,9 @@ class Site:
 
 <section aria-labelledby="board-h">
   <div class="sec-head"><h2 class="h2" id="board-h">What the plays say now</h2>
-  <p>How many plays in each family hold each stock, as of the {dlong(self.asof)} close. Click a column to sort; tap a cell for every call on that stock.</p></div>
+  <p>The ten names the most plays hold, family by family, as of the {dlong(self.asof)} close. Tap a cell for every call on that stock.</p></div>
   {board}
-  <p class="muted small"><a href="{h('stocks/')}">The full stock list</a>: every name with its price, plays in, analysts' upside, score and crash exposure, sortable and filterable.</p>
-</section>
-
-<section aria-labelledby="flips-h">
-  <div class="sec-head"><h2 class="h2" id="flips-h">Fresh calls</h2><p>Recent changes of mind, one per play, slower plays first.</p></div>
-  <ul class="flips">{flip_html}</ul>
+  <p><a class="btn" href="{h('stocks/')}">See all {len(universe())} names in the stock list</a></p>
 </section>
 
 <section aria-labelledby="thinkers-h">
@@ -829,6 +866,39 @@ class Site:
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
         self.add(path, self.shell(path, "Be The Puck · What the trading rules say about your stocks", f"{len(TIMED)} published trading plays from {n_an} analysts, run nightly on stocks, ETFs, indexes and crypto: which way they lean, the price that flips each one, crash exposure, market weather and a watchlist for your own stocks.", body, active="", extra_head=extra))
 
+    def home_feature(self):
+        """The hero's live card: tonight's strongest Start among the main names, with the check-a-stock box."""
+        depth = 0
+        h = lambda x: self.href(depth, x)
+        best = None
+        for t in universe():
+            if t.get("bulk") or t.get("index") or t["crypto"] or t["group"] in ("Indexes & ETFs", "Sectors"):
+                continue
+            L = self.light(t)
+            if L["state"] != "start" or not L["n"]:
+                continue
+            key = (L["k"] / L["n"], t["short"])
+            if best is None or key[0] > best[0][0]:
+                best = (key, t, L)
+        if not best:
+            return ""
+        _, t, L = best
+        x = self.r(t["sym"], "buy-and-hold")
+        meta = self.meta.get(t["sym"]) or {}
+        c = meta["ohlc"]["close"] if meta.get("ohlc") is not None else None
+        day = float(c.iloc[-1] / c.iloc[-2] - 1) if c is not None and len(c) > 1 else None
+        since = f"Start since {dlong(L['since'])}." if L.get("since") is not None else ""
+        return f"""<div class="card feat-card">
+  <div class="feat-top"><span class="eyebrow">Tonight's strongest Start</span><span class="mono small muted">{dlong(self.asof)} close</span></div>
+  <a class="feat-name" href="{h('stocks/' + t['slug'] + '/')}"><b>{e(t['short'])}</b><span>{e(t['name'])}</span></a>
+  <div class="feat-row"><span class="feat-px mono">{money(x['price'], t['cur'])}</span><span class="{dir_cls(day)}">{pct(day)} on the day</span></div>
+  <div class="feat-light">{light_badge(L, big=True)}<div class="feat-meter"><div class="feat-num"><b>{L['k']}</b> of {L['n']} plays hold it</div>{fill_bar(L['k'], L['n'])}
+  <div class="feat-marks"><span style="left:{round(LIGHT_OFF * 100)}%">Stop {round(LIGHT_OFF * 100)}%</span><span style="left:{round(LIGHT_ON * 100)}%">Start {round(LIGHT_ON * 100)}%</span></div></div></div>
+  <p class="small muted">{e(since)} It turns Stop if the share falls to {round(LIGHT_OFF * 100)}%.</p>
+  <form class="feat-check" action="{h('watchlist/')}" method="get"><label for="home-add" class="small muted">Check any stock</label>
+  <div class="lock-row"><input id="home-add" name="add" type="text" placeholder="NVDA, SHOP.TO, Apple…" autocomplete="off" spellcheck="false"><button type="submit" class="btn primary">See the read</button></div></form>
+</div>"""
+
     def home_paper(self, depth):
         """The paper-trading game, near the top of the home page, with quick picks where the plays agree."""
         h = lambda x: self.href(depth, x)
@@ -844,22 +914,30 @@ class Site:
         n_names = len([t for t in TICKERS if not t.get("index")])
         return f"""<section class="card pt-promo" aria-labelledby="pt-promo-h">
 <div class="pt-promo-copy"><p class="eyebrow">New · Paper trading</p><h2 class="h2" id="pt-promo-h">Trade US$100,000 of play money</h2>
-<p>Pick a username, then buy and sell any of the {n_names} stocks, funds and coins Be The Puck covers at the latest price. See if you can beat the S&amp;P 500, and put your portfolio on the leaderboard if you like. Free, no email, no real money.</p>
+<p>Buy and sell any of the {n_names} stocks, funds and coins Be The Puck covers at the latest price. See if you can beat the S&amp;P 500, and put your portfolio on the leaderboard if you like. Free, and never real money.</p>
 <div class="hero-links"><a class="btn primary" href="{h('paper/')}">Get my US$100,000</a><a class="btn" href="{h('paper/leaders/')}">See the leaderboard</a></div></div>
 <div class="pt-promo-ideas"><p class="small muted">Where the plays agree right now. Tap one to trade it.</p><div class="pt-idea-list">{picks}</div></div>
 </section>"""
 
-    def board_html(self, depth, curated=False):
+    def board_html(self, depth, curated=False, top=None):
         """Stocks x play families: how many plays in each family hold each stock.
-        curated=True leaves out the Nasdaq-100 and TSX names added in bulk (the home page)."""
+        curated=True leaves out the Nasdaq-100 and TSX names added in bulk (the home page);
+        top=N keeps only the N names the most plays hold, without group headings."""
         h = lambda x: self.href(depth, x)
         names = [t for t in universe() if not (curated and t.get("bulk"))]
+        if top:
+            def share(t):
+                k, n = self.consensus(t)
+                return k / n if n else 0
+            names = sorted([t for t in names if not t.get("index")], key=lambda t: (-share(t), t["short"]))[:top]
         fams = [(k, name, [p for p in TIMED if p["family"] == k]) for k, name, _ in FAMILIES]
         head = "".join(f'<th class="c" scope="col"><a href="{h("strategies/")}#fam-{k}">{e(name)}</a><span class="sym-sub">{len(ps)} plays</span></th>' for k, name, ps in fams)
         rows = ""
-        for g in [x for x in GROUP_ORDER if any(t["group"] == x for t in names)]:
-            rows += f'<tr class="grp"><td class="stick">{e(g)}</td><td colspan="{len(fams) + 1}"></td></tr>'
-            for t in [x for x in names if x["group"] == g]:
+        groups = [None] if top else [x for x in GROUP_ORDER if any(t["group"] == x for t in names)]
+        for g in groups:
+            if g is not None:
+                rows += f'<tr class="grp"><td class="stick">{e(g)}</td><td colspan="{len(fams) + 1}"></td></tr>'
+            for t in (names if g is None else [x for x in names if x["group"] == g]):
                 cells = ""
                 for k, name, ps in fams:
                     kk, nn = self.consensus(t, ps)
@@ -1331,6 +1409,14 @@ class Site:
         watch_btn = (f'<button type="button" class="btn sm" data-watch-add="{e(sym)}" data-watch-href="{e(h("watchlist/"))}">+ Add to my watchlist</button>')
         if not t.get("index"):
             watch_btn = (f'<span class="read-acts">{watch_btn}<a class="btn sm" href="{e(h("paper/"))}?t={e(t["slug"])}">Paper trade {e(t["short"])}</a></span>')
+        # phones: the three things to do with a stock, docked at the bottom of the screen
+        act_bar = ""
+        if not t.get("index"):
+            act_bar = (f'<div class="act-bar" role="region" aria-label="Actions for {e(t["short"])}">'
+                       f'<button type="button" class="btn sm" data-watch-add="{e(sym)}" data-watch-href="{e(h("watchlist/"))}">+ Follow</button>'
+                       f'<a class="btn sm" href="{e(h("alerts/"))}?t={e(t["slug"])}" data-signed-out>Email me</a>'
+                       f'<a class="btn sm" href="{e(h("me/"))}#alerts" data-signed-in hidden>My alerts</a>'
+                       f'<a class="btn sm primary" href="{e(h("paper/"))}?t={e(t["slug"])}">Trade {e(t["short"])}</a></div>')
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><span>{e(t['short'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
@@ -1351,6 +1437,7 @@ class Site:
 {exposed}
 {arts}
 <section class="jump"><label class="small muted" for="jump-stock">Another stock</label>{others}</section>
+{act_bar}
 """
         self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js",)))
 

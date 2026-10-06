@@ -55,9 +55,12 @@ async function memberState(req) {
     return payload.h === tag ? "member" : "none";
   }
   if (payload.k === "sub" && payload.id) return live ? "member" : "renew";
+  // a Be The Puck account with an email: member tools are free until midnight, January 1, 2027 (Toronto)
+  if (payload.k === "acct" && payload.u) return live && Date.now() < FREE_UNTIL ? "member" : "none";
   return "none";
 }
 
+const FREE_UNTIL = Date.UTC(2027, 0, 1, 5, 0, 0);
 const PRIVATE = { "cache-control": "private, no-store", vary: "cookie" };
 const OLD_HOSTS = new Set(["quiplee.com", "www.quiplee.com"]);
 

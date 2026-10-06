@@ -300,7 +300,7 @@
     [].forEach.call(items, function (it) {
       var top = it.querySelector('.nav-top');
       top.addEventListener('click', function (e) {
-        if (touch && !it.classList.contains('open')) {
+        if (touch && !it.classList.contains('open') && !it.closest('.menu-open')) {
           e.preventDefault(); closeAll(it); it.classList.add('open'); top.setAttribute('aria-expanded', 'true');
         }
       });
@@ -371,7 +371,86 @@
     window.addEventListener('scroll', function () { if (cur) hide(); }, { passive: true, capture: true });
   }
 
-  function init() { initCharts(); initPicker(); initNav(); initMenus(); initHints(); }
+  // ---------------------------------------------------------------- header: phone menu, scroll state, market status
+  function initHead() {
+    var head = document.querySelector('.site-head');
+    if (!head) return;
+    var tog = head.querySelector('.nav-toggle');
+    if (tog) {
+      tog.addEventListener('click', function () {
+        var open = !head.classList.contains('menu-open');
+        head.classList.toggle('menu-open', open);
+        document.documentElement.classList.toggle('menu-lock', open);
+        tog.setAttribute('aria-expanded', String(open));
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && head.classList.contains('menu-open')) { tog.click(); tog.focus(); }
+      });
+    }
+    var bar = head.querySelector('.scroll-bar'), ticking = false;
+    function onScroll() {
+      ticking = false;
+      var y = window.scrollY || 0, max = document.documentElement.scrollHeight - window.innerHeight;
+      head.classList.toggle('scrolled', y > 8);
+      if (bar) bar.style.transform = 'scaleX(' + (max > 0 ? Math.min(1, y / max) : 0) + ')';
+    }
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+    onScroll();
+    // the U.S. market: open 9:30 to 4 New York time on weekdays (holidays aside)
+    var m = head.querySelector('[data-mkt]');
+    if (m) {
+      try {
+        var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short', hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+        var get = function (t) { var p = parts.filter(function (x) { return x.type === t; })[0]; return p ? p.value : ''; };
+        var mins = parseInt(get('hour'), 10) % 24 * 60 + parseInt(get('minute'), 10), wd = get('weekday');
+        var open = ['Sat', 'Sun'].indexOf(wd) < 0 && mins >= 570 && mins < 960;
+        m.classList.add(open ? 'open' : 'shut');
+        m.setAttribute('title', (open ? 'U.S. market open now. ' : 'U.S. market closed. ') + 'Be The Puck updates after each close.');
+        var t = m.querySelector('[data-mkt-txt]');
+        if (t) t.textContent = (open ? 'Open · ' : 'Closed · ') + t.textContent.replace(' close', '');
+      } catch (e) { /* old browser: keep the date */ }
+    }
+  }
+
+  // ---------------------------------------------------------------- motion: sections settle in, numbers count up
+  function initMotion() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return;
+    var vh = window.innerHeight;
+    var els = [].slice.call(document.querySelectorAll('main > section, main .card, main .tile, .foot-cta'))
+      .filter(function (el) { return el.getBoundingClientRect().top > vh * 0.92 && !el.closest('.tbl-wrap'); });
+    els.forEach(function (el) { el.classList.add('rv'); });
+    var io = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add('rv-in');
+        io.unobserve(en.target);
+      });
+    }, { rootMargin: '0px 0px -6% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+    // <b data-count="37454">37,454</b>: the real number stays in the HTML for crawlers and no-JS readers
+    var nums = [].slice.call(document.querySelectorAll('[data-count]'));
+    var io2 = new IntersectionObserver(function (ents) {
+      ents.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        io2.unobserve(en.target);
+        var el = en.target, to = parseFloat(el.getAttribute('data-count')), t0 = null, txt = el.textContent;
+        if (!(to > 0)) return;
+        var dec = (String(el.getAttribute('data-count')).split('.')[1] || '').length;
+        function fmt(v) { return v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
+        function step(ts) {
+          if (!t0) t0 = ts;
+          var k = Math.min(1, (ts - t0) / 1200), e = 1 - Math.pow(1 - k, 3);
+          el.textContent = fmt(to * e);
+          if (k < 1) requestAnimationFrame(step); else el.textContent = txt;
+        }
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.6 });
+    nums.forEach(function (el) { io2.observe(el); });
+  }
+
+  function init() { initCharts(); initPicker(); initNav(); initMenus(); initHints(); initHead(); initMotion(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

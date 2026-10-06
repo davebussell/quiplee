@@ -35,7 +35,7 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "paper", "alerts", "rules", "guides"}
+             "picks", "members", "locked", "paper", "alerts", "rules", "guides", "me"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "paper.json", "reads.json", "hist"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
@@ -95,7 +95,10 @@ def reads_json(site):
             read = sv.read_lines(site, t, meta, site.fund.get(sym)) if meta else []
         except Exception:
             read = []
+        oh = (meta or {}).get("ohlc")
+        d1 = float(oh["close"].iloc[-1] / oh["close"].iloc[-2] - 1) if oh is not None and len(oh) > 1 else None
         out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),
+                    "g": t["group"], "d1": None if d1 is None else round(d1, 5),
                     "L": None if not L["state"] else (1 if L["state"] == "start" else 0), "k": L["k"], "of": L["n"],
                     "since": L["since"].strftime("%Y-%m-%d") if L.get("since") is not None else None, "read": read}
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "t": out}, ensure_ascii=False, separators=(",", ":"))

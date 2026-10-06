@@ -542,21 +542,24 @@
     api('board').then(function (j) {
       loading(false);
       var box = $('[data-pt-board]', app);
-      var rows = (j.rows || []);
-      if (!rows.length) {
-        var ex = [['Your name here', 0.084, 108400, 'NVDA, RY, SHOP'], ['Another player', 0.031, 103100, 'TD, CNQ, AEM'], ['And another', -0.012, 98800, 'BTC, MSFT']];
-        box.innerHTML = '<div class="card pt-empty"><p><b>No shared portfolios yet.</b> The board fills in after each night\'s close with every portfolio whose owner chose to share it.</p>' +
-          '<p><a class="btn primary" href="' + esc(PLAYER.replace(/player\/(index\.html)?$/, '')) + '">Start playing</a></p></div>' +
-          '<p class="eyebrow pt-ex-label">Example only: what a row will look like</p><div class="tbl-wrap pt-example" aria-hidden="true"><table class="tbl" data-nosort><thead><tr><th class="r">#</th><th>Player</th><th class="r">Return</th><th class="r">Value</th><th>Biggest holdings</th></tr></thead><tbody>' +
-          ex.map(function (r, i) {
-            return '<tr><td class="r mono">' + (i + 1) + '</td><td><span class="sym">' + r[0] + '</span></td><td class="r ' + cls(r[1]) + '">' + pct(r[1]) + '</td><td class="r mono">' + usd(r[2], 0) + '</td><td class="small">' + r[3] + '</td></tr>';
-          }).join('') + '</tbody></table></div>';
-        return;
-      }
-      box.innerHTML = '<p class="muted small">Valued at the close on ' + esc(day(j.asof + 'T12:00:00Z')) + '. ' + (j.players ? j.players + ' players in all; ' + rows.length + ' shared.' : '') + '</p>' +
+      var rows = (j.rows || []).slice();
+      var hb = document.getElementById('pt-house'), house = [];
+      try { house = hb ? JSON.parse(hb.textContent) : []; } catch (e) { house = []; }
+      var all = rows.concat(house).sort(function (a, b) { return b.ret - a.ret; });
+      var lead = rows.length
+        ? 'Valued at the close on ' + esc(day(j.asof + 'T12:00:00Z')) + '. ' + (j.players ? j.players + ' players in all; ' + rows.length + ' shared.' : '')
+        : '<b>No players have shared yet.</b> Until they do, the house benchmarks below set the bar: US$100,000 in one fund since the game opened. <a href="' + esc(PLAYER.replace(/player\/(index\.html)?$/, '')) + '">Start playing</a> and share yours to take them on.';
+      var rank = 0;
+      box.innerHTML = '<p class="muted small pt-board-lead">' + lead + '</p>' +
         '<div class="tbl-wrap"><table class="tbl"><thead><tr>' + th('#', 'r') + th('Player') + th('Return', 'r', ' data-sort-first="desc"') + th('Value', 'r') + th('Biggest holdings') + th('Cash', 'r') + th('Since') + '</tr></thead><tbody>' +
-        rows.map(function (r, i) {
-          return '<tr><td class="r mono">' + (i + 1) + '</td><td><a class="sym" href="' + esc(playerHref(r.name)) + '">' + esc(r.name) + '</a></td>' +
+        all.map(function (r) {
+          if (r.house) {
+            return '<tr class="pt-house"><td class="r mono muted">–</td><td><span class="tag">House</span> <b>' + esc(r.name) + '</b></td>' +
+              '<td class="r ' + cls(r.ret) + '" data-v="' + r.ret + '">' + pct(r.ret) + '</td><td class="r mono" data-v="' + r.value + '">' + usd(r.value, 0) + '</td>' +
+              '<td class="small muted">All in one fund</td><td class="r" data-v="0">0%</td><td class="small muted">' + esc(day(r.since + 'T12:00:00Z')) + '</td></tr>';
+          }
+          rank++;
+          return '<tr><td class="r mono">' + rank + '</td><td><a class="sym" href="' + esc(playerHref(r.name)) + '">' + esc(r.name) + '</a></td>' +
             '<td class="r ' + cls(r.ret) + '" data-v="' + r.ret + '">' + pct(r.ret) + '</td><td class="r mono" data-v="' + r.value + '">' + usd(r.value, 0) + '</td>' +
             '<td class="small">' + (r.top || []).map(esc).join(', ') + (r.n > 3 ? ' <span class="muted">+' + (r.n - 3) + '</span>' : '') + '</td>' +
             '<td class="r" data-v="' + r.cash + '">' + pct(r.cash, 0).replace('+', '') + '</td><td class="small muted">' + esc(day(r.since)) + '</td></tr>';

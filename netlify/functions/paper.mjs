@@ -4,7 +4,9 @@
  * covers at Yahoo's latest price (delayed up to 15 minutes; the last close when
  * the market is shut). Toronto-listed names trade in C$ and are converted at the
  * live USD/CAD rate. Long only, no margin, no fees. Accounts are a username and
- * a password (PBKDF2, never stored in the clear); nothing else is asked for.
+ * the one Be The Puck account (netlify/lib/account.mjs): email or username and a
+ * password (PBKDF2, never stored in the clear). New players sign up through
+ * /api/account/signup; the username-only sign-up here stays for old pages.
  *
  *   POST /api/paper/signup    {name, password, share}   -> sets the "pt" cookie
  *   POST /api/paper/login     {name, password}
@@ -28,83 +30,18 @@
  * p/<name> portfolio, h/<name> nightly values, board, rl/<hash> rate limits.
  * The names that can be traded come from /data/paper.json (built nightly).
  */
-import { getStore } from "@netlify/blobs";
-import { pbkdf2, randomBytes, timingSafeEqual } from "node:crypto";
-import { promisify } from "node:util";
-import { env, now, DAY, sign, verify, readCookie, json, readBody, hashId, checkPassword } from "../lib/qm.mjs";
-
-const pbkdf2p = promisify(pbkdf2);
-const START = 100000;
-const COOKIE = "pt";
-const COOKIE_DAYS = 180;
-const ITER = 310000;
-const NAME_RX = /^[A-Za-z0-9_]{3,20}$/;
-const RESERVED = new Set(["admin", "administrator", "bethepuck", "puck", "support", "help", "root", "moderator", "mod", "system",
-  "staff", "official", "anonymous", "null", "undefined", "me", "api", "paper", "leaders", "player", "dave", "claude"]);
-const BLOCKED = ["fuck", "shit", "cunt", "nigg", "fag", "rape", "nazi", "hitler", "whore", "slut", "kike", "spic", "chink", "retard"];
+import { timingSafeEqual } from "node:crypto";
+import { env, now, DAY, json, readBody, hashId, checkPassword } from "../lib/qm.mjs";
+import {
+  store, lc, hashPassword, nameProblem, session, freshPortfolio, overLimit, ipKey, crossSite, signInCookies, signOutCookies,
+  reply, emailKey, EMAIL_RX, NAME_RX, ptCookie,
+} from "../lib/account.mjs";
 const MAX_TRADES_KEPT = 1000;
 const TRADE_BURST = 40;               // trades per 10 minutes per player
 const QUOTE_TTL = 15 * 1000;
 const UNIVERSE_TTL = 10 * 60 * 1000;
 
-const store = () => getStore({ name: "paper", consistency: "strong" });
 const r2 = (x) => Math.round(x * 100) / 100;
-const lc = (s) => String(s || "").toLowerCase();
-
-// ------------------------------------------------------------------ helpers
-async function hashPassword(pw) {
-  const salt = randomBytes(16);
-  const h = await pbkdf2p(String(pw).slice(0, 200), salt, ITER, 32, "sha256");
-  return `pbkdf2-sha256$${ITER}$${salt.toString("base64url")}$${h.toString("base64url")}`;
-}
-
-const cookie = (token, days) => `${COOKIE}=${token}; Path=/; Max-Age=${Math.round(days * DAY)}; HttpOnly; Secure; SameSite=Lax`;
-const clearCookie = () => `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`;
-const issue = (u, v) => { const t = now(); return cookie(sign({ k: "pt", u, v, iat: t, exp: t + COOKIE_DAYS * DAY }, env("QM_SECRET")), COOKIE_DAYS); };
-
-function nameProblem(name) {
-  if (!NAME_RX.test(name || "")) return "Usernames are 3 to 20 letters, numbers or underscores.";
-  const l = lc(name);
-  if (RESERVED.has(l) || BLOCKED.some((w) => l.includes(w))) return "That username isn't available. Try another.";
-  return null;
-}
-
-function ipKey(req, context, what) {
-  const ip = (context && context.ip) || req.headers.get("x-nf-client-connection-ip") || "unknown";
-  return "rl/" + hashId(what + ":" + ip, env("QM_SECRET"));
-}
-
-/** A fixed-window counter: true if this attempt is over the limit. */
-async function overLimit(s, key, max, windowSec, bump = true) {
-  try {
-    let rec = (await s.get(key, { type: "json" })) || { n: 0, t: now() };
-    if (now() - rec.t > windowSec) rec = { n: 0, t: now() };
-    if (rec.n >= max) return true;
-    if (bump) { rec.n += 1; await s.setJSON(key, rec); }
-    return false;
-  } catch (e) {
-    return false;
-  }
-}
-
-/** Same-site check for anything that changes state (cookies are SameSite=Lax as well). */
-function crossSite(req) {
-  const o = req.headers.get("origin");
-  if (!o) return false;
-  try { return new URL(o).host !== new URL(req.url).host; } catch (e) { return true; }
-}
-
-async function session(req, s) {
-  const p = verify(readCookie(req, COOKIE), env("QM_SECRET"));
-  if (!p || p.k !== "pt" || !p.u || !(p.exp > now())) return null;
-  const acct = await s.get("u/" + p.u, { type: "json" });
-  if (!acct || acct.v !== p.v) return null;
-  return { u: p.u, acct };
-}
-
-function freshPortfolio(name, share, t = new Date().toISOString()) {
-  return { name, share: !!share, hidden: false, created: t, start: START, cash: START, pos: {}, trades: [], realized: 0, n_trades: 0, recent: [], resets: 0 };
-}
 
 // ------------------------------------------------------------------ universe + quotes
 let UNIV = { at: 0, data: null, origin: "" };
@@ -225,11 +162,11 @@ async function signup(req, context, s) {
   if (lc(pw) === lc(name)) return json({ error: "Pick a password that isn't your username." }, 400);
   if (await overLimit(s, ipKey(req, context, "signup"), 5, 3600)) return json({ error: "Too many new accounts from here. Try again in an hour." }, 429);
   const u = lc(name);
-  const acct = { name, pw: await hashPassword(pw), v: 1, created: new Date().toISOString() };
+  const acct = { name, pw: await hashPassword(pw), v: 1, created: new Date().toISOString(), follow: [], alerts: { on: false, level: "all" } };
   const w = await s.setJSON("u/" + u, acct, { onlyIfNew: true });
   if (w.modified === false) return json({ error: "That username is taken. Try another." }, 409);
   await s.setJSON("p/" + u, freshPortfolio(name, b.share === true || b.share === "on" || b.share === "true"));
-  return json({ ok: true, name }, 200, issue(u, 1));
+  return reply({ ok: true, name }, 200, signInCookies(req, u, acct));
 }
 
 async function login(req, context, s) {
@@ -240,14 +177,18 @@ async function login(req, context, s) {
   if ((await overLimit(s, ipk, 12, 900, false)) || (await overLimit(s, uk, 10, 900, false))) {
     return json({ error: "Too many tries. Wait 15 minutes and try again." }, 429);
   }
-  const acct = NAME_RX.test(u) ? await s.get("u/" + u, { type: "json" }) : null;
+  let acct = null, uu = u;
+  if (u.includes("@")) {
+    const rec = EMAIL_RX.test(u) ? await s.get(emailKey(u), { type: "json" }) : null;
+    if (rec) { uu = rec.u; acct = await s.get("u/" + uu, { type: "json" }); }
+  } else if (NAME_RX.test(u)) acct = await s.get("u/" + u, { type: "json" });
   const good = acct ? await checkPassword(String(b.password || ""), acct.pw) : (await hashPassword("x"), false);
   if (!good) {
     await overLimit(s, ipk, 12, 900);
     await overLimit(s, uk, 10, 900);
     return json({ error: "That username and password don't match." }, 401);
   }
-  return json({ ok: true, name: acct.name }, 200, issue(u, acct.v));
+  return reply({ ok: true, name: acct.name }, 200, signInCookies(req, uu, acct));
 }
 
 async function me(req, s, sess) {
@@ -400,7 +341,7 @@ async function changePassword(req, s, sess) {
   if (pw.length < 8 || pw.length > 200) return json({ error: "Passwords need at least 8 characters." }, 400);
   const acct = { ...sess.acct, pw: await hashPassword(pw), v: (sess.acct.v || 1) + 1 };
   await s.setJSON("u/" + sess.u, acct);
-  return json({ ok: true }, 200, issue(sess.u, acct.v));
+  return json({ ok: true }, 200, ptCookie(sess.u, acct.v));
 }
 
 async function reset(req, s, sess) {
@@ -422,8 +363,9 @@ async function reset(req, s, sess) {
 async function remove(req, s, sess) {
   const b = await readBody(req);
   if (!(await checkPassword(String(b.password || ""), sess.acct.pw))) return json({ error: "That password doesn't match." }, 401);
-  await Promise.all(["u/", "p/", "h/"].map((k) => s.delete(k + sess.u).catch(() => {})));
-  return json({ ok: true }, 200, clearCookie());
+  await Promise.all(["u/", "p/", "h/", "as/"].map((k) => s.delete(k + sess.u).catch(() => {})));
+  if (sess.acct.email) await s.delete(emailKey(sess.acct.email)).catch(() => {});
+  return reply({ ok: true }, 200, signOutCookies(req));
 }
 
 async function quoteRoute(req, url) {
@@ -535,7 +477,7 @@ export default async (req, context) => {
     if (crossSite(req)) return json({ error: "Cross-site request refused." }, 403);
     if (route === "signup") return await signup(req, context, s);
     if (route === "login") return await login(req, context, s);
-    if (route === "logout") return json({ ok: true }, 200, clearCookie());
+    if (route === "logout") return reply({ ok: true }, 200, signOutCookies(req));
     const sess = await session(req, s);
     if (!sess) return json({ error: "Sign in first.", signed_in: false }, 401);
     if (route === "trade") return await trade(req, s, sess);

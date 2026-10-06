@@ -441,11 +441,12 @@ def _run_ticker(sym):
     # per-ticker extras: crash exposure, three years of candles, the heatmap's week axis
     bclose = _G["prices"][t["bench"]]["close"] if t.get("bench") in _G["prices"] else None
     yr = d[d.index > d.index[-1] - pd.DateOffset(years=3)]    # 2 years shown + a year to warm up the 200-day average
-    weeks = d["close"].groupby(d.index.to_period("W-FRI")).last().index[-104:]
+    # each week is stamped with its last actual session (a week still in progress is not dated in the future)
+    weeks = pd.Series(d.index, index=d.index).groupby(d.index.to_period("W-FRI")).last().iloc[-104:]
     out[(sym, "__meta")] = {
         "risk": risk.assess(t, d["close"], bclose, _G.get("fund", {}).get(sym)),
         "ohlc": yr[["open", "high", "low", "close", "volume"]].astype("float32"),
-        "weeks": [w.end_time.normalize() for w in weeks],
+        "weeks": [pd.Timestamp(w).normalize() for w in weeks.values],
         "first": d.index[0],
     }
     _share(out)
