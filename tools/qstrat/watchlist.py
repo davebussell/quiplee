@@ -114,6 +114,7 @@ def watchlist_page(site):
 <noscript><p class="note-line">The watchlist needs JavaScript. Every covered stock also has its own page under <a href="{h('stocks/')}">Stocks</a>.</p></noscript>
 <div class="wl-plays"><span class="small muted">Plays to count</span>
 <div class="seg seg-sm" role="group" aria-label="Plays to count" id="wl-mode"><button type="button" data-v="core" aria-pressed="true">Core 20</button><button type="button" data-v="all" aria-pressed="false">All {len(TIMED)}</button><button type="button" data-v="pick" aria-pressed="false">Pick plays</button></div>
+<a class="small" href="{h('rules/')}">Your own Start/Stop rules and portfolio limits (members)</a>
 </div>
 <div class="card wl-picker" id="wl-picker" hidden></div>
 <div id="wl-sum" class="wl-sum"></div>

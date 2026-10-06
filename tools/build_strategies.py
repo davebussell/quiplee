@@ -35,8 +35,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "paper", "alerts"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "paper.json", "reads.json"}
+             "picks", "members", "locked", "paper", "alerts", "rules", "guides"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "paper.json", "reads.json", "hist"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -200,6 +200,8 @@ def main():
     except Exception as ex:   # the game's nightly values never block a build
         print("paper trading: snapshot failed:", ex)
     from qstrat.watchlist import watch_json
+    from qstrat.rules import write_hist
+    print("weekly call history files:", write_hist(site, out))
     with open(os.path.join(out, "data", "watch.json"), "w", encoding="utf-8") as f:
         f.write(watch_json(site))
     t2 = time.time()

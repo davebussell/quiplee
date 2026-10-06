@@ -87,6 +87,7 @@ def nav_menus():
                     ("stocks/?group=tsx", "TSX stocks", f"The {n_tsx()} Toronto-listed companies, in Canadian dollars"),
                     ("watchlist/", "My watchlist", "Check your own stocks, or add ones Be The Puck doesn't cover"),
                     ("alerts/", "Free email alerts", "An email with the analysis when the light flips on your stocks"),
+                    ("rules/", "Your own rules (members)", "Pick the plays, set when the light turns, check your portfolio"),
                     ("picks/", "Top picks (members)", "Five rule-based picks, tracked against the S&P 500")],
         "paper/": [("paper/", "Play the game", "US$100,000 of play money to trade the names Be The Puck covers"),
                    ("paper/leaders/", "Leaderboard", "Shared portfolios ranked by return since they started")],
@@ -669,7 +670,10 @@ class Site:
             self.strat_summary(s)
         self.render_pairs()
         from .guides import Guides
-        Guides(self).build()
+        self.guides = Guides(self)
+        self.guides.build()
+        from .rules import rules_page
+        rules_page(self, self.guides)
         self.learn.build()
         self.method_page()
         return self.pages
@@ -1136,7 +1140,7 @@ class Site:
             alert = (f'<a class="btn sm light-alert" href="{h("alerts/")}?t={e(t["slug"])}">Email me when it flips</a>')
         return (f'<div class="light-box {L["state"]}">{light_badge(L, big=True)}'
                 f'<div class="light-txt"><b>{word}{since}.</b> {L["k"]} of {L["n"]} plays hold {e(t["short"])} ({pct(L["share"], sign=False, d=0)}). '
-                f'{nxt} <a href="{h("method/")}#light">How the light works</a></div>{alert}</div>')
+                f'{nxt} <a href="{h("method/")}#light">How the light works</a> · <a href="{h("rules/")}">Set your own rules</a></div>{alert}</div>')
 
     def stocks_index(self):
         path, depth = "stocks/", 1
@@ -1585,7 +1589,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "paper/player/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "rules/", "paper/player/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

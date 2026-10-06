@@ -96,8 +96,8 @@ home page's board. Micro caps carry a 0.30% switching cost.
 was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in `plays_fn.pb_ema`
 and drop its `flag` in `plays.py` once confirmed.
 
-**Members.** `/picks/` (the top-picks tracker) and every report under
-`/articles/` (not the hub) are for members. `netlify/edge-functions/member-gate.js`
+**Members.** `/picks/` (the top-picks tracker), `/rules/` (their own Start/Stop
+rules) and every report under `/articles/` (not the hub) are for members. `netlify/edge-functions/member-gate.js`
 serves the full page only with a signed member cookie; otherwise it serves the
 page's locked version (title, opening line, sign-in / join card) that
 `tools/qstrat/members.py` builds under `/locked/`. `netlify/functions/member.mjs`
@@ -138,6 +138,17 @@ aren't applied to held shares yet.
 that falls to 40% or less, walked through two years of weekly calls so it
 doesn't flicker. Shown on stock pages, the stock list (sort "Start first"), the
 watchlist and in the game; `data/reads.json` carries each light and read.
+
+**Members' own rules.** `/rules/` (`tools/qstrat/rules.py`, `assets/rules.js`)
+lets a member choose which plays count toward the light (all, "Best record" and
+"Crash protection" from the guides' nightly rankings, a family preset, or their
+own pick), move the 60/40 thresholds, and check their watchlist against four
+limits: biggest stock, biggest sector or group, share in names that are Start
+under their rule, and share in High / Very high crash exposure. The light is
+walked through `data/hist/<slug>.json` (two years of weekly calls per stock)
+exactly as `Site.light` does, so "every play, 60/40" matches the site's light on
+every name. The rule is saved with the member's list (`PUT /api/member/list
+{rules}`); weights come from the quantities or values in the watchlist file.
 
 **Free email alerts.** `/alerts/` signs people up (email + stocks, confirmed by
 a link). `netlify/functions/alerts.mjs` stores them in the Blobs store

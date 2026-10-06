@@ -7,7 +7,8 @@
  * GET  /api/member/magic?t=                   -> the sign-in link from the welcome / sign-in email
  * POST /api/member/link      email            -> emails a sign-in link to a subscriber (same reply either way)
  * GET  /api/member/list                       -> {tickers, alerts, email}
- * PUT  /api/member/list      {tickers, alerts} -> saves the list the nightly alert email checks
+ * PUT  /api/member/list      {tickers, alerts, rules} -> saves the list the nightly alert email checks,
+ *                                              and the member's own rule ({preset, plays, on, off, lim})
  *
  * Env: QM_SECRET (signs cookies), QM_PASS_HASH (pbkdf2-sha256 of the members'
  * password), QM_OWNER_EMAIL (optional: where the password member's alerts go),
@@ -138,21 +139,43 @@ function cleanList(tickers) {
   return out;
 }
 
+/** A member's own rule (the /rules/ page): which plays count toward the Start/Stop light
+ * (a ready-made preset, or their own list of play slugs), the two thresholds, and four
+ * portfolio limits as fractions (null = not checked). */
+const LIMITS = ["pos", "group", "start", "crash"];
+function cleanRules(r) {
+  if (!r || typeof r !== "object") return null;
+  const plays = (Array.isArray(r.plays) ? r.plays : []).map((x) => String(x || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60)).filter(Boolean).slice(0, 200);
+  let preset = /^[a-z]{1,16}$/.test(String(r.preset || "")) ? String(r.preset) : "all";
+  if (preset === "custom" && !plays.length) preset = "all";
+  let on = Number(r.on), off = Number(r.off);
+  if (!(on >= 0.5 && on <= 0.95)) on = 0.6;
+  if (!(off >= 0.05 && off < on)) off = Math.min(0.4, on - 0.05);
+  const lim = {};
+  const src = r.lim && typeof r.lim === "object" ? r.lim : {};
+  for (const k of LIMITS) {
+    const v = src[k] === null || src[k] === undefined || src[k] === "" ? NaN : Number(src[k]);
+    lim[k] = v >= 0 && v <= 1 ? Math.round(v * 1000) / 1000 : null;
+  }
+  return { preset, plays: preset === "custom" ? [...new Set(plays)] : [], on: Math.round(on * 100) / 100, off: Math.round(off * 100) / 100, lim };
+}
+
 async function list(req, m) {
   const s = store("qm-lists");
   const cur = (await s.get(m.id, { type: "json" })) || { tickers: [], alerts: true };
   let email = "";
   if (m.kind === "sub") email = ((await getRecord(m.id)) || {}).email || "";
   else email = env("QM_OWNER_EMAIL");
-  if (req.method === "GET") return json({ tickers: cur.tickers || [], alerts: cur.alerts !== false, email: !!email, updated: cur.updated || null });
+  if (req.method === "GET") return json({ tickers: cur.tickers || [], alerts: cur.alerts !== false, email: !!email, updated: cur.updated || null, rules: cur.rules || null });
   const body = await readBody(req);
   const next = {
     tickers: body.tickers !== undefined ? cleanList(body.tickers) : cur.tickers || [],
     alerts: body.alerts !== undefined ? !!body.alerts : cur.alerts !== false,
+    rules: body.rules !== undefined ? cleanRules(body.rules) : cur.rules || null,
     updated: new Date().toISOString(),
   };
   await s.setJSON(m.id, next);
-  return json({ ok: true, tickers: next.tickers, alerts: next.alerts, email: !!email });
+  return json({ ok: true, tickers: next.tickers, alerts: next.alerts, email: !!email, rules: next.rules });
 }
 
 export default async (req, context) => {

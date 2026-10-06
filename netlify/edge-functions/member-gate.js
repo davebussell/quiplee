@@ -1,6 +1,6 @@
 /* member-gate.js: the Be The Puck Members paywall.
  *
- * Runs in front of /picks/ and every report under /articles/ (the hub stays
+ * Runs in front of /picks/, /rules/ and every report under /articles/ (the hub stays
  * open). With a valid member cookie the page is served as built. Without one,
  * the page's locked version is served at the same URL: its title and opening
  * line plus a sign-in / join card, built under /locked/<path> by
@@ -88,6 +88,6 @@ export default async (req, context) => {
 };
 
 export const config = {
-  path: ["/picks", "/picks/*", "/articles/*"],
+  path: ["/picks", "/picks/*", "/articles/*", "/rules", "/rules/*"],
   excludedPath: ["/articles/", "/articles/index.html"],
 };

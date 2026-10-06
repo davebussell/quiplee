@@ -1013,3 +1013,48 @@ details.pt-import > *:not(summary) { margin-top: 10px; }
 .pt-impmode { display: flex; flex-direction: column; gap: 8px; }
 .pt-import .btn.primary { align-self: flex-start; cursor: pointer; }
 .pt-import .btn:disabled { opacity: .55; cursor: default; }
+
+/* ---------- members' own rules (/rules/) ---------- */
+.ru-app { display: flex; flex-direction: column; gap: 18px; }
+.ru-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start; }
+.ru-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ru-card .h3 { display: flex; align-items: center; gap: 10px; margin: 0; }
+.ru-card .h3.ru-h-gap { margin-top: 10px; }
+.ru-card p { margin: 0; }
+.ru-n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel-2); box-shadow: inset 0 0 0 1px var(--line-2);
+  font: 600 12px var(--data); color: var(--violet-ink); flex: none; }
+.ru-presets { align-self: flex-start; border: 0; border-radius: 0; overflow: visible; gap: 6px; }
+.ru-presets button { border: 1px solid var(--line-2); border-radius: 999px; }
+.ru-presets button[aria-pressed="true"] { box-shadow: none; border-color: var(--violet); background: rgba(124, 108, 245, .16); color: var(--ink); }
+.ru-pick summary { cursor: pointer; font-size: 13.5px; color: var(--ink-2); }
+.ru-pick[open] summary { margin-bottom: 12px; }
+.ru-picker { max-height: 440px; overflow: auto; padding: 2px; }
+.ru-picker legend .linkish { font: 500 11px var(--data); letter-spacing: 0; text-transform: none; }
+.ru-thr { display: flex; flex-direction: column; gap: 10px; }
+.ru-num { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 14px; color: var(--ink-2); }
+.ru-num input { width: 70px; font: 600 15px var(--data); color: var(--ink); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 8px; text-align: right; }
+.ru-num input:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124, 108, 245, .2); }
+.ru-num input:disabled { opacity: .4; }
+.ru-thr .ru-lab { min-width: 76px; }
+.ru-lim .ru-num { flex-wrap: nowrap; flex: 1 1 260px; }
+.ru-lim .ru-num span { min-width: 0; }
+.ru-lims { display: flex; flex-direction: column; gap: 12px; }
+.ru-lim { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.ru-lim:last-child { border-bottom: 0; padding-bottom: 0; }
+.ru-lim-on { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); cursor: pointer; }
+.ru-lim-on input { accent-color: var(--violet); width: 16px; height: 16px; margin: 0; }
+.ru-save { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ru-save .btn { cursor: pointer; }
+.ru-save .btn:disabled { opacity: .5; cursor: default; }
+.ru-out { display: flex; flex-direction: column; gap: 14px; }
+.ru-out .sec-head { margin-bottom: 0; }
+.ru-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 10px; }
+.ru-checks:empty { display: none; }
+.ru-checks p { margin: 4px 0 0; }
+.ru-tiles .tile.ru-warn .tile-value { color: var(--warning); }
+.ru-tbl tr.ru-diff td, .ru-example tr.ru-diff td { background: rgba(124, 108, 245, .08); }
+.ru-tbl tr.ru-diff td:first-child, .ru-example tr.ru-diff td:first-child { box-shadow: inset 3px 0 0 var(--violet); }
+.ru-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: rgba(124, 108, 245, .25); box-shadow: inset 3px 0 0 var(--violet); vertical-align: -1px; margin-right: 4px; }
+.ru-key { margin: 0; }
+.ru-example { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.ru-example p, .ru-example .h3 { margin: 0; }
