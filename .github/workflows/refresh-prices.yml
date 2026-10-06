@@ -1,4 +1,4 @@
-# After each U.S. close: adds the stocks readers asked for on /watchlist/,
+# After each U.S. close (and a morning top-up for crypto): adds the stocks readers asked for on /watchlist/,
 # refreshes prices, macro series (FRED, multpl) and company fundamentals in
 # data/, and commits them. The commit is a push to main, so Netlify rebuilds
 # the whole site from the new data (see netlify.toml). Runs every day so crypto
@@ -9,6 +9,7 @@ name: Refresh prices
 on:
   schedule:
     - cron: "45 21 * * *"   # 17:45 ET in summer, 16:45 ET in winter
+    - cron: "15 10 * * *"   # morning top-up: Yahoo often posts the previous UTC day's crypto bar late
   workflow_dispatch:
 
 permissions:
@@ -36,6 +37,7 @@ jobs:
       - name: Fetch macro series
         run: python tools/fetch_macro.py || true
       - name: Fetch company fundamentals
+        if: github.event.schedule != '15 10 * * *'
         run: python tools/fetch_fundamentals.py || true
       - name: Commit the new prices
         run: |
