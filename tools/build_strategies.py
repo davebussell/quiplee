@@ -35,8 +35,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "paper", "alerts", "rules", "guides", "me"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "paper.json", "reads.json", "hist"}
+             "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -197,13 +197,18 @@ def main():
         f.write(site.plays_json())
     with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
         f.write(reads_json(site))
-    from qstrat import paper
-    with open(os.path.join(out, "data", "paper.json"), "w", encoding="utf-8") as f:
-        f.write(paper.paper_json(site))
-    try:
-        print("paper trading:", paper.snapshot(site))
-    except Exception as ex:   # the game's nightly values never block a build
-        print("paper trading: snapshot failed:", ex)
+    from qstrat import screen, theory
+    with open(os.path.join(out, "data", "tickers.json"), "w", encoding="utf-8") as f:
+        f.write(screen.tickers_json(site))
+    with open(os.path.join(out, "data", "screen.json"), "w", encoding="utf-8") as f:
+        f.write(screen.screen_json(site))
+    t2 = time.time()
+    os.makedirs(os.path.join(out, "data", "theory"), exist_ok=True)
+    tfiles = getattr(site, "theory_json", None) or theory.files(site)
+    for slug, js in tfiles.items():
+        with open(os.path.join(out, "data", "theory", slug + ".json"), "w", encoding="utf-8") as f:
+            f.write(js)
+    print(f"theory tester: {len(tfiles)} stocks in {time.time() - t2:.0f}s")
     from qstrat.watchlist import watch_json
     from qstrat.rules import write_hist
     print("weekly call history files:", write_hist(site, out))

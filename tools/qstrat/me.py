@@ -2,9 +2,9 @@
 
 Signed out, the page sells the account with a real preview (tonight's lights on a
 sample list, clearly labelled as an example) next to the sign-up form. Signed in,
-assets/me.js draws the dashboard from /api/account/me, /api/paper/me and
-data/reads.json: the stocks you follow and their lights, your email alerts, your
-game, the member tools (free until January 1, 2027) and your account settings.
+assets/me.js draws the dashboard from /api/account/me and data/reads.json: the
+stocks you follow and their lights, your email alerts, a shortcut into the Theory
+tester, the member tools (free until January 1, 2027) and your account settings.
 """
 import html
 
@@ -57,10 +57,10 @@ def me_page(site):
 <section class="me-out" data-me-out>
 <div class="me-out-grid">
 <div class="me-out-copy"><p class="eyebrow">My Puck</p>
-<h1 class="h1 me-h1">Your stocks, your game and your alerts, <em>in one place</em>.</h1>
-<p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening a Start/Stop light flips, keeps your US$100,000 paper portfolio and opens every member tool until {FREE_UNTIL}.</p>
+<h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>
+<p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening a Start/Stop light flips, and opens every member tool until {FREE_UNTIL}.</p>
 <ul class="check-list"><li>Follow up to 100 stocks, funds and coins</li><li>An email with the analysis when a light flips, the same evening</li>
-<li>Your paper portfolio on any device, and the leaderboard if you like</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
+<li>Test any theory on the stocks you follow, from one play to all of them</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
 <div class="me-preview">{_preview(site, depth)}</div>
 </div>
 <div class="card me-auth-card"><div data-auth data-auth-next="/me/?welcome=1" data-auth-context="me"><noscript><p>My Puck needs JavaScript.</p></noscript></div></div>
@@ -71,12 +71,12 @@ def me_page(site):
 </div>
 
 <section class="card prose me-how"><p class="eyebrow">Good to know</p><ul>
-<li><b>Free for good:</b> your account, the game, the Start/Stop light and its flip emails.</li>
+<li><b>Free for good:</b> your account, the screener, the Theory tester, the Start/Stop light and its flip emails.</li>
 <li><b>Member tools</b> (top picks, reports, your own rules, play-by-play emails) are free until {FREE_UNTIL}, then {PRICE} a month. Nothing is charged unless you choose to subscribe.</li>
 <li><b>Emails</b> go out after the U.S. close, only when something changed, and every one has a one-click unsubscribe.</li>
 <li><b>Privacy:</b> Be The Puck keeps your email, your username and what you follow, and nothing else.</li>
 </ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></section>
 """
-    site.add(path, site.shell(path, "My Puck: your stocks, your game and your alerts",
-                              "One free Be The Puck account: follow your stocks, get an email when the Start/Stop light flips, keep your paper portfolio, and use every member tool free until January 1, 2027.",
+    site.add(path, site.shell(path, "My Puck: your stocks and their alerts",
+                              "One free Be The Puck account: follow your stocks, get an email when the Start/Stop light flips, test theories on them, and use every member tool free until January 1, 2027.",
                               body, active="", scripts=("assets/widgets.js", "assets/me.js"), link=False))

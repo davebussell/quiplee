@@ -504,3 +504,11 @@ def run(prices, irx, now, plays=None, tickers=None, workers=None, spill=None):
         for s in syms:
             results.update(_run_ticker(s))
     return results
+
+
+def cad_per_usd(base=PRICE_DIR):
+    """Canadian dollars per US dollar at the last close (None if the rate is missing)."""
+    try:
+        return float(_read("CAD=X", base)["close"].iloc[-1])
+    except Exception:
+        return None

@@ -49,6 +49,17 @@
 
 # Stories now live alongside every other piece under /articles/ (the Hertz
 # lesson keeps its URL at /stories/the-hertz-lesson.html)
+# Paper trading was replaced by the Theory tester (October 2026). Player data stays in Blobs.
+[[redirects]]
+  from = "/paper"
+  to = "/theory/"
+  status = 301
+
+[[redirects]]
+  from = "/paper/*"
+  to = "/theory/"
+  status = 301
+
 [[redirects]]
   from = "/stories"
   to = "/articles/"

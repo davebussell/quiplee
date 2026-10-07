@@ -37,13 +37,13 @@ tools/qstrat/render.py       HTML for home, plays, analysts, stocks, pairs, meth
 tools/qstrat/stockview.py    stock-page blocks: candlesticks, heatmap, the read, fundamentals, crash card
 tools/qstrat/markets.py      /markets/: weather, index and sector tables, gauges, past tops, simulator
 tools/qstrat/watchlist.py    /watchlist/ page and data/watch.json
-tools/qstrat/paper.py        /paper/ (paper trading), data/paper.json and the nightly portfolio snapshot
+tools/qstrat/screen.py       the home page: step 1 (crash gauges) and the screener; data/screen.json, data/tickers.json
+tools/qstrat/theory.py       /theory/ (the Theory tester) and data/theory/<slug>.json
 tools/qstrat/articles.py     /articles/: macro pieces, stock and sector briefs (rebuilt nightly)
 tools/qstrat/learn.py        Learn hub, 13 play lessons, glossary, Call it, flashcards, play quiz, reading list
 tools/qstrat/basics.py       Track 1 (stock basics) and Track 3 (markets and risk) lessons with widgets
 tools/qstrat/practice.py     the Call it chart scenarios (data/practice.json) and play-quiz bank
 netlify/functions/watch.mjs  the request queue (Netlify Function + Blobs) behind /api/watch
-netlify/functions/paper.mjs  paper-trading accounts, trades, quotes and leaderboard (/api/paper/*)
 assets/site.js, learn.js     line charts; quizzes, flashcards, Call it (progress in localStorage)
 assets/widgets.js            candlesticks, plays heatmap, positioning simulator, core toggle
 assets/lab.js, watchlist.js  Learn widgets and step-by-step lessons; the watchlist app
@@ -118,42 +118,49 @@ Netlify Blobs behind `/api/picks-state` (token `PICKS_STATE_TOKEN`), not in this
 repo; only the production build writes it. Locally, set `QUIPLEE_PICKS_FILE` to a
 JSON file.
 
-**Paper trading.** `/paper/` is a free game: sign up with a username and
-password (no email), start with US$100,000 of play money and trade any covered
-name (indexes excepted) at Yahoo's latest price, delayed up to 15 minutes, or
-the last close when the market is shut. TSX names trade in C$ at the live
-USD/CAD rate; the account is in US dollars. Long only, whole shares (coins in
-fractions), no fees, no dividends. `netlify/functions/paper.mjs` holds the
-accounts (PBKDF2 hashes, signed `pt` cookie with `QM_SECRET`), portfolios and
-trades in the Blobs store `paper`; `tools/qstrat/paper.py` builds the pages,
-`data/paper.json` (the tradable names) and, in the production build, the
-nightly snapshot: every portfolio valued at the close for its chart, and the
-leaderboard of shared portfolios (`/paper/leaders/`, profiles at
-`/paper/player/?u=`). Moderation: `POST /api/paper/admin/hide {"u": "name"}`
-with `Authorization: Bearer $PICKS_STATE_TOKEN` takes a portfolio off the board
-and its public page (`"hidden": false` puts it back). Known gap: stock splits
-aren't applied to held shares yet.
+**Home page and screener.** The home page answers two questions in four numbered
+steps. Step 1, "Is the market about to crash?", is the nine crash gauges' verdict
+(`macro.py`) and the plays on the S&P 500. Steps 2 to 4 are a screener of every
+covered name (`screen.py`, `assets/screen.js`, data in `data/screen.json`): buying
+or selling (a play agrees with buying when it holds the stock, with selling when
+it's out), where to look (market, sector, crash exposure, a name), and how many of
+the plays must agree. The first 25 rows are rendered at build time; the filters,
+sorting, ready-made screens and the ☆ follow run in the browser and sync to the URL
+(`?side=sell&mkt=ca&min=75`). The filter rules in `screen.py` and `screen.js` must match.
+
+**Theory tester.** `/theory/` (`theory.py`, `assets/theory.js`): pick a stock and a
+theory (one play, a family of plays or all of them) and get the reading (buy, don't
+buy or split), the rationale (the rule that applies, tonight's indicator readings,
+the checks, since when, the price that would change its mind, the record on that
+stock), then step or auto-roll through every play's reason to buy or not, best
+record first. Each covered name's data is `data/theory/<slug>.json`, written by the
+pair-page workers (`_pairs_for` in `render.py`) while that stock's chart windows are
+loaded, so it adds seconds to the build, not minutes. The page renders NVDA with
+all 100 plays by default; `?s=<slug>&t=all|fam:<family>|play:<slug>` picks another.
+Paper trading, which this replaced in October 2026, is gone from the site
+(`/paper/*` redirects here); its old portfolios are left untouched in the Blobs
+store `paper`.
 
 **Start/Stop light.** Every stock gets one light from all the plays
 (`Site.light` in `render.py`): Start at 60% or more of the plays in, Stop once
 that falls to 40% or less, walked through two years of weekly calls so it
 doesn't flicker. Shown on stock pages, the stock list (sort "Start first"), the
-watchlist and in the game; `data/reads.json` carries each light and read.
+watchlist, the screener and the Theory tester; `data/reads.json` carries each light and read.
 
 **One account and My Puck.** A Be The Puck account (email or username plus a
-password) is shared by the game, My Puck (`/me/`), the stocks a person follows,
+password) is shared by My Puck (`/me/`), the stocks a person follows,
 their emails and the member tools. Accounts live in the Blobs store `paper`
 (`u/<name>`, with `e/<hash>` mapping an email to its account); the logic is in
 `netlify/lib/account.mjs` and the routes in `netlify/functions/account.mjs`
 (`/api/account/*`: sign-up, sign-in, follow, alerts, email, confirm, forgot/reset
-password, unsubscribe, delete). Old username-only game accounts keep working and
+password, unsubscribe, delete). Old username-only accounts from the retired game keep working and
 can add an email in My Puck. Signing in sets the HttpOnly `pt` session, a readable
 `bp_name` cookie for the header, and, for accounts with an email, a `qm` cookie of
 kind `acct` that opens the member pages. **Member tools are free for every account
 until midnight on January 1, 2027 (Toronto)**: `FREE_UNTIL` in `netlify/lib/account.mjs`,
 `FREE_UNTIL_MS` in `netlify/lib/qm.mjs` and `FREE_UNTIL` in the edge gate must stay
 the same date. After it, an `acct` cookie no longer opens member pages and the
-locked versions ask for the $5/month membership; the game, the Start/Stop light and
+locked versions ask for the $5/month membership; the screener, the Theory tester, the Start/Stop light and
 its flip emails stay free. `/members/`, every lock card and a bar on member pages
 say so.
 

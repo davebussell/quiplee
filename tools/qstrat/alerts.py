@@ -45,7 +45,7 @@ def _example(site, depth):
 def alerts_page(site):
     path, depth = "alerts/", 1
     h = lambda x: site.href(depth, x)
-    uni = h("data/paper.json") + "?v=" + site.ver
+    uni = h("data/tickers.json") + "?v=" + site.ver
     body = f"""<section class="pair-head"><p class="eyebrow">Free email alerts</p><h1 class="h1">Get an email when the light flips</h1>
 <p class="lede">Pick the stocks you care about. When the Start/Stop light changes on one of them, because enough of Be The Puck's plays have moved in or out, we email you the change and the analysis after the close. Free, and you can stop any time.</p></section>
 
@@ -62,7 +62,7 @@ def alerts_page(site):
 <button class="btn primary" type="submit">Email me the flips</button>
 <p class="pt-msg" role="alert" data-al-msg></p>
 <p class="small muted">We'll send one email to confirm. After that you only hear from us when a light on your list flips: one email per close at most, with every change in it.</p>
-<p class="small">Want the game, play-by-play emails and the member tools too? <a href="{h('me/')}">Create a free account</a> instead; member tools are free until January 1, 2027.</p>
+<p class="small">Want play-by-play emails and the member tools too? <a href="{h('me/')}">Create a free account</a> instead; member tools are free until January 1, 2027.</p>
 </form>
 </section>
 <section class="card al-card" data-al-manage hidden></section>

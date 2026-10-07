@@ -1,6 +1,6 @@
 /* alerts.js: the /alerts/ page. Sign up for free Start/Stop emails, or change or
  * stop them from the link in an email (?m=<token>). Talks to /api/alerts/
- * (netlify/functions/alerts.mjs); names come from data/paper.json. */
+ * (netlify/functions/alerts.mjs); names come from data/tickers.json. */
 (function () {
   'use strict';
   var app = document.getElementById('al-app');

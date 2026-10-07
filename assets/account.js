@@ -3,7 +3,7 @@
  *  - the sign-up / sign-in / forgot-password widget in any [data-auth] slot:
  *      data-auth-mode="signup|login"  which form shows first
  *      data-auth-next="reload|/path/" where to go after (default: reload)
- *      data-auth-context="game|member|alerts|me" small wording changes
+ *      data-auth-context="member|alerts|me|theory" small wording changes
  *  - window.BPAuth: name(), signedIn(), me() and follow(sym, on)
  * Talks to /api/account/ (netlify/functions/account.mjs). The session cookie is
  * HttpOnly; the readable bp_name cookie only tells pages who is signed in. */
@@ -50,10 +50,10 @@
 
   // ------------------------------------------------------------ the widget
   var COPY = {
-    game: { go: 'Get my US$100,000', lead: 'Free. Your portfolio follows you to any device.' },
+    theory: { go: 'Create my free account', lead: 'Follow the stocks you test and get an email when their light flips.' },
     member: { go: 'Create my free account', lead: 'Member tools open straight away and stay free until ' + FREE + '.' },
     alerts: { go: 'Create my free account', lead: 'Follow your stocks and get an email when the light flips.' },
-    me: { go: 'Create my free account', lead: 'One account for the game, your stocks and your emails.' }
+    me: { go: 'Create my free account', lead: 'One account for your stocks, your emails and every member tool.' }
   };
   function watchSyms() {
     try { var v = JSON.parse(localStorage.getItem('quiplee.watch.v1') || 'null'); return ((v && v.items) || []).map(function (x) { return x.sym; }).slice(0, 40); } catch (e) { return []; }
@@ -70,12 +70,11 @@
       '<form class="auth-form" data-form="signup" novalidate>' +
       '<label for="' + uid + 'e">Email</label><input id="' + uid + 'e" name="email" type="email" autocomplete="email" required placeholder="you@example.com">' +
       '<label for="' + uid + 'p">Password</label><div class="pw-row"><input id="' + uid + 'p" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"><button type="button" class="pw-eye" aria-label="Show password">Show</button></div>' +
-      '<label for="' + uid + 'n">Username <span class="opt">optional, shown if you share your game</span></label><input id="' + uid + 'n" name="name" autocomplete="username" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="We\'ll make one from your email">' +
+      '<label for="' + uid + 'n">Username <span class="opt">optional, shown when you sign in</span></label><input id="' + uid + 'n" name="name" autocomplete="username" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="We\'ll make one from your email">' +
       '<label class="auth-check"><input type="checkbox" name="alerts"><span>Email me when the Start/Stop light flips on stocks I follow. I can stop any time.</span></label>' +
-      (ctx === 'game' ? '<label class="auth-check"><input type="checkbox" name="share"><span>Show my portfolio on the leaderboard</span></label>' : '') +
       '<button class="btn primary glow" type="submit">' + esc(c.go) + '</button>' +
       '<p class="auth-msg" role="alert"></p>' +
-      '<p class="auth-fine">' + esc(c.lead) + ' From ' + FREE + ', member tools are $5 a month; the game and Start/Stop emails stay free.</p>' +
+      '<p class="auth-fine">' + esc(c.lead) + ' From ' + FREE + ', member tools are $5 a month; the screener, the Theory tester and Start/Stop emails stay free.</p>' +
       '</form>' +
       '<form class="auth-form" data-form="login" novalidate hidden>' +
       '<label for="' + uid + 'i">Email or username</label><input id="' + uid + 'i" name="id" autocomplete="username" required>' +

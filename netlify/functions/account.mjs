@@ -1,7 +1,7 @@
-/* account.mjs: one Be The Puck account for the game, My Puck, alerts and member tools.
+/* account.mjs: one Be The Puck account for My Puck, alerts and member tools.
  *
  *   GET  /api/account/me                       -> {signed_in, name, email, email_ok, follow, alerts, rules, member, ...}
- *   POST /api/account/signup  {email, password, name?, share?}   -> signs in; emails a confirm link
+ *   POST /api/account/signup  {email, password, name?}   -> signs in; emails a confirm link
  *   POST /api/account/login   {id (email or username), password}
  *   POST /api/account/logout
  *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about)
@@ -24,7 +24,7 @@ import * as mail from "../lib/mail.mjs";
 import { sendOne } from "../lib/freealerts.mjs";
 import {
   store, lc, emailKey, emailTag, hashPassword, nameProblem, passwordProblem, signInCookies, signOutCookies, reply, redirectWith,
-  session, updateAccount, freshPortfolio, overLimit, ipKey, crossSite, membership, readLink, NAME_RX, EMAIL_RX, MAX_FOLLOW,
+  session, updateAccount, overLimit, ipKey, crossSite, membership, readLink, NAME_RX, EMAIL_RX, MAX_FOLLOW,
   FREE_UNTIL_LABEL, ptCookie, cleanRules, memberCookie, hasPaidCookie,
 } from "../lib/account.mjs";
 import { checkPassword } from "../lib/qm.mjs";
@@ -103,7 +103,6 @@ async function signup(req, context, s) {
   if (w.modified === false) return reply({ error: "That username is taken. Try another." }, 409);
   const we = await s.setJSON(emailKey(email), { u }, { onlyIfNew: true });
   if (we.modified === false) { await s.delete("u/" + u).catch(() => {}); return reply({ error: "That email already has an account. Sign in, or reset your password." }, 409); }
-  await s.setJSON("p/" + u, freshPortfolio(name, b.share === true || b.share === "on" || b.share === "true"));
   const sent = await sendConfirm(s, u, acct).catch(() => false);
   return reply({ ok: true, name, mail: sent }, 200, signInCookies(req, u, acct));
 }

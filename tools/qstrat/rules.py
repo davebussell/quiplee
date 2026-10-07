@@ -20,7 +20,7 @@ import os
 from .content import TICKERS, TIMED
 from .render import DISCLAIMER, LIGHT_ON, LIGHT_OFF, light_badge, dlong
 from .members import member_tag, locked_page
-from . import paper
+from .engine import cad_per_usd
 
 e = html.escape
 PRESET_N = 20
@@ -148,7 +148,7 @@ def rules_page(site, guides):
     path, depth = "rules/", 1
     h = lambda x: site.href(depth, x)
     pre = presets(site, guides)
-    fx = paper.cad_per_usd() or FX_FALLBACK
+    fx = cad_per_usd() or FX_FALLBACK
     title = "Your own rules: set the Start/Stop light and check your portfolio"
     desc = (f"Be The Puck Members choose which of the {len(TIMED)} plays count, set when the light turns Start or Stop, "
             "and check their portfolio against their own limits.")

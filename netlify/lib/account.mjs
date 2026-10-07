@@ -1,13 +1,14 @@
-/* account.mjs: the one Be The Puck account, shared by the game (paper.mjs), My Puck
- * (account.mjs), the member tools (member.mjs) and the nightly emails.
+/* account.mjs: the one Be The Puck account, shared by My Puck (account.mjs), the
+ * member tools (member.mjs) and the nightly emails.
  *
- * An account lives in the Blobs store "paper" (it began as the game's account):
+ * An account lives in the Blobs store "paper" (it began as the paper-trading game's,
+ * which was retired in October 2026; old p/ and h/ records are left as they were):
  *   u/<name>  {name, pw, v, created, email, email_ok, email_at, confirm_sent,
  *              follow: [SYM], alerts: {on, level: "light"|"all"}, rules, seen}
  *   p/<name>  the paper portfolio      h/<name> its nightly values
  *   e/<hash>  {u}: who owns an email address (hash keyed with QM_SECRET)
  *   as/<name> the calls last emailed (so an email only goes out on a change)
- * <name> is the lower-cased username. Old game accounts have no email until the
+ * <name> is the lower-cased username. Accounts made for the old game have no email until the
  * player adds one in My Puck.
  *
  * Cookies, all signed with QM_SECRET (see qm.mjs):
@@ -31,7 +32,6 @@ export const PT_DAYS = 180;
 export const FREE_UNTIL = Date.UTC(2027, 0, 1, 5, 0, 0);
 export const FREE_UNTIL_LABEL = "January 1, 2027";
 export const freeNow = () => Date.now() < FREE_UNTIL;
-export const START = 100000;
 export const MAX_FOLLOW = 100;
 export const NAME_RX = /^[A-Za-z0-9_]{3,20}$/;
 export const EMAIL_RX = /^[^\s@<>"',;]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
@@ -129,10 +129,6 @@ export async function updateAccount(s, u, fn) {
     if (w.modified !== false) return { acct: next };
   }
   return { error: "Busy, please try again.", status: 409 };
-}
-
-export function freshPortfolio(name, share, t = new Date().toISOString()) {
-  return { name, share: !!share, hidden: false, created: t, start: START, cash: START, pos: {}, trades: [], realized: 0, n_trades: 0, recent: [], resets: 0 };
 }
 
 /** A fixed-window counter: true if this attempt is over the limit. */

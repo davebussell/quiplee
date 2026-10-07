@@ -48,7 +48,7 @@ def free_bar(site, depth):
     h = lambda x: site.href(depth, x)
     return (f'<div class="free-bar"><div class="wrap"><span class="tag mem">{LOCK_SVG}Members</span> '
             f'<span>Free with an account until <b>{FREE_UNTIL}</b>, then {PRICE} a month. '
-            f'The game and the Start/Stop light stay free.</span> <a href="{h("members/")}">Details</a></div></div>')
+            f'The screener, the Theory tester and the Start/Stop light stay free.</span> <a href="{h("members/")}">Details</a></div></div>')
 
 
 def member_tag():
@@ -74,7 +74,7 @@ def lock_card(site, depth, next_path, what="report"):
 <div class="lock-split">
 <div class="auth-slot" data-auth data-auth-next="reload" data-auth-context="member"><noscript><p><a class="btn primary" href="{h('me/')}">Create your free account</a></p></noscript></div>
 <div class="lock-join"><p class="eyebrow">Members get</p><ul class="check-list">{perks}</ul>
-<p class="small muted">The game, the Start/Stop light and its flip emails are free for good. <a href="{h('members/')}">What's included</a></p>
+<p class="small muted">The screener, the Theory tester, the Start/Stop light and its flip emails are free for good. <a href="{h('members/')}">What's included</a></p>
 {pw_details(next_path, "lock-pw")}</div>
 </div>
 </section>"""
@@ -124,14 +124,14 @@ def members_page(site):
     cards = "".join(f'<a class="card mem-card" href="{h(u)}"><span class="eyebrow">Included</span><span class="name">{t}</span><span class="muted small">{d}</span></a>'
                     for t, d, u in benefits)
     body = f"""<section class="pair-head"><p class="eyebrow">Be The Puck Members</p><h1 class="h1">Every member tool, free until {FREE_UNTIL}</h1>
-<p class="lede">Everything on Be The Puck's stock and play pages stays free, and so do the paper-trading game, the Start/Stop light and its flip emails. Members also get the top-picks tracker, every report, their own rules and play-by-play emails. Create a free account and they're yours until {FREE_UNTIL}; after that, {PRICE} a month.</p>
+<p class="lede">Everything on Be The Puck's stock and play pages stays free, and so do the screener, the Theory tester, the Start/Stop light and its flip emails. Members also get the top-picks tracker, every report, their own rules and play-by-play emails. Create a free account and they're yours until {FREE_UNTIL}; after that, {PRICE} a month.</p>
 <div class="mem-state" data-mem-state hidden><span class="tag live">You're a member</span> <a href="{h('me/')}">Open My Puck</a> · <a href="{h('picks/')}">Top picks</a> · <a href="{h('rules/')}">Your rules</a> · <a href="{h('articles/')}">Reports</a></div></section>
 
 <section><div class="grid grid-4">{cards}</div></section>
 
 <section class="split mem-split">
 <div class="card prose" id="join"><p class="eyebrow">Join free</p><h2 class="h2">Free until {FREE_UNTIL}</h2>
-<p>One account for everything: the game, the stocks you follow, your emails and every member tool.</p>
+<p>One account for everything: the stocks you follow, your emails and every member tool.</p>
 <div data-signed-out><div class="auth-slot" data-auth data-auth-next="/me/?welcome=1" data-auth-context="member"></div></div>
 <div class="mem-in" data-signed-in hidden><p><span class="tag live">Signed in</span> Member tools are open on this account until {FREE_UNTIL}.</p>
 <div class="hero-links"><a class="btn primary" href="{h('me/')}">Open My Puck</a><a class="btn" href="{h('picks/')}">Top picks</a><a class="btn" href="{h('rules/')}">Your rules</a></div></div>
@@ -141,16 +141,16 @@ def members_page(site):
 <li><b>Today</b><span>Create a free account with your email. Top picks, reports, your own rules and play-by-play emails open straight away.</span></li>
 <li><b>Before then</b><span>We'll email every member about the switch, with the date and the price, before anything changes.</span></li>
 <li><b>From {FREE_UNTIL}</b><span>Member tools are {PRICE} a month through PayPal, cancel any time. Nothing is charged unless you choose to subscribe.</span></li>
-<li><b>Always free</b><span>Your account, the paper-trading game, every stock page and play, the Start/Stop light and its flip emails.</span></li>
+<li><b>Always free</b><span>Your account, the screener, the Theory tester, every stock page and play, the Start/Stop light and its flip emails.</span></li>
 </ol>
 {pw_details("picks/", "mem-pw")}
 {sub_note}</div>
 </section>
 
 <section class="card prose"><p class="eyebrow">Good to know</p><ul>
-<li><b>What's free for good.</b> Every stock page, every play, the Start/Stop light and its flip emails, the markets page, the watchlist, the paper-trading game, the guides and the Learn tracks.</li>
+<li><b>What's free for good.</b> Every stock page, every play, the Start/Stop light and its flip emails, the markets page, the screener, the Theory tester, the watchlist, the guides and the Learn tracks.</li>
 <li><b>What the picks are.</b> The top five names on Be The Puck's public <a href="{h('stocks/?sort=score')}">strongest-setups list</a>, held by a fixed rule and tracked from the close they go in. A rule, not anyone's opinion, and not advice for you.</li>
-<li><b>From {FREE_UNTIL}.</b> {PRICE} a month, billed through PayPal, cancel any time. Your account, game and Start/Stop emails carry on either way.</li>
+<li><b>From {FREE_UNTIL}.</b> {PRICE} a month, billed through PayPal, cancel any time. Your account, the Theory tester and Start/Stop emails carry on either way.</li>
 <li><b>Privacy.</b> Be The Puck keeps your email, your username and what you choose to follow, and nothing else. Payments will be handled by PayPal; Be The Puck never sees your card.</li>
 </ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck doesn't know your goals, taxes or timeline, and takes no positions in the names it covers.</p></section>"""
     site.add(path, site.shell(path, "Members · free until January 1, 2027",

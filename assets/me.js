@@ -1,7 +1,7 @@
 /* me.js: My Puck (/me/). Signed out, the page shows the sign-up widget (account.js).
- * Signed in, it draws the dashboard from /api/account/me (the account), /api/paper/me
- * (the game) and data/reads.json (every covered name's light and read):
- * the stocks you follow, your email alerts, your game, the member tools and settings.
+ * Signed in, it draws the dashboard from /api/account/me (the account) and
+ * data/reads.json (every covered name's light and read): the stocks you follow,
+ * your email alerts, a shortcut into the Theory tester, the member tools and settings.
  * Also handles the links in emails: ?reset= (new password), ?stop= (stop emails),
  * ?confirmed=1 / ?confirm=expired and ?welcome=1. */
 (function () {
@@ -12,7 +12,7 @@
   var STOCK = app.getAttribute('data-stock'), FREE = app.getAttribute('data-free') || 'January 1, 2027';
   var POPULAR = ['NVDA', 'AAPL', 'MSFT', 'SHOP.TO', 'RY.TO', 'BTC-USD', 'TSLA', 'TD.TO'];
   var q = new URLSearchParams(location.search);
-  var R = null, A = null, P = null;
+  var R = null, A = null;
 
   function $(s, r) { return (r || app).querySelector(s); }
   function $$(s, r) { return [].slice.call((r || app).querySelectorAll(s)); }
@@ -90,24 +90,21 @@
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     var on = list.filter(function (s) { return R.t[s].L === 1; });
     var flipped = list.filter(function (s) { var t = R.t[s]; return t.since && daysBetween(t.since, R.asof) <= 7; });
-    var g = P && P.total != null ? P : null;
     var al = A.alerts || {};
     var mailState = !A.email ? ['Add your email', 'warn'] : !A.email_ok ? ['Confirm your email', 'warn'] : al.on ? ['On', 'on'] : ['Off', ''];
-    var bench = null;
-    if (g && g.history && g.history.length > 1) {
-      var h = g.history.filter(function (x) { return x[2] != null; });
-      if (h.length > 1) bench = h[h.length - 1][2] / h[0][2] - 1;
-    }
+    var k = 0, n = 0;
+    list.forEach(function (s) { k += R.t[s].k || 0; n += R.t[s].of || 0; });
+    var avg = n ? Math.round(100 * k / n) : null;
     return '<div class="me-kpis">' +
       '<div class="card tile"><span class="tile-label">Your stocks on Start</span><span class="tile-value"><b data-count="' + on.length + '">' + on.length + '</b><small> of ' + list.length + '</small></span>' + bar(on.length, list.length || 1) + '<span class="tile-note">' + (list.length ? (list.length - on.length) + ' on Stop' : 'Follow a few to begin') + '</span></div>' +
       '<div class="card tile"><span class="tile-label">Flipped in the last week</span><span class="tile-value">' + flipped.length + '</span><span class="tile-note">' + (flipped.length ? flipped.slice(0, 4).map(function (s) { return esc(R.t[s].s); }).join(', ') : 'No changes on your list') + '</span></div>' +
-      '<div class="card tile"><span class="tile-label">Your game</span><span class="tile-value">' + (g ? 'US$' + num(g.total, 0) : 'US$100,000') + '</span><span class="tile-note">' + (g ? '<b class="' + cls(g.ret) + '">' + pct(g.ret) + '</b> since you started' + (bench != null ? ' · S&amp;P ' + pct(bench) : '') : 'Waiting for your first trade') + '</span></div>' +
+      '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small> of 100</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average, across your list') + '</span></div>' +
       '<div class="card tile"><span class="tile-label">Email alerts</span><span class="tile-value me-mail ' + mailState[1] + '">' + mailState[0] + '</span><span class="tile-note">' + (A.last_sent ? 'Last sent after the ' + esc(day(A.last_sent)) + ' close' : 'Sent after the close, only on a change') + '</span></div>' +
       '</div>';
   }
   function notice() {
     if (!A.email) {
-      return '<div class="me-note warn"><b>Add your email to unlock the member tools</b> and get alerts. Your game and username stay as they are.' +
+      return '<div class="me-note warn"><b>Add your email to unlock the member tools</b> and get alerts. Your username stays as it is.' +
         ' <a href="#account">Add it below</a></div>';
     }
     if (!A.email_ok) {
@@ -136,26 +133,17 @@
     }
     return '<section class="card me-card" id="alerts"><div class="me-card-h"><h2 class="h3">Email alerts</h2></div>' + body + '<p class="pt-msg" data-al-msg role="status"></p></section>';
   }
-  function spark(hist) {
-    var v = (hist || []).map(function (x) { return x[1]; });
-    if (v.length < 2) return '';
-    var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v), W = 260, H = 54;
-    var pts = v.map(function (y, i) { return (i * W / (v.length - 1)).toFixed(1) + ',' + (H - 4 - (hi > lo ? (y - lo) / (hi - lo) : .5) * (H - 8)).toFixed(1); });
-    return '<svg class="me-spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--violet-ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
-  }
-  function gameCard() {
-    var g = P && P.total != null ? P : null;
-    if (!g) {
-      return '<section class="card me-card"><div class="me-card-h"><h2 class="h3">Your game</h2></div><p class="small muted">Your US$100,000 of play money is waiting. Buy any name Be The Puck covers at the latest price.</p>' +
-        '<a class="btn primary glow" href="/paper/">Make your first trade</a></section>';
-    }
-    var top = (g.rows || []).slice(0, 4).map(function (r) {
-      return '<li><span><b>' + esc(r.short) + '</b> <small class="muted">' + esc(r.name) + '</small></span><span class="mono ' + cls(r.gain_pct) + '">' + pct(r.gain_pct) + '</span></li>';
-    }).join('');
-    return '<section class="card me-card"><div class="me-card-h"><h2 class="h3">Your game</h2><span class="tag">' + (g.share ? 'On the leaderboard' : 'Private') + '</span></div>' +
-      '<p class="me-big">US$' + num(g.total, 2) + ' <small class="' + cls(g.ret) + '">' + pct(g.ret) + '</small></p>' + spark(g.history) +
-      (top ? '<ul class="me-pos">' + top + '</ul>' : '<p class="small muted">All cash for now.</p>') +
-      '<div class="hero-links"><a class="btn sm" href="/paper/">Open the game</a><a class="btn sm" href="/paper/leaders/">Leaderboard</a></div></section>';
+  function theoryCard() {
+    var list = (A.follow || []).filter(function (s) { return R.t[s]; });
+    var opts = list.map(function (s) { return '<option value="' + esc(R.t[s].u) + '">' + esc(R.t[s].s) + ' · ' + esc(R.t[s].n) + '</option>'; }).join('');
+    var fams = [['all', 'All 100 plays'], ['fam:trend', 'Trend following'], ['fam:breakout', 'Breakouts & channels'], ['fam:momentum', 'Momentum'],
+      ['fam:reversion', 'Mean reversion'], ['fam:volume', 'Volume & money flow'], ['fam:pattern', 'Candles & chart patterns'], ['fam:calendar', 'Calendar']];
+    return '<section class="card me-card" id="theory"><div class="me-card-h"><h2 class="h3">Test a theory</h2></div>' +
+      '<p class="small muted">Pick one of your stocks and a theory: see the reading, why, and every play\'s reason to buy or not.</p>' +
+      (list.length ? '<form class="me-th" action="/theory/" method="get"><label class="small muted" for="me-th-s">Stock</label><select id="me-th-s" name="s">' + opts + '</select>' +
+        '<label class="small muted" for="me-th-t">Theory</label><select id="me-th-t" name="t">' + fams.map(function (f) { return '<option value="' + f[0] + '">' + esc(f[1]) + '</option>'; }).join('') + '</select>' +
+        '<button class="btn primary" type="submit">Test it</button></form>'
+        : '<a class="btn primary" href="/theory/">Open the Theory tester</a>') + '</section>';
   }
   function rulesLine() {
     var r = A.rules;
@@ -186,7 +174,7 @@
       '<label>New password<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>' +
       '<button class="btn" type="submit">Change password</button><p class="auth-msg" role="alert"></p></form></details>' +
       '<details class="pt-more"><summary>Delete my account</summary><form class="auth-form" data-acct="delete" novalidate>' +
-      '<p class="small muted">Removes your account, game, followed stocks and emails for good.</p>' +
+      '<p class="small muted">Removes your account, followed stocks and emails for good.</p>' +
       '<label>Password<input name="password" type="password" autocomplete="current-password" required></label>' +
       '<button class="btn" type="submit">Delete my account</button><p class="auth-msg" role="alert"></p></form></details></section>';
   }
@@ -209,13 +197,13 @@
     box.innerHTML =
       '<div class="me-top"><div><p class="eyebrow">My Puck</p><h1 class="h1 me-hi">' + greeting() + ', <em>' + esc(A.name) + '</em></h1>' +
       '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' stock' + ((A.follow || []).length === 1 ? '' : 's') + ' followed</p></div>' +
-      '<div class="hero-links"><a class="btn primary glow" href="/paper/">Trade</a><a class="btn" href="/watchlist/">Watchlist</a></div></div>' +
+      '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
       notice() + kpis() +
       '<div class="me-grid"><section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
       '<div class="me-add"><input type="search" data-add-q placeholder="Follow a stock: NVDA, Shopify, gold…" autocomplete="off" aria-label="Follow a stock"><div class="me-sug" data-sug hidden></div></div>' +
       (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Follow the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
-      '<div class="me-side">' + alertsCard() + gameCard() + '</div></div>' +
+      '<div class="me-side">' + alertsCard() + theoryCard() + '</div></div>' +
       toolsCard() + accountCard();
     box.hidden = false;
     wire(box, local);
@@ -287,11 +275,8 @@
       $('[data-me-out]').hidden = true;
       $('[data-me-in]').hidden = false;
       $('[data-me-in]').innerHTML = '<div class="me-skel"><div></div><div></div><div></div></div>';
-      return Promise.all([
-        getJSON(app.getAttribute('data-reads')).catch(function () { return { asof: null, t: {} }; }),
-        getJSON('/api/paper/me').catch(function () { return null; })
-      ]).then(function (res) {
-        R = res[0]; P = res[1] && res[1].total != null ? res[1] : null;
+      return getJSON(app.getAttribute('data-reads')).catch(function () { return { asof: null, t: {} }; }).then(function (res) {
+        R = res;
         draw();
         if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ block: 'start' }); }
       });
