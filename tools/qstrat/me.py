@@ -11,6 +11,7 @@ import html
 from .content import TICKERS, TIMED
 from .render import light_badge, money, dlong, fill_bar
 from .members import FREE_UNTIL, PRICE
+from .media import page_art, PAGE_ART
 
 e = html.escape
 SAMPLE = ["NVDA", "AAPL", "SHOP.TO", "RY.TO", "MSFT", "BTC-USD"]
@@ -54,7 +55,7 @@ def me_page(site):
 <div class="pw-row"><input id="me-np" name="password" type="password" autocomplete="new-password" minlength="8" required><button type="button" class="pw-eye">Show</button></div>
 <button class="btn primary" type="submit">Save and sign in</button><p class="auth-msg" role="alert"></p></form></section>
 
-<section class="me-out" data-me-out>
+<section class="me-out has-art" data-me-out>{page_art(h, PAGE_ART["me/"], "50% 60%")}
 <div class="me-out-grid">
 <div class="me-out-copy"><p class="eyebrow">My Puck</p>
 <h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>

@@ -14,6 +14,7 @@ import pandas as pd
 from . import macro
 from . import stockview as sv
 from .content import TICKERS, TIMED
+from .media import page_art, WEATHER_IMG
 
 e = html.escape
 STATUS_WORD = {"calm": "Calm", "watch": "Watch", "warning": "Warning"}
@@ -266,7 +267,7 @@ def markets_page(site):
                   "warning": "The trend has broken: the index is below its long average or most plays have stepped aside, which is how past falls announced themselves."}.get(tst, "")
 
     body = f"""
-<section class="pair-head"><p class="eyebrow">Markets · closes to {M['asof'].strftime('%b %-d, %Y')}</p>
+<section class="pair-head has-art">{page_art(h, WEATHER_IMG[M["weather"]], "50% 40%")}<p class="eyebrow">Markets · closes to {M['asof'].strftime('%b %-d, %Y')}</p>
 <h1 class="h1">Market weather: <span class="wx {weather_cls}">{e(M['weather'])}</span></h1>
 <p class="lede">{e(summary_sentence(M))} {trend_line}</p>
 <div class="gchips">{chips}</div>

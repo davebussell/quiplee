@@ -10,7 +10,8 @@
   if (!app) return;
   var META = JSON.parse(document.getElementById('th-data').textContent);
   var P = META.plays, FAM = {}, NAMES = META.names;
-  META.fams.forEach(function (f) { FAM[f[0]] = f[1]; });
+  var FIC = {};
+  META.fams.forEach(function (f) { FAM[f[0]] = f[1]; FIC[f[0]] = f[2] || ''; });
   var SRC = app.getAttribute('data-src'), VER = app.getAttribute('data-v'), STOCK = app.getAttribute('data-stock');
   var out = document.getElementById('th-out'), qIn = document.getElementById('th-q'), sug = document.getElementById('th-sug');
   var sel = document.getElementById('th-theory');
@@ -90,7 +91,7 @@
     }
     var href = STOCK + D.u + '/' + m.p + '/';
     return '<article class="th-card ' + cls + '"><header class="th-card-h"><span class="th-say ' + cls + '">' + say + '</span>' +
-      '<a class="th-name" href="' + esc(href) + '">' + esc(m.name) + '</a><span class="th-by">' + esc(FAM[m.f]) + ' · ' + esc(m.by) + '</span></header>' +
+      '<a class="th-name" href="' + esc(href) + '">' + esc(m.name) + '</a><span class="th-by">' + (FIC[m.f] || '') + esc(FAM[m.f]) + ' · ' + esc(m.by) + '</span></header>' +
       '<p class="th-idea">' + esc(m.idea) + '</p><dl class="th-why"><dt>Why</dt><dd>' + why + '</dd>' + checks + since + nxt + rec + '</dl>' +
       '<a class="th-more" href="' + esc(href) + '">Chart and every call</a></article>';
   }

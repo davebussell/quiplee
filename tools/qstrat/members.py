@@ -20,6 +20,7 @@ How the lock works
 """
 import html
 import os
+from .media import page_art, PAGE_ART
 
 e = html.escape
 PRICE = "$5"
@@ -123,7 +124,7 @@ def members_page(site):
     ]
     cards = "".join(f'<a class="card mem-card" href="{h(u)}"><span class="eyebrow">Included</span><span class="name">{t}</span><span class="muted small">{d}</span></a>'
                     for t, d, u in benefits)
-    body = f"""<section class="pair-head"><p class="eyebrow">Be The Puck Members</p><h1 class="h1">Every member tool, free until {FREE_UNTIL}</h1>
+    body = f"""<section class="pair-head has-art">{page_art(h, PAGE_ART["members/"], "55% 55%")}<p class="eyebrow">Be The Puck Members</p><h1 class="h1">Every member tool, free until {FREE_UNTIL}</h1>
 <p class="lede">Everything on Be The Puck's stock and play pages stays free, and so do the screener, the Theory tester, the Start/Stop light and its flip emails. Members also get the top-picks tracker, every report, their own rules and play-by-play emails. Create a free account and they're yours until {FREE_UNTIL}; after that, {PRICE} a month.</p>
 <div class="mem-state" data-mem-state hidden><span class="tag live">You're a member</span> <a href="{h('me/')}">Open My Puck</a> · <a href="{h('picks/')}">Top picks</a> · <a href="{h('rules/')}">Your rules</a> · <a href="{h('articles/')}">Reports</a></div></section>
 

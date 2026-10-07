@@ -14,6 +14,7 @@ import pandas as pd
 
 from .content import TICKERS, TIMED, FAMILIES, GROUP_ORDER
 from . import stockview as sv
+from .icons import icon
 
 e = html.escape
 RISK = ["Low", "Moderate", "High", "Very high"]
@@ -177,7 +178,10 @@ def crash_card(site, depth):
         k, n = site.consensus(spx)
         plays = (f'<a class="cc-plays" href="{h("stocks/" + spx["slug"] + "/")}"><span>The plays on the S&amp;P 500</span>'
                  f'<b>{k} of {n} hold it</b>{light_badge(L)}</a>')
-    return f"""<div class="card crash-card" id="step-1">
+    from .media import pic, WEATHER_IMG
+    sky = pic(h, WEATHER_IMG[M["weather"]], sizes="(max-width: 900px) 100vw, 560px", cls="cc-sky-img", decorative=True)
+    return f"""<div class="card crash-card wx-{cls}" id="step-1">
+  <div class="cc-sky" aria-hidden="true">{sky}</div>
   <div class="cc-top"><span class="step-tag"><span class="step-n">1</span>The market</span><span class="mono small muted">{dlong(M['asof'])}</span></div>
   <h2 class="cc-q">Is the market about to crash?</h2>
   <p class="cc-verdict"><span class="wx {cls}">{e(M['weather'])}.</span> {e(answer)}</p>
@@ -241,8 +245,8 @@ def screener(site, depth):
 <div class="scr-steps card">
   <fieldset class="scr-step is-next" id="step-2"><legend><span class="step-n">2</span>What's your play?</legend>
     <div class="scr-side" role="group" aria-label="Your play">
-      <button type="button" data-side="buy" aria-pressed="true"><b>Buying</b><span>Count the plays that hold it</span></button>
-      <button type="button" data-side="sell" aria-pressed="false"><b>Selling</b><span>Count the plays that are out</span></button>
+      <button type="button" data-side="buy" aria-pressed="true"><b>{icon("buy")}Buying</b><span>Count the plays that hold it</span></button>
+      <button type="button" data-side="sell" aria-pressed="false"><b>{icon("sell")}Selling</b><span>Count the plays that are out</span></button>
     </div>
   </fieldset>
   <fieldset class="scr-step" id="step-3"><legend><span class="step-n">3</span>Where are you looking?</legend>

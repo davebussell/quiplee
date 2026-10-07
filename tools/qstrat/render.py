@@ -9,9 +9,13 @@ import json
 import math
 import os
 
+from urllib.parse import quote
+
 import numpy as np
 import pandas as pd
 
+from .icons import mark, app_icon_svg, icon
+from .media import pic, page_art, PAGE_ART
 from .linker import link_terms
 from . import stockview as sv
 from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, GROUP_ORDER, BAR_WORD,
@@ -76,7 +80,7 @@ def light_badge(L, href=None, big=False):
     return f'<a class="{cls}" href="{href}" title="{tip}">{inner}</a>' if href else f'<span class="{cls}" title="{tip}">{inner}</span>'
 FONTS = ("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700"
          "&family=Geist+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap")
-ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b0f17'/%3E%3Cellipse cx='27' cy='44' rx='18' ry='7.5' fill='%235d6a82'/%3E%3Crect x='9' y='37' width='36' height='7' fill='%235d6a82'/%3E%3Cellipse cx='27' cy='37' rx='18' ry='7.5' fill='%23e7edf7'/%3E%3Cpath d='M44 27 L51.5 13 L59 27 Z' fill='%231fd093'/%3E%3C/svg%3E")
+ICON = "data:image/svg+xml," + quote(app_icon_svg())
 NAV = [("markets/", "Markets"), ("stocks/", "Stocks"), ("theory/", "Theory tester"), ("watchlist/", "Watchlist"), ("strategies/", "Plays"),
        ("learn/", "Learn"), ("articles/", "Articles"), ("desk/", "Live desk")]
 NAV_ACTIVE = {"thinkers/": "strategies/"}   # analyst pages sit under Plays in the menu
@@ -527,6 +531,7 @@ class Site:
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0f17">
 <link rel="icon" type="image/svg+xml" href="{ICON}">
+<link rel="apple-touch-icon" href="{h('apple-touch-icon.png')}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{FONTS}">
@@ -535,7 +540,7 @@ class Site:
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head"><div class="wrap head-row">
-<a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
+<a class="logo" href="{h('')}" aria-label="Be The Puck, home">{mark(28, gid="bp-trail-h")}<span class="logo-word">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></span></a>
 <nav class="site-nav" id="site-nav" aria-label="Main">{nav}<a class="nav-me" href="{h('me/')}">My Puck</a></nav>
 <span class="head-meta" data-mkt data-asof="{self.asof.strftime('%Y-%m-%d')}"><i aria-hidden="true"></i><span data-mkt-txt>{dshort(self.asof)} close</span></span>
 <a class="acct-btn" href="{h('me/')}" data-acct-btn><span class="acct-ava" aria-hidden="true"></span><span data-acct-label>Sign in</span></a>
@@ -546,7 +551,7 @@ class Site:
 </main>
 {cta}<footer class="site-foot"><div class="wrap">
 <div class="foot-cols">
-<div class="foot-brand"><a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
+<div class="foot-brand"><a class="logo" href="{h('')}" aria-label="Be The Puck, home">{mark(26, gid="bp-trail-f")}<span class="logo-word">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></span></a>
 <p>{len(TIMED)} published trading plays run on real prices after every U.S. close, with the price that would change each one's mind. It takes no positions in the names it covers.</p></div>
 <div><p class="foot-h">Stocks</p><a href="{h('stocks/')}">All stocks</a><a href="{h('watchlist/')}">Watchlist</a><a href="{h('markets/')}">Markets</a><a href="{h('desk/')}">Live desk</a></div>
 <div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}">My Puck</a></div>
@@ -746,10 +751,14 @@ class Site:
                 ("markets/", "Market weather", "All nine crash gauges", "Each one's history back to the 1920s, and where it stood at past market tops."),
                 ("guides/", "Guides", "Which predictions work?", "Every family and every play, graded against buying and holding since 2005."),
                 ("alerts/", "Free email alerts", "Know when a light flips", "An email with the analysis the evening a stock you follow turns Start or Stop.")]
-        more_html = "".join(f'<a class="card more-card" href="{h(u)}"><span class="eyebrow">{e(k)}</span><b>{e(t)}</b><span class="muted small">{e(d)}</span></a>' for u, k, t, d in more)
+        from .media import WEATHER_IMG
+        wx_img = WEATHER_IMG.get((self.macro or {}).get("weather"), "wx-unsettled")
+        more_img = {"theory/": "theory-board", "markets/": wx_img, "guides/": "puck-row", "alerts/": "phone-alert"}
+        more_html = "".join(f'<a class="card more-card" href="{h(u)}"><span class="more-img">{pic(h, more_img[u], sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 280px", decorative=True)}</span>'
+                            f'<span class="eyebrow">{e(k)}</span><b>{e(t)}</b><span class="muted small">{e(d)}</span></a>' for u, k, t, d in more)
         body = f"""
 <section class="hero hero-v3">
-  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-art" aria-hidden="true">{pic(h, "hero-trail", sizes="100vw", cls="hero-art-img", eager=True, decorative=True)}</div>
   <div class="hero-copy">
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
     <h1 class="hero-h1">Don't chase where the stock is. Chase where it's <em>going</em>.</h1>
@@ -839,12 +848,12 @@ class Site:
                          f'<td class="r" data-v="{sm["beat_sharpe"] / sm["graded"] if sm["graded"] else ""}">{sm["beat_sharpe"]} of {sm["graded"]}</td>'
                          f'<td class="r" data-v="{sm["cut_dd"] / sm["graded"] if sm["graded"] else ""}">{sm["cut_dd"]} of {sm["graded"]}</td>'
                          f'<td class="r">{sm["switches"]:.1f}</td></tr>')
-            secs += f"""<section id="fam-{k}" class="fam-sec"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>
+            secs += f"""<section id="fam-{k}" class="fam-sec"><div class="sec-head"><h2 class="h2 fam-h"><span class="fam-ic">{icon(k)}</span>{e(name)}</h2><p>{e(desc)}</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Checks</th><th class="r">In now</th><th class="r">Calls right</th><th class="r">Beat B&amp;H Sharpe</th><th class="r">Cut drawdown</th><th class="r">Switches / yr</th></tr></thead>
 <tbody>{rows}</tbody></table></div></section>"""
         bh = PLAY["buy-and-hold"]
         body = f"""
-<section class="pair-head"><p class="eyebrow">Plays</p><h1 class="h1">{len(TIMED)} plays, one scorecard</h1>
+<section class="pair-head has-art">{page_art(h, PAGE_ART["strategies/"], "60% 60%")}<p class="eyebrow">Plays</p><h1 class="h1">{len(TIMED)} plays, one scorecard</h1>
 <p class="lede">Each play is written down exactly as Be The Puck tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into seven families.</p>
 <div class="chips fam-chips">{chips}</div></section>
 {secs}
@@ -955,7 +964,7 @@ class Site:
                 continue
             chips += f'<a href="#fam-{k}">{e(name)} <span class="muted">{len(group)}</span></a>'
             cards = "".join(self.thinker_card(th, depth) for th in group)
-            secs += f'<section id="fam-{k}" class="fam-sec"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div><div class="grid grid-3">{cards}</div></section>'
+            secs += f'<section id="fam-{k}" class="fam-sec"><div class="sec-head"><h2 class="h2 fam-h"><span class="fam-ic">{icon(k)}</span>{e(name)}</h2><p>{e(desc)}</p></div><div class="grid grid-3">{cards}</div></section>'
         extra = "".join(self.thinker_card(th, depth) for th in THINKERS if th.get("benchmark") or th.get("skeptic"))
         n_an = n_people()
         body = f"""
@@ -1091,7 +1100,7 @@ class Site:
                                          ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
         n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R])
         body = f"""
-<section class="pair-head"><p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and how many plays agree</h1>
+<section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and how many plays agree</h1>
 <p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list: how many of the {len(TIMED)} plays hold each one, how far analysts' targets sit above the price, the combined score and how exposed it is to a crash. Sort by any column, filter by group, or open a name for its chart and every play.</p>
 <div class="seg seg-sm st-views" role="group" aria-label="View"><button type="button" aria-pressed="true" data-view="list">Stock list</button><button type="button" aria-pressed="false" data-view="families">By play family</button></div></section>
 
@@ -1131,9 +1140,9 @@ class Site:
         for fk, fname, _ in FAMILIES:
             ps = [p for p in TIMED if p["family"] == fk]
             kk, nn = self.consensus(t, ps)
-            tiles += (f'<a class="card fam-tile" href="#fam-{fk}"><span class="tile-label">{e(fname)}</span>'
+            tiles += (f'<a class="card fam-tile" href="#fam-{fk}"><span class="tile-label">{icon(fk)}{e(fname)}</span>'
                       f'<span class="fam-n"><b>{kk}</b> of {nn} in</span>{fill_bar(kk, nn)}</a>')
-            rows += f'<tr class="grp" id="fam-{fk}"><td colspan="6">{e(fname)}</td></tr>'
+            rows += f'<tr class="grp" id="fam-{fk}"><td colspan="6">{icon(fk)} {e(fname)}</td></tr>'
             for s in ps:
                 x = self.r(sym, s["slug"])
                 nm = next_move(x, s, t)

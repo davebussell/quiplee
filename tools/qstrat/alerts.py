@@ -9,6 +9,7 @@ import html
 from .content import TICKERS
 from .render import DISCLAIMER, LIGHT_ON, LIGHT_OFF, light_badge, dlong
 from . import stockview as sv
+from .media import page_art, PAGE_ART
 
 e = html.escape
 
@@ -46,7 +47,7 @@ def alerts_page(site):
     path, depth = "alerts/", 1
     h = lambda x: site.href(depth, x)
     uni = h("data/tickers.json") + "?v=" + site.ver
-    body = f"""<section class="pair-head"><p class="eyebrow">Free email alerts</p><h1 class="h1">Get an email when the light flips</h1>
+    body = f"""<section class="pair-head has-art">{page_art(h, PAGE_ART["alerts/"], "50% 60%")}<p class="eyebrow">Free email alerts</p><h1 class="h1">Get an email when the light flips</h1>
 <p class="lede">Pick the stocks you care about. When the Start/Stop light changes on one of them, because enough of Be The Puck's plays have moved in or out, we email you the change and the analysis after the close. Free, and you can stop any time.</p></section>
 
 <div id="al-app" class="al-app" data-api="/api/alerts/" data-universe="{e(uni)}" data-stock="{e(h('stocks/{s}/'))}">

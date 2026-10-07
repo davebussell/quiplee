@@ -15,6 +15,8 @@ import math
 import pandas as pd
 
 from .content import TICKERS, TIMED, FAMILIES, credit
+from .media import page_art, PAGE_ART
+from .icons import icon
 
 e = html.escape
 FAM = {k: name for k, name, _ in FAMILIES}
@@ -128,7 +130,7 @@ def reason_card(D, i, meta, depth, h):
         rec = f'<dt>Its record on {e(D["s"])}</dt><dd>{rec}</dd>'
     href = h(f'stocks/{D["u"]}/{m["p"]}/')
     return (f'<article class="th-card {cls}"><header class="th-card-h"><span class="th-say {cls}">{say}</span>'
-            f'<a class="th-name" href="{href}">{e(m["name"])}</a><span class="th-by">{e(FAM[m["f"]])} · {e(m["by"])}</span></header>'
+            f'<a class="th-name" href="{href}">{e(m["name"])}</a><span class="th-by">{icon(m["f"])}{e(FAM[m["f"]])} · {e(m["by"])}</span></header>'
             f'<p class="th-idea">{e(m["idea"])}</p><dl class="th-why"><dt>Why</dt><dd>{why}</dd>{checks}{since}{nxt}{rec}</dl>'
             f'<a class="th-more" href="{href}">Chart and every call</a></article>')
 
@@ -213,9 +215,9 @@ def theory_page(site):
     out = (verdict_html(D, "all", meta) + roll_html(D, "all", meta, depth, h)) if D else ""
     pop = "".join(f'<a class="chip-btn" href="?s={e(t["slug"])}" data-pick="{e(t["slug"])}">{e(t["short"])}</a>'
                   for sym in POPULAR for t in TICKERS if t["sym"] == sym and (sym, "buy-and-hold") in site.R)
-    data = json.dumps({"plays": meta, "fams": [[k, name] for k, name, _ in FAMILIES], "names": names, "default": t0["slug"] if t0 else None},
+    data = json.dumps({"plays": meta, "fams": [[k, name, icon(k)] for k, name, _ in FAMILIES], "names": names, "default": t0["slug"] if t0 else None},
                       ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
-    body = f"""<section class="pair-head th-head"><p class="eyebrow">Theory tester</p>
+    body = f"""<section class="pair-head th-head has-art">{page_art(h, PAGE_ART["theory/"], "62% 45%")}<p class="eyebrow">Theory tester</p>
 <h1 class="h1">Put a theory to the test on any stock</h1>
 <p class="lede">Pick a stock and a theory. See what it says tonight, why, and the price that would change its mind. Then roll through every play's reason to buy or not, best record first.</p></section>
 

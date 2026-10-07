@@ -15,6 +15,8 @@ import pandas as pd
 
 from .content import TICKERS, TIMED, PLAY, FAMILIES, FAMILY, THINKER, GROUP_ORDER, credit
 from .render import universe, pct, fill_bar, dlong, DISCLAIMER
+from .media import page_art, PAGE_ART
+from .icons import icon
 
 e = html.escape
 
@@ -343,7 +345,7 @@ class Guides:
         cards = ""
         for fk, name, desc, fm in fams:
             g = FAMILY_GUIDE.get(fk, {})
-            cards += (f'<a class="card g-fam" href="{h("guides/" + fk + "/")}"><span class="eyebrow">{len(fm["plays"])} plays</span><span class="name">{e(name)}</span>'
+            cards += (f'<a class="card g-fam" href="{h("guides/" + fk + "/")}"><span class="fam-ic">{icon(fk)}</span><span class="eyebrow">{len(fm["plays"])} plays</span><span class="name">{e(name)}</span>'
                       f'<span class="small muted">{e(g.get("bet", desc))}</span>'
                       f'<span class="g-mini"><span>Cut the worst fall {self.share(fm["cut"], fm["n"])}</span><span>Beat holding, risk-adjusted {self.share(fm["beat_sh"], fm["n"])}</span>'
                       f'<span>Calls right <b>{pct(fm["bat"], sign=False, d=0)}</b></span></span></a>')
@@ -391,7 +393,7 @@ class Guides:
                            f'<span class="g-li">{self.share(m[key], m["n"])}</span></li>' for p, m in lst)
         refs = "".join(f"<li><b>{e(a)}</b>, {e(b)}. <i>{e(c)}</i>.</li>" for a, b, c in BOOKS)
         body = f"""
-<section class="pair-head"><p class="eyebrow">Guides</p><h1 class="h1">Which predictions actually work?</h1>
+<section class="pair-head has-art">{page_art(h, PAGE_ART["guides/"], "50% 62%")}<p class="eyebrow">Guides</p><h1 class="h1">Which predictions actually work?</h1>
 <p class="lede">Every trading play is a prediction about what a price will do next. They come in seven kinds: trends continue, breakouts run, strength persists, dips snap back, volume leads price, patterns warn of a turn, and the calendar matters. Be The Puck runs all {len(TIMED)} plays on {len(self.univ)} stocks, funds and coins every night. Here is what the record says about each kind of bet, with a guide to every family and every play.</p></section>
 
 <section><div class="sec-head"><h2 class="h2">Five things {allm['n']:,} backtests say</h2><p>Each play against simply holding the same stock over the same dates since 2005, after costs, as of the {dlong(self.s.asof)} close.</p></div>

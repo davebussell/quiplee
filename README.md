@@ -203,6 +203,21 @@ Canada's anti-spam law asks for.
 
 ---
 
+**Brand and imagery.** The logo mark (a chart line running into the puck) is drawn in
+`tools/qstrat/icons.py` (`mark()`, `app_icon_svg()`), along with the line icons for the
+seven play families and the tools; the favicon is built from it, and `apple-touch-icon.png`,
+`favicon.ico` and `og-default.png` (the share card) were rendered from the same mark and the
+hero picture. Photography lives in `assets/img/<name>-<640|1200|1920>.webp`, one dark
+"night ice" set, all through Canva: the puck on ice, the empty arena, Toronto at night and
+the skates are Canva stock photos (Canva content licence, fine for use on the site); the
+puck-trail hero, the coach's whiteboard, the four lake skies (one per market-weather state,
+picked each night on the home page and Markets), the cracked ice, the row of pucks, the
+bubble, the phone and the rental lot were generated with Canva's image generator. The
+working file is the "Be The Puck Photo Board" design in Dave's Canva (pages 1-4 stock,
+5-15 generated); export a page at 2400px and run it through the same 640/1200/1920 WebP
+sizes to add or replace one. `tools/qstrat/media.py` holds the alt text, `pic()` and which
+picture heads which page (`PAGE_ART`, `ARTICLE_ART`, `WEATHER_IMG`).
+
 ## Live desk (`/desk/`)
 
 **News breaks. We tell you what it's worth.**

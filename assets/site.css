@@ -59,7 +59,10 @@ p { margin: 0; }
   border-bottom: 1px solid var(--line);
 }
 .head-row { display: flex; align-items: center; gap: 12px 28px; padding-block: 12px; flex-wrap: wrap; }
-.logo { font: 800 22px/1 var(--ui); letter-spacing: -.5px; color: var(--ink); }
+.logo { display: inline-flex; align-items: center; gap: 9px; font: 800 22px/1 var(--ui); letter-spacing: -.5px; color: var(--ink); flex: none; }
+.logo-mark { display: block; flex: none; transition: transform .25s ease; }
+.logo:hover .logo-mark { transform: translate(2px, -2px); }
+.logo-word { white-space: nowrap; }
 .logo:hover { text-decoration: none; }
 .logo-the { color: var(--muted); font-weight: 600; }
 .logo-tick { color: var(--in); font-size: .55em; vertical-align: super; margin-left: 1px; }
@@ -1141,6 +1144,7 @@ body { font-size: 16px; }
 .foot-cols a { display: block; color: var(--ink-2); font-size: 14px; padding: 5px 0; }
 .foot-cols a:hover { color: var(--ink); }
 .foot-brand p { margin-top: 12px; max-width: 34ch; line-height: 1.55; }
+.foot-cols .foot-brand .logo { display: inline-flex; font-size: 20px; color: var(--ink); padding: 0; }
 .foot-h { font: 600 11.5px var(--data); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .site-foot .foot-disclaim { color: var(--ink-2); font-size: 13px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .foot-meta { font-size: 12.5px; }
@@ -1566,3 +1570,57 @@ body { font-size: 16px; }
 @media (max-width: 760px) { .th-pick { grid-template-columns: 1fr; } .th-why { grid-template-columns: 1fr; gap: 2px; } .th-why dd { margin-bottom: 8px; } .th-auto { margin-left: 0; } .th-nav { flex-wrap: wrap; } }
 .me-th { display: flex; flex-direction: column; gap: 6px; }
 .me-th .btn { margin-top: 6px; align-self: flex-start; }
+
+/* ---------- imagery: one dark "night ice" set (assets/img, see tools/qstrat/media.py) ---------- */
+html, body { overflow-x: clip; }
+.ic { width: 1.15em; height: 1.15em; flex: none; vertical-align: -.2em; }
+/* home hero: the puck whose trail is a rising chart, full bleed behind the slogan */
+.hero-art { position: absolute; z-index: -1; pointer-events: none; top: 30px; left: calc(50% - 50vw); width: 100vw; height: 900px; overflow: hidden; }
+.hero-art-img { width: 100%; height: 100%; object-fit: cover; object-position: 36% 50%; opacity: .95; }
+.hero-art::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(11, 15, 23, .94) 0%, rgba(11, 15, 23, .78) 34%, rgba(11, 15, 23, .30) 62%, rgba(11, 15, 23, .55) 100%),
+              linear-gradient(180deg, rgba(11, 15, 23, .35) 0%, rgba(11, 15, 23, 0) 30%, rgba(11, 15, 23, .2) 70%, var(--bg) 100%); }
+@media (max-width: 900px) {
+  .hero-art { top: -28px; height: 600px; }
+  .hero-art-img { object-position: 80% 30%; opacity: 1; }
+  .hero-art::after { background: linear-gradient(180deg, rgba(11, 15, 23, .5) 0%, rgba(11, 15, 23, .55) 30%, rgba(11, 15, 23, .82) 62%, var(--bg) 100%), linear-gradient(90deg, rgba(11, 15, 23, .55), rgba(11, 15, 23, 0) 70%); }
+}
+/* the crash card wears tonight's sky: calm, mostly calm, unsettled or stormy */
+.crash-card { position: relative; overflow: hidden; isolation: isolate; background: rgba(17, 23, 37, .82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.cc-sky { position: absolute; z-index: -1; inset: 0 0 auto 0; height: 220px; pointer-events: none; }
+.cc-sky-img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; opacity: .75;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .7) 45%, transparent 100%); mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .7) 45%, transparent 100%); }
+.cc-sky::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 15, 23, .15), rgba(17, 23, 37, .55) 70%, transparent); }
+.crash-card .cc-q { text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
+/* cards that lead somewhere get a picture */
+.more-card { padding-top: 0; overflow: hidden; }
+.more-img { display: block; margin: 0 -20px 8px; aspect-ratio: 16 / 8; overflow: hidden; background: var(--bg-2); border-bottom: 1px solid var(--line); }
+.more-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, opacity .3s ease; opacity: .9; }
+.more-card:hover .more-img img { transform: scale(1.04); opacity: 1; }
+.scr-side b { display: inline-flex; align-items: center; gap: 6px; }
+.scr-side [data-side="buy"] .ic { color: var(--in); }
+.scr-side [data-side="sell"] .ic { color: var(--out); }
+/* section pages: a picture behind the title, faded into the page */
+.has-art { position: relative; padding-top: 18px; min-height: 230px; }
+.page-art { position: absolute; z-index: -1; pointer-events: none; top: -28px; left: calc(50% - 50vw); width: 100vw; height: 420px; overflow: hidden; }
+.page-art-img { width: 100%; height: 100%; object-fit: cover; object-position: var(--art-pos, 50% 50%); opacity: .8; }
+.page-art::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(11, 15, 23, .95) 0%, rgba(11, 15, 23, .8) 38%, rgba(11, 15, 23, .35) 75%, rgba(11, 15, 23, .5) 100%),
+              linear-gradient(180deg, rgba(11, 15, 23, .2) 0%, rgba(11, 15, 23, .1) 40%, var(--bg) 100%); }
+@media (max-width: 760px) {
+  .page-art { height: 360px; }
+  .page-art::after { background: linear-gradient(180deg, rgba(11, 15, 23, .55) 0%, rgba(11, 15, 23, .78) 50%, var(--bg) 100%); }
+}
+/* play-family icons */
+.fam-ic { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; flex: none; color: var(--violet-ink);
+  background: rgba(124, 108, 245, .12); box-shadow: inset 0 0 0 1px rgba(124, 108, 245, .32); }
+.fam-ic .ic { width: 22px; height: 22px; }
+.fam-h { display: flex; align-items: center; gap: 12px; }
+.g-fam .fam-ic { margin-bottom: 4px; }
+.g-fam:hover .fam-ic { background: rgba(124, 108, 245, .2); }
+.fam-tile .tile-label { display: flex; align-items: center; gap: 7px; }
+.fam-tile .tile-label .ic { color: var(--violet-ink); }
+.tbl tr.grp td .ic { color: var(--violet-ink); margin-right: 4px; }
+.track-pill { display: flex; flex-direction: column; gap: 6px; }
+.track-pill .fam-ic { margin-bottom: 4px; }
+.th-by .ic { color: var(--violet-ink); margin-right: 5px; }

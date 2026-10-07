@@ -15,6 +15,10 @@ import pandas as pd
 from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, BAR_WORD, FAMILIES, FAMILY, credit)
 from .glossary import GLOSSARY, TOPICS, BY_SLUG
 from . import ind
+from .media import page_art, PAGE_ART
+from .icons import icon
+
+TRACK_ICON = {"basics": "learn", "plays": "theory", "markets": "weather"}
 
 BASICS = [
     dict(slug="what-is-a-stock", title="What a stock is, and what sets its price", minutes=5, track="basics",
@@ -348,9 +352,9 @@ class Learn:
         total = sum(l["minutes"] for l in LESSONS)
         nq = sum(len(v) for v in QUIZZES.values())
         body = f"""
-<section class="pair-head"><p class="eyebrow">Learn</p><h1 class="h1">From "what is a stock?" to reading the market</h1>
+<section class="pair-head has-art">{page_art(h, PAGE_ART["learn/"], "50% 55%")}<p class="eyebrow">Learn</p><h1 class="h1">From "what is a stock?" to reading the market</h1>
 <p class="lede">{len(LESSONS)} short, hands-on lessons in three tracks, about {total} minutes in all. Start with how stocks work, move on to the {len(TIMED)} trading plays, then learn to read the whole market and plan for a crash. Every lesson uses real prices and real companies, and every technical word on the site links back to a plain-English definition.</p>
-<div class="track-pills">{''.join(f'<a class="card track-pill" href="#track-{k}"><span class="eyebrow">Track {i}</span><b>{n}</b></a>' for i, (k, n, _) in enumerate(TRACKS, 1))}</div></section>
+<div class="track-pills">{''.join(f'<a class="card track-pill" href="#track-{k}"><span class="fam-ic">{icon(TRACK_ICON[k])}</span><span class="eyebrow">Track {i}</span><b>{n}</b></a>' for i, (k, n, _) in enumerate(TRACKS, 1))}</div></section>
 <section class="card progress" id="progress" hidden aria-live="polite"><p class="eyebrow">Your progress</p><div class="progress-grid"></div>
 <p class="muted small">Saved in this browser only. <button type="button" class="linkish" id="progress-reset">Reset</button></p></section>
 {tracks}
