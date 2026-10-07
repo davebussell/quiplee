@@ -136,6 +136,8 @@ class Articles:
                   "From 1929 to 2022: what fell, how far, what set it off, and which warning signs had a real track record.", "written", WRITTEN))
         L.append(("macro", "articles/cash-or-invested/", "Cash, stay invested, or buckets?",
                   "What selling, holding, rebalancing and a simple trend rule would have done through 2008, 2020 and 2022, and why the bucket approach exists.", "written", WRITTEN))
+        from .top10 import TITLE as T10, DEK as D10
+        L.append(("stocks", "articles/top-10/", T10, D10, "live", None))
         L.append(("stocks", "articles/debt-and-crashes/", "Debt decides who survives a crash",
                   "The storm test on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.", "live", None))
         L.append(("stocks", "articles/green-across-the-board/", "Green across the board, with room to run",
@@ -160,6 +162,7 @@ class Articles:
         self.cash()
         self.debt()
         self.green()
+        self.top10()
         self.core20()
         self.regimes()
         self.backtests()
@@ -196,7 +199,7 @@ class Articles:
                 extra = f'<div class="card"><p class="h3">Sector briefs</p><div class="chips" style="margin-top:10px">{chips}</div></div>'
             secs += f'<section id="{key}"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>{extra}<div class="grid grid-3">{cards}</div></section>'
         feat = ""
-        for sp in ["articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
+        for sp in ["articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
                    "articles/debt-and-crashes/", "articles/green-across-the-board/"]:
             b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
             when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
@@ -475,6 +478,14 @@ class Articles:
                    "The storm test on every covered stock: which balance sheets would struggle if credit tightened, and how to check one yourself.",
                    body, [("Yahoo Finance company fundamentals", "https://finance.yahoo.com/")], live=True,
                    related=self.related(depth, ["articles/green-across-the-board/", "articles/bubbles-and-crashes/", "articles/is-this-a-bubble/"]))
+
+    def top10(self):
+        from . import top10 as t10
+        path, depth = "articles/top-10/", 2
+        state, info = t10.run(self.s)
+        self.s.top10_state = state
+        self.shell(path, "stocks", t10.TITLE, t10.DEK, t10.body(self, state, depth), live=True,
+                   desc="Be The Puck's weekly top 10: the stocks the most published trading plays agree on, set after each Friday close and tracked against the S&P 500, with reconstructed lists from one year, six months and three months ago.")
 
     def green(self):
         path, depth = "articles/green-across-the-board/", 2

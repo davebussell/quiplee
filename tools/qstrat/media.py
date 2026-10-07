@@ -57,4 +57,4 @@ PAGE_ART = {"theory/": "theory-board", "guides/": "puck-row", "alerts/": "phone-
             "articles/": "cracked-ice"}
 # article covers, by article slug
 ARTICLE_ART = {"is-this-a-bubble": "bubble", "bubbles-and-crashes": "cracked-ice", "cash-or-invested": "wx-stormy",
-               "debt-and-crashes": "puck-ice", "green-across-the-board": "hero-trail", "the-hertz-lesson": "rental-lot"}
+               "debt-and-crashes": "puck-ice", "green-across-the-board": "hero-trail", "the-hertz-lesson": "rental-lot", "top-10": "puck-row"}

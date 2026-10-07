@@ -203,6 +203,8 @@ Canada's anti-spam law asks for.
 
 ---
 
+**Top 10 this week** (`/articles/top-10/`, `tools/qstrat/top10.py`, a member report). A weekly stake in the ground: the ten stocks (no funds, indexes or coins) with the Start light on that the most plays hold, ties to the bigger 13-week gain, at most two per group, set after each Friday close and tracked equal-weight against the S&P 500 from that close. Lists are never recomputed: the record sits in Netlify Blobs behind `/api/picks-state?doc=top10` (same `PICKS_STATE_TOKEN`; production builds write, others read; `QUIPLEE_TOP10_FILE` for local runs). The first production build also froze reconstructed lists for one year, six months and three months before launch, built only from prices and weekly play calls up to those closes (they still use today's covered stocks and plays, so they flatter the rule; the page says so). Analysts' targets are shown for context but never rank, because there is no record of past targets.
+
 **Brand and imagery.** The logo is the original wordmark (be*the*puck▲) with the puck favicon (`ICON` in `render.py`; `apple-touch-icon.png` and `favicon.ico` are rendered from it, and `og-default.png` is the share card with the hero picture). `tools/qstrat/icons.py` holds the line icons for the seven play families and the tools (it also keeps an unused puck-and-trail mark, tried and dropped in October 2026). Photography lives in `assets/img/<name>-<640|1200|1920>.webp`, one dark
 "night ice" set, all through Canva: the puck on ice, the empty arena, Toronto at night and
 the skates are Canva stock photos (Canva content licence, fine for use on the site); the
