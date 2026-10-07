@@ -1440,8 +1440,9 @@ body { font-size: 16px; }
 .scr-sum b { color: var(--ink); }
 .scr-sort { display: inline-flex; align-items: center; gap: 8px; }
 .scr-sort select { font: 500 13px var(--ui); color: var(--ink); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; }
-.screen { --scr-cols: minmax(0, 1fr) 66px 112px 50px 96px 48px 70px 48px; }
-.scr-cols { display: grid; grid-template-columns: var(--scr-cols) 36px; gap: 8px; padding: 8px 10px; font: 600 10.5px var(--data); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+.screen { --scr-cols: minmax(0, 1fr) 66px 112px 56px 96px 48px 70px 60px; }
+.scr-cols { display: grid; grid-template-columns: var(--scr-cols) 36px; gap: 8px; padding: 8px 10px; font: 600 10.5px var(--data); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+.scr-cols span { white-space: nowrap; }
 .scr-cols span:nth-child(n+5):not(:last-child) { text-align: right; }
 .scr-list { list-style: none; margin: 0; padding: 0; }
 .scr-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }

@@ -190,14 +190,28 @@ def crash_card(site, depth):
 
 # ------------------------------------------------------------------ steps 2 to 4: the screener
 PRESETS = [
-    ("Canada, most plays buying", dict(mkt="ca", min=75)),
-    ("U.S. names nearly all plays like", dict(mkt="us", min=90)),
+    ("Canadian names the plays are buying", dict(mkt="ca", min=75)),
+    ("U.S. names with the strongest agreement", dict(mkt="us", min=90)),
     ("What the plays are selling", dict(side="sell", min=75)),
     ("Fresh Starts this week", dict(fresh=True, min=60)),
-    ("Lower crash risk, most plays in", dict(risk="low", min=60)),
+    ("Lower crash risk, plays buying", dict(risk="low", min=60)),
     ("Gold and miners", dict(sec="Metals & mining", min=60)),
     ("Semiconductors", dict(sec="Semiconductors", min=60)),
 ]
+PRESET_FLOOR = 5      # a ready-made screen eases its bar (75, then 60, then 50) until it finds this many names
+
+
+def preset_screen(site, kw):
+    """The preset at the highest bar that finds PRESET_FLOOR names, else the lowest bar that finds any."""
+    best = None
+    for m in [kw["min"]] + [x for x in (75, 60, 50) if x < kw["min"]]:
+        k2 = dict(kw, min=m)
+        n = len(ranked(site, state(**k2)))
+        if n >= PRESET_FLOOR:
+            return k2, n
+        if n:
+            best = (k2, n)
+    return best
 
 
 def screener(site, depth):
@@ -214,8 +228,9 @@ def screener(site, depth):
                    for k, lab in [("", "Any"), ("low", "Low or moderate"), ("high", "High or very high")])
     presets = ""
     for lab, kw in PRESETS:
-        n = len(ranked(site, state(**kw)))
-        if n:
+        got_p = preset_screen(site, kw)
+        if got_p:
+            kw, n = got_p
             presets += f'<button type="button" class="chip-btn scr-preset" data-preset="{e(json.dumps(kw))}">{e(lab)} <span class="muted">{n}</span></button>'
     sorts = "".join(f'<option value="{k}">{e(lab)}</option>' for k, lab in SORTS)
     n_all = len(rows(site))
