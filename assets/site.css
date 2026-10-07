@@ -59,10 +59,7 @@ p { margin: 0; }
   border-bottom: 1px solid var(--line);
 }
 .head-row { display: flex; align-items: center; gap: 12px 28px; padding-block: 12px; flex-wrap: wrap; }
-.logo { display: inline-flex; align-items: center; gap: 9px; font: 800 22px/1 var(--ui); letter-spacing: -.5px; color: var(--ink); flex: none; }
-.logo-mark { display: block; flex: none; transition: transform .25s ease; }
-.logo:hover .logo-mark { transform: translate(2px, -2px); }
-.logo-word { white-space: nowrap; }
+.logo { font: 800 22px/1 var(--ui); letter-spacing: -.5px; color: var(--ink); }
 .logo:hover { text-decoration: none; }
 .logo-the { color: var(--muted); font-weight: 600; }
 .logo-tick { color: var(--in); font-size: .55em; vertical-align: super; margin-left: 1px; }
@@ -1144,7 +1141,6 @@ body { font-size: 16px; }
 .foot-cols a { display: block; color: var(--ink-2); font-size: 14px; padding: 5px 0; }
 .foot-cols a:hover { color: var(--ink); }
 .foot-brand p { margin-top: 12px; max-width: 34ch; line-height: 1.55; }
-.foot-cols .foot-brand .logo { display: inline-flex; font-size: 20px; color: var(--ink); padding: 0; }
 .foot-h { font: 600 11.5px var(--data); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .site-foot .foot-disclaim { color: var(--ink-2); font-size: 13px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .foot-meta { font-size: 12.5px; }

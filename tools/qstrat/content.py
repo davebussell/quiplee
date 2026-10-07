@@ -62,6 +62,7 @@ TICKERS = [
     {"sym": "GPRO", "name": "GoPro", "group": "Software & devices", "cur": "$"},
     # Healthcare
     {"sym": "LLY", "name": "Eli Lilly", "group": "Healthcare", "cur": "$"},
+    {"sym": "NVO", "name": "Novo Nordisk", "group": "Healthcare", "cur": "$"},
     {"sym": "PFE", "name": "Pfizer", "group": "Healthcare", "cur": "$"},
     {"sym": "BSX", "name": "Boston Scientific", "group": "Healthcare", "cur": "$"},
     {"sym": "MDT", "name": "Medtronic", "group": "Healthcare", "cur": "$"},

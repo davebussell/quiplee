@@ -203,11 +203,7 @@ Canada's anti-spam law asks for.
 
 ---
 
-**Brand and imagery.** The logo mark (a chart line running into the puck) is drawn in
-`tools/qstrat/icons.py` (`mark()`, `app_icon_svg()`), along with the line icons for the
-seven play families and the tools; the favicon is built from it, and `apple-touch-icon.png`,
-`favicon.ico` and `og-default.png` (the share card) were rendered from the same mark and the
-hero picture. Photography lives in `assets/img/<name>-<640|1200|1920>.webp`, one dark
+**Brand and imagery.** The logo is the original wordmark (be*the*puck▲) with the puck favicon (`ICON` in `render.py`; `apple-touch-icon.png` and `favicon.ico` are rendered from it, and `og-default.png` is the share card with the hero picture). `tools/qstrat/icons.py` holds the line icons for the seven play families and the tools (it also keeps an unused puck-and-trail mark, tried and dropped in October 2026). Photography lives in `assets/img/<name>-<640|1200|1920>.webp`, one dark
 "night ice" set, all through Canva: the puck on ice, the empty arena, Toronto at night and
 the skates are Canva stock photos (Canva content licence, fine for use on the site); the
 puck-trail hero, the coach's whiteboard, the four lake skies (one per market-weather state,
