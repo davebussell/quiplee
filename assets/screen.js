@@ -15,7 +15,7 @@
   var minIn = document.getElementById('scr-min'), minOut = document.getElementById('scr-min-out');
   var secSel = document.getElementById('scr-sec'), qIn = document.getElementById('scr-q'), sortSel = document.getElementById('scr-sort');
   var fresh = document.getElementById('scr-fresh'), goBtn = document.getElementById('scr-go');
-  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'agree' };
+  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'up' };
   var S = Object.assign({}, DEF), DATA = null, shown = PAGE, FAMS = [];
   var MKT = { '': '', us: 'U.S.', ca: 'Canada', crypto: 'Crypto', fund: 'Funds & indexes' };
   var RISK = ['Low', 'Moderate', 'High', 'Very high'], RISK_CLS = ['calm', 'watch', 'warning', 'warning'];
@@ -67,7 +67,7 @@
       agree: function (a, b) { return agree(b) / b.o - agree(a) / a.o || b.o - a.o || (a.s < b.s ? -1 : 1); },
       day: function (a, b) { return cmpNum(Math.abs(a.d || 0) || null, Math.abs(b.d || 0) || null, true); },
       y1: function (a, b) { return cmpNum(a.y, b.y, true); },
-      up: function (a, b) { return cmpNum(a.up, b.up, true); },
+      up: function (a, b) { return cmpNum(a.up, b.up, true) || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
       risk: function (a, b) { return cmpNum(a.r, b.r, false) || agree(b) / b.o - agree(a) / a.o; },
       az: function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; }
     }[S.sort] || null;

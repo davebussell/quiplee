@@ -21,9 +21,10 @@ RISK = ["Low", "Moderate", "High", "Very high"]
 RISK_CLS = ["calm", "watch", "warning", "warning"]
 MARKETS = [("", "All"), ("us", "U.S."), ("ca", "Canada"), ("crypto", "Crypto"), ("fund", "Funds & indexes")]
 FUND_GROUPS = ("Market indexes", "Sectors", "Indexes & ETFs")
-SORTS = [("agree", "Most plays agree"), ("day", "Biggest move today"), ("y1", "Best year"), ("up", "Most analyst upside"),
+SORTS = [("up", "Most analyst upside"), ("agree", "Most plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
          ("risk", "Least crash exposure"), ("az", "A to Z")]
 DEFAULT_MIN = 60
+DEFAULT_SORT = "up"          # the screener opens on Most analyst upside
 PAGE = 25
 FRESH_DAYS = 7
 
@@ -105,14 +106,17 @@ def matches(site, r, st):
 
 
 def state(**kw):
-    st = {"side": "buy", "mkt": "", "sec": "", "risk": "", "min": DEFAULT_MIN, "fresh": False, "q": "", "sort": "agree"}
+    st = {"side": "buy", "mkt": "", "sec": "", "risk": "", "min": DEFAULT_MIN, "fresh": False, "q": "", "sort": DEFAULT_SORT}
     st.update(kw)
     return st
 
 
 def ranked(site, st):
     got = [r for r in rows(site) if matches(site, r, st)]
-    got.sort(key=lambda r: (-agree(r, st["side"]) / r["o"], -r["o"], r["s"]))
+    if st["sort"] == "up":      # most analyst upside first; names with no analyst target go last
+        got.sort(key=lambda r: (r["up"] is None, -(r["up"] or 0), -agree(r, st["side"]) / r["o"], r["s"]))
+    else:
+        got.sort(key=lambda r: (-agree(r, st["side"]) / r["o"], -r["o"], r["s"]))
     return got
 
 
@@ -178,10 +182,7 @@ def crash_card(site, depth):
         k, n = site.consensus(spx)
         plays = (f'<a class="cc-plays" href="{h("stocks/" + spx["slug"] + "/")}"><span>The plays on the S&amp;P 500</span>'
                  f'<b>{k} of {n} hold it</b>{light_badge(L)}</a>')
-    from .media import pic, WEATHER_IMG
-    sky = pic(h, WEATHER_IMG[M["weather"]], sizes="(max-width: 900px) 100vw, 560px", cls="cc-sky-img", decorative=True)
     return f"""<div class="card crash-card wx-{cls}" id="step-1">
-  <div class="cc-sky" aria-hidden="true">{sky}</div>
   <div class="cc-top"><span class="step-tag"><span class="step-n">1</span>The market</span><span class="mono small muted">{dlong(M['asof'])}</span></div>
   <h2 class="cc-q">Is the market about to crash?</h2>
   <p class="cc-verdict"><span class="wx {cls}">{e(M['weather'])}.</span> {e(answer)}</p>
@@ -236,7 +237,7 @@ def screener(site, depth):
         if got_p:
             kw, n = got_p
             presets += f'<button type="button" class="chip-btn scr-preset" data-preset="{e(json.dumps(kw))}">{e(lab)} <span class="muted">{n}</span></button>'
-    sorts = "".join(f'<option value="{k}">{e(lab)}</option>' for k, lab in SORTS)
+    sorts = "".join(f'<option value="{k}"{" selected" if k == DEFAULT_SORT else ""}>{e(lab)}</option>' for k, lab in SORTS)
     n_all = len(rows(site))
     fam_names = " · ".join(name for _, name, _ in FAMILIES)
     return f"""<section class="screen" id="screen" aria-labelledby="scr-h" data-src="{e(h('data/screen.json'))}?v={site.ver}" data-stock="{e(h('stocks/{u}/'))}" data-me="{e(h('me/'))}" data-page="{PAGE}">
