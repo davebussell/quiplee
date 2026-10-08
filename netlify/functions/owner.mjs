@@ -62,7 +62,7 @@ export async function stats({ withEmail = false, since = null } = {}) {
   try {
     const as = getStore({ name: ALERTS, consistency: "strong" });
     const recs = await readAll(as, await keys(as, "sub/"));
-    subs = { total: recs.length, confirmed: recs.filter(([, r]) => r.confirmed).length };
+    subs = { total: recs.length, confirmed: recs.filter(([, r]) => r.confirmed).length, weekly: recs.filter(([, r]) => r.confirmed && r.weekly).length };
   } catch (e) { /* the alerts store is optional */ }
   const pick = (r) => {
     const o = { name: r.name, created: r.created, email_confirmed: r.email_ok, alerts: r.alerts, follows: r.follow };

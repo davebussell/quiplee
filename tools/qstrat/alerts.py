@@ -60,6 +60,7 @@ def alerts_page(site):
 <p class="small"><button type="button" class="linkbtn al-wl" data-al-watchlist hidden>Use the stocks on my watchlist</button></p>
 <label>Email<input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
 <label class="pt-check"><input type="checkbox" name="consent"> Email me when the Start/Stop light changes on these stocks. I can unsubscribe from any email.</label>
+<label class="pt-check"><input type="checkbox" name="weekly"> Also send me the <a href="{h('weekly/')}">weekly market weather</a> on Saturdays.</label>
 <button class="btn primary" type="submit">Email me the flips</button>
 <p class="pt-msg" role="alert" data-al-msg></p>
 <p class="small muted">We'll send one email to confirm. After that you only hear from us when a light on your list flips: one email per close at most, with every change in it.</p>

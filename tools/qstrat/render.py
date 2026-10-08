@@ -91,7 +91,8 @@ def nav_menus():
                      ("markets/#idx-h", "Indexes and sectors", "The plays on the S&P 500, Nasdaq, Dow, Russell, TSX and sector funds"),
                      ("markets/#tops-h", "Today vs past market tops", "Each gauge at the 2000, 2007, 2020 and 2022 peaks"),
                      ("markets/#ex-h", "Who would feel a crash first", "Covered stocks ranked by crash exposure"),
-                     ("markets/#positioning", "Cash, stay in, or buckets?", "Run your mix through real crashes")],
+                     ("markets/#positioning", "Cash, stay in, or buckets?", "Run your mix through real crashes"),
+                     ("weekly/", "This week", "The gauges and every light that flipped, free by email on Saturdays")],
         "stocks/": [("stocks/", "All stocks", "Every name: plays in, analysts' upside, score, crash exposure"),
                     ("stocks/?sort=score", "Strongest setups", "Most plays in, plus room to the analysts' targets"),
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
@@ -706,6 +707,8 @@ class Site:
         theory_page(self)
         from .alerts import alerts_page
         alerts_page(self)
+        from .weekly import weekly_page
+        weekly_page(self)
         from .me import me_page
         me_page(self)
         from .owner import owner_page
@@ -1250,7 +1253,29 @@ class Site:
 <section class="jump"><label class="small muted" for="jump-stock">Another stock</label>{others}</section>
 {act_bar}
 """
-        self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js",)))
+        title, desc = self.stock_meta(t, bh, ol)
+        self.add(path, self.shell(path, title, desc, body, active="stocks/", scripts=("assets/widgets.js",)))
+
+    def stock_meta(self, t, bh, ol):
+        """Search title and description for a stock page. They carry tonight's reading
+        (the light, how many plays agree, the analysts' upside) so the search snippet
+        answers the question people type ("NVDA buy or sell", "RY stock forecast")."""
+        L = self.light(t)
+        tsx = " (TSX)" if t.get("tsx") else ""
+        stock = "" if t.get("index") else " stock"
+        if L["state"]:
+            word = "Start" if L["state"] == "start" else "Stop"
+            title = f"{t['short']}{stock}{tsx}: {word} · {L['k']} of {L['n']} trading plays agree · {t['name']}"
+        else:
+            title = f"{t['name']} ({t['short']}){tsx} · plays, chart and crash exposure"
+        bits = [f"{t['name']} ({t['short']}) closed at {money(bh['price'], t['cur'])} on {dlong(bh['asof'])}."]
+        if L["state"]:
+            since = f" since {dlong(L['since'])}" if L.get("since") is not None else ""
+            bits.append(f"{L['k']} of {L['n']} published trading plays hold it; the light reads {word}{since}.")
+        if ol.get("ok") and ol.get("upside") is not None:
+            bits.append(f"Analysts' average 12-month target is {pct(abs(ol['upside']), sign=False, d=0)} {'above' if ol['upside'] >= 0 else 'below'} the close.")
+        bits.append("See the levels that flip each play, the chart and crash exposure.")
+        return title, " ".join(bits)
 
     def articles_for(self, t, depth):
         h = lambda x: self.href(depth, x)
