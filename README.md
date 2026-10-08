@@ -216,6 +216,10 @@ working file is the "Be The Puck Photo Board" design in Dave's Canva (pages 1-4 
 sizes to add or replace one. `tools/qstrat/media.py` holds the alt text, `pic()` and which
 picture heads which page (`PAGE_ART`, `ARTICLE_ART`, `WEATHER_IMG`).
 
+**News on the stock charts.** Every stock page's candlestick chart carries a dot for each news story and company filing, on the first close after it. Hover or tap a dot for the story and its measured impact: the move from the last close before it to the next close and five closes later, against the S&P 500 (S&P/TSX for Toronto names) over the same days, and how that compares with the stock's normal daily swing (the spread of its last 60 daily moves). Nearby dots merge on narrow screens; a list under the chart opens the same cards. The archive is `data/news/<slug>.json`, kept by `tools/fetch_news.py` in the nightly workflow: every U.S. company's 8-K filings from SEC EDGAR (two years back) and the week's Google News headlines, which accumulate night by night. On page load the chart also asks `/.netlify/functions/news` for anything newer, so today's stories show as "too fresh to measure" until the next close. `?news=<ms timestamp>` opens the dot for that story (the desk's "See it on the chart" links use it).
+
+**Owner numbers.** `/owner/` (noindex, not in the sitemap) lists every account, newest first, with totals, for the members'-password cookie only (`netlify/functions/owner.mjs`, `/api/owner/stats`). The same endpoint answers a bearer token whose SHA-256 is in the function (or `QM_STATS_TOKEN`); `?consume=1` returns the sign-ups since the last call, once each, for the hourly phone notification. With `RESEND_API_KEY` and `QM_OWNER_EMAIL` set, each new account also emails the owner with the running total.
+
 ## Live desk (`/desk/`)
 
 **News breaks. We tell you what it's worth.**
@@ -228,6 +232,8 @@ evidence (how comparable events moved peers). Includes a **Story Screener**
 story type, impact, and direction.
 
 See [BRAND.md](BRAND.md) for the full brand & content strategy.
+
+Under each story, a **measure it** note gives the last close before the story and, once the closes are in, the next-day and five-day move against the S&P 500 (SPY) and the stock's normal daily swing, with a link to the story's dot on the stock's chart.
 
 ## Run locally
 

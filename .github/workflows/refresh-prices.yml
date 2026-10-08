@@ -1,6 +1,6 @@
 # After each U.S. close (and a morning top-up for crypto): adds the stocks readers asked for on /watchlist/,
-# refreshes prices, macro series (FRED, multpl) and company fundamentals in
-# data/, and commits them. The commit is a push to main, so Netlify rebuilds
+# refreshes prices, macro series (FRED, multpl), company fundamentals and the
+# news archive behind the chart markers (SEC 8-Ks, Google News) in data/, and commits them. The commit is a push to main, so Netlify rebuilds
 # the whole site from the new data (see netlify.toml). Runs every day so crypto
 # and reader requests update on weekends too. If a source fails, the old file
 # is kept and the macro and fundamentals steps never block the price refresh.
@@ -39,11 +39,14 @@ jobs:
       - name: Fetch company fundamentals
         if: github.event.schedule != '15 10 * * *'
         run: python tools/fetch_fundamentals.py || true
+      - name: Fetch news and filings for the chart markers
+        timeout-minutes: 12
+        run: python tools/fetch_news.py || true
       - name: Commit the new prices
         run: |
           git config user.name "bethepuck-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/prices data/macro data/fundamentals data/universe
+          git add data/prices data/macro data/fundamentals data/universe data/news
           if git diff --cached --quiet; then
             echo "No price changes"
           else

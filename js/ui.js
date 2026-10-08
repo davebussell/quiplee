@@ -104,6 +104,55 @@
     return '<svg class="wt-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none"><polyline points="' + pts + '" fill="none" stroke="' + stroke + '" stroke-width="1.6"/></svg>';
   }
 
+  // ---------- how to measure a story's impact (and the measurement, once the closes are in) ----------
+  var CLOSE_AFTER = 6.5 * 36e5; // a Yahoo daily bar is stamped at the 9:30 am open; its close comes 6.5 hours later
+  function dayKey(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  function mdate(ms) { return new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/New_York' }); }
+  function pctS(v) { return (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1) + '%'; }
+  function measureOf(s) {
+    var t = s.tickers && s.tickers[0];
+    var p = t && window.Q.prices ? Q.prices.get(t) : null;
+    if (!p || !p.series || p.series.length < 20) return { t: t };
+    var ser = p.series, b = Q.outcomes.baseIndex(s.ts, ser);
+    if (b < 1) return { t: t };
+    var spy = Q.prices.get('SPY'), sIdx = {};
+    if (spy && spy.series) spy.series.forEach(function (x, i) { sIdx[dayKey(x.t)] = i; });
+    function mv(k) {
+      if (b + k >= ser.length) return null;
+      var d = ser[b + k].c / ser[b].c - 1, out = { d: d, m: null, done: ser[b + k].t + CLOSE_AFTER <= Date.now() };
+      var i0 = sIdx[dayKey(ser[b].t)], i1 = sIdx[dayKey(ser[b + k].t)];
+      if (i0 != null && i1 != null) out.m = spy.series[i1].c / spy.series[i0].c - 1;
+      return out;
+    }
+    var rr = [];
+    for (var q = Math.max(1, b - 59); q <= b; q++) rr.push(ser[q].c / ser[q - 1].c - 1);
+    var mean = rr.reduce(function (a, v) { return a + v; }, 0) / rr.length;
+    var sd = Math.sqrt(rr.reduce(function (a, v) { return a + (v - mean) * (v - mean); }, 0) / rr.length);
+    return { t: t, base: ser[b].c, baseT: ser[b].t, sd: sd, one: mv(1), five: mv(5), left: Math.max(0, 5 - (ser.length - 1 - b)) };
+  }
+  function measureHtml(s, long) {
+    var m = measureOf(s), t = m.t;
+    if (!t) return '';
+    var chart = Q.data.TICKERS[t] ? ' <a class="m-chart" href="/stocks/' + esc(t.toLowerCase()) + '/?news=' + s.ts + '#chart">See it on the ' + esc(t) + ' chart →</a>' : '';
+    if (m.base == null) {
+      return '<div class="measure"><b>How to measure it:</b> note ' + esc(t) + '’s last close before this story, then the next close and the close five trading days later. ' +
+        'Take off the S&amp;P 500’s move over the same days and compare what’s left with ' + esc(t) + '’s normal daily swing: bigger is the story, smaller is noise.' + chart + '</div>';
+    }
+    var sdTxt = '±' + (m.sd * 100).toFixed(1) + '%';
+    var head = esc(t) + ' closed <b>$' + m.base.toFixed(2) + '</b> on ' + mdate(m.baseT) + ', the last close before this story.';
+    var o = m.one;
+    if (!o) {
+      return '<div class="measure"><b>How to measure it:</b> ' + head + ' Compare the next close, and the close five trading days later, with that. ' +
+        'Take off the S&amp;P 500’s move over the same days. A normal day for ' + esc(t) + ' is ' + sdTxt + ': a bigger gap is the story moving the stock; a smaller one is noise.' + chart + '</div>';
+    }
+    var ex = o.d - (o.m || 0), z = m.sd ? Math.abs(ex) / m.sd : null;
+    var read = z == null ? '' : z >= 2 ? ', ' + z.toFixed(1) + '× a normal day: the story moved the stock' : z >= 1 ? ', ' + z.toFixed(1) + '× a normal day: a real but modest reaction' : ', inside a normal day (' + sdTxt + '): more noise than news';
+    var line = (o.done ? 'Next day ' : 'So far today ') + '<b class="' + (o.d >= 0 ? 'up' : 'down') + '">' + pctS(o.d) + '</b>' +
+      (o.m != null ? ' vs S&amp;P 500 ' + pctS(o.m) + ': <b class="' + (ex >= 0 ? 'up' : 'down') + '">' + pctS(ex) + ' beyond the market</b>' : '') + read + '.';
+    var five = m.five ? ' Five days: ' + pctS(m.five.d) + (m.five.m != null ? ' vs ' + pctS(m.five.m) : '') + '.' : (long && m.left ? ' The five-day read comes in ' + m.left + ' more close' + (m.left > 1 ? 's' : '') + '.' : '');
+    return '<div class="measure"><b>Measured:</b> ' + head + ' ' + line + five + chart + '</div>';
+  }
+
   // ---------- story card ----------
   function storyCard(s) {
     var im = s.impact;
@@ -128,6 +177,7 @@
           '<div class="conf">' + im.conf + '%<div class="conf-bar"><div class="conf-fill" style="width:' + im.conf + '%;background:' + confColor(im.dir) + '"></div></div></div>' +
         '</div>' +
         '<div class="why"><b>Why:</b> ' + esc(im.mechanism) + ' · ' + (im.dir === 'neutral' ? 'no clear directional read' : 'anticipated ' + esc(impactText(im)) + ' over ' + im.horizon) + '</div>' +
+        measureHtml(s) +
       '</div>';
   }
 
@@ -190,6 +240,8 @@
                 ? '<span class="call-hit">✓ direction call correct</span>'
                 : '<span class="call-miss">✗ direction call missed</span>') : '') +
           '</div></div>' : '') +
+      '<div class="d-section"><h4>How to measure the impact</h4>' + measureHtml(s, true) +
+        '<p class="muted" style="font-size:12.5px;margin:6px 0 0">The rule: start from the last close before the story, look at the next close and the close five trading days later, take off the S&amp;P 500 over the same days, and compare what\u2019s left with the stock\u2019s normal daily swing (the spread of its last 60 daily moves).</p></div>' +
       '<div class="d-section"><h4>Affected stocks</h4><div class="d-affected">' +
         s.tickers.map(function (t) { return affectedRow(t, im); }).join('') +
       '</div></div>' +

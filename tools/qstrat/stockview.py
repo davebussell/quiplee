@@ -4,9 +4,12 @@ the plain-English read, fundamentals and crash exposure (the storm test).
 Each function returns an HTML string. Charts carry their data as embedded JSON
 for assets/widgets.js to draw.
 """
+import datetime as dt
 import html
 import json
 import math
+import os
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -64,7 +67,55 @@ def is_equity(t, fund):
 # --------------------------------------------------------------------------
 # candlesticks
 # --------------------------------------------------------------------------
-def candles_block(t, meta, learn="#", cid="cd", title=None, note=None, rng=126):
+NEWS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "news")
+ET = ZoneInfo("America/New_York")
+BENCH_NAME = {"^GSPC": "S&P 500", "^GSPTSE": "S&P/TSX"}
+
+
+def news_items(t):
+    """The archived headlines and filings for a stock (tools/fetch_news.py), newest first."""
+    try:
+        with open(os.path.join(NEWS_DIR, t["slug"] + ".json")) as f:
+            return json.load(f).get("items") or []
+    except (OSError, ValueError):
+        return []
+
+
+def bar_closes_utc(index, crypto=False):
+    """When each daily bar's closing price was set, in UTC: 4 pm New York for stocks
+    (TSX closes at the same moment), midnight UTC at the end of the day for crypto."""
+    out = []
+    for d in index:
+        day = pd.Timestamp(d).date()
+        if crypto:
+            out.append(pd.Timestamp(day, tz="UTC") + pd.Timedelta(days=1))
+        else:
+            out.append(pd.Timestamp(dt.datetime(day.year, day.month, day.day, 16, 0, tzinfo=ET)).tz_convert("UTC"))
+    return pd.DatetimeIndex(out)
+
+
+def news_marks(t, o, items, keep=520):
+    """Each story placed on the chart: b = the last bar that closed before it was published
+    (the price the story is measured from). The page works out the moves from there."""
+    if not items:
+        return []
+    closes = bar_closes_utc(o.index, t.get("crypto"))
+    first = len(o) - keep
+    out = []
+    for it in items:
+        try:
+            ts = pd.Timestamp(it["t"])
+        except (KeyError, ValueError):
+            continue
+        b = int(closes.searchsorted(ts, side="right")) - 1
+        if b < max(first, 1):
+            continue
+        out.append({"b": b, "t": it["t"], "h": it.get("h", "")[:200], "s": it.get("s", ""), "u": it.get("u", ""),
+                    "k": it.get("k", "news"), "ty": it.get("ty", "")})
+    return sorted(out, key=lambda x: x["t"])
+
+
+def candles_block(t, meta, learn="#", cid="cd", title=None, note=None, rng=126, news=None, bench=None, live=False):
     o = meta["ohlc"]
     t0 = o.index[0]
     vol = [int(v) if v == v and v > 0 else 0 for v in o["volume"].values]
@@ -75,10 +126,22 @@ def candles_block(t, meta, learn="#", cid="cd", title=None, note=None, rng=126):
             "label": f"{t['short']} daily candlesticks with volume"}
     if not any(vol):
         spec["v"] = [0] * len(vol)
+    news_note = ""
+    if news is not None:
+        # the news markers: each story, and the market's own closes on the same days to measure it against
+        spec["news"] = news_marks(t, o, news)
+        spec["sym"], spec["name"], spec["crypto"] = t["sym"], t["name"], bool(t.get("crypto"))
+        spec["live"] = bool(live)
+        if bench is not None and t.get("bench"):
+            bc = bench.reindex(o.index).ffill()
+            spec["bc"] = [_sig(v) for v in bc.values]
+            spec["bn"] = BENCH_NAME.get(t["bench"], "the market")
+        news_note = (" Dots above the candles mark news and company filings: hover or tap one to see the story and how the stock moved "
+                     "from the last close before it, against the market on the same days.")
     title = title or f"{e(t['short'])}, day by day"
     note = note or ("Each candle is one trading day: the box spans the open and close, the thin line the day's high and low. "
-                    "Hollow boxes closed up, filled boxes closed down. Toggle the averages to see the trend the plays read.")
-    return (f'<div class="card chart-card"><div class="chart-top"><h3 class="h3">{title}</h3>'
+                    "Hollow boxes closed up, filled boxes closed down. Toggle the averages to see the trend the plays read." + news_note)
+    return (f'<div class="card chart-card" id="chart"><div class="chart-top"><h3 class="h3">{title}</h3>'
             f'<a class="small" href="{learn}">How to read candlesticks</a></div>'
             f'<div class="candles" data-candles="{cid}"></div><script type="application/json" id="{cid}">{_js(spec)}</script>'
             f'<p class="chart-note">{note}</p></div>')

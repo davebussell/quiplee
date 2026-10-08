@@ -58,6 +58,7 @@ function fetchText(url, headers) {
 function splitPublisher(it) {
   var src = it.source, title = it.title;
   if (!src) { var i = title.lastIndexOf(' - '); if (i > 0) { src = title.slice(i + 3); title = title.slice(0, i); } }
+  else if (title.slice(-(src.length + 3)) === ' - ' + src) title = title.slice(0, -(src.length + 3)); // Google appends the publisher
   return { headline: title, src: src || 'Google News' };
 }
 

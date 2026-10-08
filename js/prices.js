@@ -13,15 +13,19 @@
     load: function (tickers) {
       tickers = (tickers || []).filter(function (t) { return t && Q.data.TICKERS[t]; });
       if (!tickers.length) return Promise.resolve(cache);
-      var url = ENDPOINT + '?tickers=' + encodeURIComponent(tickers.join(','));
-      return fetch(url).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-        .then(function (j) {
-          if (j && j.prices) {
-            Q.prices.available = true;
-            Object.keys(j.prices).forEach(function (k) { cache[k] = j.prices[k]; });
-          }
-          return cache;
-        });
+      // SPY (the S&P 500) is the yardstick each story's move is measured against
+      if (tickers.indexOf('SPY') === -1) tickers.push('SPY');
+      var batches = [];
+      for (var i = 0; i < tickers.length; i += 12) batches.push(tickers.slice(i, i + 12));
+      return Promise.all(batches.map(function (b) {
+        return fetch(ENDPOINT + '?tickers=' + encodeURIComponent(b.join(','))).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (j) {
+            if (j && j.prices) {
+              Q.prices.available = true;
+              Object.keys(j.prices).forEach(function (k) { cache[k] = j.prices[k]; });
+            }
+          });
+      })).then(function () { return cache; });
     }
   };
 })();

@@ -73,6 +73,48 @@
       new ResizeObserver(function () { if (Math.abs(box.clientWidth - w) > 2) { w = box.clientWidth; fn(); } }).observe(box);
     }
   }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // ---- news on the candle chart: when each bar's close was set, and how a story moved the stock
+  var NYH = null;
+  function nyHour(ms) {
+    if (!NYH) NYH = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' });
+    return +NYH.format(new Date(ms));
+  }
+  /** UTC ms when each bar's close was set: 4 pm New York (the TSX closes then too), midnight UTC for crypto. */
+  function closeTimes(D) {
+    return D.d.map(function (dd) {
+      var x = day(D.t0, dd), base = Date.UTC(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate());
+      if (D.crypto) return base + 864e5;
+      return nyHour(base + 20 * 36e5) === 16 ? base + 20 * 36e5 : base + 21 * 36e5;
+    });
+  }
+  /** The move from the last close before the story (b) to the next close and five closes later, against
+   *  the market's closes on the same days, and the stock's normal daily swing (60 sessions up to b). */
+  function measureNews(D, it) {
+    var c = D.c, n = c.length, b = it.b, bc = D.bc, s = {};
+    for (var k in it) s[k] = it[k];
+    s.r = b + 1 < n ? b + 1 : null;
+    s.mi = s.r != null ? s.r : b;
+    function mv(a, i, j) { return a && a[i] && a[j] ? a[j] / a[i] - 1 : null; }
+    s.d1 = s.r != null ? mv(c, b, b + 1) : null;
+    s.m1 = s.r != null ? mv(bc, b, b + 1) : null;
+    s.d5 = b + 5 < n ? mv(c, b, b + 5) : null;
+    s.m5 = b + 5 < n ? mv(bc, b, b + 5) : null;
+    var rr = [];
+    for (var q = Math.max(1, b - 59); q <= b; q++) if (c[q] && c[q - 1]) rr.push(c[q] / c[q - 1] - 1);
+    var mean = rr.reduce(function (a, v) { return a + v; }, 0) / (rr.length || 1);
+    s.sd = rr.length > 10 ? Math.sqrt(rr.reduce(function (a, v) { return a + (v - mean) * (v - mean); }, 0) / rr.length) : null;
+    s.ex = s.d1 == null ? null : s.d1 - (s.m1 || 0);
+    s.z = s.ex != null && s.sd ? Math.abs(s.ex) / s.sd : null;
+    return s;
+  }
+  function nkey(h) { return String(h || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 70); }
+  function etTime(t) {
+    try { return new Date(t).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET'; } catch (e) { return t; }
+  }
+  function shortDate(t) { try { return new Date(t).toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric' }); } catch (e) { return t; } }
+  function dirc(v) { return v == null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : ''; }
+
   function niceTicks(lo, hi, n) {
     var span = hi - lo || Math.abs(hi) || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
     var step = [1, 2, 2.5, 5, 10].map(function (m) { return m * mag; }).find(function (s) { return span / s <= n; }) || 10 * mag;
@@ -120,6 +162,167 @@
     var lines = {};
     Object.keys(OVERLAYS).forEach(function (k) { lines[k] = OVERLAYS[k].calc(D.c); });
     var cur = null;
+
+    // ---- news markers (stock pages): a dot over the first close after each story; hover or tap for the story
+    // and the move, measured from the last close before it against the market on the same days
+    var news = null, groups = {}, clusters = [], card = null, list = null, hideT = null, pinned = false, geo = null, viewI0 = 0, listAll = false;
+    var SYM = String(D.sym || '').replace(/^\^/, ''), BN = D.bn || null;
+    if (D.news) {
+      news = D.news.map(function (it) { return measureNews(D, it); });
+      regroup();
+      card = el('div', { 'class': 'cd-news', role: 'dialog', 'aria-label': 'News on ' + SYM });
+      card.hidden = true;
+      card.addEventListener('pointerenter', function () { clearTimeout(hideT); });
+      card.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && !pinned) hideSoon(); });
+      card.addEventListener('click', function (e) { if (e.target.closest('.cn-x')) hide(); });
+      list = el('div', { 'class': 'cd-newslist' });
+      list.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.hasAttribute('data-all')) { listAll = !listAll; paintList(); return; }
+        var mi = +b.getAttribute('data-mi');
+        if (!isNaN(mi)) { plot.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); openMi(mi, true); }
+      });
+      document.addEventListener('pointerdown', function (e) { if (!card.hidden && !card.contains(e.target) && !(e.target.closest && e.target.closest('.cd-mk'))) hide(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !card.hidden) hide(); });
+    }
+    function regroup() { groups = {}; news.forEach(function (x) { (groups[x.mi] = groups[x.mi] || []).push(x); }); }
+    function hide() { clearTimeout(hideT); pinned = false; if (card) card.hidden = true; }
+    function hideSoon() { clearTimeout(hideT); hideT = setTimeout(hide, 280); }
+    function row(label, d, m) {
+      return '<div class="cn-row"><span class="cn-l">' + label + '</span><b class="' + dirc(d) + '">' + (d == null ? '–' : pct(d)) + '</b>' +
+        '<span class="cn-m">' + (d == null ? 'still developing' : m != null && BN ? esc(BN) + ' ' + (Math.abs(m) < 0.0005 ? '0.0%' : pct(m)) : '') + '</span></div>';
+    }
+    function verdict(x) {
+      var beyond = BN ? ' beyond the ' + esc(BN) : '';
+      if (x.z == null) return '<b class="' + dirc(x.ex) + '">' + pct(x.ex) + '</b>' + beyond + '.';
+      var zz = x.z.toFixed(1) + '× a normal day for ' + esc(SYM);
+      if (x.z >= 2) return '<b class="' + dirc(x.ex) + '">' + pct(x.ex) + '</b>' + beyond + ', ' + zz + ': the news moved the stock.';
+      if (x.z >= 1) return '<b class="' + dirc(x.ex) + '">' + pct(x.ex) + '</b>' + beyond + ', ' + zz + ': a real but modest reaction.';
+      return pct(x.ex) + beyond + ', inside a normal day\'s swing for ' + esc(SYM) + ' (±' + (x.sd * 100).toFixed(1) + '%): more noise than news.';
+    }
+    function storiesHtml(g, max) {
+      return g.slice(0, max).map(function (it) {
+        return '<p class="cn-meta">' + esc(etTime(it.t)) + (it.s ? ' · ' + esc(it.s) : '') + '</p>' +
+          (it.u ? '<a class="cn-h" href="' + esc(it.u) + '" target="_blank" rel="noopener noreferrer">' + esc(it.h) + '</a>' : '<p class="cn-h">' + esc(it.h) + '</p>');
+      }).join('') + (g.length > max ? '<p class="cn-more">+ ' + (g.length - max) + ' more before the same close</p>' : '');
+    }
+    function impactHtml(x) {
+      var base = fdate(day(D.t0, D.d[x.b]));
+      return x.d1 == null
+        ? '<p class="cn-verdict">Too fresh to measure: it came after the ' + base + ' close, so the next close is the first read on the impact.</p>'
+        : '<div class="cn-rows">' + row('Next day', x.d1, x.m1) + row('5 days', x.d5, x.m5) + '</div><p class="cn-verdict">' + verdict(x) + '</p>';
+    }
+    // a cluster is one marker: the stories before one close, or (when markers would overlap) a few nearby closes
+    function cardHtml(cl) {
+      var gs = cl.mis.slice().sort(function (a, b) { return b - a; }).map(function (mi) { return groups[mi]; });
+      var how = '<p class="cn-how">Each move is measured from the last close before the story to the next close and five closes later' +
+        (BN ? ', minus the ' + esc(BN) + ' over the same days' : '') + '. Several stories before one close share its move.</p>';
+      if (gs.length === 1) {
+        var g = gs[0];
+        return '<button type="button" class="cn-x" aria-label="Close">×</button>' + storiesHtml(g, 4) + '<div class="cn-imp">' + impactHtml(g[0]) + '</div>' +
+          '<p class="cn-how">Measured from the ' + fdate(day(D.t0, D.d[g[0].b])) + ' close, the last before ' + (g.length > 1 ? 'these stories; together they share the move' : 'the story') +
+          (BN ? ', minus the ' + esc(BN) + ' over the same days' : '') + '.</p>';
+      }
+      return '<button type="button" class="cn-x" aria-label="Close">×</button>' + gs.map(function (g) {
+        return '<div class="cn-sec">' + storiesHtml(g, 2) + '<div class="cn-imp">' + impactHtml(g[0]) + '</div></div>';
+      }).join('') + how;
+    }
+    function markerY(mi) { return Math.max(geo.m.t + 8, geo.Y(D.h[mi]) - 12); }
+    function clusterOf(mi) { for (var i = 0; i < clusters.length; i++) if (clusters[i].mis.indexOf(mi) >= 0) return i; return -1; }
+    function open(ci, pin) {
+      clearTimeout(hideT);
+      var cl = clusters[ci];
+      if (!cl || !geo) return;
+      pinned = !!pin;
+      card.innerHTML = cardHtml(cl);
+      card.hidden = false;
+      var bw = box.clientWidth, cw = card.offsetWidth, ch = card.offsetHeight;
+      var left = Math.max(0, Math.min(bw - cw, plot.offsetLeft + cl.x - cw / 2));
+      var top = plot.offsetTop + cl.y + 14;
+      if (top + ch > plot.offsetTop + plot.clientHeight + 40 && plot.offsetTop + cl.y - 14 - ch > 0) top = plot.offsetTop + cl.y - 14 - ch;
+      card.style.left = left + 'px'; card.style.top = top + 'px';
+    }
+    function openMi(mi, pin) { var ci = clusterOf(mi); if (ci >= 0) open(ci, pin); }
+    function drawNews(svg, X, Y, i0, m) {
+      geo = { X: X, Y: Y, m: m }; viewI0 = i0; clusters = [];
+      var gap = 16, cur2 = null;
+      Object.keys(groups).map(Number).filter(function (mi) { return mi >= i0; }).sort(function (a, b) { return a - b; }).forEach(function (mi) {
+        if (cur2 && X(mi) - X(cur2.mis[cur2.mis.length - 1]) < gap) cur2.mis.push(mi);
+        else { cur2 = { mis: [mi] }; clusters.push(cur2); }
+      });
+      clusters.forEach(function (cl, ci) {
+        var last = cl.mis[cl.mis.length - 1], x = X(last), y = Math.min.apply(null, cl.mis.map(markerY));
+        cl.x = x; cl.y = y;
+        var items = [], x0 = groups[last][0];
+        cl.mis.forEach(function (mi) { items = items.concat(groups[mi]); });
+        var nn = items.length, pend = x0.ex == null, multi = cl.mis.length > 1;
+        var col = multi ? css('--violet-ink') : pend ? css('--violet-ink') : x0.sd && Math.abs(x0.ex) < 0.5 * x0.sd ? css('--muted') : x0.ex > 0 ? css('--candle-up') : css('--candle-down');
+        var hollow = pend && !multi;
+        var gg = svgEl('g', { 'class': 'cd-mk', tabindex: '0', role: 'button', 'aria-label': (nn > 1 ? nn + ' stories, latest: ' : 'Story: ') + groups[last][groups[last].length - 1].h }, svg);
+        svgEl('line', { x1: x, x2: x, y1: y + (nn > 1 ? 7 : 5), y2: Math.max(y + 6, Y(D.h[last]) - 2), stroke: col, 'stroke-width': 1, opacity: 0.6 }, gg);
+        svgEl('circle', { cx: x, cy: y, r: 13, fill: 'transparent' }, gg);
+        svgEl('circle', { cx: x, cy: y, r: nn > 1 ? 7 : 5, fill: hollow ? css('--panel') : col, stroke: hollow ? col : css('--panel'), 'stroke-width': hollow ? 2 : 1.5 }, gg);
+        if (nn > 1) {
+          var tx = svgEl('text', { x: x, y: y + 3.2, 'text-anchor': 'middle', 'font-size': 9, 'font-weight': 700, 'font-family': css('--data'), fill: hollow ? col : '#fff' }, gg);
+          tx.textContent = nn > 9 ? '9+' : nn;
+        }
+        gg.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse' && !pinned) open(ci, false); });
+        gg.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse' && !pinned) hideSoon(); });
+        gg.addEventListener('pointerdown', function (e) { e.stopPropagation(); open(ci, true); });
+        gg.addEventListener('focus', function () { if (!pinned) open(ci, false); });
+        gg.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(ci, true); } });
+      });
+      paintList();
+    }
+    function paintList() {
+      if (!list) return;
+      var vis = news.filter(function (x) { return x.mi >= viewI0; }).sort(function (a, b) { return a.t < b.t ? 1 : -1; });
+      if (!vis.length) { list.innerHTML = '<p class="nl-empty">No news or filings on ' + esc(SYM) + ' in this range yet.</p>'; return; }
+      var rows = (listAll ? vis : vis.slice(0, 5)).map(function (x) {
+        var mv = x.ex == null ? '<span class="nl-pend">too fresh</span>' : '<b class="' + dirc(x.ex) + '">' + pct(x.ex) + '</b>';
+        return '<li><button type="button" data-mi="' + x.mi + '"><span class="nl-d">' + esc(shortDate(x.t)) + '</span><span class="nl-h">' + esc(x.h) + '</span>' + mv + '</button></li>';
+      }).join('');
+      list.innerHTML = '<div class="nl-head"><b>News and filings on the chart</b><span>next-day move' + (BN ? ' beyond the ' + esc(BN) : '') + '</span></div><ul>' + rows + '</ul>' +
+        (vis.length > 5 ? '<button type="button" class="linkish nl-all" data-all>' + (listAll ? 'Show fewer' : 'Show all ' + vis.length) + '</button>' : '');
+    }
+    function setRange(r) {
+      state.range = r;
+      [].forEach.call(rg.children, function (x) { x.setAttribute('aria-pressed', String(x.textContent === (ranges.filter(function (q) { return q[1] === r; })[0] || [])[0])); });
+    }
+    function deepLink() {
+      var q = new URLSearchParams(location.search).get('news');
+      if (!q || !news) return;
+      var ts = /^\d+$/.test(q) ? +q : Date.parse(q), best = null;
+      if (!ts) return;
+      news.forEach(function (x) { var dd = Math.abs(Date.parse(x.t) - ts); if (dd < 36 * 36e5 && (!best || dd < best.d)) best = { x: x, d: dd }; });
+      if (!best) return;
+      var need = n - best.x.mi + 3;
+      if (need > state.range) { var fit = ranges.filter(function (r) { return r[1] >= need && r[1] <= n + 5; })[0]; if (fit) { setRange(fit[1]); draw(); } }
+      box.scrollIntoView({ block: 'center' });
+      setTimeout(function () { openMi(best.x.mi, true); }, 350);
+    }
+    function liveNews() {
+      if (!news || !D.live || !D.sym || location.protocol === 'file:') { deepLink(); return; }
+      var url = '/.netlify/functions/news?edgar=0&tickers=' + encodeURIComponent(D.sym) + '&names=' + encodeURIComponent(D.sym + ':' + (D.name || D.sym));
+      fetch(url).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (j && j.stories && j.stories.length) {
+          var have = {}, closes = closeTimes(D), added = 0;
+          news.forEach(function (x) { have[nkey(x.h)] = 1; });
+          j.stories.forEach(function (st) {
+            var h = String(st.headline || ''), src = st.src || '';
+            if (src && h.slice(-(src.length + 3)) === ' - ' + src) h = h.slice(0, -(src.length + 3));
+            if (h.length < 12 || have[nkey(h)] || !st.ts) return;
+            var b = -1;
+            for (var i = closes.length - 1; i >= 0; i--) if (closes[i] <= st.ts) { b = i; break; }
+            if (b < 1 || b < n - 520) return;
+            have[nkey(h)] = 1; added++;
+            news.push(measureNews(D, { b: b, t: new Date(st.ts).toISOString(), h: h, s: src || 'News', u: st.link || '', k: 'news', ty: 'News' }));
+          });
+          if (added) { regroup(); draw(); }
+        }
+        deepLink();
+      }).catch(deepLink);
+    }
 
     function draw() {
       plot.innerHTML = '';
@@ -192,6 +395,7 @@
         var ch = i > 0 ? D.c[i] / D.c[i - 1] - 1 : null;
         var parts = [fdate(day(D.t0, D.d[i])), 'O ' + money(D.o[i], D.cur), 'H ' + money(D.h[i], D.cur), 'L ' + money(D.l[i], D.cur), 'C ' + money(D.c[i], D.cur) + (ch != null ? ' (' + pct(ch) + ')' : '')];
         if (D.v[i]) parts.push('Vol ' + bigNum(D.v[i]));
+        if (news && groups[i]) parts.push(groups[i].length + (groups[i].length > 1 ? ' stories' : ' story') + ' (dot above)');
         tip.textContent = parts.join('  ·  ');
       }
       function nearest(e) { var r = svg.getBoundingClientRect(); var px = (e.clientX - r.left) * (W / r.width); return Math.max(i0, Math.min(n - 1, Math.round((px - m.l) / step - 0.5) + i0)); }
@@ -201,9 +405,12 @@
         if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
         e.preventDefault(); show(Math.max(i0, Math.min(n - 1, (cur == null ? n - 1 : cur) + (e.key === 'ArrowRight' ? 1 : -1))));
       };
+      if (news) { drawNews(svg, X, Y, i0, m); if (card && !card.hidden) hide(); }
       show(cur != null && cur >= i0 ? cur : n - 1);
     }
     onResize(plot, draw);
+    if (list) { box.appendChild(card); box.appendChild(list); }
+    liveNews();
   }
 
   // ======================================================== plays-over-time heatmap

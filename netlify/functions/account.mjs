@@ -15,6 +15,8 @@
  *   POST /api/account/delete  {password}
  *   GET|POST /api/account/unsubscribe?t=                         -> stop the emails (POST = one-click from mail apps)
  *
+ * Each new account is emailed to the owner (QM_OWNER_EMAIL) with the running total; the owner's
+ * numbers and every sign-up are at /owner/ (netlify/functions/owner.mjs).
  * Storage and cookies: netlify/lib/account.mjs. Emails go through Resend (RESEND_API_KEY);
  * without it, sign-up still works and the confirm link goes out on the first hourly run
  * after the key is set (alerts-nightly.mjs).
@@ -28,7 +30,7 @@ import {
   FREE_UNTIL_LABEL, ptCookie, cleanRules, memberCookie, hasPaidCookie,
 } from "../lib/account.mjs";
 import { checkPassword } from "../lib/qm.mjs";
-import { confirmMsg, resetMsg } from "../lib/accountmail.mjs";
+import { confirmMsg, resetMsg, ownerMsg } from "../lib/accountmail.mjs";
 
 let READS = { at: 0, data: null, origin: "" };
 async function reads(req) {
@@ -104,7 +106,17 @@ async function signup(req, context, s) {
   const we = await s.setJSON(emailKey(email), { u }, { onlyIfNew: true });
   if (we.modified === false) { await s.delete("u/" + u).catch(() => {}); return reply({ error: "That email already has an account. Sign in, or reset your password." }, 409); }
   const sent = await sendConfirm(s, u, acct).catch(() => false);
+  await tellOwner(s, acct).catch((e) => console.error("owner email", e));
   return reply({ ok: true, name, mail: sent }, 200, signInCookies(req, u, acct));
+}
+
+/** Email the owner about each new account, with the running total (once Resend is on). */
+async function tellOwner(s, acct) {
+  const to = env("QM_OWNER_EMAIL");
+  if (!mail.configured() || !to) return;
+  let total = 0;
+  for await (const page of s.list({ prefix: "u/", paginate: true })) total += page.blobs.length;
+  await sendOne(ownerMsg(acct, total, to));
 }
 
 async function findAccount(s, id) {

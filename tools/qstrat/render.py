@@ -708,6 +708,8 @@ class Site:
         alerts_page(self)
         from .me import me_page
         me_page(self)
+        from .owner import owner_page
+        owner_page(self)
         state, info = picks.run(self)
         picks.picks_page(self, state, info)
         self.home()
@@ -1168,7 +1170,8 @@ class Site:
             day_ch = float(cc.iloc[-1] / cc.iloc[-2] - 1)
         y1 = self.one_year(t)
         if meta.get("ohlc") is not None and len(meta["ohlc"]):
-            chart = sv.candles_block(t, meta, learn=h("learn/candlesticks/"))
+            bench = self.prices[t["bench"]]["close"] if t.get("bench") in self.prices else None
+            chart = sv.candles_block(t, meta, learn=h("learn/candlesticks/"), news=None if t.get("index") else sv.news_items(t), bench=bench, live=True)
             heat = sv.heatmap_block(self, t, meta, lambda p: h(self.pair_path(t, p)) if p["slug"] in own_pages else None)
         else:
             chart = chart_block("px-" + t["slug"], price_spec(bh, PLAY["buy-and-hold"], t, with_rule=False), "", f"{e(t['short'])} over the last three years")
@@ -1508,7 +1511,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "rules/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "rules/", "owner/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

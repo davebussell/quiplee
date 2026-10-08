@@ -1,6 +1,7 @@
 /* accountmail.mjs: the emails a Be The Puck account gets.
  *   confirmMsg   confirm an email address (sent on sign-up or when the address changes)
  *   resetMsg     a one-hour link to set a new password
+ *   ownerMsg     to the site owner (QM_OWNER_EMAIL): a new account, with the running total
  *   nightlyMsg   "your stocks tonight": Start/Stop flips (always free) and, for members
  *                (free for every account until FREE_UNTIL), every play that got in or out
  * Each returns {to, subject, html, text, headers}. Senders: freealerts.sendAll / sendOne.
@@ -34,6 +35,18 @@ export function resetMsg(u, acct) {
     `${DISCLAIMER}<br><br>${sender()}`, "A link to choose a new password, good for one hour.");
   const text = `Reset your Be The Puck password (${acct.name}): ${url}\n\nThe link works for one hour. If you didn't ask, ignore this email.`;
   return { to: acct.email, subject: "Reset your Be The Puck password", html, text };
+}
+
+/** To the owner: someone just made an account. total = accounts on the site now. */
+export function ownerMsg(acct, total, to) {
+  const when = new Date(acct.created || Date.now()).toLocaleString("en-US", { timeZone: "America/Toronto", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const html = mail.shell(`New sign-up: ${acct.name}`,
+    `<p><b>${esc(acct.name)}</b> made a Be The Puck account at ${esc(when)} (Toronto time)${acct.email ? ` with an address at <b>${esc(String(acct.email).split("@")[1] || "")}</b>` : ""}.</p>` +
+    `<p style="font-size:28px;font-weight:700;margin:8px 0 2px">${total.toLocaleString("en-US")}</p><p style="color:#6b7385;margin:0 0 16px">accounts on the site now</p>` +
+    mail.button(siteUrl() + "/owner/", "See every sign-up"),
+    "You get this because your address is set as QM_OWNER_EMAIL for bethepuck.com.", `${acct.name} just signed up. ${total} accounts now.`);
+  const text = `New Be The Puck sign-up: ${acct.name} (${when} Toronto). ${total} accounts now. Every sign-up: ${siteUrl()}/owner/`;
+  return { to, subject: `New sign-up: ${acct.name} · ${total.toLocaleString("en-US")} accounts`, html, text };
 }
 
 function footer(u, member) {

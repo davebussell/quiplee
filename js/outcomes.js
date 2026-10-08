@@ -1,17 +1,23 @@
 /* outcomes.js — joins story timestamps to the real daily price series so
  * lookback / similar / the scoreboard use ACTUAL returns, not estimates.
  *
- * For each story: baseline = last close at/before publication; d1 = next
+ * For each story: baseline = the last close set before publication; d1 = next
  * trading day's close vs baseline; d5 = five trading days out. Partial ages
  * get what's available (d1 only) and stay "developing" for the rest.
  * Only stories from the real feed (s.real) are ever overwritten. */
 (function () {
   window.Q = window.Q || {};
 
+  // Yahoo stamps a daily bar at the session's open (9:30 am New York); its close is set 6.5 hours later
+  var CLOSE_AFTER = 6.5 * 36e5;
+  function baseIndex(ts, series) {
+    var idx = -1;
+    for (var i = 0; i < series.length; i++) { if (series[i].t + CLOSE_AFTER <= ts) idx = i; else break; }
+    return idx;
+  }
   function computeFromSeries(ts, series) {
     if (!series || series.length < 2) return null;
-    var idx = -1;
-    for (var i = 0; i < series.length; i++) { if (series[i].t <= ts) idx = i; else break; }
+    var idx = baseIndex(ts, series);
     if (idx < 0) return null;                       // story predates the series
     var base = series[idx].c;
     if (!base) return null;
@@ -51,6 +57,7 @@
       return { n: n, hits: hits, rate: n ? Math.round(hits / n * 100) : null };
     },
 
-    compute: computeFromSeries
+    compute: computeFromSeries,
+    baseIndex: baseIndex
   };
 })();
