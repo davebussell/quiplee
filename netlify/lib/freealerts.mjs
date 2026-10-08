@@ -2,10 +2,12 @@
  *
  * A subscriber is stored in the Blobs store "alerts" under sub/<id>, where id is a
  * keyed hash of the lower-cased email:
- *   {email, tickers, confirmed, created, confirm_sent, pending, last: {SYM: [L, k, of]}}
+ *   {email, tickers, weekly, confirmed, created, confirm_sent, pending, pending_weekly, last: {SYM: [L, k, of]}}
+ * weekly: true also sends the Saturday market-weather email (weekly-weather.mjs); a
+ * record may have weekly and no stocks.
  * last holds the light we last told them about (1 Start, 0 Stop) so an email only
  * goes out when it flips. Links in emails carry signed tokens (QM_SECRET):
- *   {k: "ac", id, x}  confirm (x = the ticker list being confirmed), 14 days
+ *   {k: "ac", id, x, w}  confirm (x = the ticker list being confirmed, w = the weekly), 14 days
  *   {k: "am", id}     manage / unsubscribe, no expiry (deleting the record kills it)
  */
 import { env, sign, verify, hashId, siteUrl, now, DAY } from "./qm.mjs";
@@ -16,7 +18,7 @@ export const MAX_TICKERS = 50;
 export const EMAIL_RX = /^[^\s@<>"',;]{1,64}@[A-Za-z0-9.-]{1,190}\.[A-Za-z]{2,24}$/;
 export const subId = (email) => hashId("alert-email:" + String(email).trim().toLowerCase(), env("QM_SECRET"));
 
-export const confirmToken = (id, tickers) => sign({ k: "ac", id, x: tickers, exp: now() + 14 * DAY }, env("QM_SECRET"));
+export const confirmToken = (id, tickers, weekly) => sign({ k: "ac", id, x: tickers, w: !!weekly, exp: now() + 14 * DAY }, env("QM_SECRET"));
 export const manageToken = (id) => sign({ k: "am", id }, env("QM_SECRET"));
 export function readToken(t, kind) {
   const p = verify(t, env("QM_SECRET"));
@@ -31,26 +33,27 @@ const esc = mail.esc;
 const DISCLAIMER = "This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.";
 
 /** Who sent it, why they got it, and how to stop (CASL / CAN-SPAM). */
-function footer(id) {
+export function footer(id, why) {
   const addr = env("QM_MAIL_ADDRESS");
-  return `${DISCLAIMER}<br><br>You're getting this because you asked Be The Puck to email you when the Start/Stop light changes on your stocks. ` +
+  return `${DISCLAIMER}<br><br>You're getting this because you asked Be The Puck ${why || "to email you when the Start/Stop light changes on your stocks"}. ` +
     `<a href="${esc(manageUrl(id))}">Change your stocks</a> · <a href="${esc(unsubUrl(id))}">Unsubscribe</a><br>` +
     `Be The Puck (bethepuck.com) is made by Click Shift Marketing${addr ? ", " + esc(addr) : ""}.`;
 }
 
-function headers(id) {
+export function headers(id) {
   return { "List-Unsubscribe": `<${unsubUrl(id)}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" };
 }
 
-export function confirmEmail(id, email, tickers, R) {
-  const url = siteUrl() + "/api/alerts/confirm?t=" + encodeURIComponent(confirmToken(id, tickers));
+export function confirmEmail(id, email, tickers, R, weekly) {
+  const url = siteUrl() + "/api/alerts/confirm?t=" + encodeURIComponent(confirmToken(id, tickers, weekly));
   const names = tickers.map((s) => (R && R.t[s] ? R.t[s].s : s)).join(", ");
+  const what = [names ? `an email when the Start/Stop light flips on: <b>${esc(names)}</b>` : "", weekly ? "the weekly market weather every Saturday" : ""].filter(Boolean).join(", and ");
   const html = mail.shell("Confirm your Be The Puck alerts",
-    `<p>Tap the button to start getting an email when the Start/Stop light flips on: <b>${esc(names)}</b>.</p>` +
+    `<p>Tap the button to start getting ${what}.</p>` +
     `<p style="margin:22px 0"><a href="${esc(url)}" style="background:#7c6cf5;color:#fff;text-decoration:none;padding:12px 18px;border-radius:10px;font-weight:600">Confirm my alerts</a></p>` +
     `<p style="color:#6b7385;font-size:13px">If you didn't ask for this, ignore this email and nothing will be sent. The link works for 14 days.</p>`,
     `${DISCLAIMER}<br><br>Be The Puck (bethepuck.com) is made by Click Shift Marketing.`);
-  const text = `Confirm your Be The Puck alerts for ${names}: ${url}\n\nIf you didn't ask for this, ignore this email.\n\n${DISCLAIMER}`;
+  const text = `Confirm your Be The Puck emails${names ? " for " + names : ""}${weekly ? (names ? " and the weekly" : " (the weekly market weather)") : ""}: ${url}\n\nIf you didn't ask for this, ignore this email.\n\n${DISCLAIMER}`;
   return { to: email, subject: "Confirm your Be The Puck alerts", html, text };
 }
 

@@ -1,6 +1,7 @@
 /* alerts.mjs: free email alerts when the Start/Stop light flips on a reader's stocks.
  *
- *   POST /api/alerts/subscribe   {email, tickers, consent}  -> stores the request and emails a confirm link
+ *   POST /api/alerts/subscribe   {email, tickers, weekly, consent} -> stores the request and emails a confirm link
+ *                                                              (weekly: the Saturday market weather; stocks optional then)
  *   GET  /api/alerts/confirm?t=                             -> confirms, back to /alerts/?confirmed=1&m=<manage token>
  *   GET  /api/alerts/manage?t=                              -> {email (masked), tickers, confirmed}
  *   POST /api/alerts/update      {t, tickers}               -> changes the list (token proves it's theirs)
@@ -68,24 +69,27 @@ async function subscribe(req, context, s) {
   let R;
   try { R = await reads(req); } catch (e) { return json({ error: "Alerts are unavailable right now. Try again in a minute." }, 503); }
   const tickers = cleanTickers(b.tickers, R);
-  if (!tickers.length) return json({ error: "Add at least one stock Be The Puck covers." }, 400);
+  const weekly = b.weekly === true || b.weekly === "on" || b.weekly === "true";
+  if (!tickers.length && !weekly) return json({ error: "Add at least one stock Be The Puck covers." }, 400);
   const ip = (context && context.ip) || req.headers.get("x-nf-client-connection-ip") || "unknown";
   if (await limited(s, "rl/" + hashId("asub:" + ip, env("QM_SECRET")), 8, 3600)) return json({ error: "Too many requests from here. Try again in an hour." }, 429);
   const id = subId(email);
   if (await limited(s, "rl/" + hashId("aem:" + id, env("QM_SECRET")), 4, 3600)) return json({ error: "We've just sent a link to that address. Check your inbox (and spam folder)." }, 429);
   const rec = (await s.get("sub/" + id, { type: "json" })) || { email, tickers: [], confirmed: false, created: new Date().toISOString(), last: {} };
   // an existing, confirmed list only changes through the emailed link (so nobody can edit someone else's)
-  if (rec.confirmed) rec.pending = tickers;
-  else rec.tickers = tickers;
+  // (a confirmed reader adding just the weekly keeps their stocks)
+  if (rec.confirmed) { rec.pending = tickers.length ? tickers : rec.tickers; rec.pending_weekly = weekly || !!rec.weekly; }
+  else { rec.tickers = tickers; rec.weekly = weekly; }
+  if (b.src && !rec.src) rec.src = String(b.src).slice(0, 40);
   rec.email = email;
   rec.confirm_sent = null;
-  const m = confirmEmail(id, email, tickers, R);
+  const m = confirmEmail(id, email, rec.confirmed ? rec.pending : tickers, R, rec.confirmed ? rec.pending_weekly : weekly);
   if (mail.configured()) {
     const r = await sendOne(m);
     if (r.sent) rec.confirm_sent = new Date().toISOString();
   }
   await s.setJSON("sub/" + id, rec);
-  return json({ ok: true, mail: !!rec.confirm_sent, tickers });
+  return json({ ok: true, mail: !!rec.confirm_sent, tickers, weekly });
 }
 
 async function confirm(req, url, s) {
@@ -95,8 +99,10 @@ async function confirm(req, url, s) {
   if (!rec) return redirect("/alerts/?expired=1");
   let R = null;
   try { R = await reads(req); } catch (e) { /* keep going: last states fill in tonight */ }
-  const tickers = Array.isArray(p.x) && p.x.length ? p.x.slice(0, MAX_TICKERS) : rec.tickers;
+  const tickers = Array.isArray(p.x) ? p.x.slice(0, MAX_TICKERS) : rec.tickers;
   rec.tickers = tickers;
+  if (p.w !== undefined) rec.weekly = !!p.w || (rec.confirmed && !!rec.weekly);
+  delete rec.pending_weekly;
   rec.confirmed = true;
   rec.confirmed_at = rec.confirmed_at || new Date().toISOString();
   delete rec.pending;
@@ -109,7 +115,7 @@ async function manage(url, s) {
   const p = readToken(url.searchParams.get("t"), "am");
   const rec = p && (await s.get("sub/" + p.id, { type: "json" }));
   if (!rec) return json({ error: "This link no longer works. Sign up again below." }, 404);
-  return json({ email: mask(rec.email), tickers: rec.tickers, confirmed: !!rec.confirmed });
+  return json({ email: mask(rec.email), tickers: rec.tickers, weekly: !!rec.weekly, confirmed: !!rec.confirmed });
 }
 
 async function update(req, s) {
@@ -120,11 +126,13 @@ async function update(req, s) {
   let R;
   try { R = await reads(req); } catch (e) { return json({ error: "Alerts are unavailable right now." }, 503); }
   const tickers = cleanTickers(b.tickers, R);
-  if (!tickers.length) return json({ error: "Keep at least one stock, or unsubscribe instead." }, 400);
+  const weekly = b.weekly === undefined ? !!rec.weekly : b.weekly === true;
+  if (!tickers.length && !weekly) return json({ error: "Keep at least one stock or the weekly, or unsubscribe instead." }, 400);
   rec.tickers = tickers;
+  rec.weekly = weekly;
   rec.last = lastFor(tickers, R, rec.last || {});
   await s.setJSON("sub/" + p.id, rec);
-  return json({ ok: true, tickers });
+  return json({ ok: true, tickers, weekly });
 }
 
 async function unsubscribe(req, url, s) {

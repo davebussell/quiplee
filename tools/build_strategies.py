@@ -35,8 +35,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist"}
+             "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner", "weekly"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "weather.json", "theory", "hist"}
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -197,7 +197,9 @@ def main():
         f.write(site.plays_json())
     with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
         f.write(reads_json(site))
-    from qstrat import screen, theory
+    from qstrat import screen, theory, weekly
+    with open(os.path.join(out, "data", "weather.json"), "w", encoding="utf-8") as f:
+        f.write(weekly.weather_json(site))
     with open(os.path.join(out, "data", "tickers.json"), "w", encoding="utf-8") as f:
         f.write(screen.tickers_json(site))
     with open(os.path.join(out, "data", "screen.json"), "w", encoding="utf-8") as f:

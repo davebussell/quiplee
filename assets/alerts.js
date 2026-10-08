@@ -67,18 +67,20 @@
     f.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var p = parse(ta.value), email = f.email.value.trim();
-      if (!p.syms.length) { msg(out, 'Add at least one stock Be The Puck covers.'); return; }
+      var weekly = !!(f.weekly && f.weekly.checked);
+      if (!p.syms.length && !weekly) { msg(out, 'Add at least one stock Be The Puck covers.'); return; }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg(out, "That email address doesn't look right."); return; }
       if (!f.consent.checked) { msg(out, 'Tick the box to agree to the emails.'); return; }
       var btn = f.querySelector('button[type=submit]');
       btn.disabled = true;
       msg(out, 'Sending…', true);
-      post('subscribe', { email: email, tickers: p.syms, consent: true }).then(function (j) {
+      post('subscribe', { email: email, tickers: p.syms, weekly: weekly, consent: true }).then(function (j) {
         btn.disabled = false;
         if (!j.ok) { msg(out, j.error || "That didn't work. Try again."); return; }
         msg(out, j.mail ? 'Check your inbox: tap the link in the email from Be The Puck to start your alerts.'
           : "Got it. We'll email you a link to confirm as soon as alerts switch on.", true);
         f.reset(); chips([], []);
+        try { if (window.gtag) window.gtag('event', 'sign_up', { method: 'alerts' }); } catch (e) { /* no analytics */ }
       }).catch(function () { btn.disabled = false; msg(out, "Couldn't reach the server. Check your connection and try again."); });
     });
   }
@@ -92,10 +94,10 @@
     fetch(API + 'manage?t=' + encodeURIComponent(tok)).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.tickers) { box.innerHTML = '<p>' + esc(j.error || 'This link no longer works.') + '</p>'; $('[data-al-signup]').hidden = false; return; }
       var names = j.tickers.filter(function (s) { return U.names[s]; }).map(function (s) { return U.names[s][0]; });
-      box.innerHTML = (q.get('confirmed') ? '<p class="al-ok"><b>You\'re set.</b> We\'ll email ' + esc(j.email) + ' when the light flips on these stocks.</p>' : '') +
+      box.innerHTML = (q.get('confirmed') ? '<p class="al-ok"><b>You\'re set.</b> We\'ll email ' + esc(j.email) + (j.tickers.length ? ' when the light flips on these stocks' : '') + (j.weekly ? (j.tickers.length ? ', and' : '') + ' the weekly market weather on Saturdays' : '') + '.</p>' : '') +
         (unsub ? '<p><b>Unsubscribe ' + esc(j.email) + '?</b> You won\'t get any more alerts.</p><p><button type="button" class="btn primary" data-al-unsub>Unsubscribe</button> <a href="?m=' + esc(encodeURIComponent(tok)) + '">Change my stocks instead</a></p><p class="pt-msg" data-al-umsg></p>'
           : '<h2 class="h3">Your alerts for ' + esc(j.email) + '</h2><form class="pt-form" data-al-edit novalidate><label>Stocks to follow<textarea name="tickers" rows="3">' + esc(names.join(', ')) + '</textarea></label>' +
-            '<div class="al-chips" data-al-chips></div><div class="hero-links"><button class="btn primary" type="submit">Save my stocks</button><button type="button" class="btn" data-al-unsub>Unsubscribe</button></div>' +
+            '<div class="al-chips" data-al-chips></div><label class="pt-check"><input type="checkbox" name="weekly"' + (j.weekly ? ' checked' : '') + '> The weekly market weather on Saturdays</label><div class="hero-links"><button class="btn primary" type="submit">Save my stocks</button><button type="button" class="btn" data-al-unsub>Unsubscribe</button></div>' +
             '<p class="pt-msg" role="alert" data-al-umsg></p></form>');
       var ta = box.querySelector('textarea');
       if (ta) {
@@ -104,7 +106,8 @@
         box.querySelector('[data-al-edit]').addEventListener('submit', function (ev) {
           ev.preventDefault();
           var p = parse(ta.value);
-          post('update', { t: tok, tickers: p.syms }).then(function (r) { msg($('[data-al-umsg]'), r.ok ? 'Saved. ' + r.tickers.length + ' stocks on your list.' : (r.error || "That didn't save."), r.ok); });
+          var wk = box.querySelector('input[name=weekly]');
+          post('update', { t: tok, tickers: p.syms, weekly: !!(wk && wk.checked) }).then(function (r) { msg($('[data-al-umsg]'), r.ok ? 'Saved. ' + r.tickers.length + ' stocks on your list' + (r.weekly ? ', plus the weekly.' : '.') : (r.error || "That didn't save."), r.ok); });
         });
       }
       var ub = box.querySelector('[data-al-unsub]');

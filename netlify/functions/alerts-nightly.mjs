@@ -42,7 +42,7 @@ export default async () => {
       if (!rec) return;
       const id = keys[i + j].slice(4);
       if (!rec.confirm_sent && (!rec.confirmed || rec.pending)) {
-        msgs.push(confirmEmail(id, rec.email, rec.pending || rec.tickers, R));
+        msgs.push(confirmEmail(id, rec.email, rec.pending || rec.tickers, R, rec.pending ? rec.pending_weekly : rec.weekly));
         rec.confirm_sent = new Date().toISOString();
         writes.push([keys[i + j], rec]);
         return;
