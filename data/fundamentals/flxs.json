@@ -14,7 +14,7 @@
  "equity": 133495000.0,
  "equity_date": "2026-06-30",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 90.65,
  "fiftyTwoWeekLow": 34.0,
  "financialCurrency": "USD",
@@ -57,7 +57,7 @@
  "totalRevenue": 459177984,
  "total_debt_bs": 51896000.0,
  "trailingEps": 6.07,
- "trailingPE": 14.242475,
+ "trailingPE": 14.031301,
  "trailingPegRatio": 1.3355,
  "website": "https://www.flexsteel.com"
 }

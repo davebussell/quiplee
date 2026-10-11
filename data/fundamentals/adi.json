@@ -6,7 +6,7 @@
  "currency": "USD",
  "currentRatio": 1.25,
  "debtToEquity": 27.314,
- "dividendYield": 1.08,
+ "dividendYield": 1.07,
  "earningsGrowth": 1.635,
  "ebit": 3029828000.0,
  "ebitda": 6922700800,
@@ -14,7 +14,7 @@
  "equity": 33815755000.0,
  "equity_date": "2025-10-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 445.91,
  "fiftyTwoWeekLow": 223.47,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 9164060672,
  "totalRevenue": 13881744384,
  "total_debt_bs": 8664610000.0,
- "trailingEps": 8.43,
- "trailingPE": 48.183865,
+ "trailingEps": 8.42,
+ "trailingPE": 48.241093,
  "trailingPegRatio": 0.5757,
  "website": "https://www.analog.com"
 }

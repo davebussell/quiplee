@@ -14,7 +14,7 @@
  "equity": 961936000.0,
  "equity_date": "2025-11-30",
  "exchange": "TOR",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 45.03,
  "fiftyTwoWeekLow": 33.91,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 305142016,
  "totalRevenue": 2005762048,
  "total_debt_bs": 276913000.0,
- "trailingEps": 1.58,
- "trailingPE": 23.816456,
+ "trailingEps": 1.68,
+ "trailingPE": 22.398811,
  "trailingPegRatio": null,
  "website": "https://www.richelieu.com"
 }

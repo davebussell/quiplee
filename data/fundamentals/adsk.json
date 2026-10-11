@@ -14,7 +14,7 @@
  "equity": 3045000000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 320.0,
  "fiftyTwoWeekLow": 185.5,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 3704999936,
  "totalRevenue": 7790000128,
  "total_debt_bs": 2734000000.0,
- "trailingEps": 7.71,
- "trailingPE": 30.525293,
+ "trailingEps": 7.77,
+ "trailingPE": 30.289576,
  "trailingPegRatio": 0.845,
  "website": "https://www.autodesk.com"
 }

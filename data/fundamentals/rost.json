@@ -14,9 +14,9 @@
  "equity": 6187443000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 257.0,
- "fiftyTwoWeekLow": 147.49,
+ "fiftyTwoWeekLow": 148.58,
  "financialCurrency": "USD",
  "forwardEps": 8.97296,
  "forwardPE": 24.786692,
@@ -56,8 +56,8 @@
  "totalDebt": 4739150848,
  "totalRevenue": 24511797248,
  "total_debt_bs": 5212338000.0,
- "trailingEps": 8.27,
- "trailingPE": 26.89359,
+ "trailingEps": 8.17,
+ "trailingPE": 27.222767,
  "trailingPegRatio": 2.4926,
  "website": "https://www.rossstores.com"
 }

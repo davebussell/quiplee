@@ -14,7 +14,7 @@
  "equity": 76550000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 2.73,
  "fiftyTwoWeekLow": 0.57,
  "financialCurrency": "USD",
@@ -56,7 +56,7 @@
  "totalDebt": 86048000,
  "totalRevenue": 568590016,
  "total_debt_bs": 83318000.0,
- "trailingEps": -0.99,
+ "trailingEps": -0.98,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.gopro.com"

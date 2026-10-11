@@ -14,7 +14,7 @@
  "equity": 8286000000.0,
  "equity_date": "2026-03-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 452.7,
  "fiftyTwoWeekLow": 100.02,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 485000000,
  "totalRevenue": 5155999744,
  "total_debt_bs": 457000000.0,
- "trailingEps": 0.97,
- "trailingPE": 274.51544,
+ "trailingEps": 0.94,
+ "trailingPE": 283.27658,
  "trailingPegRatio": 2.731,
  "website": "https://www.arm.com"
 }

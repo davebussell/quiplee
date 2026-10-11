@@ -6,7 +6,7 @@
  "currency": "USD",
  "currentRatio": 0.76,
  "debtToEquity": null,
- "dividendYield": 2.7,
+ "dividendYield": 2.65,
  "earningsGrowth": 0.857,
  "ebit": 3049900000.0,
  "ebitda": 5642299904,
@@ -14,7 +14,7 @@
  "equity": -8096600000.0,
  "equity_date": "2025-09-30",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 110.51,
  "fiftyTwoWeekLow": 77.99,
  "financialCurrency": "USD",
@@ -57,7 +57,7 @@
  "totalRevenue": 38338301952,
  "total_debt_bs": 26611500000.0,
  "trailingEps": 1.73,
- "trailingPE": 54.01786,
+ "trailingPE": 52.456646,
  "trailingPegRatio": 1.1143,
  "website": "https://www.starbucks.com"
 }

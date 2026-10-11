@@ -14,7 +14,7 @@
  "equity": 2690757695.0,
  "equity_date": "2025-12-31",
  "exchange": "NCM",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 5.13,
  "fiftyTwoWeekLow": 1.43,
  "financialCurrency": "CNY",
@@ -56,7 +56,7 @@
  "totalDebt": 45133896,
  "totalRevenue": 457863808,
  "total_debt_bs": 50038464.0,
- "trailingEps": -7.98,
+ "trailingEps": -7.87,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.mcholo.com"

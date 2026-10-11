@@ -14,7 +14,7 @@
  "equity": 28327602000.0,
  "equity_date": "2025-10-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 539.48,
  "fiftyTwoWeekLow": 362.55,
  "financialCurrency": "USD",
@@ -57,7 +57,7 @@
  "totalRevenue": 9416465408,
  "total_debt_bs": 14293418000.0,
  "trailingEps": 5.66,
- "trailingPE": 87.929306,
+ "trailingPE": 90.10424,
  "trailingPegRatio": 2.1917,
  "website": "https://www.synopsys.com"
 }

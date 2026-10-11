@@ -14,7 +14,7 @@
  "equity": 29164000000.0,
  "equity_date": "2025-08-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 1096.5,
  "fiftyTwoWeekLow": 844.06,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 10181000192,
  "totalRevenue": 303154003968,
  "total_debt_bs": 8173000000.0,
- "trailingEps": 20.76,
- "trailingPE": 45.612717,
+ "trailingEps": 20.74,
+ "trailingPE": 45.6567,
  "trailingPegRatio": 4.4343,
  "website": "https://www.costco.com"
 }

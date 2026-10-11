@@ -14,7 +14,7 @@
  "equity": 4311057000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 252.03,
  "fiftyTwoWeekLow": 126.01,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 19997000,
  "totalRevenue": 5602506752,
  "total_debt_bs": 39995000.0,
- "trailingEps": 5.21,
- "trailingPE": 34.927063,
+ "trailingEps": 5.2,
+ "trailingPE": 34.994232,
  "trailingPegRatio": 2.1649,
  "website": "https://www.odfl.com"
 }

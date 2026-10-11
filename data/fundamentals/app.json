@@ -14,7 +14,7 @@
  "equity": 2134671000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 738.01,
  "fiftyTwoWeekLow": 266.84,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 3515072000,
  "totalRevenue": 6829124096,
  "total_debt_bs": 3544741000.0,
- "trailingEps": 12.87,
- "trailingPE": 21.52603,
+ "trailingEps": 13.01,
+ "trailingPE": 21.29439,
  "trailingPegRatio": 0.6831,
  "website": "https://www.applovin.com"
 }

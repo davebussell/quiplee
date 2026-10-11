@@ -14,7 +14,7 @@
  "equity": 10033000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-10",
+ "fetched": "2026-10-11",
  "fiftyTwoWeekHigh": 285.5,
  "fiftyTwoWeekLow": 143.3,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 3304999936,
  "totalRevenue": 15891000320,
  "total_debt_bs": 3290000000.0,
- "trailingEps": 1.95,
- "trailingPE": 100.769226,
+ "trailingEps": 1.9,
+ "trailingPE": 103.42105,
  "trailingPegRatio": 1.0488,
  "website": "https://www.doordash.com"
 }
