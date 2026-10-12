@@ -233,7 +233,8 @@
       if (sc || sg) {
         var r = score(sym);
         if (sc) { sc.innerHTML = r.s == null ? '–' : '<b>' + r.s + '</b>'; sc.setAttribute('data-v', r.s == null ? '' : r.s); }
-        if (sg) { sg.innerHTML = sigPill(r.sig); sg.setAttribute('data-v', r.sig == null ? '' : r.sig); }
+        if (sg && sg.hasAttribute('data-with-score')) { sg.innerHTML = sigPill(r.sig) + (r.s == null ? '' : ' <b class="sig-n">' + r.s + '</b>'); sg.setAttribute('data-v', r.s == null ? '' : r.s); }
+        else if (sg) { sg.innerHTML = sigPill(r.sig); sg.setAttribute('data-v', r.sig == null ? '' : r.sig); }
         if (tr.hasAttribute('data-sig')) tr.setAttribute('data-sig', r.sig == null ? '' : r.sig);
       }
       [].forEach.call(fams, function (td) {

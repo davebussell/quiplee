@@ -368,7 +368,7 @@ def picks_page(site, state, info):
         o = o or sv.outlook(site, t)
         rk_risk = (site.meta.get(t["sym"]) or {}).get("risk") or {}
         ex = _exits(site, t)
-        ex_txt = (f'Nearest exit: <a href="{h(site.pair_path(t, ex[0][0]))}">{e(ex[0][0]["name"])}</a> gets out below {money(ex[0][1], t["cur"])} '
+        ex_txt = (f'Nearest exit: <a href="{h(site.pair_link(t, ex[0][0]))}">{e(ex[0][0]["name"])}</a> gets out below {money(ex[0][1], t["cur"])} '
                   f'<span class="muted">({pct(ex[0][2], d=1)})</span>') if ex else "No play that holds it has a price exit nearby."
         ser = _close(site, t["sym"])
         entry_px = _at(ser, p["entry"]) or p["px_in"]

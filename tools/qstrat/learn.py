@@ -560,7 +560,7 @@ class Learn:
         from .render import next_move, dlong
         nm = next_move(x, PLAY[slug], t)
         a, b = self.full(sym, slug), self.full(sym, slug, "bh")
-        page = h(f"stocks/{t['slug']}/{slug}/")
+        page = h(self.s.pair_link(t, PLAY[slug]))
         state = "IN" if x["state"] == 1 else "OUT"
         body = f"""
 <section class="prose">

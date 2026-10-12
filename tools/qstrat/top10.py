@@ -2,7 +2,9 @@
 
 The rule (also printed on the page)
   * Stocks only: no funds, indexes, sectors or coins.
-  * The Start/Stop light must be on Start at the close the list is made.
+  * The plays-only light (render.Site.light: on at 60% of plays in, off at 40%) must be on
+    at the close the list is made. It is no longer shown as a verdict anywhere else, but the
+    Top 10 keeps its published rule so the record stays comparable.
   * Ranked by the share of the plays that hold the stock that night; ties go to the
     bigger 13-week price gain.
   * At most two names from any one group, so ten picks are not one bet ten times.
@@ -344,7 +346,7 @@ def body(art, state, depth):
 
     rule = f"""<section class="card prose"><p class="eyebrow">The rule</p><ul>
 <li><b>Stocks only.</b> No funds, indexes, sector baskets or coins.</li>
-<li><b>Start light on.</b> The same Start/Stop light as every stock page: it turns Start when {round(LIGHT_ON * 100)}% of the plays hold the stock and stays on until that falls to {round(LIGHT_OFF * 100)}%.</li>
+<li><b>Most plays in.</b> At least {round(LIGHT_ON * 100)}% of the plays hold the stock, or did since they last fell to {round(LIGHT_OFF * 100)}% or less (the plays-only rule the site used before Your signal; it stays fixed so every list is judged by the same rule).</li>
 <li><b>Most plays first.</b> Ranked by the share of the {len(TIMED)} plays that hold the stock that night; ties go to the bigger 13-week price gain.</li>
 <li><b>Two per group, at most.</b> So ten picks are not one bet ten times.</li>
 <li><b>Set after each Friday close</b> (or the week's last close, when Friday is a holiday), and never changed afterwards. Each list is tracked from its own close against the S&amp;P 500.</li>

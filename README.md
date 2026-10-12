@@ -83,13 +83,13 @@ and commits `data/`; that push triggers the Netlify build.
 most accurate play in each family, the top 3 in each family, plays right more than half the
 time) or their own pick. `assets/plays.js` keeps the choice in the browser and, signed in, on
 the account (`POST /api/account/plays`); `?plays=top1|top3|half|all|<slug.slug>` shares a view.
-The home screener (with a "Most accurate plays agree" sort), the stock list (Plays in, Score,
+The home screener (with a "Most accurate plays agree" sort), the stock list (Your signal, Plays in,
 the family board), each stock page (Plays in, the score, the most accurate play in each family,
 the full list with each play's calls right on that stock), the watchlist and My Puck all
 recount from `data/playset.json`. "Accurate" is the share of a play's finished calls that went
 the right way on the real stocks (no funds, indexes or coins) since 2005; a play needs 500+
-calls on at least half the stocks to be ranked (`render.rankable`). The Start/Stop light, Top 10
-and Top picks always use every play.
+calls on at least half the stocks to be ranked (`render.rankable`). Top 10 and Top picks always
+use every play.
 
 **Your signal.** Readers weight 17 factors (`tools/qstrat/factors.py`): plays in, analysts'
 upside and rating, P/E, forward P/E, PEG, price to sales and book, dividend yield, earnings and
@@ -173,11 +173,17 @@ Paper trading, which this replaced in October 2026, is gone from the site
 (`/paper/*` redirects here); its old portfolios are left untouched in the Blobs
 store `paper`.
 
-**Start/Stop light.** Every stock gets one light from all the plays
-(`Site.light` in `render.py`): Start at 60% or more of the plays in, Stop once
-that falls to 40% or less, walked through two years of weekly calls so it
-doesn't flicker. Shown on stock pages, the stock list (sort "Start first"), the
-watchlist, the screener and the Theory tester; `data/reads.json` carries each light and read.
+**One verdict: Your signal.** Since October 2026 the site makes one call per stock, Your
+signal (Buy, Hold, Sell from the reader's weights; see above). It heads every stock page and
+is the first column on the stock list, the screener, the watchlist and My Puck;
+`data/reads.json` carries each stock's standard signal (`S`, `sc`) and read. The old Start/Stop
+light (`Site.light`: on at 60% of plays in, off at 40%) is no longer shown; only the Top 10's
+published rule and the members' `/rules/` page still use it.
+
+**Stock x play pages.** Only each stock's headline plays (the most accurate in each family,
+plus the Mayer Multiple) and every play on SPY (the Learn examples) get a page; any other
+`/stocks/<stock>/<play>/` forwards to that play's row on the stock page (`netlify.toml`). That
+cut a deploy from about 40,000 files to about 6,000. Link with `site.pair_link`.
 
 **One account and My Puck.** A Be The Puck account (email or username plus a
 password) is shared by My Puck (`/me/`), the stocks a person follows,
@@ -207,7 +213,8 @@ and `QM_MAIL_ADDRESS` (the postal address Canada's anti-spam law asks for, shown
 every email footer). Until the key is set, sign-ups work and confirm links queue;
 `alerts-nightly.mjs` (hourly) sends them on its first run after the key is in, then
 sends each account one "your stocks tonight" email per close when something changed:
-Start/Stop flips (free) and, for members, every play that got in or out and prices
+flips of the account's own signal (free; `netlify/lib/signal.mjs` scores it with the
+account's saved weights and plays) and, for members, every play that got in or out and prices
 near a play's line. Resend's free tier is 3,000 emails a month and 100 a day; past
 that, its Pro plan.
 

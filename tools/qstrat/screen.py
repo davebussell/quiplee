@@ -127,11 +127,12 @@ def ranked(site, st):
 
 
 # ------------------------------------------------------------------ markup (screen.js draws the same)
-def light_html(r):
-    if r["L"] is None:
-        return '<span class="light-pill">–</span>'
-    st = "start" if r["L"] == 1 else "stop"
-    return f'<span class="light-pill {st}"><i aria-hidden="true"></i>{"Start" if r["L"] == 1 else "Stop"}</span>'
+def signal_html(r):
+    """Your signal with the standard weights (screen.js redraws it with the reader's)."""
+    from .factors import SIG_WORD, SIG_CLS
+    if r["sc"] is None:
+        return '<span class="sig-pill na">–</span>'
+    return f'<span class="sig-pill {SIG_CLS[r["sg"]]}">{SIG_WORD[r["sg"]]}</span> <b class="sig-n {SIG_CLS[r["sg"]]}">{r["sc"]}</b>'
 
 
 def row_html(site, r, side, depth):
@@ -143,18 +144,16 @@ def row_html(site, r, side, depth):
         f'<i style="height:{max(8, round(100 * (kk if side == "buy" else nn - kk) / nn)) if nn else 8}%" title="{e(name)}: {kk if side == "buy" else nn - kk} of {nn}"></i>'
         for (kk, nn), (_, name, _) in zip(r["f"], FAMILIES))
     risk = (f'<span class="lvl lvl-{RISK_CLS[r["r"]]}">{RISK[r["r"]]}</span>' if r["r"] is not None else '<span class="muted">–</span>')
-    from .factors import SIG_WORD, SIG_CLS
-    up = (f'<b class="sig-n {SIG_CLS[r["sg"]]}">{r["sc"]}</b> <small class="sig-w {SIG_CLS[r["sg"]]}">{SIG_WORD[r["sg"]]}</small>' if r["sc"] is not None
-          else '<span class="muted">–</span>')
+    up = f'<b class="{dir_cls(r["up"])}">{pct(r["up"], d=0)}</b>' if r["up"] is not None else '<span class="muted">–</span>'
     return (f'<li class="scr-row" data-sym="{e(r["sym"])}"><a class="scr-main" href="{h("stocks/" + r["u"] + "/")}">'
             f'<span class="scr-sym"><b>{e(r["s"])}</b><span>{e(r["n"])}</span></span>'
-            f'<span class="scr-light">{light_html(r)}</span>'
+            f'<span class="scr-light">{signal_html(r)}</span>'
             f'<span class="scr-agree {side}"><span class="scr-num"><b>{a}</b> of {o}</span><span class="fillbar" aria-hidden="true"><i style="width:{w}%"></i></span></span>'
             f'<span class="scr-fams {side}" aria-hidden="true">{fams}</span>'
             f'<span class="scr-px mono">{money(r["p"], r["c"])} <small class="{dir_cls(r["d"])}">{pct(r["d"])}</small></span>'
             f'<span class="scr-y1 {dir_cls(r["y"])}"><em>1 yr</em>{pct(r["y"], d=0)}</span>'
             f'<span class="scr-risk"><em>Crash</em>{risk}</span>'
-            f'<span class="scr-up"><em>Score</em>{up}</span></a>'
+            f'<span class="scr-up"><em>Analysts</em>{up}</span></a>'
             f'<button type="button" class="scr-star" aria-pressed="false" aria-label="Follow {e(r["s"])}" title="Follow {e(r["s"])}">☆</button></li>')
 
 
@@ -168,7 +167,7 @@ def summary(n, st):
 
 # ------------------------------------------------------------------ step 1: the market
 def crash_card(site, depth):
-    from .render import dlong, light_badge
+    from .render import dlong
     from .markets import fmt_val
     h = lambda x: site.href(depth, x)
     M = site.macro
@@ -186,10 +185,9 @@ def crash_card(site, depth):
     spx = next((t for t in TICKERS if t["sym"] == "^GSPC"), None)
     plays = ""
     if spx and (spx["sym"], "buy-and-hold") in site.R:
-        L = site.light(spx)
         k, n = site.consensus(spx)
         plays = (f'<a class="cc-plays" href="{h("stocks/" + spx["slug"] + "/")}"><span>The plays on the S&amp;P 500</span>'
-                 f'<b>{k} of {n} hold it</b>{light_badge(L)}</a>')
+                 f'<b>{k} of {n} hold it</b></a>')
     return f"""<div class="card crash-card wx-{cls}" id="step-1">
   <div class="cc-top"><span class="step-tag"><span class="step-n">1</span>The market</span><span class="mono small muted">{dlong(M['asof'])}</span></div>
   <h2 class="cc-q">Is the market about to crash?</h2>
@@ -206,7 +204,7 @@ PRESETS = [
     ("Canadian names the plays are buying", dict(mkt="ca", min=75)),
     ("U.S. names with the strongest agreement", dict(mkt="us", min=90)),
     ("What the plays are selling", dict(side="sell", min=75)),
-    ("Fresh Starts this week", dict(fresh=True, min=60)),
+    ("Plays turned buying this week", dict(fresh=True, min=60)),
     ("Lower crash risk, plays buying", dict(risk="low", min=60)),
     ("Gold and miners", dict(sec="Metals & mining", min=60)),
     ("Semiconductors", dict(sec="Semiconductors", min=60)),
@@ -270,7 +268,7 @@ def screener(site, depth):
     <div class="scr-min"><output id="scr-min-out" for="scr-min">At least <b>{DEFAULT_MIN}%</b> of the {len(TIMED)} plays</output>
     <input type="range" id="scr-min" min="0" max="100" step="5" value="{DEFAULT_MIN}" aria-label="Share of the plays that must agree, in percent"></div>
     <div class="chips scr-mins" role="group" aria-label="Quick picks">{mins}</div>
-    <label class="auth-check scr-fresh"><input type="checkbox" id="scr-fresh"><span>Only lights that flipped in the last week</span></label>
+    <label class="auth-check scr-fresh"><input type="checkbox" id="scr-fresh"><span>Only where most plays turned in the last week</span></label>
   </fieldset>
   <div class="scr-try"><span class="scr-lab">Or start from one of these</span><div class="chips">{presets}</div></div>
   <button type="button" class="btn primary scr-go" id="scr-go">See the {len(got)} names</button>
@@ -279,11 +277,11 @@ def screener(site, depth):
   <div class="scr-head"><p class="scr-sum" id="scr-sum" aria-live="polite">{summary(len(got), st)}</p>
   <label class="scr-sort"><span class="small muted">Sort</span><select id="scr-sort">{sorts}</select></label>
   <button type="button" class="linkish scr-reset" id="scr-reset" hidden>Start over</button></div>
-  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Light</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span>Crash</span><span>Score</span><span></span></div>
+  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Your signal</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span>Crash</span><span>Analysts</span><span></span></div>
   <ol class="scr-list" id="scr-list">{first}</ol>
   <p class="scr-empty" id="scr-empty" hidden>No names match all of that. Try fewer plays in step 4, or a wider market in step 3.</p>
   <div class="scr-foot"><button type="button" class="btn" id="scr-more"{"" if len(got) > PAGE else " hidden"}>Show {PAGE} more</button>
-  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. Score is your signal's 0 to 100: Buy, Hold or Sell by the factors you weight (Weights, in step 4). The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when its light flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
+  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. Your signal is the one call on each name: Buy, Hold or Sell, scored 0 to 100 from the factors you weight (Weights, in step 4). Analysts is the gap to their average 12-month target. The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when your signal on it flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
 </div>
 </div>
 </section>"""
@@ -291,7 +289,8 @@ def screener(site, depth):
 
 def tickers_json(site):
     """data/tickers.json, every name the alerts page can look up:
-    names[sym] = [short, name, slug, "USD"|"CAD", last close, "stock"|"fund"|"crypto", plays in, plays, group, light 1|0|null]."""
+    names[sym] = [short, name, slug, "USD"|"CAD", last close, "stock"|"fund"|"crypto", plays in, plays, group,
+                  signal with the standard weights 1|0|-1|null]."""
     from .render import sig
     from .engine import cad_per_usd
     names = {}
@@ -301,8 +300,8 @@ def tickers_json(site):
         x = site.r(t["sym"], "buy-and-hold")
         k, n = site.consensus(t)
         kind = "crypto" if t["crypto"] else ("fund" if t["group"] in ("Indexes & ETFs", "Sectors") else "stock")
-        lt = site.light(t)
-        names[t["sym"]] = [t["short"], t["name"], t["slug"], "CAD" if t["cur"] == "C$" else "USD", sig(x["price"], 6), kind, k, n, t["group"],
-                           None if not lt["state"] else (1 if lt["state"] == "start" else 0)]
+        from .factors import score as fx_score
+        _, sg, _ = fx_score(site, t)
+        names[t["sym"]] = [t["short"], t["name"], t["slug"], "CAD" if t["cur"] == "C$" else "USD", sig(x["price"], 6), kind, k, n, t["group"], sg]
     fx = cad_per_usd()
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "fx": {"CAD": fx} if fx else {}, "names": names}, ensure_ascii=False, separators=(",", ":"))

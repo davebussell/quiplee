@@ -73,7 +73,8 @@
       var i = ix[0], p = D.plays[i], b = H.b[i] || [0, 0, null], ch = st ? st.charAt(i) : '-';
       var hereTxt = b[1] ? 'On ' + esc(H.s) + ': right ' + b[0] + ' of ' + b[1] : 'No finished calls on ' + esc(H.s) + ' yet';
       var since = (ch === '1' || ch === '0') && b[2] ? (ch === '1' ? 'In' : 'Out') + ' since ' + day(b[2]) : '';
-      cards += '<a class="card tp" data-fam="' + f[0] + '" href="' + esc(H.pair.replace('{s}', p.s)) + '"><span class="tp-fam">' + (icons[f[0]] || '') + esc(f[1]) + '</span>' +
+      var href = (H.keep || []).indexOf(p.s) >= 0 ? H.pair.replace('{s}', p.s) : '#play-' + p.s;
+      cards += '<a class="card tp" data-fam="' + f[0] + '" href="' + esc(href) + '"><span class="tp-fam">' + (icons[f[0]] || '') + esc(f[1]) + '</span>' +
         '<span class="tp-name"><b>' + esc(p.n) + '</b>' + pill(ch) + '</span>' +
         '<span class="tp-acc"><b>' + pc(p.a) + '</b> of ' + Number(p.c).toLocaleString('en-US') + ' calls right' + (p.e ? '' : ' <span class="ps-few">few calls</span>') + '</span>' +
         '<span class="tp-here">' + hereTxt + (since ? ' · ' + since : '') + '</span></a>';
@@ -109,18 +110,42 @@
       var g = document.querySelector('tr[data-ps-grp="' + f[0] + '"]');
       if (g) g.hidden = !any && !showAll;
     });
-    [].forEach.call(document.querySelectorAll('tr[data-ps-play]'), function (tr) { tr.hidden = !showAll && !P.onSlug(tr.getAttribute('data-ps-play')); });
+    [].forEach.call(document.querySelectorAll('tr[data-ps-play]'), function (tr) {
+      var slug = tr.getAttribute('data-ps-play');
+      tr.hidden = !showAll && !P.onSlug(slug) && slug !== focus;
+      if (slug === focus) { var g = document.querySelector('tr[data-ps-grp="' + tr.getAttribute('data-fam') + '"]'); if (g) g.hidden = false; }
+    });
     if (allSub) {
       allSub.innerHTML = all ? allSub0 : (showAll ? 'All ' + D.plays.length + ' plays, by family. <button type="button" class="linkish" data-ps-mine>Show only your ' + P.size() + '</button>'
         : 'Your ' + P.size() + ' of the ' + D.plays.length + ' plays, by family. <button type="button" class="linkish" data-ps-every>Show all ' + D.plays.length + '</button>');
     }
   }
+  // a link to one play on this stock (#play-<slug>, or ?play=<slug> from a retired stock x play
+  // address): show its row even if the reader's filter hides it, scroll to it and mark it
+  var focus = null;
+  function wanted() {
+    var m = /[?&]play=([a-z0-9-]+)/.exec(location.search), h = /^#play-([a-z0-9-]+)$/.exec(location.hash);
+    return m ? m[1] : h ? h[1] : null;
+  }
+  function goTo(slug, smooth) {
+    var tr = slug && document.getElementById('play-' + slug);
+    if (!tr) return;
+    focus = slug;
+    tr.hidden = false;
+    var g = document.querySelector('tr[data-ps-grp="' + (tr.getAttribute('data-fam') || '') + '"]');
+    if (g) g.hidden = false;
+    [].forEach.call(document.querySelectorAll('tr.ps-focus'), function (x) { x.classList.remove('ps-focus'); });
+    tr.classList.add('ps-focus');
+    if (/[?&]play=/.test(location.search) && history.replaceState) history.replaceState(null, '', location.pathname + '#play-' + slug);
+    setTimeout(function () { tr.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' }); }, smooth ? 0 : 60);
+  }
+  window.addEventListener('hashchange', function () { goTo(wanted(), true); });
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest && ev.target.closest('[data-ps-every], [data-ps-mine]');
     if (!b) return;
     showAll = b.hasAttribute('data-ps-every');
     draw();
   });
-  P.ready(draw);
+  P.ready(function (D) { draw(D); goTo(wanted(), false); });
   P.onChange(function () { showAll = false; draw(); });
 })();

@@ -33,3 +33,6 @@ _site/
 /picks/
 /members/
 /locked/
+
+# Local engine cache and previews (tools/dev_render.py)
+.cache/

@@ -1,15 +1,16 @@
 """/me/: My Puck, the one place for a Be The Puck account.
 
-Signed out, the page sells the account with a real preview (tonight's lights on a
+Signed out, the page sells the account with a real preview (tonight's signal on a
 sample list, clearly labelled as an example) next to the sign-up form. Signed in,
 assets/me.js draws the dashboard from /api/account/me and data/reads.json: the
-stocks you follow and their lights, your email alerts, a shortcut into the Theory
+stocks you follow and your signal on each, your email alerts, a shortcut into the Theory
 tester, the member tools (free until January 1, 2027) and your account settings.
 """
 import html
 
 from .content import TICKERS, TIMED
-from .render import light_badge, money, dlong, fill_bar
+from .render import money, fill_bar, pct, dir_cls, sig_pill, fx_score, dlong
+from .factors import SIG_CLS
 from .members import FREE_UNTIL, PRICE
 from .media import page_art, PAGE_ART
 
@@ -18,30 +19,33 @@ SAMPLE = ["NVDA", "AAPL", "SHOP.TO", "RY.TO", "MSFT", "BTC-USD"]
 
 
 def _preview(site, depth):
-    """A static picture of the dashboard on a sample list, with tonight's real lights."""
+    """A static picture of the dashboard on a sample list, with tonight's real signal (standard weights)."""
     h = lambda x: site.href(depth, x)
     names = [t for s in SAMPLE for t in TICKERS if t["sym"] == s and (s, "buy-and-hold") in site.R]
     rows, on = "", 0
     for t in names:
-        L = site.light(t)
-        on += L["state"] == "start"
+        sc, sg, _ = fx_score(site, t)
+        on += sg == 1
+        k, n = site.consensus(t)
         x = site.r(t["sym"], "buy-and-hold")
-        since = f'since {dlong(L["since"])}' if L.get("since") is not None else ""
+        y1 = site.one_year(t)
+        sig_html = sig_pill(sg) + (f' <b class="sig-n {SIG_CLS[sg]}">{sc}</b>' if sc is not None else "")
         rows += (f'<li><a href="{h("stocks/" + t["slug"] + "/")}"><span class="mp-sym"><b>{e(t["short"])}</b><span>{e(t["name"])}</span></span>'
-                 f'{light_badge(L)}<span class="mp-bar">{fill_bar(L["k"], L["n"])}<span>{L["k"]}/{L["n"]}</span></span>'
-                 f'<span class="mp-px mono">{money(x["price"], t["cur"])}</span><span class="mp-since">{e(since)}</span></a></li>')
+                 f'<span class="mp-sig">{sig_html}</span><span class="mp-bar">{fill_bar(k, n)}<span>{k}/{n} plays</span></span>'
+                 f'<span class="mp-px mono">{money(x["price"], t["cur"])}</span>'
+                 f'<span class="mp-since">{f"<span class={chr(34)}{dir_cls(y1)}{chr(34)}>{pct(y1, d=0)}</span> in a year" if y1 is not None else ""}</span></a></li>')
     return f"""<div class="mp-frame" aria-label="Example of My Puck">
 <div class="mp-chrome"><i></i><i></i><i></i><span>bethepuck.com/me/</span><b class="tag">Example</b></div>
 <div class="mp-body">
 <div class="mp-kpis">
-<div><span>Your stocks on Start</span><b>{on} <small>of {len(names)}</small></b></div>
+<div><span>Your signal: Buy</span><b>{on} <small>of {len(names)}</small></b></div>
 <div><span>Plays counted</span><b>{len(TIMED)}</b></div>
 <div><span>Email alerts</span><b class="mp-on">On</b></div>
 <div><span>Member tools</span><b>Free <small>to 2027</small></b></div>
 </div>
 <p class="mp-h">Your stocks <span>· the {dlong(site.asof)} close</span></p>
 <ul class="mp-list">{rows}</ul>
-<p class="mp-foot">You'd get an email the evening any of these lights flips, with the analysis.</p>
+<p class="mp-foot">You'd get an email the evening your signal flips on any of these, with the analysis.</p>
 </div></div>"""
 
 
@@ -59,7 +63,7 @@ def me_page(site):
 <div class="me-out-grid">
 <div class="me-out-copy"><p class="eyebrow">My Puck</p>
 <h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>
-<p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening a Start/Stop light flips, and opens every member tool until {FREE_UNTIL}.</p>
+<p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening your signal on one flips, and opens every member tool until {FREE_UNTIL}.</p>
 <ul class="check-list"><li>Follow up to 100 stocks, funds and coins</li><li>An email with the analysis when a light flips, the same evening</li>
 <li>Test any theory on the stocks you follow, from one play to all of them</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
 <div class="me-preview">{_preview(site, depth)}</div>
@@ -72,12 +76,12 @@ def me_page(site):
 </div>
 
 <section class="card prose me-how"><p class="eyebrow">Good to know</p><ul>
-<li><b>Free for good:</b> your account, the screener, the Theory tester, the Start/Stop light and its flip emails.</li>
+<li><b>Free for good:</b> your account, the screener, the Theory tester, your signal and its flip emails.</li>
 <li><b>Member tools</b> (top picks, reports, your own rules, play-by-play emails) are free until {FREE_UNTIL}, then {PRICE} a month. Nothing is charged unless you choose to subscribe.</li>
 <li><b>Emails</b> go out after the U.S. close, only when something changed, and every one has a one-click unsubscribe.</li>
 <li><b>Privacy:</b> Be The Puck keeps your email, your username and what you follow, and nothing else.</li>
 </ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></section>
 """
     site.add(path, site.shell(path, "My Puck: your stocks and their alerts",
-                              "One free Be The Puck account: follow your stocks, get an email when the Start/Stop light flips, test theories on them, and use every member tool free until January 1, 2027.",
+                              "One free Be The Puck account: follow your stocks, get an email when your signal on one flips, test theories on them, and use every member tool free until January 1, 2027.",
                               body, active="", scripts=("assets/widgets.js", "assets/plays.js", "assets/me.js"), link=False))

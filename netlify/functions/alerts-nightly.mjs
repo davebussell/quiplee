@@ -1,15 +1,15 @@
-/* alerts-nightly.mjs: emails free subscribers when the Start/Stop light flips.
+/* alerts-nightly.mjs: emails free subscribers when Be The Puck's signal flips (Buy, Hold, Sell).
  *
  * Runs every hour. It does nothing until /data/reads.json carries a new close
  * (the nightly price refresh lands at a different time each night), then:
  *   1. sends any confirm links that couldn't go out when people signed up, and
- *   2. for every confirmed subscriber, compares each stock's light with the one
- *      last emailed (last[SYM]) and sends one email listing every flip.
- * A stock seen for the first time only records its light. Needs RESEND_API_KEY.
+ *   2. for every confirmed subscriber, compares each stock's signal (standard weights,
+ *      reads.json S) with the one last emailed (last[SYM]) and sends one email listing every flip.
+ * A stock seen for the first time only records its signal. Needs RESEND_API_KEY.
  *
  * Then the same for Be The Puck accounts (netlify/lib/account.mjs): pending confirm
  * links, and one "your stocks tonight" email per account with alerts on, listing
- * Start/Stop flips and, at level "all" while member tools are open to the account,
+ * flips of the account's own signal (its saved weights and plays, lib/signal.mjs) and, at level "all" while member tools are open to the account,
  * every play that got in or out on the stocks it follows (lib/alerts.mjs compare).
  * What was last emailed sits in the paper store under as/<name>.
  */
@@ -20,6 +20,7 @@ import { STORE, confirmEmail, flipEmail, sendAll } from "../lib/freealerts.mjs";
 import { compare } from "../lib/alerts.mjs";
 import { store as acctStore, membership, updateAccount } from "../lib/account.mjs";
 import { confirmMsg, nightlyMsg } from "../lib/accountmail.mjs";
+import { loadPlayset, signalFor, resolve, weights } from "../lib/signal.mjs";
 
 export default async () => {
   if (!mail.configured()) {
@@ -53,11 +54,12 @@ export default async () => {
       let changed = false;
       for (const sym of rec.tickers || []) {
         const t = R.t[sym];
-        if (!t || t.L == null) continue;
-        const now = [t.L, t.k, t.of];
-        if (!last[sym]) { last[sym] = now; changed = true; continue; }
-        if (last[sym][0] !== t.L) flips.push({ sym, t, was: last[sym] });
-        if (last[sym][0] !== t.L || last[sym][1] !== t.k) { last[sym] = now; changed = true; }
+        if (!t || t.S == null) continue;
+        const now = [t.S, t.k, t.of, "s"];
+        // first sight, or a record from the Start/Stop light days (no "s" marker): record quietly
+        if (!last[sym] || last[sym][3] !== "s") { last[sym] = now; changed = true; continue; }
+        if (last[sym][0] !== t.S) flips.push({ sym, t, was: last[sym] });
+        if (last[sym][0] !== t.S || last[sym][1] !== t.k) { last[sym] = now; changed = true; }
       }
       if (flips.length) {
         msgs.push(flipEmail(id, rec.email, flips, R));
@@ -84,7 +86,7 @@ async function accounts(R, fresh) {
   const keys = [];
   for await (const page of s.list({ prefix: "u/", paginate: true })) keys.push(...page.blobs.map((b) => b.key));
   const msgs = [], writes = [];
-  let D = null;
+  let D = null, PS = null;
   for (let i = 0; i < keys.length; i += 25) {
     const recs = await Promise.all(keys.slice(i, i + 25).map((k) => s.get(k, { type: "json" }).catch(() => null)));
     for (let j = 0; j < recs.length; j++) {
@@ -100,13 +102,18 @@ async function accounts(R, fresh) {
       if (!fresh || !acct.email_ok || al.on !== true || !(acct.follow || []).length) continue;
       const snap = (await s.get("as/" + u, { type: "json" }).catch(() => null)) || {};
       if (snap.asof === R.asof) continue;
-      const L = {}, flips = [];
+      // the account's own signal: its saved weights and plays (the standard ones if it never set any)
+      if (!PS) PS = await loadPlayset().catch(() => ({ plays: [], fams: [], t: {}, fx: [], wd: { w: {}, buy: 60, sell: 40 }, x: {} }));
+      const sel = resolve(PS, acct.plays), W = weights(PS, acct.signal);
+      const S = {}, flips = [];
       for (const sym of acct.follow) {
         const t = R.t[sym];
-        if (!t || t.L == null) continue;
-        const last = snap.L && snap.L[sym];
-        if (last && last[0] !== t.L) flips.push({ sym, t, was: last });
-        L[sym] = [t.L, t.k, t.of];
+        if (!t) continue;
+        const g = PS.x[sym] ? signalFor(PS, sym, acct.plays, acct.signal, sel) : { s: t.sc, sig: t.S };
+        if (g.sig == null) continue;
+        const last = snap.S && snap.S[sym];
+        if (last && last[0] !== g.sig) flips.push({ sym, t: { ...t, S: g.sig, sc: g.s }, was: last, W });
+        S[sym] = [g.sig, g.s];
       }
       let plays = [], psnap = snap.p || null;
       const member = membership(acct).active;
@@ -123,7 +130,7 @@ async function accounts(R, fresh) {
         msgs.push(nightlyMsg(u, acct, flips, plays, R, member && al.level !== "light"));
         writes.push([u, { last_sent: R.asof }, "patch"]);
       }
-      writes.push(["as/" + u, { asof: R.asof, L, p: psnap }]);
+      writes.push(["as/" + u, { asof: R.asof, S, p: psnap }]);
     }
   }
   return { s, msgs, writes, n: keys.length };

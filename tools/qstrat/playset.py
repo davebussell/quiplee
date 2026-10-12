@@ -69,12 +69,12 @@ def signal_section(site, h):
         up = next((x for x in p1 if x["k"] == "upside"), None)
         pl = next((x for x in p1 if x["k"] == "plays"), None)
         if s1 is not None and s2 is not None and up and pl and up["p"] is not None:
-            ex = (f'<p><b>An example.</b> On the {dlong(site.asof)} close, {pl["v"]} of the plays held {e(t["name"])} ({e(t["short"])}), so its light read Start. '
+            ex = (f'<p><b>An example.</b> On the {dlong(site.asof)} close, {pl["v"]} of the plays held {e(t["name"])} ({e(t["short"])}), so the plays alone said buy. '
                   f'But analysts\' average target sat at {e(up["v"].split(" (")[0])} from the price, which scores {up["p"]}. With the standard weights its score is {s1}: {SIG_WORD[g1]}. '
                   f'Set analysts\' upside to 0 and it scores {s2}: {SIG_WORD[g2]}. Neither is right or wrong; the weights say what you think matters.</p>')
     return f"""<section class="card prose" id="your-signal"><p class="eyebrow">Your signal</p><h2 class="h2">Build your own Buy, Hold and Sell</h2>
-<p>The Start/Stop light reads only the plays. <b>Your signal</b> is yours to set: weight any of {len(FACTORS)} factors, from the plays and analysts to P/E, growth, debt, trend and crash exposure. Each factor scores a stock from 0 to 100, higher meaning more in favour of buying. Your score is the weighted average of the factors you weight, and your lines turn it into a signal: <b>Buy</b> at {BUY} or more, <b>Sell</b> at {SELL} or less and <b>Hold</b> in between, unless you move them.</p>
-<p>Company numbers like P/E score by rank: a P/E lower than 80% of the {n_stocks()} stocks we cover scores 80. A loss-maker scores 0 on P/E. A stock with no number for a factor (a fund has no P/E) is scored on the rest, and gets no score if less than half your weight applies. The standard weights, half plays and half analysts' upside, give the same score the site has always shown.</p>
+<p><b>Your signal</b> is Be The Puck's one call on a stock, and it's yours to set: weight any of {len(FACTORS)} factors, from the plays and analysts to P/E, growth, debt, trend and crash exposure. Each factor scores a stock from 0 to 100, higher meaning more in favour of buying. Your score is the weighted average of the factors you weight, and your lines turn it into a signal: <b>Buy</b> at {BUY} or more, <b>Sell</b> at {SELL} or less and <b>Hold</b> in between, unless you move them.</p>
+<p>Company numbers like P/E score by rank: a P/E lower than 80% of the {n_stocks()} stocks we cover scores 80. A loss-maker scores 0 on P/E. A stock with no number for a factor (a fund has no P/E) is scored on the rest, and gets no score if less than half your weight applies. The standard weights are half plays, half analysts' upside. Put every weight on the plays and you get the old plays-only reading.</p>
 {ex}
 <div class="ps-steps-row"><button type="button" class="btn sm primary" data-ps-open="weights">Set your weights</button><span class="small muted">Or start from a ready-made mix:</span></div>
 <ul class="sig-presets">{presets}</ul>

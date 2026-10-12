@@ -74,9 +74,13 @@ def slugify_group(g):
     return "".join(c if c.isalnum() else "-" for c in g.lower()).strip("-").replace("--", "-")
 
 
-def plays_for(t):
-    """Plays that get a page of their own on this ticker: every play, on every stock."""
-    return TIMED
+# Stock x play pages exist only for each stock's headline plays: the most accurate play in each
+# family (Site.top_plays) plus these. Any other /stocks/<stock>/<play>/ address forwards to that
+# play's row on the stock page (netlify.toml), which carries the same call, level and record.
+HEADLINE_EXTRA = ("mayer-multiple",)
+# Every play keeps one full example page, on SPY, because the Learn lessons walk through them;
+# plus the RSI(2) on Tesla example in "Reading a backtest".
+EXTRA_PAIRS = {("SPY", s["slug"]) for s in TIMED} | {("TSLA", "rsi-2-pullback")}
 BASE = "https://bethepuck.com/"
 DISCLAIMER = ("This analysis does not constitute trading advice. Please meet with an advisor or independently review sources "
               "before making any decision.")
@@ -88,7 +92,8 @@ MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true">
 FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
                 '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
 FOOT_DISCLAIM = f'<p class="foot-disclaim"><b>Not trading advice.</b> {DISCLAIMER}</p>'
-# The Start/Stop light: one call per stock from all the plays. It turns to Start when this
+# The plays-only light (retired as a verdict in October 2026; Your signal replaced it). Only the
+# Top 10's published rule and the members' /rules/ page still use it. It turns to Start when this
 # share of the plays with a call hold the stock, and back to Stop only when the share falls
 # to LIGHT_OFF, so a stock hovering near half doesn't flicker.
 LIGHT_ON, LIGHT_OFF = 0.6, 0.4
@@ -528,9 +533,25 @@ class Site:
     def pair_path(self, t, s):
         return f"stocks/{t['slug']}/{s['slug']}/"
 
+    def headline_plays(self):
+        """The plays that get a page of their own on every stock (see HEADLINE_EXTRA)."""
+        if getattr(self, "_headline", None) is None:
+            got = [p for _, p, _ in self.top_plays()]
+            got += [PLAY[x] for x in HEADLINE_EXTRA if x in PLAY and PLAY[x] not in got]
+            self._headline = got
+        return self._headline
+
+    def headline_slugs(self):
+        return {p["slug"] for p in self.headline_plays()}
+
+    def pair_link(self, t, s):
+        """Where a link to play s on stock t goes: its own page for a headline play, else the play's row on the stock page."""
+        if s["slug"] in self.headline_slugs() or (t["sym"], s["slug"]) in EXTRA_PAIRS:
+            return self.pair_path(t, s)
+        return f"stocks/{t['slug']}/#play-{s['slug']}"
+
     def pair_or_stock(self, t, s):
-        """The stock-and-play page when it exists, else the stock's own page."""
-        return self.pair_path(t, s) if (s.get("core") or not (t.get("requested") or t.get("core_only"))) else f"stocks/{t['slug']}/"
+        return self.pair_link(t, s)
 
     def shell(self, path, title, desc, body, active=None, charts=False, extra_head="", lesson=None, glossary=False, scripts=(), link=True, og="og-default.png"):
         depth = path.count("/")
@@ -1154,23 +1175,6 @@ class Site:
         past = w[w.index <= x["asof"] - pd.DateOffset(years=1)]
         return (x["price"] / float(past.iloc[-1]) - 1) if len(past) else None
 
-    def light_block(self, t, depth):
-        """The Start/Stop light on a stock page, with an email-alert button."""
-        h = lambda x: self.href(depth, x)
-        L = self.light(t)
-        if not L["state"]:
-            return ""
-        since = f' since {dlong(L["since"])}' if L.get("since") is not None else ""
-        word = "Start" if L["state"] == "start" else "Stop"
-        nxt = (f'Turns Stop if the share falls to {round(LIGHT_OFF * 100)}%.' if L["state"] == "start"
-               else f'Turns Start if it reaches {round(LIGHT_ON * 100)}%.')
-        alert = ""
-        if not t.get("index"):
-            alert = (f'<a class="btn sm light-alert" href="{h("alerts/")}?t={e(t["slug"])}">Email me when it flips</a>')
-        return (f'<div class="light-box {L["state"]}">{light_badge(L, big=True)}'
-                f'<div class="light-txt"><b>{word}{since}.</b> {L["k"]} of {L["n"]} plays hold {e(t["short"])} ({pct(L["share"], sign=False, d=0)}). '
-                f'{nxt} <a href="{h("method/")}#light">How the light works</a> · <a href="{h("rules/")}">Set your own rules</a></div>{alert}</div>')
-
     def stocks_index(self):
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
@@ -1193,11 +1197,10 @@ class Site:
             score, sig, _ = fx_score(self, t)
             upp = f'{sv.upside_points(up):.4f}' if ol["ok"] else ""
             gslug = slugify_group(t["group"])
-            lt = self.light(t)
             ndx_attr = (' data-ndx="1"' if t.get("ndx") else "") + (' data-tsx="1"' if t.get("tsx") else "")
             rows += (f'<tr data-group="{gslug}"{ndx_attr} data-sym="{e(t["sym"])}" data-upp="{upp}" data-sig="{"" if sig is None else sig}" data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
-                     f'<td data-v="{0 if lt["state"] == "start" else 1 if lt["state"] == "stop" else 2}">{light_badge(lt)}</td>'
+                     f'<td class="nowrap" data-v="{score if score is not None else ""}" data-ps-signal data-with-score>{sig_pill(sig)}{f" <b class=sig-n>{score}</b>" if score is not None else ""}</td>'
                      f'<td class="small muted grp-col">{e(t["group"])}</td>'
                      f'<td class="r mono">{money(x["price"], t["cur"])}</td>'
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
@@ -1205,22 +1208,20 @@ class Site:
                      f'<td class="r {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
                      f'<td data-v="{sortv(k / n if n else None)}" data-ps-plays>{count_in(k, n)}</td>'
                      f'<td class="r {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
-                     f'<td class="r" data-v="{score if score is not None else ""}" data-ps-scorecell>{f"<b>{score}</b>" if score is not None else "–"}</td>'
-                     f'<td data-v="{"" if sig is None else sig}" data-ps-signal>{sig_pill(sig)}</td>'
                      f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
         chips = ('<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>'
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>'
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="tsx">TSX</button>') + "".join(
             f'<button type="button" class="chip-btn" aria-pressed="false" data-group="{slugify_group(g)}">{e(g)}</button>' for g in groups)
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
-                          for k, lab in [("light", "Start first"), ("score", "Strongest setups"), ("signal", "Your Buys first"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
+                          for k, lab in [("signal", "Highest signal"), ("score", "Your Buys only"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
                                          ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
         n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R])
         body = f"""
-<section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and how many plays agree</h1>
-<p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list: how many of the {len(TIMED)} plays hold each one, how far analysts' targets sit above the price, the combined score and how exposed it is to a crash. Sort by any column, filter by group, or open a name for its chart and every play.</p>
+<section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and what your signal says</h1>
+<p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list. Your signal is the one call: Buy, Hold or Sell from the factors you weight. The other columns are what goes into it: how many of the {len(TIMED)} plays hold each name, analysts' targets and crash exposure. Sort by any column, filter by group, or open a name for its chart and every play.</p>
 <div class="seg seg-sm st-views" role="group" aria-label="View"><button type="button" aria-pressed="true" data-view="list">Stock list</button><button type="button" aria-pressed="false" data-view="families">By play family</button></div>
-{ps_bar(h, "Pick the plays you trust. Plays in, the score, the sorts and the family view count only those.", "st-ps")}</section>
+{ps_bar(h, "Set your signal once: the weights and the plays you count. The list, the sorts and the family view all follow.", "st-ps")}</section>
 
 <section class="st-list" id="list">
 <div class="st-tools">
@@ -1229,19 +1230,19 @@ class Site:
 <div class="chips st-groups">{chips}</div>
 </div>
 <div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl"><thead><tr>
-<th class="stick">Stock</th><th data-sort-first="asc">Light</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
+<th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
 <th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
-<th class="r" data-sort-first="desc">Score</th><th data-sort-first="desc">Your signal</th><th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
+<th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
-<p class="muted small">Score and signal: with the standard weights, half the share of the plays you count that hold it and half analysts' upside; change the weights to bring in P/E, growth, debt, trend and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines. Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
+<p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. With the standard weights, half is the share of the plays you count that hold it and half is analysts' upside; change the weights to bring in P/E, growth, debt, trend and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines. Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
 
 <section class="st-fams" id="families" hidden>
 <div class="sec-head"><h2 class="h2">By play family</h2><p>How many plays in each family hold each stock. Tap a cell for every call on that stock.</p></div>
 {self.board_html(depth)}
 </section>"""
-        self.add(path, self.shell(path, "Stocks · every stock and how many plays agree",
-                                  f"Every stock, ETF, index and coin Be The Puck covers: how many of {len(TIMED)} plays hold it, analysts' upside, a combined score and crash exposure, sortable and filterable.",
+        self.add(path, self.shell(path, "Stocks · every stock and what your signal says",
+                                  f"Every stock, ETF, index and coin Be The Puck covers with your signal (Buy, Hold or Sell from the factors you weight), how many of {len(TIMED)} plays hold it, analysts' upside and crash exposure.",
                                   body, active="stocks/", scripts=("assets/plays.js", "assets/stocks.js")))
 
     def stock_page(self, t):
@@ -1253,7 +1254,7 @@ class Site:
         fund = self.fund.get(sym)
         rk = meta.get("risk")
         k, n = self.consensus(t)
-        own_pages = {p["slug"] for p in plays_for(t)}
+        own_pages = self.headline_slugs() | {p for (x, p) in EXTRA_PAIRS if x == sym}
         tiles, rows = "", ""
         for fk, fname, _ in FAMILIES:
             ps = [p for p in TIMED if p["family"] == fk]
@@ -1272,8 +1273,9 @@ class Site:
                 nxt = nm["short"] + (f' <span class="muted">({pct(nm["dist"])})</span>' if nm["dist"] is not None else "")
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
-                name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages else f'<b>{e(s["name"])}</b>')
-                rows += (f'<tr data-ps-play="{s["slug"]}"><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
+                name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages
+                        else f'<a href="{h("strategies/" + s["slug"] + "/")}"><b>{e(s["name"])}</b></a>')
+                rows += (f'<tr id="play-{s["slug"]}" data-ps-play="{s["slug"]}" data-fam="{fk}"><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
                          f'<td>{pill(x["state"])}{band}</td><td class="nowrap" data-v="{pd.Timestamp(x["since"]).strftime("%Y-%m-%d") if x["since"] is not None else ""}">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
                          f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td>{right_here}<td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
                          f'<td class="r nowrap" data-v="{sortv(a.get("maxdd"))}">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td></tr>')
@@ -1298,7 +1300,7 @@ class Site:
         if meta.get("ohlc") is not None and len(meta["ohlc"]):
             bench = self.prices[t["bench"]]["close"] if t.get("bench") in self.prices else None
             chart = sv.candles_block(t, meta, learn=h("learn/candlesticks/"), news=None if t.get("index") else sv.news_items(t), bench=bench, live=True)
-            heat = sv.heatmap_block(self, t, meta, lambda p: h(self.pair_path(t, p)) if p["slug"] in own_pages else None)
+            heat = sv.heatmap_block(self, t, meta, lambda p: h(self.pair_path(t, p)) if p["slug"] in own_pages else f"#play-{p['slug']}")
         else:
             chart = chart_block("px-" + t["slug"], price_spec(bh, PLAY["buy-and-hold"], t, with_rule=False), "", f"{e(t['short'])} over the last three years")
             heat = ""
@@ -1353,18 +1355,16 @@ class Site:
         from .factors import signal_card
         from .newsevents import moves_block
         here_json = json.dumps({"sym": sym, "s": t["short"], "b": here, "upp": None if upp is None else round(upp, 4), "tw": sv.TREND_WEIGHT,
-                                "pair": h("stocks/" + t["slug"] + "/{s}/")}, separators=(",", ":")).replace("</", "<\\/")
+                                "pair": h("stocks/" + t["slug"] + "/{s}/"), "keep": sorted(own_pages)}, separators=(",", ":")).replace("</", "<\\/")
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><span>{e(t['short'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
 <div class="byline"><span class="mono" style="color:var(--ink);font-size:18px">{money(bh['price'], t['cur'])}</span>
 <span class="{dir_cls(day_ch)}">{pct(day_ch)} on the day</span><span>·</span><span class="{dir_cls(y1)}">{pct(y1)} in a year</span><span>·</span><span>close {dlong(bh['asof'])}</span></div>
-{self.light_block(t, depth)}
 {idx_note}{req_note}</section>
+{signal_card(self, t, h)}
 <section class="card read-card"><div class="read-top"><p class="eyebrow">The read</p>{watch_btn}</div><ul class="read">{read_html}</ul>
 <p class="muted small">{DISCLAIMER} <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
-{ps_bar(h, "Pick the plays you trust and weight what matters to you: P/E, growth, debt, trend, analysts. Your signal, the tiles and the lists follow, on this page and every other.")}
-{signal_card(self, t, h)}
 {summary}
 {self.top_plays_block(t, h)}
 {chart}
@@ -1426,7 +1426,7 @@ class Site:
 
     # -------------------------------------------------------------- pair
     def render_pairs(self, workers=None):
-        """Every stock x play page; one worker process per batch of tickers."""
+        """Each stock's headline-play pages (and its Theory tester data); one worker process per batch of tickers."""
         import os
         workers = workers or min(8, os.cpu_count() or 1)
         self.theory_json = {}
@@ -1569,14 +1569,15 @@ class Site:
 
     # ------------------------------------------------------------ method
     def method_page(self):
+        from .factors import FACTORS as SIG_FACTORS, BUY as SIG_BUY, SELL as SIG_SELL
         path, depth = "method/", 1
         h = lambda x: self.href(depth, x)
         body = f"""
-<section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Be The Puck tests a play</h1>
+<section class="pair-head"><p class="eyebrow">Method</p><h1 class="h1">How Be The Puck makes its call and tests a play</h1>
 <p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
-<section class="card prose" id="light"><p class="eyebrow">The Start/Stop light</p>
-<p>Every stock gets one light that sums up all {len(TIMED)} plays. It reads <b>Start</b> when {round(LIGHT_ON * 100)}% or more of the plays with a call hold the stock, and stays Start until the share falls to {round(LIGHT_OFF * 100)}% or less, when it turns <b>Stop</b>. It turns back to Start only at {round(LIGHT_ON * 100)}% again. The gap in the middle keeps a stock that hovers around half from flipping every few days. The light's history is walked through the last two years of weekly calls, then today's close.</p>
-<p>Each play counts once, whatever its family or how often it trades. Anyone can choose which plays count on the screener, the stock list, each stock page, the watchlist and My Puck (<a href="{h('guides/your-plays/')}">pick your plays</a>); the light itself always sums up every play. Members can also set their own Start/Stop thresholds. {DISCLAIMER}</p></section>
+<section class="card prose" id="signal"><span id="light"></span><p class="eyebrow">Your signal: the one call on each stock</p>
+<p>Every stock gets one call, <b>Buy</b>, <b>Hold</b> or <b>Sell</b>, and the reader sets it. Each of {len(SIG_FACTORS)} factors turns into points from 0 to 100: the share of the plays you count that hold the stock, analysts' upside and rating, P/E and the other value measures, growth, margins, debt, trend, momentum and crash exposure. Company numbers score by rank among every covered company, so a P/E lower than 80% of them scores 80. Your score is the weighted average of the factors you weight, over the ones the stock has; with less than half your weight available (a fund has no P/E) there's no score. Buy at {SIG_BUY} or more, Sell at {SIG_SELL} or less, unless you move the lines.</p>
+<p>The standard weights are half plays, half analysts' upside. Change them, or the plays you count, from any stock page, the stock list, the screener or the watchlist, and every page follows (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Until October 2026 the site also showed a Start/Stop light, which read only the plays; the same reading is your signal with every weight on the plays. {DISCLAIMER}</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>
@@ -1614,8 +1615,8 @@ class Site:
 <li>Each gauge is calm, watch or warning on thresholds stated on the Markets page, chosen from the research cited there. The weather word adds them up: two points per warning, one per watch, and "stormy" also needs the trend gauge to have broken.</li>
 </ul></div>
 </section>
-<section class="card prose"><p class="eyebrow">Plays + analysts' upside score</p>
-<p>Used to rank the strongest setups on the home page and in Green across the board (which only include stocks at least half the plays hold), and to sort the watchlist. Half is the share of all {len(TIMED)} plays holding the stock. Half is the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic; the score is a ranking aid, not a forecast or a recommendation.</p></section>
+<section class="card prose"><p class="eyebrow">Analysts' upside</p>
+<p>One of the factors in your signal, and half of it with the standard weights. It's the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic, which is why you can weight them down or out.</p></section>
 <section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
 <p>Tickers added on the watchlist that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
@@ -1624,7 +1625,7 @@ class Site:
 <p>Be The Puck reports what a published rule says. It does not know your goals, taxes or other holdings. {DISCLAIMER} Past results come from a backtest on stocks that are still listed today, which flatters every play and buy and hold alike. With {len(TIMED)} plays and {len(universe())} stocks, some pairs will look excellent by luck alone. Summaries of each analyst's views are Be The Puck's paraphrase of public material, and Be The Puck has no affiliation with them.</p>
 <p>Rebuilt automatically after each U.S. market close. <a href="{h('strategies/')}">See every play</a> or <a href="{h('thinkers/valeriy-zakamulin/')}">the case against timing</a>.</p></section>
 """
-        self.add(path, self.shell(path, "Method", "How Be The Puck tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))
+        self.add(path, self.shell(path, "Method", "How Be The Puck makes its one call on a stock and tests every trading play: data, execution, costs, grading and the next-move math.", body, active="method/"))
 
     # ------------------------------------------------------------ exports
     def signals_json(self):
@@ -1657,7 +1658,7 @@ def _pairs_for(sym):
     site = _SITE
     t = TK[sym]
     before = set(site.pages)
-    for s in plays_for(t):
+    for s in site.headline_plays() + [PLAY[p] for (x, p) in sorted(EXTRA_PAIRS) if x == sym and PLAY[p] not in site.headline_plays()]:
         site.pair_page(t, s)
     out = {k: v for k, v in site.pages.items() if k not in before}
     if (sym, "buy-and-hold") in site.R:

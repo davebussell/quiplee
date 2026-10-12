@@ -15,14 +15,15 @@ Every factor turns into points from 0 to 100, higher meaning more in favour of b
 A reader's score is the weighted average of the points they weight, over the factors the
 stock has. With less than half their weight available (a fund has no P/E), there's no score.
 Buy at or above their buy line (default 60), Sell at or below their sell line (default 40),
-Hold in between. The default weights (plays 50, analysts' upside 50) give the site's existing
-score; the Start/Stop light stays as it was, the plays' own reading.
+Hold in between. The default weights are plays 50, analysts' upside 50. Your signal is the
+site's one headline call on a stock (October 2026: it replaced the Start/Stop light).
 """
 import math
 
 import pandas as pd
 
 from . import stockview as sv
+from .content import TIMED
 
 GROUPS = [("signals", "Plays and analysts"), ("value", "Value"), ("quality", "Growth and quality"), ("price", "Price and risk")]
 
@@ -260,13 +261,17 @@ def signal_card(site, t, h):
         allrows += (f'<tr data-sig-f="{key}"><td>{e(name)}</td><td>{e(v or "–")}</td><td class="r">{"–" if p is None else p}</td>'
                     f'<td class="small muted">{e(desc)}</td></tr>')
     pos = 50 if s is None else s
+    alert = "" if t.get("index") else (f'<a class="btn sm sig-alert" href="{h("alerts/")}?t={e(t["slug"])}" data-signed-out>Email me when it flips</a>'
+                                       f'<a class="btn sm sig-alert" href="{h("me/")}#alerts" data-signed-in hidden>My alerts</a>')
     return f"""<section class="card sig-card" id="your-signal">
 <div class="sig-head"><div class="sig-l"><p class="eyebrow">Your signal</p>
 <div class="sig-row"><span class="sig-badge {SIG_CLS[sig]}" data-sig-badge>{SIG_WORD[sig]}</span><span class="sig-score"><b data-sig-score>{"–" if s is None else s}</b><small> / 100</small></span></div></div>
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
 <div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
-<div class="sig-acts"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button>
-<span class="small muted">Weight P/E, growth, debt, trend and more; your Buy and Sell lines move every page. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></span></div>
+<div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button>
+<button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>
+{alert}</div>
+<p class="small muted sig-note">Your signal is the one call Be The Puck makes on a stock, and you set it: weight the plays, analysts, P/E, growth, debt, trend and more, and move the Buy and Sell lines. Every page follows your choice. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></p>
 <details class="sig-all"><summary>All {len(FACTORS)} factors for {e(t["short"])}</summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th>{e(t["short"])}</th><th class="r">Points</th><th>What it is</th></tr></thead><tbody data-sig-all>{allrows}</tbody></table></div></details>
 </section>"""

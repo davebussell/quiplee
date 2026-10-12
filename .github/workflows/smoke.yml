@@ -1,0 +1,37 @@
+# After every push to main (once that commit is live) and once a day after the evening
+# price update: open the key pages at 390px and 1280px and fail on anything a reader would
+# notice (tools/smoke.py). A failed run makes GitHub email the repo owner.
+name: Smoke test
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["data/**", "**.md"]
+  schedule:
+    - cron: "40 23 * * *"   # after the evening price update has deployed
+  workflow_dispatch:
+
+concurrency:
+  group: smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Check the live site
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python tools/smoke.py https://bethepuck.com --commit "${{ github.sha }}" --wait 45
+          else
+            python tools/smoke.py https://bethepuck.com
+          fi

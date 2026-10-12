@@ -5,7 +5,7 @@
  *   POST /api/account/login   {id (email or username), password}
  *   POST /api/account/logout
  *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about)
- *   POST /api/account/alerts  {on, level: "light"|"all"}
+ *   POST /api/account/alerts  {on, level: "light"|"all"}  ("light" = signal flips only; the name predates Your signal)
  *   POST /api/account/plays   {plays?: {p: "all"|"top1"|"top3"|"half"|"custom", s: [play slugs]},
  *                              signal?: {w: {factor: weight}, buy, sell}} -> the plays that count and the reader's signal (assets/plays.js)
  *   POST /api/account/email   {email, password}                  -> add or change the address (re-confirm)

@@ -26,7 +26,7 @@
       t.innerHTML = tile('Accounts', a.total.toLocaleString('en-US'), a.email_confirmed + ' confirmed their email') +
         tile('New today', a.new_24h, 'last 24 hours') +
         tile('New this week', a.new_7d, a.new_30d + ' in the last 30 days') +
-        tile('Start/Stop emails', s.total, s.confirmed + ' confirmed, without an account');
+        tile('Signal emails', s.total, s.confirmed + ' confirmed, without an account');
       t.hidden = false;
       $('[data-owner-rows]').innerHTML = (x.j.recent || []).map(function (u) {
         return '<tr><td><b>' + esc(u.name) + '</b></td><td class="nowrap">' + esc(when(u.created)) + '</td><td>' + esc(u.email || '–') + '</td>' +

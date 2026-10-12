@@ -79,10 +79,11 @@ def stock_data(site, t):
             "ok": int(bat.get("right") or 0), "nc": int(bat.get("n") or 0),
             "cg": _f(a.get("cagr")), "bc": _f(b.get("cagr")), "y": stats["start"].year if stats.get("start") is not None else None,
         })
-    L = site.light(t)
+    from .factors import score as fx_score
+    sc, sg, _ = fx_score(site, t)
     k, n = site.consensus(t)
     return {"sym": t["sym"], "s": t["short"], "n": t["name"], "u": t["slug"], "c": t["cur"], "p": _f(site.r(t["sym"], "buy-and-hold")["price"]),
-            "asof": site.asof.strftime("%Y-%m-%d"), "L": None if not L["state"] else (1 if L["state"] == "start" else 0), "k": k, "o": n, "x": rows}
+            "asof": site.asof.strftime("%Y-%m-%d"), "S": sg, "sc": sc, "k": k, "o": n, "x": rows}
 
 
 def files(site):
@@ -128,11 +129,11 @@ def reason_card(D, i, meta, depth, h):
         if x["cg"] is not None and x["bc"] is not None and x["y"]:
             rec += f' {_pct(x["cg"])} a year, against {_pct(x["bc"])} for buying and holding, since {x["y"]}.'
         rec = f'<dt>Its record on {e(D["s"])}</dt><dd>{rec}</dd>'
-    href = h(f'stocks/{D["u"]}/{m["p"]}/')
+    href = h(f'stocks/{D["u"]}/#play-{m["p"]}')   # the play's row on the stock page
     return (f'<article class="th-card {cls}"><header class="th-card-h"><span class="th-say {cls}">{say}</span>'
             f'<a class="th-name" href="{href}">{e(m["name"])}</a><span class="th-by">{icon(m["f"])}{e(FAM[m["f"]])} · {e(m["by"])}</span></header>'
             f'<p class="th-idea">{e(m["idea"])}</p><dl class="th-why"><dt>Why</dt><dd>{why}</dd>{checks}{since}{nxt}{rec}</dl>'
-            f'<a class="th-more" href="{href}">Chart and every call</a></article>')
+            f'<a class="th-more" href="{href}">Its call and record on the {e(D["s"])} page</a></article>')
 
 
 def order(D, idx):
@@ -157,8 +158,8 @@ def verdict_html(D, theory, meta):
         word, cls = ("Buy", "buy") if share >= ON else ("Don't buy", "no") if share <= OFF else ("Split", "split")
         label = "All the plays" if theory == "all" else FAM[theory[4:]] + " plays"
         line = f'<b>{len(ins)} of {n}</b> {"plays" if theory == "all" else e(FAM[theory[4:]].lower()) + " plays"} say buy {e(D["s"])} tonight; {len(outs)} say don&#39;t.'
-        if theory == "all" and D["L"] is not None:
-            line += f' The Start/Stop light is on <b>{"Start" if D["L"] == 1 else "Stop"}</b>.'
+        if theory == "all" and D.get("S") is not None:
+            line += f' Be The Puck\'s signal, with the standard weights, reads <b>{ {1: "Buy", 0: "Hold", -1: "Sell"}[D["S"]] }</b> ({D["sc"]}).'
     w = round(100 * share)
     meter = "" if theory.startswith("play:") else (f'<div class="th-meter" aria-hidden="true"><i style="width:{w}%"></i></div>'
                                                    f'<div class="th-meter-l"><span>Buy {len(ins)}</span><span>Don&#39;t buy {len(outs)}</span></div>')

@@ -1,4 +1,4 @@
-/* alerts.js: the /alerts/ page. Sign up for free Start/Stop emails, or change or
+/* alerts.js: the /alerts/ page. Sign up for free emails when the signal flips, or change or
  * stop them from the link in an email (?m=<token>). Talks to /api/alerts/
  * (netlify/functions/alerts.mjs); names come from data/tickers.json. */
 (function () {
@@ -40,8 +40,8 @@
     var box = $('[data-al-chips]');
     if (!box) return;
     box.innerHTML = syms.map(function (s) {
-      var m = U.names[s], L = m[9];
-      return '<a class="al-chip" href="' + esc(STOCK.replace('{s}', m[2])) + '">' + (L == null ? '' : '<span class="light-pill ' + (L ? 'start' : 'stop') + '"><i></i>' + (L ? 'Start' : 'Stop') + '</span>') +
+      var m = U.names[s], g = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[m[9]];
+      return '<a class="al-chip" href="' + esc(STOCK.replace('{s}', m[2])) + '">' + (g ? '<span class="sig-pill ' + g[1] + '">' + g[0] + '</span>' : '') +
         '<b>' + esc(m[0]) + '</b><span>' + esc(m[1]) + '</span></a>';
     }).join('') + (bad.length ? '<p class="small down">Not covered: ' + esc(bad.join(', ')) + '. <a href="' + esc(STOCK.replace('{s}/', '')) + '">See every name</a>.</p>' : '');
   }
@@ -92,7 +92,7 @@
     fetch(API + 'manage?t=' + encodeURIComponent(tok)).then(function (r) { return r.json(); }).then(function (j) {
       if (!j.tickers) { box.innerHTML = '<p>' + esc(j.error || 'This link no longer works.') + '</p>'; $('[data-al-signup]').hidden = false; return; }
       var names = j.tickers.filter(function (s) { return U.names[s]; }).map(function (s) { return U.names[s][0]; });
-      box.innerHTML = (q.get('confirmed') ? '<p class="al-ok"><b>You\'re set.</b> We\'ll email ' + esc(j.email) + ' when the light flips on these stocks.</p>' : '') +
+      box.innerHTML = (q.get('confirmed') ? '<p class="al-ok"><b>You\'re set.</b> We\'ll email ' + esc(j.email) + ' when the signal flips on these stocks.</p>' : '') +
         (unsub ? '<p><b>Unsubscribe ' + esc(j.email) + '?</b> You won\'t get any more alerts.</p><p><button type="button" class="btn primary" data-al-unsub>Unsubscribe</button> <a href="?m=' + esc(encodeURIComponent(tok)) + '">Change my stocks instead</a></p><p class="pt-msg" data-al-umsg></p>'
           : '<h2 class="h3">Your alerts for ' + esc(j.email) + '</h2><form class="pt-form" data-al-edit novalidate><label>Stocks to follow<textarea name="tickers" rows="3">' + esc(names.join(', ')) + '</textarea></label>' +
             '<div class="al-chips" data-al-chips></div><div class="hero-links"><button class="btn primary" type="submit">Save my stocks</button><button type="button" class="btn" data-al-unsub>Unsubscribe</button></div>' +

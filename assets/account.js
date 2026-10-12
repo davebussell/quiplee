@@ -50,9 +50,9 @@
 
   // ------------------------------------------------------------ the widget
   var COPY = {
-    theory: { go: 'Create my free account', lead: 'Follow the stocks you test and get an email when their light flips.' },
+    theory: { go: 'Create my free account', lead: 'Follow the stocks you test and get an email when your signal on one flips.' },
     member: { go: 'Create my free account', lead: 'Member tools open straight away and stay free until ' + FREE + '.' },
-    alerts: { go: 'Create my free account', lead: 'Follow your stocks and get an email when the light flips.' },
+    alerts: { go: 'Create my free account', lead: 'Follow your stocks and get an email when your signal on one flips.' },
     me: { go: 'Create my free account', lead: 'One account for your stocks, your emails and every member tool.' }
   };
   function watchSyms() {
@@ -71,10 +71,10 @@
       '<label for="' + uid + 'e">Email</label><input id="' + uid + 'e" name="email" type="email" autocomplete="email" required placeholder="you@example.com">' +
       '<label for="' + uid + 'p">Password</label><div class="pw-row"><input id="' + uid + 'p" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"><button type="button" class="pw-eye" aria-label="Show password">Show</button></div>' +
       '<label for="' + uid + 'n">Username <span class="opt">optional, shown when you sign in</span></label><input id="' + uid + 'n" name="name" autocomplete="username" maxlength="20" pattern="[A-Za-z0-9_]{3,20}" placeholder="We\'ll make one from your email">' +
-      '<label class="auth-check"><input type="checkbox" name="alerts"><span>Email me when the Start/Stop light flips on stocks I follow. I can stop any time.</span></label>' +
+      '<label class="auth-check"><input type="checkbox" name="alerts"><span>Email me when my signal flips on stocks I follow. I can stop any time.</span></label>' +
       '<button class="btn primary glow" type="submit">' + esc(c.go) + '</button>' +
       '<p class="auth-msg" role="alert"></p>' +
-      '<p class="auth-fine">' + esc(c.lead) + ' From ' + FREE + ', member tools are $5 a month; the screener, the Theory tester and Start/Stop emails stay free.</p>' +
+      '<p class="auth-fine">' + esc(c.lead) + ' From ' + FREE + ', member tools are $5 a month; the screener, the Theory tester and signal emails stay free.</p>' +
       '</form>' +
       '<form class="auth-form" data-form="login" novalidate hidden>' +
       '<label for="' + uid + 'i">Email or username</label><input id="' + uid + 'i" name="id" autocomplete="username" required>' +

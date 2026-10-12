@@ -41,6 +41,15 @@
   status = 301
   force = true
 
+# Stock x play pages now exist only for each stock's headline plays (the most accurate play per
+# family and render.HEADLINE_EXTRA) and for every play on SPY (render.EXTRA_PAIRS). Any other
+# one forwards to that play's row on the stock page; the pages that still exist are files, so
+# this rule never covers them.
+[[redirects]]
+  from = "/stocks/:sym/:play/"
+  to = "/stocks/:sym/?play=:play"
+  status = 301
+
 # Lessons that were renamed when the site grew from 7 rules to 59 plays
 [[redirects]]
   from = "/learn/the-seven-rules/*"

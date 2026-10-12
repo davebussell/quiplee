@@ -64,7 +64,7 @@
       var fam = S.theory === 'all' ? null : FAM[S.theory.slice(4)];
       label = fam ? fam + ' plays' : 'All the plays';
       line = '<b>' + ins.length + ' of ' + n + '</b> ' + (fam ? esc(fam.toLowerCase()) + ' plays' : 'plays') + ' say buy ' + esc(D.s) + ' tonight; ' + outs.length + " say don&#39;t.";
-      if (!fam && D.L != null) line += ' The Start/Stop light is on <b>' + (D.L === 1 ? 'Start' : 'Stop') + '</b>.';
+      if (!fam && D.S != null) line += ' Be The Puck&#39;s signal, with the standard weights, reads <b>' + ({ '1': 'Buy', '0': 'Hold', '-1': 'Sell' })[D.S] + '</b> (' + D.sc + ').';
     }
     return '<div class="th-verdict ' + cls + '"><p class="th-step"><span class="step-n">3</span>The reading</p>' +
       '<p class="th-q">' + esc(label) + ' on <b>' + esc(D.s) + '</b> <span class="muted">· ' + esc(D.n) + ', ' + money(D.p, D.c) + '</span></p>' +
@@ -89,11 +89,11 @@
       if (x.cg != null && x.bc != null && x.y) rec += ' ' + pct(x.cg) + ' a year, against ' + pct(x.bc) + ' for buying and holding, since ' + x.y + '.';
       rec = '<dt>Its record on ' + esc(D.s) + '</dt><dd>' + rec + '</dd>';
     }
-    var href = STOCK + D.u + '/' + m.p + '/';
+    var href = STOCK + D.u + '/#play-' + m.p;   // the play's row on the stock page
     return '<article class="th-card ' + cls + '"><header class="th-card-h"><span class="th-say ' + cls + '">' + say + '</span>' +
       '<a class="th-name" href="' + esc(href) + '">' + esc(m.name) + '</a><span class="th-by">' + (FIC[m.f] || '') + esc(FAM[m.f]) + ' · ' + esc(m.by) + '</span></header>' +
       '<p class="th-idea">' + esc(m.idea) + '</p><dl class="th-why"><dt>Why</dt><dd>' + why + '</dd>' + checks + since + nxt + rec + '</dl>' +
-      '<a class="th-more" href="' + esc(href) + '">Chart and every call</a></article>';
+      '<a class="th-more" href="' + esc(href) + '">Its call and record on the ' + esc(D.s) + ' page</a></article>';
   }
 
   function lists() {

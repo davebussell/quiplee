@@ -2,7 +2,7 @@
 
 What is locked
   /picks/          the top-picks tracker (tools/qstrat/picks.py)
-  /rules/          the member's own Start/Stop rule and portfolio limits (tools/qstrat/rules.py)
+  /rules/          the member's own plays-only rule and portfolio limits (tools/qstrat/rules.py)
   /articles/<...>  every report: long reads, sector pieces and stock briefs.
                    The /articles/ hub stays open.
 
@@ -49,7 +49,7 @@ def free_bar(site, depth):
     h = lambda x: site.href(depth, x)
     return (f'<div class="free-bar"><div class="wrap"><span class="tag mem">{LOCK_SVG}Members</span> '
             f'<span>Free with an account until <b>{FREE_UNTIL}</b>, then {PRICE} a month. '
-            f'The screener, the Theory tester and the Start/Stop light stay free.</span> <a href="{h("members/")}">Details</a></div></div>')
+            f'The screener, the Theory tester and your signal stay free.</span> <a href="{h("members/")}">Details</a></div></div>')
 
 
 def member_tag():
@@ -68,14 +68,14 @@ def lock_card(site, depth, next_path, what="report"):
     h = lambda x: site.href(depth, x)
     perks = "".join(f"<li>{x}</li>" for x in (
         "The top-picks tracker, reviewed every Friday", "Every report and plain-English stock brief",
-        "Your own Start/Stop rules and portfolio limits", "Play-by-play emails on the stocks you follow"))
+        "Portfolio limits checked against your own rules", "Play-by-play emails on the stocks you follow"))
     return f"""<section class="card lock-card" id="lock" aria-labelledby="lock-h">
 <div class="lock-top">{member_tag()}<h2 class="h2" id="lock-h">This {e(what)} is for members, and it's free until {FREE_UNTIL}</h2>
 <p class="muted">Create a free Be The Puck account and it opens straight away. From {FREE_UNTIL}, membership is {PRICE} a month; nothing is charged unless you choose to subscribe.</p></div>
 <div class="lock-split">
 <div class="auth-slot" data-auth data-auth-next="reload" data-auth-context="member"><noscript><p><a class="btn primary" href="{h('me/')}">Create your free account</a></p></noscript></div>
 <div class="lock-join"><p class="eyebrow">Members get</p><ul class="check-list">{perks}</ul>
-<p class="small muted">The screener, the Theory tester, the Start/Stop light and its flip emails are free for good. <a href="{h('members/')}">What's included</a></p>
+<p class="small muted">The screener, the Theory tester, your signal and its flip emails are free for good. <a href="{h('members/')}">What's included</a></p>
 {pw_details(next_path, "lock-pw")}</div>
 </div>
 </section>"""
@@ -117,15 +117,15 @@ def members_page(site):
                               "See every entry, every exit and the reason, and how the model is doing against the S&amp;P 500.", "picks/"),
         ("Every report", "The long reads on bubbles, crashes, debt and positioning, the sector pieces, and a plain-English brief on every covered stock, "
                          "rebuilt each night with the latest close.", "articles/"),
-        ("Your own rules", "Choose which plays count toward the Start/Stop light, set when it turns, and check your portfolio against your own "
+        ("Your own rules", "Choose which plays count toward a plays-only rule, set when it turns, and check your portfolio against your own "
                            "limits: biggest stock, biggest sector, share in Start names and crash exposure.", "rules/"),
-        ("Play-by-play emails", "On top of the free Start/Stop flips: an email after the close listing every play that got in or out on the stocks you follow, "
+        ("Play-by-play emails", "On top of the free signal flips: an email after the close listing every play that got in or out on the stocks you follow, "
                                 "and prices that are close to a play's line.", "me/"),
     ]
     cards = "".join(f'<a class="card mem-card" href="{h(u)}"><span class="eyebrow">Included</span><span class="name">{t}</span><span class="muted small">{d}</span></a>'
                     for t, d, u in benefits)
     body = f"""<section class="pair-head has-art">{page_art(h, PAGE_ART["members/"], "55% 55%")}<p class="eyebrow">Be The Puck Members</p><h1 class="h1">Every member tool, free until {FREE_UNTIL}</h1>
-<p class="lede">Everything on Be The Puck's stock and play pages stays free, and so do the screener, the Theory tester, the Start/Stop light and its flip emails. Members also get the top-picks tracker, every report, their own rules and play-by-play emails. Create a free account and they're yours until {FREE_UNTIL}; after that, {PRICE} a month.</p>
+<p class="lede">Everything on Be The Puck's stock and play pages stays free, and so do the screener, the Theory tester, your signal and its flip emails. Members also get the top-picks tracker, every report, their own rules and play-by-play emails. Create a free account and they're yours until {FREE_UNTIL}; after that, {PRICE} a month.</p>
 <div class="mem-state" data-mem-state hidden><span class="tag live">You're a member</span> <a href="{h('me/')}">Open My Puck</a> · <a href="{h('picks/')}">Top picks</a> · <a href="{h('rules/')}">Your rules</a> · <a href="{h('articles/')}">Reports</a></div></section>
 
 <section><div class="grid grid-4">{cards}</div></section>
@@ -142,18 +142,18 @@ def members_page(site):
 <li><b>Today</b><span>Create a free account with your email. Top picks, reports, your own rules and play-by-play emails open straight away.</span></li>
 <li><b>Before then</b><span>We'll email every member about the switch, with the date and the price, before anything changes.</span></li>
 <li><b>From {FREE_UNTIL}</b><span>Member tools are {PRICE} a month through PayPal, cancel any time. Nothing is charged unless you choose to subscribe.</span></li>
-<li><b>Always free</b><span>Your account, the screener, the Theory tester, every stock page and play, the Start/Stop light and its flip emails.</span></li>
+<li><b>Always free</b><span>Your account, the screener, the Theory tester, every stock page and play, your signal and its flip emails.</span></li>
 </ol>
 {pw_details("picks/", "mem-pw")}
 {sub_note}</div>
 </section>
 
 <section class="card prose"><p class="eyebrow">Good to know</p><ul>
-<li><b>What's free for good.</b> Every stock page, every play, the Start/Stop light and its flip emails, the markets page, the screener, the Theory tester, the watchlist, the guides and the Learn tracks.</li>
+<li><b>What's free for good.</b> Every stock page, every play, your signal and its flip emails, the markets page, the screener, the Theory tester, the watchlist, the guides and the Learn tracks.</li>
 <li><b>What the picks are.</b> The top five names on Be The Puck's public <a href="{h('stocks/?sort=score')}">strongest-setups list</a>, held by a fixed rule and tracked from the close they go in. A rule, not anyone's opinion, and not advice for you.</li>
-<li><b>From {FREE_UNTIL}.</b> {PRICE} a month, billed through PayPal, cancel any time. Your account, the Theory tester and Start/Stop emails carry on either way.</li>
+<li><b>From {FREE_UNTIL}.</b> {PRICE} a month, billed through PayPal, cancel any time. Your account, the Theory tester and signal emails carry on either way.</li>
 <li><b>Privacy.</b> Be The Puck keeps your email, your username and what you choose to follow, and nothing else. Payments will be handled by PayPal; Be The Puck never sees your card.</li>
 </ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Be The Puck doesn't know your goals, taxes or timeline, and takes no positions in the names it covers.</p></section>"""
     site.add(path, site.shell(path, "Members · free until January 1, 2027",
-                              f"Be The Puck Members: the top-picks tracker, every report and stock brief, your own Start/Stop rules and play-by-play emails. Free with an account until January 1, 2027, then {PRICE} a month.",
+                              f"Be The Puck Members: the top-picks tracker, every report and stock brief, portfolio limits and play-by-play emails. Free with an account until January 1, 2027, then {PRICE} a month.",
                               body, scripts=("assets/members.js",)))

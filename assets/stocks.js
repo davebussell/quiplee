@@ -1,7 +1,7 @@
 /* stocks.js — the /stocks/ list: search, group filter, one-click sorts and the
  * list / by-family switch. Column sorting itself comes from sortable.js; the
  * sort buttons press the right column header until it sorts high to low.
- * Supports ?sort=score|signal|plays|upside|crash|year|light, ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
+ * Supports ?sort=signal|score|plays|upside|crash|year (score: only your Buys, highest first), ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
 (function () {
   'use strict';
   var tbl = document.getElementById('st-tbl');
@@ -9,7 +9,7 @@
   var rows = [].slice.call(tbl.tBodies[0].rows);
   var q = document.getElementById('st-q'), count = document.getElementById('st-count');
   var st = { group: '', q: '', buyOnly: false };
-  var COL = { score: 9, plays: 7, upside: 8, signal: 10, crash: 11, year: 5, light: 1 };
+  var COL = { signal: 1, score: 1, year: 5, plays: 7, upside: 8, crash: 9, light: 1 };
   var params = new URLSearchParams(location.search);
 
   function apply() {
@@ -22,17 +22,18 @@
       if (ok) shown++;
     });
     count.textContent = (shown === rows.length ? rows.length + ' names.' : shown + ' of ' + rows.length + ' names shown.')
-      + (st.buyOnly ? ' Strongest setups shows only the stocks your signal rates Buy, highest score first.' : '');
+      + (st.buyOnly ? ' Showing only the stocks your signal rates Buy, highest score first.' : '');
   }
   function setPressed(sel, el) { [].forEach.call(document.querySelectorAll(sel), function (b) { b.setAttribute('aria-pressed', String(b === el)); }); }
 
   function sortBy(key) {
+    if (key === 'light') key = 'signal';   // old links to the retired Start/Stop sort
     st.buyOnly = key === 'score';
     apply();
     var th = tbl.tHead.rows[0].cells[COL[key]];
     var btn = th && (th.querySelector('.sort-btn') || th);
     if (!btn) return;
-    var want = key === 'light' ? 'ascending' : 'descending';
+    var want = 'descending';
     for (var i = 0; i < 3 && th.getAttribute('aria-sort') !== want; i++) btn.click();
     var b = document.querySelector('.st-sorts [data-sort="' + key + '"]');
     if (b) setPressed('.st-sorts [data-sort]', b);

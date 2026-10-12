@@ -9,8 +9,8 @@ Netlify runs the second command on every push (see netlify.toml) and publishes
 _site/. The build copies the hand-written parts of the site (live desk,
 stories, assets, js) unchanged apart from glossary links, then generates the
 home page, /markets/ (crash gauges and the plays on indexes), /watchlist/,
-/articles/, /strategies/ (plays), /thinkers/ (analysts), /stocks/ (every stock x
-play page), /learn/ (three tracks), /method/, data/*.json and sitemap.xml.
+/articles/, /strategies/ (plays), /thinkers/ (analysts), /stocks/ (each stock, its
+headline-play pages and every play on SPY), /learn/ (three tracks), /method/, data/*.json and sitemap.xml.
 Edit tools/qstrat/plays.py for plays, analysts.json for analysts, content.py
 for tickers.
 """
@@ -37,10 +37,10 @@ STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.j
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
-                  "playset.json", "events.json", "events"}   # data/events/ (earnings and rating history) is only read at build time
+                  "playset.json", "events.json", "events", "build.json"}   # data/events/ (earnings and rating history) is only read at build time
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
-                 "package.json", "package-lock.json"}
+                 "package.json", "package-lock.json", "CLAUDE.md", ".cache"}
 
 
 def root_href(slug):
@@ -82,7 +82,9 @@ def copy_static(out):
 
 
 def reads_json(site):
-    """Each covered name's Start/Stop light and its plain-English read, for the alert emails."""
+    """Each covered name's standard signal (S: 1 Buy, 0 Hold, -1 Sell; sc: score), plays in (k of `of`)
+    and plain-English read, for My Puck and the alert emails (netlify/lib/signal.mjs rescores
+    it with an account's own weights from data/playset.json)."""
     from qstrat import stockview as sv
     from qstrat.content import TICKERS
     out = {}
@@ -90,7 +92,9 @@ def reads_json(site):
         sym = t["sym"]
         if t.get("index") or (sym, "buy-and-hold") not in site.R:
             continue
-        L = site.light(t)
+        from qstrat.factors import score as fx_score
+        sc, sg, _ = fx_score(site, t)
+        k, n = site.consensus(t)
         meta = site.meta.get(sym)
         try:
             read = sv.read_lines(site, t, meta, site.fund.get(sym)) if meta else []
@@ -100,8 +104,7 @@ def reads_json(site):
         d1 = float(oh["close"].iloc[-1] / oh["close"].iloc[-2] - 1) if oh is not None and len(oh) > 1 else None
         out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),
                     "g": t["group"], "d1": None if d1 is None else round(d1, 5),
-                    "L": None if not L["state"] else (1 if L["state"] == "start" else 0), "k": L["k"], "of": L["n"],
-                    "since": L["since"].strftime("%Y-%m-%d") if L.get("since") is not None else None, "read": read}
+                    "S": sg, "sc": sc, "k": k, "of": n, "y1": None if site.one_year(t) is None else round(float(site.one_year(t)), 4), "read": read}
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "t": out}, ensure_ascii=False, separators=(",", ":"))
 
 
@@ -159,6 +162,51 @@ def write_pages(pages, out):
             f.write(html)
 
 
+def write_data(site, out, quick=False):
+    """The data files the pages read in the browser (and the alert emails read). quick=True
+    (tools/dev_render.py) skips the per-stock Theory tester and weekly history files."""
+    from qstrat.playset import playset_json
+    from qstrat.newsevents import events_json
+    from qstrat import screen, theory
+    from qstrat.watchlist import watch_json
+    from qstrat.rules import write_hist
+    d = os.path.join(out, "data")
+    os.makedirs(d, exist_ok=True)
+
+    def put(name, text):
+        with open(os.path.join(d, name), "w", encoding="utf-8") as f:
+            f.write(text)
+    put("signals.json", site.signals_json())
+    put("glossary.json", glossary_json())
+    put("names.json", site.names_json())
+    put("plays.json", site.plays_json())
+    put("playset.json", playset_json(site))
+    put("events.json", events_json(site))
+    put("reads.json", reads_json(site))
+    put("tickers.json", screen.tickers_json(site))
+    put("screen.json", screen.screen_json(site))
+    put("watch.json", watch_json(site))
+    put("build.json", build_json(site))
+    if quick:
+        return
+    t2 = time.time()
+    os.makedirs(os.path.join(d, "theory"), exist_ok=True)
+    tfiles = getattr(site, "theory_json", None) or theory.files(site)
+    for slug, js in tfiles.items():
+        put(os.path.join("theory", slug + ".json"), js)
+    print(f"theory tester: {len(tfiles)} stocks in {time.time() - t2:.0f}s")
+    print("weekly call history files:", write_hist(site, out))
+
+
+def build_json(site):
+    """What this deploy was built from: the smoke test waits for its commit and checks the data's age."""
+    import datetime as dt
+    commit = os.environ.get("COMMIT_REF") or os.environ.get("GITHUB_SHA") or ""
+    return json.dumps({"commit": commit, "asof": site.asof.strftime("%Y-%m-%d"),
+                       "built": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                       "pages": sum(1 for _ in site.pages)}, separators=(",", ":"))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(ROOT, "_site"), help="output folder (default: _site)")
@@ -187,40 +235,7 @@ def main():
     pages = site.build()
     print(f"rendered and wrote {len(pages)} pages in {time.time() - t1:.0f}s")
     write_pages({k: v for k, v in pages.items() if v is not None}, out)
-    os.makedirs(os.path.join(out, "data"), exist_ok=True)
-    with open(os.path.join(out, "data", "signals.json"), "w") as f:
-        f.write(site.signals_json())
-    with open(os.path.join(out, "data", "glossary.json"), "w", encoding="utf-8") as f:
-        f.write(glossary_json())
-    with open(os.path.join(out, "data", "names.json"), "w", encoding="utf-8") as f:
-        f.write(site.names_json())
-    with open(os.path.join(out, "data", "plays.json"), "w", encoding="utf-8") as f:
-        f.write(site.plays_json())
-    from qstrat.playset import playset_json
-    with open(os.path.join(out, "data", "playset.json"), "w", encoding="utf-8") as f:
-        f.write(playset_json(site))
-    from qstrat.newsevents import events_json
-    with open(os.path.join(out, "data", "events.json"), "w", encoding="utf-8") as f:
-        f.write(events_json(site))
-    with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
-        f.write(reads_json(site))
-    from qstrat import screen, theory
-    with open(os.path.join(out, "data", "tickers.json"), "w", encoding="utf-8") as f:
-        f.write(screen.tickers_json(site))
-    with open(os.path.join(out, "data", "screen.json"), "w", encoding="utf-8") as f:
-        f.write(screen.screen_json(site))
-    t2 = time.time()
-    os.makedirs(os.path.join(out, "data", "theory"), exist_ok=True)
-    tfiles = getattr(site, "theory_json", None) or theory.files(site)
-    for slug, js in tfiles.items():
-        with open(os.path.join(out, "data", "theory", slug + ".json"), "w", encoding="utf-8") as f:
-            f.write(js)
-    print(f"theory tester: {len(tfiles)} stocks in {time.time() - t2:.0f}s")
-    from qstrat.watchlist import watch_json
-    from qstrat.rules import write_hist
-    print("weekly call history files:", write_hist(site, out))
-    with open(os.path.join(out, "data", "watch.json"), "w", encoding="utf-8") as f:
-        f.write(watch_json(site))
+    write_data(site, out)
     t2 = time.time()
     items = build_practice(prices, irx, now)
     with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:

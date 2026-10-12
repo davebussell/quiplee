@@ -23,8 +23,7 @@
     'Plays in': 'How many of the plays you chose to count hold it right now.',
     'Target': 'How far analysts\u2019 average 12-month price target sits above (+) or below (\u2212) today\u2019s price. Needs 3 or more analysts.',
     'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
-    'Signal': 'Your signal: Buy, Hold or Sell from your score (0 to 100) on the factors you weight. Change the weights with the Weights button.',
-    'Light': 'Start or Stop, summing up every play: Start when 60% or more hold it, Stop once that falls to 40% or less.',
+    'Signal': 'Your signal, the one call on each name: Buy, Hold or Sell from your score (0 to 100) on the factors you weight. Change the weights with the Weights button.',
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
   };
@@ -289,7 +288,7 @@
 
     // rows
     var showW = W.byValue;
-    var head = ['Stock', 'Light', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Signal', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var head = ['Stock', 'Signal', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
     var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) {
       var at = { 'class': i >= 2 && i <= 5 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
@@ -305,6 +304,11 @@
       var sa = sig(a.sym, A, sel).s, sb = sig(b.sym, B, sel).s;
       return (sb == null ? -1 : sb) - (sa == null ? -1 : sa);
     });
+    function sigCell(sym, t) {
+      var g = sig(sym, t, sel), w = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[g.sig];
+      return el('td', { 'data-v': g.s == null ? '' : String(g.s) }, g.s == null ? [el('span', { 'class': 'muted', text: '–' })]
+        : [el('span', { 'class': 'sig-pill ' + w[1], text: w[0] }), el('span', { 'class': 'sig-sc', text: ' ' + g.s })]);
+    }
     rows.forEach(function (it) {
       var t = D.t[it.sym], s = status(it.sym);
       var rm = el('button', { type: 'button', 'class': 'wl-x', 'aria-label': 'Remove ' + it.sym, text: '×', on: { click: function () { st.items = st.items.filter(function (x) { return x.sym !== it.sym; }); if (st.example) st.example = false; save(); render(); } } });
@@ -325,25 +329,20 @@
         if (lastF !== null && p.f !== lastF) strip.appendChild(el('b'));
         lastF = p.f;
         var a = el(p.c || !(t.req || t.co) ? 'a' : 'span', { 'class': c === '1' ? 'in' : c === '0' ? 'out' : 'na', title: p.n + ': ' + (c === '1' ? 'IN' : c === '0' ? 'OUT' : 'no call') + (t.m && t.m[p.s] ? ' · ' + t.m[p.s] : '') });
-        if (a.tagName === 'A') a.href = PAIR.replace('{u}', t.u).replace('{s}', p.s);
+        if (a.tagName === 'A') a.href = STOCK.replace('{u}', t.u) + '#play-' + p.s;
         strip.appendChild(a);
       });
       var href = STOCK.replace('{u}', t.u);
       var sub = t.n + (notes[it.sym] ? ' · ' + notes[it.sym] : '') + (t.req ? ' · added by a reader' : '');
       var cells = [
         el('td', {}, [el('a', { 'class': 'sym', href: href, text: t.s }), el('span', { 'class': 'sym-sub', text: sub })]),
-        el('td', {}, [t.L == null ? el('span', { 'class': 'muted', text: '–' }) : el('a', { 'class': 'light-pill ' + (t.L ? 'start' : 'stop'), href: href, title: 'Start when 60% or more of the plays hold it; Stop once that falls to 40% or less.' }, [el('i'), t.L ? 'Start' : 'Stop'])]),
+        sigCell(it.sym, t),
         el('td', { 'class': 'r mono', text: Q.money(t.p, t.cur) }),
         el('td', { 'class': 'r ' + cls(t.d1), text: Q.pct(t.d1) }),
         el('td', { 'class': 'r ' + cls(t.y1), text: Q.pct(t.y1, 0) }),
         el('td', { 'class': 'r ' + cls(t.ma), text: Q.pct(t.ma, 0) }),
         el('td', {}, [el('span', { 'class': 'consensus' }, [fill(kn[0], kn[1]), kn[0] + ' of ' + kn[1]])]),
         el('td', { 'class': 'r ' + (t.up == null ? 'muted' : t.up > 0.02 ? 'up' : t.up < 0 ? 'down' : ''), title: t.up == null ? 'Fewer than 3 analysts, or no target' : 'Average 12-month target from ' + t.na + ' analysts', text: t.up == null ? '–' : Q.pct(t.up, 0) }),
-        (function () {
-          var g = sig(it.sym, t, sel), w = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[g.sig];
-          return el('td', { 'data-v': g.s == null ? '' : String(g.s) }, g.s == null ? [el('span', { 'class': 'muted', text: '–' })]
-            : [el('span', { 'class': 'sig-pill ' + w[1], text: w[0] }), el('span', { 'class': 'sig-sc', text: ' ' + g.s })]);
-        })(),
         el('td', {}, [strip]),
         el('td', {}, [t.r ? el('span', { 'class': 'lvl lvl-' + LVL[t.r[1]], text: t.r[1] }) : el('span', { 'class': 'muted', text: '–' })])
       ];

@@ -1,4 +1,4 @@
-/* alerts.mjs: free email alerts when the Start/Stop light flips on a reader's stocks.
+/* alerts.mjs: free email alerts when Be The Puck's signal (Buy, Hold, Sell) flips on a reader's stocks.
  *
  *   POST /api/alerts/subscribe   {email, tickers, consent}  -> stores the request and emails a confirm link
  *   GET  /api/alerts/confirm?t=                             -> confirms, back to /alerts/?confirmed=1&m=<manage token>
@@ -57,8 +57,8 @@ function crossSite(req) {
 
 const mask = (email) => email.replace(/^(.)(.*)(@.*)$/, (m, a, b, c) => a + "•".repeat(Math.min(6, b.length)) + c);
 
-/** Today's light for each ticker, so a new subscriber hears only about later flips. */
-const lastFor = (tickers, R, prev = {}) => Object.fromEntries(tickers.map((s) => [s, prev[s] || (R.t[s] && R.t[s].L != null ? [R.t[s].L, R.t[s].k, R.t[s].of] : null)]));
+/** Today's signal for each ticker (standard weights), so a new subscriber hears only about later flips. */
+const lastFor = (tickers, R, prev = {}) => Object.fromEntries(tickers.map((s) => [s, prev[s] || (R.t[s] && R.t[s].S != null ? [R.t[s].S, R.t[s].k, R.t[s].of, "s"] : null)]));
 
 async function subscribe(req, context, s) {
   const b = await readBody(req);

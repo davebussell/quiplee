@@ -324,7 +324,7 @@ class Guides:
         if len(good) >= 3:
             b, w = good[0], good[-1]
             out.append(f"It worked best on <b>{e(b[0])}</b> ({round(100 * b[2] / b[1])}% beat holding on risk-adjusted return) and worst on <b>{e(w[0])}</b> ({round(100 * w[2] / w[1])}%).")
-        out.append("Use it as one input. The <a href=\"{light}\">Start/Stop light</a> combines every play on a stock into one call.")
+        out.append("Use it as one input. <a href=\"{light}\">Your signal</a> combines the plays you count with the other factors you weight into one call.")
         return out
 
     # ------------------------------------------------------------ pages
@@ -415,7 +415,7 @@ class Guides:
 <div class="card"><h2 class="h3">Most often cut the worst fall</h2><ol class="g-list">{plist(top_cut, "cut")}</ol></div></section>
 
 <section class="card prose"><h2 class="h3">Putting them together</h2>
-<p>No single kind of prediction wins in every market, which is why Be The Puck sums every play on a stock into one <a href="{h('method/')}#light">Start/Stop light</a>: Start when most of the plays hold it, Stop when most don't. You can <a href="{h('alerts/')}">get an email</a> when it flips on your stocks, and members can choose which plays count. Every play also has a guide: <a href="{h('strategies/')}">browse all {len(TIMED)}</a>.</p></section>
+<p>No single kind of prediction wins in every market, which is why Be The Puck makes one call on each stock, <a href="{h('guides/your-plays/')}#your-signal">your signal</a>: the share of the plays you count that hold it, weighted with whatever else you think matters. You can <a href="{h('alerts/')}">get an email</a> when it flips on your stocks. Every play also has a guide: <a href="{h('strategies/')}">browse all {len(TIMED)}</a>.</p></section>
 
 <section class="card prose"><h2 class="h3">Further reading</h2><ul class="g-refs">{refs}</ul>
 <p class="small muted">Backtests flatter: they use stocks still listed today, can't feel fear, and with {len(TIMED)} plays some will look good by luck. {DISCLAIMER}</p></section>
@@ -491,11 +491,11 @@ class Guides:
 
         def stock_li(r):
             t = r["t"]
-            return (f'<li><a href="{h("stocks/" + t["slug"] + "/" + p["slug"] + "/")}">{e(t["short"])}</a> <span class="muted small">{e(t["name"])}</span>'
+            return (f'<li><a href="{h(self.s.pair_link(t, p))}">{e(t["short"])}</a> <span class="muted small">{e(t["name"])}</span>'
                     f'<span class="g-li {"up" if r["sh_gap"] > 0 else "down"}">{r["sh_gap"]:+.2f}</span></li>')
         best = "".join(stock_li(r) for r in ranked[:6])
         worst = "".join(stock_li(r) for r in ranked[-6:][::-1])
-        tips = "".join(f"<li>{x.replace('{light}', h('method/') + '#light')}</li>" for x in self.tips(p, m))
+        tips = "".join(f"<li>{x.replace('{light}', h('guides/your-plays/') + '#your-signal')}</li>" for x in self.tips(p, m))
         recent = []
         for t in self.univ:
             x = self.s.R.get((t["sym"], p["slug"]))
@@ -503,7 +503,7 @@ class Guides:
             if c and c["date"] >= self.s.asof - pd.Timedelta(days=10):
                 recent.append((c["date"], t, c))
         recent.sort(key=lambda z: z[0], reverse=True)
-        rec_html = "".join(f'<li><a href="{h("stocks/" + t["slug"] + "/" + p["slug"] + "/")}">{e(t["short"])}</a> <span class="muted small">{"went in" if c["state"] == 1 else "went out"} {e(dlong(d))}</span></li>'
+        rec_html = "".join(f'<li><a href="{h(self.s.pair_link(t, p))}">{e(t["short"])}</a> <span class="muted small">{"went in" if c["state"] == 1 else "went out"} {e(dlong(d))}</span></li>'
                            for d, t, c in recent[:8])
         body = f"""
 <nav class="crumbs"><a href="{h('guides/')}">Guides</a><span>/</span><a href="{h('guides/' + p['family'] + '/')}">{e(fname)}</a><span>/</span><span>{e(p['name'])}</span></nav>

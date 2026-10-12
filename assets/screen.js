@@ -92,9 +92,12 @@
   }
 
   // ---------------------------------------------------------------- markup (as screen.py)
-  function light(r) {
-    if (r.L == null) return '<span class="light-pill">–</span>';
-    return '<span class="light-pill ' + (r.L === 1 ? 'start' : 'stop') + '"><i aria-hidden="true"></i>' + (r.L === 1 ? 'Start' : 'Stop') + '</span>';
+  var SW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] };
+  // your signal: the one call on each name, from the reader's weights (r.sc / r.sg, set in recount)
+  function signal(r) {
+    var g = SW[r.sg];
+    if (r.sc == null || !g) return '<span class="sig-pill na">–</span>';
+    return '<span class="sig-pill ' + g[1] + '">' + g[0] + '</span> <b class="sig-n ' + g[1] + '">' + r.sc + '</b>';
   }
   function row(r) {
     var a = agree(r), w = r.o ? Math.round(100 * a / r.o) : 0, side = S.side;
@@ -103,22 +106,21 @@
       return '<i style="height:' + (f[1] ? Math.max(8, Math.round(100 * kk / f[1])) : 8) + '%" title="' + esc(FAMS[i]) + ': ' + kk + ' of ' + f[1] + '"></i>';
     }).join('');
     var risk = r.r != null ? '<span class="lvl lvl-' + RISK_CLS[r.r] + '">' + RISK[r.r] + '</span>' : '<span class="muted">–</span>';
-    var SW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }, g = SW[r.sg];
-    var up = r.sc != null && g ? '<b class="sig-n ' + g[1] + '">' + r.sc + '</b> <small class="sig-w ' + g[1] + '">' + g[0] + '</small>' : '<span class="muted">–</span>';
+    var up = r.up != null ? '<b class="' + dir(r.up) + '">' + pct(r.up, 0) + '</b>' : '<span class="muted">–</span>';
     var on = !!following[r.sym];
     return '<li class="scr-row" data-sym="' + esc(r.sym) + '"><a class="scr-main" href="' + esc(STOCK.replace('{u}', r.u)) + '">' +
       '<span class="scr-sym"><b>' + esc(r.s) + '</b><span>' + esc(r.n) + '</span></span>' +
-      '<span class="scr-light">' + light(r) + '</span>' +
+      '<span class="scr-light">' + signal(r) + '</span>' +
       '<span class="scr-agree ' + side + '"><span class="scr-num"><b>' + a + '</b> of ' + r.o + '</span><span class="fillbar" aria-hidden="true"><i style="width:' + w + '%"></i></span></span>' +
       '<span class="scr-fams ' + side + '" aria-hidden="true">' + fams + '</span>' +
       '<span class="scr-px mono">' + money(r.p, r.c) + ' <small class="' + dir(r.d) + '">' + pct(r.d) + '</small></span>' +
       '<span class="scr-y1 ' + dir(r.y) + '"><em>1 yr</em>' + pct(r.y, 0) + '</span>' +
       '<span class="scr-risk"><em>Crash</em>' + risk + '</span>' +
-      '<span class="scr-up"><em>Score</em>' + up + '</span></a>' +
+      '<span class="scr-up"><em>Analysts</em>' + up + '</span></a>' +
       '<button type="button" class="scr-star' + (on ? ' on' : '') + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Stop following ' : 'Follow ') + esc(r.s) + '" title="' + (on ? 'Following' : 'Follow') + ' ' + esc(r.s) + '">' + (on ? '★' : '☆') + '</button></li>';
   }
   function summary(n) {
-    var bits = [MKT[S.mkt], S.sec, S.risk === 'low' ? 'low or moderate crash exposure' : S.risk === 'high' ? 'high crash exposure' : '', S.fresh ? 'flipped this week' : '', S.q ? '“' + S.q + '”' : ''].filter(Boolean);
+    var bits = [MKT[S.mkt], S.sec, S.risk === 'low' ? 'low or moderate crash exposure' : S.risk === 'high' ? 'high crash exposure' : '', S.fresh ? 'plays turned this week' : '', S.q ? '“' + S.q + '”' : ''].filter(Boolean);
     return '<b>' + n + ' name' + (n === 1 ? '' : 's') + '</b> where at least <b>' + S.min + '% of ' + counted() + '</b> plays agree with <b>' + (S.side === 'buy' ? 'buying' : 'selling') + '</b>' +
       (bits.length ? ' · ' + esc(bits.join(' · ')) : '');
   }
@@ -222,7 +224,7 @@
     if (acct) {
       window.BPAuth.follow(sym, on).then(function (j) {
         if (!j.ok) { following[sym] = !on; draw(); toast(esc(j.error || "That didn't save. Try again.")); return; }
-        toast(on ? 'Following ' + esc(short) + '. You&#39;ll get an email the evening its light flips. <a href="' + esc(ME) + '">My Puck</a>' : 'Stopped following ' + esc(short) + '.');
+        toast(on ? 'Following ' + esc(short) + '. You&#39;ll get an email the evening your signal on it flips. <a href="' + esc(ME) + '">My Puck</a>' : 'Stopped following ' + esc(short) + '.');
       });
       return;
     }
@@ -230,7 +232,7 @@
     w.items = w.items.filter(function (x) { return x.sym !== sym; });
     if (on) w.items.push({ sym: sym });
     localSet(w);
-    toast(on ? 'Saved ' + esc(short) + ' to this browser. <a href="' + esc(ME) + '">Create a free account</a> to get an email when its light flips.' : 'Removed ' + esc(short) + '.');
+    toast(on ? 'Saved ' + esc(short) + ' to this browser. <a href="' + esc(ME) + '">Create a free account</a> to get an email when your signal on it flips.' : 'Removed ' + esc(short) + '.');
   }
   function loadFollowing() {
     localGet().items.forEach(function (x) { following[x.sym] = true; });

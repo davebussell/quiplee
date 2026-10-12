@@ -12,7 +12,7 @@
  *     scheduled notification task. Token replies carry usernames and dates, never emails.
  *
  * Accounts are the u/<name> records in the "paper" store (netlify/lib/account.mjs); free
- * Start/Stop email subscribers are the sub/<id> records in the "alerts" store.
+ * Signal-flip email subscribers are the sub/<id> records in the "alerts" store.
  */
 import { getStore } from "@netlify/blobs";
 import { createHash, timingSafeEqual } from "node:crypto";

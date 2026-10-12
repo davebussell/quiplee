@@ -1,6 +1,6 @@
 /* me.js: My Puck (/me/). Signed out, the page shows the sign-up widget (account.js).
  * Signed in, it draws the dashboard from /api/account/me (the account) and
- * data/reads.json (every covered name's light and read): the stocks you follow,
+ * data/reads.json (every covered name's standard signal and read): the stocks you follow,
  * your email alerts, a shortcut into the Theory tester, the member tools and settings.
  * Also handles the links in emails: ?reset= (new password), ?stop= (stop emails),
  * ?confirmed=1 / ?confirm=expired and ?welcome=1. */
@@ -23,10 +23,6 @@
   function money(v, cur) { if (v == null) return '–'; var d = Math.abs(v) < 1 ? 4 : 2; return (cur || '$') + num(v, d); }
   function day(iso) { if (!iso) return ''; var d = new Date(iso + 'T12:00:00Z'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }); }
   function daysBetween(a, b) { return Math.round((new Date(b + 'T12:00:00Z') - new Date(a + 'T12:00:00Z')) / 864e5); }
-  function pill(L) {
-    if (L == null) return '<span class="light-pill">–</span>';
-    return '<span class="light-pill ' + (L ? 'start' : 'stop') + '"><i aria-hidden="true"></i>' + (L ? 'Start' : 'Stop') + '</span>';
-  }
   function bar(k, n) { return '<span class="fillbar" aria-hidden="true"><i style="width:' + (n ? Math.round(100 * k / n) : 0) + '%"></i></span>'; }
   function toast(text, kind) {
     var t = document.createElement('div');
@@ -78,8 +74,17 @@
     return [t.k || 0, t.of || 0];
   }
   // the reader's signal on a name (plays.js), or null before it loads
-  function sg(s) { return PS && PS.loaded() && PS.data().x[s] ? PS.score(s) : null; }
-  function sgPill(r) { return r ? '<span class="sig-pill ' + PS.sigClass(r.sig) + '">' + (r.sig == null ? '–' : PS.sigWord(r.sig)) + '</span>' : ''; }
+  // your signal on a name: the reader's weights once plays.js has loaded, else the standard one from reads.json
+  var SIGW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] };
+  function sg(s) {
+    if (PS && PS.loaded() && PS.data().x[s]) return PS.score(s);
+    var t = R.t[s];
+    return t && t.sc != null ? { s: t.sc, sig: t.S } : { s: null, sig: null };
+  }
+  function sgPill(r) {
+    var w = r && r.sig != null ? SIGW[r.sig] : null;
+    return w ? '<span class="sig-pill ' + w[1] + '">' + w[0] + '</span> <b class="sig-n ' + w[1] + '">' + r.s + '</b>' : '<span class="sig-pill na">–</span>';
+  }
   function psChip() {
     return '<button type="button" class="ps-chip ps-chip-sm" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>' +
       esc(PS && PS.loaded() ? PS.label(false) : 'All 100') + '</b><span class="ps-caret" aria-hidden="true">▾</span></button>';
@@ -87,41 +92,38 @@
   function followRows() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     if (!list.length) {
-      return '<div class="me-empty"><p><b>Follow a few stocks to get started.</b> You\'ll see each one\'s light here, and get an email the evening it flips.</p>' +
+      return '<div class="me-empty"><p><b>Follow a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div></div>';
     }
     return '<ul class="me-list">' + list.map(function (s) {
-      var t = R.t[s], fresh = t.since && R.asof && daysBetween(t.since, R.asof) <= 7, c = kn(s);
+      var t = R.t[s], c = kn(s);
       return '<li><a class="me-row" href="' + esc(STOCK.replace('{u}', t.u)) + '">' +
-        '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + pill(t.L) +
-        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + '</span>' + sgPill(sg(s)) + '</span>' +
+        '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + '<span class="mp-sig">' + sgPill(sg(s)) + '</span>' +
+        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + ' plays</span></span>' +
         '<span class="mp-px mono">' + money(t.p, t.cur) + (t.d1 != null ? ' <small class="' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</span>' +
-        '<span class="mp-since">' + (fresh ? '<b class="me-new">Flipped ' + esc(day(t.since)) + '</b>' : t.since ? 'since ' + esc(day(t.since)) : '') + '</span></a>' +
+        '<span class="mp-since">' + (t.y1 != null ? '<span class="' + cls(t.y1) + '">' + pct(t.y1, 0) + '</span> in a year' : '') + '</span></a>' +
         '<button type="button" class="me-x" data-remove="' + esc(s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></li>';
     }).join('') + '</ul>';
   }
-  function sigTile(list, avg) {
-    if (!PS || !PS.loaded() || !list.length) {
-      return '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list') + '</span></div>';
-    }
+  function sigTile(list) {
     var n = { '1': 0, '0': 0, '-1': 0 };
     list.forEach(function (s) { var r = sg(s); if (r && r.sig != null) n[r.sig]++; });
-    return '<div class="card tile"><span class="tile-label">Your signal</span><span class="tile-value"><b class="sig-n buy">' + n['1'] + '</b><small> Buy</small></span>' +
-      '<span class="tile-note">' + n['0'] + ' Hold · ' + n['-1'] + ' Sell · ' + esc(PS.wlabel()) + (avg == null ? '' : ' · plays hold ' + avg + '% on average') + '</span></div>';
+    var wl = PS && PS.loaded() ? PS.wlabel() : 'Plays + analysts';
+    return '<div class="card tile"><span class="tile-label">Your signal on your stocks</span><span class="tile-value"><b class="sig-n buy" data-count="' + n['1'] + '">' + n['1'] + '</b><small> Buy of ' + list.length + '</small></span>' +
+      bar(n['1'], list.length || 1) + '<span class="tile-note">' + (list.length ? n['0'] + ' Hold · ' + n['-1'] + ' Sell · weights: ' + esc(wl) : 'Follow a few to begin') + '</span></div>';
+  }
+  function playsTile(avg) {
+    return '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list') + '</span></div>';
   }
   function kpis() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
-    var on = list.filter(function (s) { return R.t[s].L === 1; });
-    var flipped = list.filter(function (s) { var t = R.t[s]; return t.since && daysBetween(t.since, R.asof) <= 7; });
     var al = A.alerts || {};
     var mailState = !A.email ? ['Add your email', 'warn'] : !A.email_ok ? ['Confirm your email', 'warn'] : al.on ? ['On', 'on'] : ['Off', ''];
     var k = 0, n = 0;
     list.forEach(function (s) { var c = kn(s); k += c[0]; n += c[1]; });
     var avg = n ? Math.round(100 * k / n) : null;
     return '<div class="me-kpis">' +
-      '<div class="card tile"><span class="tile-label">Your stocks on Start</span><span class="tile-value"><b data-count="' + on.length + '">' + on.length + '</b><small> of ' + list.length + '</small></span>' + bar(on.length, list.length || 1) + '<span class="tile-note">' + (list.length ? (list.length - on.length) + ' on Stop' : 'Follow a few to begin') + '</span></div>' +
-      '<div class="card tile"><span class="tile-label">Flipped in the last week</span><span class="tile-value">' + flipped.length + '</span><span class="tile-note">' + (flipped.length ? flipped.slice(0, 4).map(function (s) { return esc(R.t[s].s); }).join(', ') : 'No changes on your list') + '</span></div>' +
-      sigTile(list, avg) +
+      sigTile(list) + playsTile(avg) +
       '<div class="card tile"><span class="tile-label">Email alerts</span><span class="tile-value me-mail ' + mailState[1] + '">' + mailState[0] + '</span><span class="tile-note">' + (A.last_sent ? 'Last sent after the ' + esc(day(A.last_sent)) + ' close' : 'Sent after the close, only on a change') + '</span></div>' +
       '</div>';
   }
@@ -147,7 +149,7 @@
       body = '<p class="small">Emails go to <b>' + esc(A.email) + '</b>' + (A.email_ok ? ' <span class="tag">Confirmed</span>' : ' <span class="tag warn">Not confirmed yet</span>') + '</p>' +
         '<label class="switch"><input type="checkbox" data-al-on' + (al.on ? ' checked' : '') + '><span class="sw" aria-hidden="true"></span><span>Email me when something changes on my stocks</span></label>' +
         '<fieldset class="me-level"' + (al.on ? '' : ' disabled') + '><legend class="small muted">What to send</legend>' +
-        '<label class="radio"><input type="radio" name="lvl" value="light"' + (al.level === 'light' ? ' checked' : '') + '><span><b>Start/Stop flips</b><small>Free for good</small></span></label>' +
+        '<label class="radio"><input type="radio" name="lvl" value="light"' + (al.level === 'light' ? ' checked' : '') + '><span><b>When your signal flips</b><small>Free for good</small></span></label>' +
         '<label class="radio"><input type="radio" name="lvl" value="all"' + (al.level !== 'light' ? ' checked' : '') + (member ? '' : ' disabled') + '><span><b>Flips, every play that moves, and prices near a play\'s line</b><small>Member tool · free until ' + esc(FREE) + '</small></span></label>' +
         '</fieldset><p class="small muted">Sent after the U.S. close, only when something changed. Every email has a one-click unsubscribe.</p>';
     }
@@ -170,14 +172,14 @@
   }
   function rulesLine() {
     var r = A.rules;
-    if (!r) return 'Using the site\'s rule: every play, Start at 60%, Stop at 40%.';
+    if (!r) return 'Check your holdings against your own limits: biggest stock, biggest sector, crash exposure.';
     var names = { all: 'Every play', best: 'Best record', protect: 'Crash protection', trend: 'Trend riders', dip: 'Dip buyers', custom: 'Your own pick of plays' };
     return (names[r.preset] || 'Your plays') + ': Start at ' + Math.round(r.on * 100) + '%, Stop at ' + Math.round(r.off * 100) + '%.';
   }
   function toolsCard() {
     var m = A.member || {};
     var badge = m.kind === 'paid' ? '<span class="tag live">Member</span>' : m.active ? '<span class="tag mem">Free until ' + esc(FREE) + '</span>' : '<span class="tag">$5 a month</span>';
-    var tools = [['/picks/', 'Top picks', 'Five rule-based picks, reviewed every Friday.'], ['/rules/', 'Your own rules', rulesLine()],
+    var tools = [['/picks/', 'Top picks', 'Five rule-based picks, reviewed every Friday.'], ['/rules/', 'Portfolio limits', rulesLine()],
       ['/articles/', 'Reports', 'Every long read and plain-English stock brief.'], ['/guides/', 'Which predictions work?', 'Guides to all ' + (R && R.n ? R.n : 100) + ' plays. Free for everyone.']];
     return '<section class="me-tools"><div class="sec-head"><h2 class="h2">Member tools</h2>' + badge + '</div><div class="grid grid-4">' +
       tools.map(function (t) { return '<a class="card mem-card" href="' + t[0] + '"><span class="name">' + esc(t[1]) + '</span><span class="muted small">' + esc(t[2]) + '</span></a>'; }).join('') +
@@ -190,7 +192,7 @@
       '<details class="pt-more"' + (A.email ? '' : ' open') + '><summary>' + (A.email ? 'Change email' : 'Add your email') + '</summary><form class="auth-form" data-acct="email" novalidate>' +
       '<label>Email<input name="email" type="email" autocomplete="email" required></label>' +
       '<label>Your password<input name="password" type="password" autocomplete="current-password" required></label>' +
-      (A.email ? '' : '<label class="auth-check"><input type="checkbox" name="alerts"><span>Email me when the Start/Stop light flips on stocks I follow. I can stop any time.</span></label>') +
+      (A.email ? '' : '<label class="auth-check"><input type="checkbox" name="alerts"><span>Email me when my signal flips on stocks I follow. I can stop any time.</span></label>') +
       '<button class="btn primary" type="submit">' + (A.email ? 'Change email' : 'Add email') + '</button><p class="auth-msg" role="alert"></p></form></details>' +
       '<details class="pt-more"><summary>Change password</summary><form class="auth-form" data-acct="password" novalidate>' +
       '<label>Current password<input name="old" type="password" autocomplete="current-password" required></label>' +
@@ -245,7 +247,7 @@
     input.addEventListener('input', function () {
       var list = suggest(input.value);
       sug.hidden = !list.length;
-      sug.innerHTML = list.map(function (s) { var t = R.t[s]; return '<button type="button" data-add="' + esc(s) + '">' + pill(t.L) + '<b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></button>'; }).join('');
+      sug.innerHTML = list.map(function (s) { var t = R.t[s]; return '<button type="button" data-add="' + esc(s) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></button>'; }).join('');
     });
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { var l = suggest(input.value); if (l.length) add(l[0]); } });
     box.addEventListener('click', function (e) {

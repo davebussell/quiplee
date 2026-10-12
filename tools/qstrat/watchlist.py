@@ -58,7 +58,7 @@ def watch_json(site):
         out[sym] = {"n": t["name"], "s": t["short"], "g": t["group"], "u": t["slug"], "cur": t["cur"],
                     "p": _r(bh["price"], 6), "d1": _r(d1, 4), "y1": _r(site.one_year(t), 4), "ma": _r(ma, 4), "c": states,
                     "r": [rk.get("score"), rk.get("level")] if rk.get("level") else None, "m": moves}
-        lt = site.light(t)
+        lt = site.light(t)   # only the members' /rules/ page (assets/rules.js) still reads the plays-only light
         if lt["state"]:
             out[sym]["L"] = 1 if lt["state"] == "start" else 0
         ol = sv.outlook(site, t)
@@ -112,8 +112,8 @@ def watchlist_page(site):
 <p class="small muted" id="wl-al-msg" aria-live="polite"></p></div>
 </div>
 <noscript><p class="note-line">The watchlist needs JavaScript. Every covered stock also has its own page under <a href="{h('stocks/')}">Stocks</a>.</p></noscript>
-{ps_bar(h, "Pick the plays you trust. Plays in, the strip and the sort count only those.", "wl-ps")}
-<p class="small wl-rules"><a href="{h('rules/')}">Your own Start/Stop rules and portfolio limits (members)</a></p>
+{ps_bar(h, "Set your signal once: the weights and the plays you count. The Signal column, Plays in, the strip and the sort follow.", "wl-ps")}
+<p class="small wl-rules"><a href="{h('rules/')}">Portfolio limits (members)</a></p>
 <div id="wl-sum" class="wl-sum"></div>
 <div id="wl-list"></div>
 </section>

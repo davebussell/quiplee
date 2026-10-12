@@ -639,10 +639,8 @@ class Articles:
             if c and c["date"] >= s.asof - pd.Timedelta(days=30):
                 flips.append((c["date"], p, c))
         flips.sort(key=lambda z: z[0], reverse=True)
-        from .render import plays_for
-        own = {p["slug"] for p in plays_for(t)}
         def flip_li(d, p, c):
-            name = f'<a href="{h(s.pair_path(t, p))}">{e(p["name"])}</a>' if p["slug"] in own else e(p["name"])
+            name = f'<a href="{h(s.pair_link(t, p))}">{e(p["name"])}</a>'
             word, cls = ("in", "up") if c["state"] == 1 else ("out", "down")
             return f'<li><span class="mono small">{d.strftime("%b %-d")}</span> {name} went <b class="{cls}">{word}</b> at {t["cur"]}{c["price"]:,.2f}</li>'
         fl = "".join(flip_li(d, p, c) for d, p, c in flips[:8])
@@ -650,7 +648,7 @@ class Articles:
         exits, entries = self.exit_levels(t), self.entry_levels(t)
 
         def lvl_list(items, word):
-            return "".join(f'<li><a href="{h(s.pair_path(t, p) if p["slug"] in own else "strategies/" + p["slug"] + "/")}">{e(p["name"])}</a>: {word} {t["cur"]}{lvl:,.2f} <span class="muted">({pc(d, 1)})</span></li>'
+            return "".join(f'<li><a href="{h(s.pair_link(t, p))}">{e(p["name"])}</a>: {word} {t["cur"]}{lvl:,.2f} <span class="muted">({pc(d, 1)})</span></li>'
                            for p, lvl, d in items[:6])
         levels = ""
         if exits:
