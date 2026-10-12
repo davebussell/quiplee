@@ -1,15 +1,15 @@
 /* stocks.js — the /stocks/ list: search, group filter, one-click sorts and the
  * list / by-family switch. Column sorting itself comes from sortable.js; the
  * sort buttons press the right column header until it sorts high to low.
- * Supports ?sort=score|plays|upside|crash|year|light, ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
+ * Supports ?sort=score|signal|plays|upside|crash|year|light, ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
 (function () {
   'use strict';
   var tbl = document.getElementById('st-tbl');
   if (!tbl) return;
   var rows = [].slice.call(tbl.tBodies[0].rows);
   var q = document.getElementById('st-q'), count = document.getElementById('st-count');
-  var st = { group: '', q: '', min: 0 };
-  var COL = { score: 9, plays: 7, upside: 8, crash: 10, year: 5, light: 1 };
+  var st = { group: '', q: '', buyOnly: false };
+  var COL = { score: 9, plays: 7, upside: 8, signal: 10, crash: 11, year: 5, light: 1 };
   var params = new URLSearchParams(location.search);
 
   function apply() {
@@ -17,17 +17,17 @@
     rows.forEach(function (r) {
       var grp = !st.group || (st.group === 'ndx' || st.group === 'tsx' ? r.getAttribute('data-' + st.group) === '1' : r.getAttribute('data-group') === st.group);
       var ok = grp && (!st.q || r.getAttribute('data-q').indexOf(st.q) >= 0)
-        && (+r.getAttribute('data-share') >= st.min);
+        && (!st.buyOnly || r.getAttribute('data-sig') === '1');
       r.hidden = !ok;
       if (ok) shown++;
     });
     count.textContent = (shown === rows.length ? rows.length + ' names.' : shown + ' of ' + rows.length + ' names shown.')
-      + (st.min ? ' Strongest setups only include stocks at least half the plays hold.' : '');
+      + (st.buyOnly ? ' Strongest setups shows only the stocks your signal rates Buy, highest score first.' : '');
   }
   function setPressed(sel, el) { [].forEach.call(document.querySelectorAll(sel), function (b) { b.setAttribute('aria-pressed', String(b === el)); }); }
 
   function sortBy(key) {
-    st.min = key === 'score' ? 0.5 : 0;
+    st.buyOnly = key === 'score';
     apply();
     var th = tbl.tHead.rows[0].cells[COL[key]];
     var btn = th && (th.querySelector('.sort-btn') || th);

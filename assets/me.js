@@ -77,6 +77,9 @@
     if (PS && PS.loaded() && !PS.isAll() && PS.data().t[s]) { var c = PS.count(s); return [c.k, c.n]; }
     return [t.k || 0, t.of || 0];
   }
+  // the reader's signal on a name (plays.js), or null before it loads
+  function sg(s) { return PS && PS.loaded() && PS.data().x[s] ? PS.score(s) : null; }
+  function sgPill(r) { return r ? '<span class="sig-pill ' + PS.sigClass(r.sig) + '">' + (r.sig == null ? '–' : PS.sigWord(r.sig)) + '</span>' : ''; }
   function psChip() {
     return '<button type="button" class="ps-chip ps-chip-sm" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>' +
       esc(PS && PS.loaded() ? PS.label(false) : 'All 100') + '</b><span class="ps-caret" aria-hidden="true">▾</span></button>';
@@ -91,11 +94,20 @@
       var t = R.t[s], fresh = t.since && R.asof && daysBetween(t.since, R.asof) <= 7, c = kn(s);
       return '<li><a class="me-row" href="' + esc(STOCK.replace('{u}', t.u)) + '">' +
         '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + pill(t.L) +
-        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + '</span></span>' +
+        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + '</span>' + sgPill(sg(s)) + '</span>' +
         '<span class="mp-px mono">' + money(t.p, t.cur) + (t.d1 != null ? ' <small class="' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</span>' +
         '<span class="mp-since">' + (fresh ? '<b class="me-new">Flipped ' + esc(day(t.since)) + '</b>' : t.since ? 'since ' + esc(day(t.since)) : '') + '</span></a>' +
         '<button type="button" class="me-x" data-remove="' + esc(s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></li>';
     }).join('') + '</ul>';
+  }
+  function sigTile(list, avg) {
+    if (!PS || !PS.loaded() || !list.length) {
+      return '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list') + '</span></div>';
+    }
+    var n = { '1': 0, '0': 0, '-1': 0 };
+    list.forEach(function (s) { var r = sg(s); if (r && r.sig != null) n[r.sig]++; });
+    return '<div class="card tile"><span class="tile-label">Your signal</span><span class="tile-value"><b class="sig-n buy">' + n['1'] + '</b><small> Buy</small></span>' +
+      '<span class="tile-note">' + n['0'] + ' Hold · ' + n['-1'] + ' Sell · ' + esc(PS.wlabel()) + (avg == null ? '' : ' · plays hold ' + avg + '% on average') + '</span></div>';
   }
   function kpis() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
@@ -109,7 +121,7 @@
     return '<div class="me-kpis">' +
       '<div class="card tile"><span class="tile-label">Your stocks on Start</span><span class="tile-value"><b data-count="' + on.length + '">' + on.length + '</b><small> of ' + list.length + '</small></span>' + bar(on.length, list.length || 1) + '<span class="tile-note">' + (list.length ? (list.length - on.length) + ' on Stop' : 'Follow a few to begin') + '</span></div>' +
       '<div class="card tile"><span class="tile-label">Flipped in the last week</span><span class="tile-value">' + flipped.length + '</span><span class="tile-note">' + (flipped.length ? flipped.slice(0, 4).map(function (s) { return esc(R.t[s].s); }).join(', ') : 'No changes on your list') + '</span></div>' +
-      '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list, of ' + (PS && PS.loaded() ? PS.label(true).replace(/^All/, 'all').replace(/^Your/, 'your') : 'all 100 plays')) + '</span></div>' +
+      sigTile(list, avg) +
       '<div class="card tile"><span class="tile-label">Email alerts</span><span class="tile-value me-mail ' + mailState[1] + '">' + mailState[0] + '</span><span class="tile-note">' + (A.last_sent ? 'Last sent after the ' + esc(day(A.last_sent)) + ' close' : 'Sent after the close, only on a change') + '</span></div>' +
       '</div>';
   }
@@ -291,7 +303,7 @@
         R = res;
         draw();
         if (PS) {
-          PS.ready(function () { if (A.plays) PS.adopt(A.plays); draw(); });
+          PS.ready(function () { if (A.plays || A.signal) PS.adopt(A.plays, A.signal); draw(); });
           PS.onChange(function () { draw(); });
         }
         if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ block: 'start' }); }

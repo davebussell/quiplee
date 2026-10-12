@@ -23,6 +23,7 @@
     'Plays in': 'How many of the plays you chose to count hold it right now.',
     'Target': 'How far analysts\u2019 average 12-month price target sits above (+) or below (\u2212) today\u2019s price. Needs 3 or more analysts.',
     'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
+    'Signal': 'Your signal: Buy, Hold or Sell from your score (0 to 100) on the factors you weight. Change the weights with the Weights button.',
     'Light': 'Start or Stop, summing up every play: Start when 60% or more hold it, Stop once that falls to 40% or less.',
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
@@ -209,6 +210,13 @@
   // half the plays in, half analysts' upside scored from -20% (0) to +50% (1); names without a target count as 0% upside
   function upPts(u) { return (Math.min(Math.max(u, -0.2), 0.5) + 0.2) / 0.7; }
   function score(t, sel) { var kn = count(t, sel); return 0.5 * (kn[1] ? kn[0] / kn[1] : 0) + 0.5 * upPts(t.up == null ? 0 : t.up); }
+  // the reader's own signal (plays.js) when it has loaded: {s: 0-100 or null, sig}
+  function sig(sym, t, sel) {
+    var PS = window.BPPlays;
+    if (PS && PS.loaded() && PS.data().x[sym]) return PS.score(sym);
+    var v = Math.round(100 * score(t, sel));
+    return { s: v, sig: v >= 60 ? 1 : v <= 40 ? -1 : 0 };
+  }
   function status(sym) {
     if (D.t[sym]) return 'covered';
     if (posted[sym] === 'excluded') return 'excluded';
@@ -281,7 +289,7 @@
 
     // rows
     var showW = W.byValue;
-    var head = ['Stock', 'Light', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var head = ['Stock', 'Light', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Signal', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
     var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) {
       var at = { 'class': i >= 2 && i <= 5 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
@@ -294,7 +302,8 @@
       if (!!A !== !!B) return A ? -1 : 1;
       if (!A) return a.sym < b.sym ? -1 : 1;
       if (showW) return (W.w[b.sym] || 0) - (W.w[a.sym] || 0);
-      return score(B, sel) - score(A, sel);
+      var sa = sig(a.sym, A, sel).s, sb = sig(b.sym, B, sel).s;
+      return (sb == null ? -1 : sb) - (sa == null ? -1 : sa);
     });
     rows.forEach(function (it) {
       var t = D.t[it.sym], s = status(it.sym);
@@ -330,6 +339,11 @@
         el('td', { 'class': 'r ' + cls(t.ma), text: Q.pct(t.ma, 0) }),
         el('td', {}, [el('span', { 'class': 'consensus' }, [fill(kn[0], kn[1]), kn[0] + ' of ' + kn[1]])]),
         el('td', { 'class': 'r ' + (t.up == null ? 'muted' : t.up > 0.02 ? 'up' : t.up < 0 ? 'down' : ''), title: t.up == null ? 'Fewer than 3 analysts, or no target' : 'Average 12-month target from ' + t.na + ' analysts', text: t.up == null ? '–' : Q.pct(t.up, 0) }),
+        (function () {
+          var g = sig(it.sym, t, sel), w = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[g.sig];
+          return el('td', { 'data-v': g.s == null ? '' : String(g.s) }, g.s == null ? [el('span', { 'class': 'muted', text: '–' })]
+            : [el('span', { 'class': 'sig-pill ' + w[1], text: w[0] }), el('span', { 'class': 'sig-sc', text: ' ' + g.s })]);
+        })(),
         el('td', {}, [strip]),
         el('td', {}, [t.r ? el('span', { 'class': 'lvl lvl-' + LVL[t.r[1]], text: t.r[1] }) : el('span', { 'class': 'muted', text: '–' })])
       ];

@@ -8,29 +8,37 @@
  * Data: data/playset.json (tools/qstrat/playset.py): every play's share of calls right on the
  * real stocks, whether it can be ranked, and every covered name's call on every play.
  *
+ * Your signal: the reader also weights factors (plays in, analysts, P/E and other value
+ * measures, growth and quality, trend, momentum, crash exposure; tools/qstrat/factors.py).
+ * A stock's score is the weighted average of its points (0-100) on the weighted factors it
+ * has; Buy at or above the buy line, Sell at or below the sell line, Hold between. Kept like
+ * the plays ({w: {factor: weight}, buy, sell}), and ?w=plays50.pe20&buy=60&sell=40 shares a view.
+ *
  * Markup it looks after on any page:
- *   [data-ps-open]      opens the chooser          [data-ps-label]   the current choice, short
+ *   [data-ps-open]      opens the chooser (="weights" on the weights tab)
+ *   [data-ps-label]     the plays choice, short    [data-ps-wlabel]  the weights, short
  *   [data-ps-set=top1]  applies a ready-made set   [data-ps-toggle=slug] a checkbox for one play
- *   tr[data-sym|data-ps-row] with td[data-ps-plays] / td[data-ps-scorecell] (+ tr[data-upp]) / td[data-ps-fam=k]:
+ *   tr[data-sym|data-ps-row] with td[data-ps-plays] / td[data-ps-scorecell] / td[data-ps-signal] / td[data-ps-fam=k]:
  *                       recounted for the choice, and the table re-sorted */
 (function () {
   'use strict';
   if (window.BPPlays) return;
-  var KEY = 'bp.plays.v1';
+  var KEY = 'bp.plays.v1', WKEY = 'bp.signal.v1';
   var me = document.currentScript, src = (me && me.src) || '';
   var ver = (src.split('?v=')[1] || '');
   var DATA_URL = src.replace(/assets\/plays\.js(\?.*)?$/, 'data/playset.json') + (ver ? '?v=' + ver : '');
   var GUIDE = src.replace(/assets\/plays\.js(\?.*)?$/, 'guides/your-plays/');
   var NAME = { all: 'All plays', top1: 'Most accurate in each family', top3: 'Top 3 in each family', half: 'Right more than half the time', custom: 'Your own pick' };
-  var TREND_WEIGHT = 0.5;   // the Score: half plays in, half analysts' upside (stockview.py)
-  var D = null, IDX = {}, FAMI = {}, sel = null, choice = { p: 'all', s: [] }, origin = 'default';
-  var subs = [], waiting = [], here = null, sortBy = 'acc', ov = null, opener = null, saveT = null;
+  var SIG_WORD = { '1': 'Buy', '0': 'Hold', '-1': 'Sell' }, SIG_CLS = { '1': 'buy', '0': 'hold', '-1': 'sell' };
+  var D = null, IDX = {}, FAMI = {}, FXI = {}, sel = null, choice = { p: 'all', s: [] }, origin = 'default';
+  var wts = null, worigin = 'default', tab = 'plays';
+  var subs = [], waiting = [], here = null, sortBy = 'acc', ov = null, opener = null, saveT = null, wsaveT = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function pc(v) { return v == null ? '–' : Math.round(v * 100) + '%'; }
   function num(v) { return Number(v).toLocaleString('en-US'); }
-  function lsGet() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
-  function lsSet(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* private mode */ } }
+  function lsGet(k) { try { return JSON.parse(localStorage.getItem(k || KEY) || 'null'); } catch (e) { return null; } }
+  function lsSet(v, k) { try { localStorage.setItem(k || KEY, JSON.stringify(v)); } catch (e) { /* private mode */ } }
   function auth() { return window.BPAuth && window.BPAuth.signedIn() ? window.BPAuth : null; }
 
   function clean(c) {
@@ -44,6 +52,71 @@
     if (!v) return null;
     if (NAME[v] && v !== 'custom') return { p: v, s: [] };
     return clean({ p: 'custom', s: v.split(/[.,]/) });
+  }
+
+  // ------------------------------------------------------------ your signal: weights, lines and the score
+  function cleanW(c) {
+    if (!c || typeof c !== 'object' || !D) return null;
+    var w = {}, any = false;
+    D.fx.forEach(function (f) { var v = c.w && +c.w[f.k]; if (v > 0) { w[f.k] = Math.min(100, Math.round(v)); any = true; } });
+    if (!any) w = Object.assign({}, D.wd.w);
+    var buy = Math.min(95, Math.max(50, Math.round(+c.buy || D.wd.buy)));
+    var sell = Math.min(buy - 5, Math.max(5, Math.round(+c.sell || D.wd.sell)));
+    return { w: w, buy: buy, sell: sell };
+  }
+  function wFromParam(q) {
+    var v = q.get('w');
+    if (!v && !q.get('buy') && !q.get('sell')) return null;
+    var w = {};
+    (v || '').split(/[.,]/).forEach(function (x) { var m = x.match(/^([a-z]+)(\d+)$/); if (m) w[m[1]] = +m[2]; });
+    return cleanW({ w: v ? w : (wts || D.wd).w, buy: q.get('buy'), sell: q.get('sell') });
+  }
+  function sameW(a, b) {
+    var ka = Object.keys(a).filter(function (k) { return a[k] > 0; }), kb = Object.keys(b).filter(function (k) { return b[k] > 0; });
+    if (ka.length !== kb.length) return false;
+    // weights that differ only in scale give the same score
+    var r = null;
+    for (var i = 0; i < ka.length; i++) { var k = ka[i]; if (!b[k]) return false; var x = a[k] / b[k]; if (r == null) r = x; else if (Math.abs(x - r) > 1e-9) return false; }
+    return true;
+  }
+  function wPreset() { for (var i = 0; i < D.wp.length; i++) if (sameW(wts.w, D.wp[i].w)) return D.wp[i]; return null; }
+  function wlabel() { if (!D || !wts) return 'Plays + analysts'; var p = wPreset(); return p ? p.n : 'Your weights'; }
+  function isDefaultW() { return !wts || (sameW(wts.w, D.wd.w) && wts.buy === D.wd.buy && wts.sell === D.wd.sell); }
+  /** A name's score with the reader's weights: {s: 0-100 or null, sig: 1|0|-1|null, parts: [{k, n, v, p, w, add}], cov}. */
+  function score(sym, wIn) {
+    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], v = D.v[sym], tot = 0, avail = 0, acc = 0, parts = [];
+    if (!x) return { s: null, sig: null, parts: [], cov: 0 };
+    D.fx.forEach(function (f, i) {
+      var wi = w[f.k] || 0;
+      if (!wi) return;
+      tot += wi;
+      var p = x[i], val = v[i];
+      if (f.k === 'plays') { var c = count(sym); p = c.n ? Math.round(100 * c.k / c.n) : null; val = p == null ? null : p + '%'; }
+      parts.push({ k: f.k, n: f.n, v: val, p: p, w: wi, add: null });
+      if (p != null) { avail += wi; acc += wi * p; }
+    });
+    if (!tot || avail < tot / 2) return { s: null, sig: null, parts: parts, cov: tot ? avail / tot : 0 };
+    var s = Math.round(acc / avail);
+    parts.forEach(function (q) { if (q.p != null) q.add = Math.round(10 * q.w * q.p / avail) / 10; });
+    return { s: s, sig: s >= W.buy ? 1 : s <= W.sell ? -1 : 0, parts: parts, cov: avail / tot };
+  }
+  function sigPill(sig) { return sig == null ? '<span class="sig-pill na">–</span>' : '<span class="sig-pill ' + SIG_CLS[sig] + '">' + SIG_WORD[sig] + '</span>'; }
+  function applyW(c, why) {
+    c = cleanW(c) || cleanW(D.wd);
+    wts = c;
+    if (why === 'user') {
+      worigin = 'user';
+      lsSet(c, WKEY);
+      var A = auth();
+      if (A) { clearTimeout(wsaveT); wsaveT = setTimeout(function () { A.post('plays', { signal: c }).catch(function () {}); }, 800); }
+      var q = new URLSearchParams(location.search);
+      if (q.has('w') || q.has('buy') || q.has('sell')) {
+        q.set('w', Object.keys(c.w).map(function (k) { return k + c.w[k]; }).join('.')); q.set('buy', c.buy); q.set('sell', c.sell);
+        history.replaceState(null, '', location.pathname + '?' + q.toString() + location.hash);
+      }
+    }
+    paint(true);
+    subs.forEach(function (f) { try { f(choice); } catch (e) { /* one widget must not stop the rest */ } });
   }
 
   // ------------------------------------------------------------ which plays a choice counts (0/1 over D.plays)
@@ -139,23 +212,30 @@
     var w = n ? Math.round(100 * k / n) : 0;
     return '<span class="consensus"><span class="fillbar" aria-hidden="true"><i style="width:' + w + '%"></i></span>' + k + ' of ' + n + ' in</span>';
   }
-  function paint() {
+  function paint(live) {
     if (!D) return;
     [].forEach.call(document.querySelectorAll('[data-ps-label]'), function (el) { el.textContent = label(false); });
+    [].forEach.call(document.querySelectorAll('[data-ps-wlabel]'), function (el) { el.textContent = wlabel(); });
+    var wp = wPreset();
+    [].forEach.call(document.querySelectorAll('[data-ps-wset]'), function (b) { if (!ov || !ov.contains(b)) b.setAttribute('aria-pressed', String(!!wp && wp.k === b.getAttribute('data-ps-wset'))); });
     [].forEach.call(document.querySelectorAll('[data-ps-set]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ps-set') === choice.p)); });
     [].forEach.call(document.querySelectorAll('[data-ps-toggle]'), function (cb) { var i = IDX[cb.getAttribute('data-ps-toggle')]; if (i != null) cb.checked = !!sel[i]; });
-    [].forEach.call(document.querySelectorAll('[data-ps-open]'), function (b) { b.classList.toggle('ps-on', choice.p !== 'all'); });
+    [].forEach.call(document.querySelectorAll('[data-ps-open]'), function (b) { b.classList.toggle('ps-on', b.getAttribute('data-ps-open') === 'weights' ? !isDefaultW() : choice.p !== 'all'); });
     var tables = [];
     [].forEach.call(document.querySelectorAll('tr[data-sym], tr[data-ps-row]'), function (tr) {
-      var cell = tr.querySelector('td[data-ps-plays]'), sc = tr.querySelector('td[data-ps-scorecell]'), fams = tr.querySelectorAll('td[data-ps-fam]');
-      if (!cell && !sc && !fams.length) return;
+      var cell = tr.querySelector('td[data-ps-plays]'), sc = tr.querySelector('td[data-ps-scorecell]'), sg = tr.querySelector('td[data-ps-signal]'), fams = tr.querySelectorAll('td[data-ps-fam]');
+      if (!cell && !sc && !sg && !fams.length) return;
       var sym = tr.getAttribute('data-sym') || tr.getAttribute('data-ps-row');
       if (!D.t[sym]) return;
       var c = count(sym), share = c.n ? c.k / c.n : null;
       if (cell) { cell.innerHTML = consensus(c.k, c.n); cell.setAttribute('data-v', share == null ? '' : share.toFixed(4)); }
       if (tr.hasAttribute('data-share')) tr.setAttribute('data-share', (share || 0).toFixed(3));
-      var upp = tr.getAttribute('data-upp');
-      if (sc && upp) { var v = Math.round(100 * (TREND_WEIGHT * (share || 0) + (1 - TREND_WEIGHT) * +upp)); sc.innerHTML = '<b>' + v + '</b>'; sc.setAttribute('data-v', v); }
+      if (sc || sg) {
+        var r = score(sym);
+        if (sc) { sc.innerHTML = r.s == null ? '–' : '<b>' + r.s + '</b>'; sc.setAttribute('data-v', r.s == null ? '' : r.s); }
+        if (sg) { sg.innerHTML = sigPill(r.sig); sg.setAttribute('data-v', r.sig == null ? '' : r.sig); }
+        if (tr.hasAttribute('data-sig')) tr.setAttribute('data-sig', r.sig == null ? '' : r.sig);
+      }
       [].forEach.call(fams, function (td) {
         var f = c.f[FAMI[td.getAttribute('data-ps-fam')]];
         if (!f) return;
@@ -170,10 +250,10 @@
       if (tables.indexOf(tb) < 0) tables.push(tb);
     });
     tables.forEach(function (tb) { if (window.BPSort) window.BPSort.resort(tb); });
-    if (ov && !ov.hidden) paintPanel();
+    if (ov && !ov.hidden) { if (live && tab === 'weights') paintWeightsLive(); else paintPanel(); }
   }
 
-  // ------------------------------------------------------------ the chooser
+  // ------------------------------------------------------------ the chooser: two tabs, Your signal (weights) and Plays
   function build() {
     if (ov) return;
     ov = document.createElement('div');
@@ -181,12 +261,11 @@
     ov.hidden = true;
     ov.innerHTML =
       '<div class="ps-panel" role="dialog" aria-modal="true" aria-labelledby="ps-h" tabindex="-1">' +
-      '<header class="ps-head"><div><h2 id="ps-h">Choose the plays that count</h2>' +
-      '<p class="ps-lede">Every count on Be The Puck uses only the plays you tick: how many plays hold a stock, the screener, the stock list and your dashboard. ' +
-      'The % is how often each play’s calls went the right way on ' + D.n + ' stocks since ' + D.since + '.</p></div>' +
+      '<header class="ps-head"><div><h2 id="ps-h"></h2><p class="ps-lede"></p></div>' +
       '<button type="button" class="ps-x" aria-label="Close">×</button></header>' +
+      '<div class="ps-tabs seg seg-sm" role="tablist" aria-label="Settings"><button type="button" role="tab" data-ps-tab="weights">Your signal</button><button type="button" role="tab" data-ps-tab="plays">Plays counted</button></div>' +
       '<div class="ps-presets" role="group" aria-label="Ready-made sets"></div>' +
-      '<div class="ps-tools"><span class="small muted">Order</span><div class="seg seg-sm ps-sort" role="group" aria-label="Order the plays"></div></div>' +
+      '<div class="ps-tools"></div>' +
       '<div class="ps-body"></div>' +
       '<footer class="ps-foot"><span class="ps-count" aria-live="polite"></span><span class="ps-saved small muted"></span>' +
       '<a class="small ps-guide" href="' + esc(GUIDE) + '">How this works</a><button type="button" class="btn primary sm ps-done">Done</button></footer></div>';
@@ -196,8 +275,27 @@
       var b = ev.target.closest('button');
       if (!b) return;
       if (b.classList.contains('ps-x') || b.classList.contains('ps-done')) close();
+      else if (b.hasAttribute('data-ps-tab')) { tab = b.getAttribute('data-ps-tab'); ov.querySelector('.ps-body').scrollTop = 0; paintPanel(); }
       else if (b.hasAttribute('data-ps-set')) apply({ p: b.getAttribute('data-ps-set'), s: [] }, 'user');
+      else if (b.hasAttribute('data-ps-wset')) {
+        var pr = D.wp.filter(function (x) { return x.k === b.getAttribute('data-ps-wset'); })[0];
+        if (pr) { applyW({ w: pr.w, buy: wts.buy, sell: wts.sell }, 'user'); paintPanel(); }
+      } else if (b.hasAttribute('data-ps-wreset')) { applyW(D.wd, 'user'); paintPanel(); }
       else if (b.hasAttribute('data-ps-sort')) { sortBy = b.getAttribute('data-ps-sort'); paintPanel(); }
+    });
+    ov.addEventListener('input', function (ev) {
+      var t = ev.target;
+      if (t.hasAttribute('data-ps-w')) {
+        var w = Object.assign({}, wts.w), k = t.getAttribute('data-ps-w'), v = +t.value;
+        if (v > 0) w[k] = v; else delete w[k];
+        if (!Object.keys(w).length) { t.value = 5; w[k] = 5; }
+        applyW({ w: w, buy: wts.buy, sell: wts.sell }, 'user');
+      } else if (t.hasAttribute('data-ps-line')) {
+        var c = { w: wts.w, buy: wts.buy, sell: wts.sell }, which = t.getAttribute('data-ps-line');
+        c[which] = +t.value;
+        if (c.sell >= c.buy) { if (which === 'buy') c.sell = c.buy - 5; else c.buy = c.sell + 5; }
+        applyW(c, 'user');
+      }
     });
     ov.addEventListener('change', function (ev) {
       var t = ev.target;
@@ -217,7 +315,21 @@
   }
   function hint(t) { var c = ov.querySelector('.ps-count'); c.textContent = t; setTimeout(paintPanel, 1600); }
   function hereOf(i) { if (!here || !here.b || !here.b[i]) return null; var b = here.b[i]; return b[1] ? { r: b[0], n: b[1], a: b[0] / b[1] } : { r: 0, n: 0, a: null }; }
+  function keepFocus(body, html, attr) {
+    var top = body.scrollTop, had = document.activeElement, key = had && had.getAttribute && (attr.map(function (x) { return had.getAttribute(x) && x + '="' + had.getAttribute(x) + '"'; }).filter(Boolean)[0]);
+    body.innerHTML = html;
+    body.scrollTop = top;
+    if (!ov.hidden && (!document.activeElement || document.activeElement === document.body)) {
+      var back = key && body.querySelector('[' + key + ']');
+      (back || ov.querySelector('.ps-panel')).focus();
+    }
+  }
   function paintPanel() {
+    [].forEach.call(ov.querySelectorAll('[data-ps-tab]'), function (b) { var on = b.getAttribute('data-ps-tab') === tab; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-selected', String(on)); });
+    if (tab === 'weights') return paintWeights();
+    ov.querySelector('#ps-h').textContent = 'Choose the plays that count';
+    ov.querySelector('.ps-lede').textContent = 'Every count on Be The Puck uses only the plays you tick: how many plays hold a stock, the screener, the stock list and your dashboard. ' +
+      'The % is how often each play’s calls went the right way on ' + D.n + ' stocks since ' + D.since + '.';
     var pres = [['top1'], ['top3'], ['half'], ['all']].map(function (x) {
       var n = 0, s = resolve({ p: x[0], s: [] });
       for (var i = 0; i < s.length; i++) n += s[i];
@@ -226,7 +338,8 @@
     ov.querySelector('.ps-presets').innerHTML = pres;
     var sorts = [['acc', 'Most accurate']].concat(here ? [['here', 'Right on ' + here.s]] : []).concat([['az', 'A to Z']]);
     if (!here && sortBy === 'here') sortBy = 'acc';
-    ov.querySelector('.ps-sort').innerHTML = sorts.map(function (s) { return '<button type="button" data-ps-sort="' + s[0] + '" aria-pressed="' + (sortBy === s[0]) + '">' + esc(s[1]) + '</button>'; }).join('');
+    ov.querySelector('.ps-tools').innerHTML = '<span class="small muted">Order</span><div class="seg seg-sm ps-sort" role="group" aria-label="Order the plays">' +
+      sorts.map(function (s) { return '<button type="button" data-ps-sort="' + s[0] + '" aria-pressed="' + (sortBy === s[0]) + '">' + esc(s[1]) + '</button>'; }).join('') + '</div>';
     var html = '';
     D.fams.forEach(function (f) {
       var ix = [];
@@ -252,15 +365,8 @@
       });
       html += '</ul></section>';
     });
-    var body = ov.querySelector('.ps-body'), top = body.scrollTop;
-    var had = document.activeElement, hadPlay = had && had.getAttribute && (had.getAttribute('data-ps-play') || had.getAttribute('data-ps-fam'));
-    body.innerHTML = html;
-    body.scrollTop = top;
-    // keep the keyboard where it was after a redraw
-    if (!ov.hidden && (!document.activeElement || document.activeElement === document.body)) {
-      var back = hadPlay && body.querySelector('[data-ps-play="' + hadPlay + '"], [data-ps-fam="' + hadPlay + '"]');
-      (back || ov.querySelector('.ps-panel')).focus();
-    }
+    var body = ov.querySelector('.ps-body');
+    keepFocus(body, html, ['data-ps-play', 'data-ps-fam']);
     [].forEach.call(body.querySelectorAll('input[data-ps-fam]'), function (cb) {
       var fk = cb.getAttribute('data-ps-fam'), tot = 0, k = 0;
       D.plays.forEach(function (p, i) { if (p.f === fk) { tot++; k += sel[i]; } });
@@ -269,15 +375,76 @@
     ov.querySelector('.ps-count').innerHTML = '<b>' + size() + '</b> of ' + D.plays.length + ' plays counted';
     ov.querySelector('.ps-saved').textContent = auth() ? 'Saved to your account' : origin === 'link' ? 'From a shared link' : 'Saved in this browser';
   }
-  function open(ev) {
-    if (!D) { waiting.push(function () { open(ev); }); return; }
+  function hereScore() { return here && D.x[here.sym] ? score(here.sym) : null; }
+  function paintWeights() {
+    ov.querySelector('#ps-h').textContent = 'Your signal';
+    ov.querySelector('.ps-lede').textContent = 'Weight what matters to you. Each factor scores a stock from 0 to 100; your score is the weighted average, ' +
+      'and your Buy and Sell lines turn it into a signal on every page. P/E, growth and the other company numbers score by rank against the ' + D.n + ' stocks we cover.';
+    var pr = wPreset();
+    ov.querySelector('.ps-presets').innerHTML = D.wp.map(function (x) {
+      return '<button type="button" class="chip-btn" data-ps-wset="' + x.k + '" aria-pressed="' + (!!pr && pr.k === x.k) + '">' + esc(x.n) + '</button>';
+    }).join('');
+    ov.querySelector('.ps-tools').innerHTML =
+      '<label class="ps-line">Buy at or above <b data-ps-lv="buy">' + wts.buy + '</b><input type="range" min="50" max="95" step="5" value="' + wts.buy + '" data-ps-line="buy" aria-label="Buy line"></label>' +
+      '<label class="ps-line">Sell at or below <b data-ps-lv="sell">' + wts.sell + '</b><input type="range" min="5" max="50" step="5" value="' + wts.sell + '" data-ps-line="sell" aria-label="Sell line"></label>';
+    var html = '', tot = 0;
+    D.fx.forEach(function (f) { tot += wts.w[f.k] || 0; });
+    var hx = here && D.x[here.sym] ? { x: D.x[here.sym], v: D.v[here.sym] } : null;
+    D.fg.forEach(function (g) {
+      var gw = 0;
+      D.fx.forEach(function (f) { if (f.g === g[0]) gw += wts.w[f.k] || 0; });
+      html += '<section class="ps-fam ps-wgrp" data-g="' + g[0] + '"><div class="ps-fam-h"><b>' + esc(g[1]) + '</b><span class="ps-fam-n" data-ps-gshare="' + g[0] + '">' + (tot ? Math.round(100 * gw / tot) : 0) + '% of the score</span></div><ul class="ps-list">';
+      D.fx.forEach(function (f, i) {
+        if (f.g !== g[0]) return;
+        var wv = wts.w[f.k] || 0, hv = '';
+        if (hx) {
+          var p = hx.x[i], v = hx.v[i];
+          if (f.k === 'plays') { var c = count(here.sym); p = c.n ? Math.round(100 * c.k / c.n) : null; v = p == null ? null : p + '%'; }
+          hv = '<span class="ps-here">' + esc(here.s) + ' ' + (v == null ? 'no data' : esc(v) + ' · <b>' + p + '</b> pts') + '</span>';
+        }
+        html += '<li class="ps-wrow' + (wv ? ' on' : '') + '" data-f="' + f.k + '"><div class="ps-wtop"><span class="ps-nm">' + esc(f.n) + '</span>' +
+          '<span class="ps-wval"><b data-ps-wv="' + f.k + '">' + wv + '</b> <span class="muted" data-ps-ws="' + f.k + '">' + (tot && wv ? Math.round(100 * wv / tot) + '%' : '') + '</span></span></div>' +
+          '<input type="range" min="0" max="100" step="5" value="' + wv + '" data-ps-w="' + f.k + '" aria-label="Weight for ' + esc(f.n) + '">' +
+          '<div class="ps-wsub"><span class="ps-wd">' + esc(f.d) + '</span>' + hv + '</div></li>';
+      });
+      html += '</ul></section>';
+    });
+    html += '<p class="small ps-wnote">Weights are relative: 20 and 20 count the same as 50 and 50. A stock without a number for a factor (a fund has no P/E) is scored on the rest, ' +
+      'and gets no score if less than half your weight applies. <button type="button" class="linkish" data-ps-wreset>Back to the standard weights</button></p>';
+    keepFocus(ov.querySelector('.ps-body'), html, ['data-ps-w']);
+    paintWeightsLive();
+  }
+  function paintWeightsLive() {
+    var tot = 0;
+    D.fx.forEach(function (f) { tot += wts.w[f.k] || 0; });
+    D.fx.forEach(function (f) {
+      var wv = wts.w[f.k] || 0, a = ov.querySelector('[data-ps-wv="' + f.k + '"]'), b = ov.querySelector('[data-ps-ws="' + f.k + '"]'), row = ov.querySelector('.ps-wrow[data-f="' + f.k + '"]');
+      if (a) a.textContent = wv;
+      if (b) b.textContent = tot && wv ? Math.round(100 * wv / tot) + '%' : '';
+      if (row) row.classList.toggle('on', !!wv);
+    });
+    D.fg.forEach(function (g) {
+      var gw = 0, el = ov.querySelector('[data-ps-gshare="' + g[0] + '"]');
+      D.fx.forEach(function (f) { if (f.g === g[0]) gw += wts.w[f.k] || 0; });
+      if (el) el.textContent = (tot ? Math.round(100 * gw / tot) : 0) + '% of the score';
+    });
+    ['buy', 'sell'].forEach(function (k) { var el = ov.querySelector('[data-ps-lv="' + k + '"]'), r = ov.querySelector('[data-ps-line="' + k + '"]'); if (el) el.textContent = wts[k]; if (r && +r.value !== wts[k]) r.value = wts[k]; });
+    var pr = wPreset();
+    [].forEach.call(ov.querySelectorAll('[data-ps-wset]'), function (b) { b.setAttribute('aria-pressed', String(!!pr && pr.k === b.getAttribute('data-ps-wset'))); });
+    var hs = hereScore(), n = Object.keys(wts.w).length;
+    ov.querySelector('.ps-count').innerHTML = hs ? esc(here.s) + ': <b>' + (hs.s == null ? 'no score' : hs.s) + '</b>' + (hs.sig == null ? '' : ' ' + sigPill(hs.sig))
+      : '<b>' + n + '</b> factor' + (n === 1 ? '' : 's') + ' weighted';
+    ov.querySelector('.ps-saved').textContent = auth() ? 'Saved to your account' : worigin === 'link' ? 'From a shared link' : 'Saved in this browser';
+  }
+  function open(which) {
+    if (!D) { waiting.push(function () { open(which); }); return; }
     build();
+    if (which === 'weights' || which === 'plays') tab = which;
     opener = document.activeElement;
     paintPanel();
     ov.hidden = false;
     document.documentElement.classList.add('ps-lock');
-    var p = ov.querySelector('.ps-panel');
-    p.focus();
+    ov.querySelector('.ps-panel').focus();
   }
   function close() {
     if (!ov) return;
@@ -287,10 +454,16 @@
   }
 
   document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('[data-ps-open], [data-ps-set]');
+    var b = ev.target.closest && ev.target.closest('[data-ps-open], [data-ps-set], [data-ps-wset]');
     if (!b || (ov && ov.contains(b))) return;
     ev.preventDefault();
-    if (b.hasAttribute('data-ps-open')) open();
+    if (b.hasAttribute('data-ps-wset')) {
+      if (!D) return;
+      var pr = D.wp.filter(function (x) { return x.k === b.getAttribute('data-ps-wset'); })[0];
+      if (pr) applyW({ w: pr.w, buy: wts.buy, sell: wts.sell }, 'user');
+      return;
+    }
+    if (b.hasAttribute('data-ps-open')) open(b.getAttribute('data-ps-open') === 'weights' ? 'weights' : 'plays');
     else if (D) apply({ p: b.getAttribute('data-ps-set'), s: [] }, 'user');
   });
   document.addEventListener('change', function (ev) {
@@ -319,8 +492,22 @@
     here: function (h) { here = h; },
     open: open,
     hadChoice: function () { return origin !== 'default'; },
-    /** The account's saved choice: used unless this browser already has one, or a link set it. */
-    adopt: function (c) { c = clean(c); if (!c || !D || origin !== 'default') return; origin = 'account'; lsSet(c); apply(c, 'account'); }
+    /** The account's saved choices: used unless this browser already has its own, or a link set them. */
+    adopt: function (c, sig) {
+      if (!D) return;
+      c = clean(c);
+      if (c && origin === 'default') { origin = 'account'; lsSet(c); apply(c, 'account'); }
+      sig = cleanW(sig);
+      if (sig && worigin === 'default') { worigin = 'account'; lsSet(sig, WKEY); applyW(sig, 'account'); }
+    },
+    // your signal
+    score: score,
+    weights: function () { return wts; },
+    wlabel: wlabel,
+    isDefaultWeights: isDefaultW,
+    setWeights: function (c) { if (D) applyW(c, 'user'); },
+    sigWord: function (sig) { return sig == null ? 'No score' : SIG_WORD[sig]; },
+    sigClass: function (sig) { return sig == null ? 'na' : SIG_CLS[sig]; }
   };
 
   // ------------------------------------------------------------ start
@@ -329,7 +516,10 @@
     D = d;
     D.plays.forEach(function (p, i) { IDX[p.s] = i; });
     D.fams.forEach(function (f, i) { FAMI[f[0]] = i; });
-    var link = fromParam(new URLSearchParams(location.search).get('plays')), mine = clean(lsGet());
+    D.fx.forEach(function (f, i) { FXI[f.k] = i; });
+    var q = new URLSearchParams(location.search), wl = wFromParam(q), wm = cleanW(lsGet(WKEY));
+    if (wl) { worigin = 'link'; wts = wl; } else if (wm) { worigin = 'browser'; wts = wm; } else wts = cleanW(D.wd);
+    var link = fromParam(q.get('plays')), mine = clean(lsGet());
     if (link) { origin = 'link'; choice = link; }
     else if (mine) { origin = 'browser'; choice = mine; }
     choice = normal(choice);
@@ -338,6 +528,6 @@
     var w = waiting; waiting = [];
     w.forEach(function (f) { try { f(D); } catch (e) { /* keep going */ } });
     var A = auth();
-    if (A && origin === 'default') A.me().then(function (a) { if (a && a.plays) window.BPPlays.adopt(a.plays); }).catch(function () {});
+    if (A && (origin === 'default' || worigin === 'default')) A.me().then(function (a) { if (a && (a.plays || a.signal)) window.BPPlays.adopt(a.plays, a.signal); }).catch(function () {});
   }).catch(function () { /* the counts printed on the page stay */ });
 })();

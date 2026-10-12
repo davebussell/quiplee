@@ -17,7 +17,7 @@
   var minIn = document.getElementById('scr-min'), minOut = document.getElementById('scr-min-out');
   var secSel = document.getElementById('scr-sec'), qIn = document.getElementById('scr-q'), sortSel = document.getElementById('scr-sort');
   var fresh = document.getElementById('scr-fresh'), goBtn = document.getElementById('scr-go');
-  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'up' };
+  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'score' };
   var S = Object.assign({}, DEF), DATA = null, shown = PAGE, FAMS = [];
   var MKT = { '': '', us: 'U.S.', ca: 'Canada', crypto: 'Crypto', fund: 'Funds & indexes' };
   var RISK = ['Low', 'Moderate', 'High', 'Very high'], RISK_CLS = ['calm', 'watch', 'warning', 'warning'];
@@ -49,7 +49,11 @@
   function recount() {
     if (!DATA || !PS || !PS.loaded()) return;
     var D = PS.data();
-    DATA.t.forEach(function (r) { if (!D.t[r.sym]) return; var c = PS.count(r.sym); r.k = c.k; r.o = c.n; r.f = c.f; r.w = c.w; });
+    DATA.t.forEach(function (r) {
+      if (!D.t[r.sym]) return;
+      var c = PS.count(r.sym); r.k = c.k; r.o = c.n; r.f = c.f; r.w = c.w;
+      var sc = PS.score(r.sym); r.sc = sc.s; r.sg = sc.sig;
+    });
   }
   function counted() { return !PS || PS.isAll() ? 'the 100' : 'your ' + PS.size(); }
   function days(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 864e5); }
@@ -76,6 +80,7 @@
   function sorted(rows) {
     var by = {
       agree: function (a, b) { return agree(b) / b.o - agree(a) / a.o || b.o - a.o || (a.s < b.s ? -1 : 1); },
+      score: function (a, b) { var d = S.side === 'buy' ? cmpNum(a.sc, b.sc, true) : cmpNum(a.sc, b.sc, false); return d || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
       acc: function (a, b) { return agreeW(b) - agreeW(a) || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
       day: function (a, b) { return cmpNum(Math.abs(a.d || 0) || null, Math.abs(b.d || 0) || null, true); },
       y1: function (a, b) { return cmpNum(a.y, b.y, true); },
@@ -98,7 +103,8 @@
       return '<i style="height:' + (f[1] ? Math.max(8, Math.round(100 * kk / f[1])) : 8) + '%" title="' + esc(FAMS[i]) + ': ' + kk + ' of ' + f[1] + '"></i>';
     }).join('');
     var risk = r.r != null ? '<span class="lvl lvl-' + RISK_CLS[r.r] + '">' + RISK[r.r] + '</span>' : '<span class="muted">–</span>';
-    var up = r.up != null ? '<span class="' + dir(r.up) + '">' + pct(r.up, 0) + '</span>' : '<span class="muted">–</span>';
+    var SW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }, g = SW[r.sg];
+    var up = r.sc != null && g ? '<b class="sig-n ' + g[1] + '">' + r.sc + '</b> <small class="sig-w ' + g[1] + '">' + g[0] + '</small>' : '<span class="muted">–</span>';
     var on = !!following[r.sym];
     return '<li class="scr-row" data-sym="' + esc(r.sym) + '"><a class="scr-main" href="' + esc(STOCK.replace('{u}', r.u)) + '">' +
       '<span class="scr-sym"><b>' + esc(r.s) + '</b><span>' + esc(r.n) + '</span></span>' +
@@ -108,7 +114,7 @@
       '<span class="scr-px mono">' + money(r.p, r.c) + ' <small class="' + dir(r.d) + '">' + pct(r.d) + '</small></span>' +
       '<span class="scr-y1 ' + dir(r.y) + '"><em>1 yr</em>' + pct(r.y, 0) + '</span>' +
       '<span class="scr-risk"><em>Crash</em>' + risk + '</span>' +
-      '<span class="scr-up"><em>Analysts</em>' + up + '</span></a>' +
+      '<span class="scr-up"><em>Score</em>' + up + '</span></a>' +
       '<button type="button" class="scr-star' + (on ? ' on' : '') + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Stop following ' : 'Follow ') + esc(r.s) + '" title="' + (on ? 'Following' : 'Follow') + ' ' + esc(r.s) + '">' + (on ? '★' : '☆') + '</button></li>';
   }
   function summary(n) {

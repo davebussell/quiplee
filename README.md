@@ -38,6 +38,9 @@ tools/qstrat/stockview.py    stock-page blocks: candlesticks, heatmap, the read,
 tools/qstrat/markets.py      /markets/: weather, index and sector tables, gauges, past tops, simulator
 tools/qstrat/watchlist.py    /watchlist/ page and data/watch.json
 tools/qstrat/playset.py      the play filter's data/playset.json and the /guides/your-plays/ guide
+tools/qstrat/factors.py      Your signal: the factors readers weight (plays, analysts, P/E, growth, debt, trend...) and how each scores
+tools/qstrat/newsevents.py   News that moves stocks: events sorted into kinds, reactions measured, "What moved X lately", the guide
+tools/fetch_events.py        earnings dates with surprises and analyst rating changes (yfinance) into data/events/<slug>.json
 tools/qstrat/screen.py       the home page: step 1 (crash gauges) and the screener; data/screen.json, data/tickers.json
 tools/qstrat/theory.py       /theory/ (the Theory tester) and data/theory/<slug>.json
 tools/qstrat/articles.py     /articles/: macro pieces, stock and sector briefs (rebuilt nightly)
@@ -87,6 +90,21 @@ recount from `data/playset.json`. "Accurate" is the share of a play's finished c
 the right way on the real stocks (no funds, indexes or coins) since 2005; a play needs 500+
 calls on at least half the stocks to be ranked (`render.rankable`). The Start/Stop light, Top 10
 and Top picks always use every play.
+
+**Your signal.** Readers weight 17 factors (`tools/qstrat/factors.py`): plays in, analysts'
+upside and rating, P/E, forward P/E, PEG, price to sales and book, dividend yield, earnings and
+revenue growth, profit margin, return on equity, debt to equity, trend, 1-year momentum and crash
+exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
+is the weighted average over the factors the stock has, and the reader's Buy and Sell lines (60/40
+to start) make it Buy, Hold or Sell on the stock page (with a factor-by-factor breakdown), the
+stock list, the screener, the watchlist and My Puck. The standard weights (plays 50, analysts'
+upside 50) give the site's existing score. Saved like the plays; `?w=plays50.pe20&buy=60&sell=40`.
+
+**News that moves stocks.** `tools/fetch_events.py` (nightly) keeps each company's earnings
+dates with EPS surprises and its analyst rating changes; `tools/qstrat/newsevents.py` sorts them,
+the 8-K filings and the headlines into kinds, measures each reaction against the stock's index,
+and grades each kind by how reliably it moved stocks the expected way. Stock pages show what moved
+the stock lately and its next earnings date; `/guides/news-that-moves-stocks/` has the table.
 
 **Bring your own stocks.** The watchlist keeps each reader's list in their
 browser. Tickers Be The Puck doesn't cover are POSTed to `/api/watch` (symbols only).

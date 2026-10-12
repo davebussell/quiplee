@@ -1,5 +1,6 @@
-/* playview.js: a stock page under the play filter (plays.js). With the reader's own
- * choice of plays, it recounts the Plays in tile and the plays + analysts' score, picks
+/* playview.js: a stock page under the play filter (plays.js). It redraws Your signal
+ * (score, Buy/Hold/Sell, why, and the factor-by-factor breakdown) for the reader's
+ * weights. With the reader's own choice of plays, it recounts the Plays in tile, picks
  * the most accurate of those plays in each family (with each one's record on this stock),
  * recounts the family tiles and shows only those plays in the full list.
  * #ps-here (render.py stock_page) carries this stock's record on every play:
@@ -26,6 +27,39 @@
   function day(iso) { return iso ? new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : ''; }
   function fill(el, k, n) { var i = el && el.querySelector('.fillbar i'); if (i) i.style.width = (n ? Math.round(100 * k / n) : 0) + '%'; }
   function pill(ch) { return ch === '1' ? '<span class="pill in">IN</span>' : ch === '0' ? '<span class="pill out">OUT</span>' : '<span class="pill">–</span>'; }
+
+  // ------------------------------------------------------------ your signal
+  var card = document.getElementById('your-signal');
+  function why(r, W) {
+    var have = r.parts.filter(function (p) { return p.p != null; });
+    if (r.s == null) {
+      var miss = r.parts.filter(function (p) { return p.p == null; }).map(function (p) { return p.n; });
+      return miss.length ? 'Not enough data for these weights: ' + H.s + ' has no ' + miss.slice(0, 4).join(', ') + '.' : 'Weight at least one factor to get a score.';
+    }
+    var where = r.sig === 1 ? 'at or above your Buy line of ' + W.buy : r.sig === -1 ? 'at or below your Sell line of ' + W.sell
+      : 'between your Sell line (' + W.sell + ') and Buy line (' + W.buy + ')';
+    var out = P.sigWord(r.sig) + ': ' + r.s + ' is ' + where + '.';
+    if (have.length === 1) return out + ' ' + have[0].n + ' (' + have[0].v + ') scores ' + have[0].p + '.';
+    var hi = have.reduce(function (a, b) { return b.p > a.p ? b : a; }), lo = have.reduce(function (a, b) { return b.p < a.p ? b : a; });
+    return out + ' ' + hi.n + ' (' + hi.v + ') scores ' + hi.p + ' and lifts it; ' + lo.n + ' (' + lo.v + ') scores ' + lo.p + ' and holds it back.';
+  }
+  function drawSignal(D) {
+    if (!card || !D.x[H.sym]) return;
+    var r = P.score(H.sym), W = P.weights();
+    var b = card.querySelector('[data-sig-badge]');
+    b.className = 'sig-badge ' + P.sigClass(r.sig);
+    b.textContent = P.sigWord(r.sig);
+    card.querySelector('[data-sig-score]').textContent = r.s == null ? '–' : r.s;
+    var z = card.querySelectorAll('[data-sig-scale] .sig-zone'), dot = card.querySelector('[data-sig-scale] .sig-dot');
+    if (z.length === 3) { z[0].style.width = W.sell + '%'; z[1].style.width = (W.buy - W.sell) + '%'; z[2].style.width = (100 - W.buy) + '%'; }
+    if (dot) { dot.style.left = (r.s == null ? 50 : r.s) + '%'; dot.hidden = r.s == null; }
+    card.querySelector('[data-sig-why]').textContent = why(r, W);
+    card.querySelector('[data-sig-rows]').innerHTML = r.parts.map(function (p) {
+      return '<tr><td>' + esc(p.n) + '</td><td>' + esc(p.v == null ? '–' : p.v) + '</td><td class="r">' + (p.p == null ? '–' : p.p) + '</td><td class="r">' + p.w + '</td><td class="r">' + (p.add == null ? '–' : p.add) + '</td></tr>';
+    }).join('');
+    var pr = card.querySelector('tr[data-sig-f="plays"]');
+    if (pr) { var c = P.count(H.sym), v = c.n ? Math.round(100 * c.k / c.n) : null; pr.cells[1].textContent = v == null ? '–' : v + '%'; pr.cells[2].textContent = v == null ? '–' : v; }
+  }
 
   function drawTop(D, st) {
     if (!grid) return;
@@ -60,12 +94,7 @@
       fill(tile, c.k, c.n);
       tile.querySelector('[data-note]').textContent = all ? note0 : 'Of the ' + P.size() + ' plays you count: ' + P.label(true) + '.';
     }
-    var sc = document.querySelector('[data-ps-score]');
-    if (sc && H.upp != null) {
-      var v = Math.round(100 * (H.tw * (c.n ? c.k / c.n : 0) + (1 - H.tw) * H.upp));
-      sc.querySelector('[data-v]').textContent = v;
-      fill(sc, v, 100);
-    }
+    drawSignal(D);
     drawTop(D, st);
     // the family tiles and the full list
     D.fams.forEach(function (f, fi) {

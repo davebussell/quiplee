@@ -21,10 +21,10 @@ RISK = ["Low", "Moderate", "High", "Very high"]
 RISK_CLS = ["calm", "watch", "warning", "warning"]
 MARKETS = [("", "All"), ("us", "U.S."), ("ca", "Canada"), ("crypto", "Crypto"), ("fund", "Funds & indexes")]
 FUND_GROUPS = ("Market indexes", "Sectors", "Indexes & ETFs")
-SORTS = [("up", "Most analyst upside"), ("agree", "Most plays agree"), ("acc", "Most accurate plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
+SORTS = [("score", "Highest score (your weights)"), ("up", "Most analyst upside"), ("agree", "Most plays agree"), ("acc", "Most accurate plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
          ("risk", "Least crash exposure"), ("az", "A to Z")]
 DEFAULT_MIN = 60
-DEFAULT_SORT = "up"          # the screener opens on Most analyst upside
+DEFAULT_SORT = "score"       # the screener opens on the score (the reader's weights; the standard ones before they choose)
 PAGE = 25
 FRESH_DAYS = 7
 
@@ -61,6 +61,8 @@ def rows(site):
         ol = sv.outlook(site, t)
         lvl = (meta.get("risk") or {}).get("level")
         since = L.get("since")
+        from .factors import score as fx_score
+        sc, sg, _ = fx_score(site, t)
         out.append({
             "sym": sym, "s": t["short"], "n": t["name"], "u": t["slug"], "g": t["group"], "m": market(t), "c": t["cur"],
             "p": round(float(x["price"]), 4), "d": None if d1 is None else round(d1, 4), "y": None if y1 is None else round(float(y1), 4),
@@ -69,6 +71,7 @@ def rows(site):
             "r": RISK.index(lvl) if lvl in RISK else None,
             "up": round(float(ol["upside"]), 4) if ol["ok"] and ol["upside"] is not None else None,
             "since": pd.Timestamp(since).strftime("%Y-%m-%d") if since is not None else None,
+            "sc": sc, "sg": sg,
         })
     site.__dict__["_screen_rows"] = out
     return out
@@ -113,7 +116,10 @@ def state(**kw):
 
 def ranked(site, st):
     got = [r for r in rows(site) if matches(site, r, st)]
-    if st["sort"] == "up":      # most analyst upside first; names with no analyst target go last
+    if st["sort"] == "score":   # highest score first (lowest when selling); names with no score go last
+        sgn = -1 if st["side"] == "buy" else 1
+        got.sort(key=lambda r: (r["sc"] is None, sgn * (r["sc"] or 0), -agree(r, st["side"]) / r["o"], r["s"]))
+    elif st["sort"] == "up":    # most analyst upside first; names with no analyst target go last
         got.sort(key=lambda r: (r["up"] is None, -(r["up"] or 0), -agree(r, st["side"]) / r["o"], r["s"]))
     else:
         got.sort(key=lambda r: (-agree(r, st["side"]) / r["o"], -r["o"], r["s"]))
@@ -137,7 +143,9 @@ def row_html(site, r, side, depth):
         f'<i style="height:{max(8, round(100 * (kk if side == "buy" else nn - kk) / nn)) if nn else 8}%" title="{e(name)}: {kk if side == "buy" else nn - kk} of {nn}"></i>'
         for (kk, nn), (_, name, _) in zip(r["f"], FAMILIES))
     risk = (f'<span class="lvl lvl-{RISK_CLS[r["r"]]}">{RISK[r["r"]]}</span>' if r["r"] is not None else '<span class="muted">–</span>')
-    up = f'<span class="{dir_cls(r["up"])}">{pct(r["up"], d=0)}</span>' if r["up"] is not None else '<span class="muted">–</span>'
+    from .factors import SIG_WORD, SIG_CLS
+    up = (f'<b class="sig-n {SIG_CLS[r["sg"]]}">{r["sc"]}</b> <small class="sig-w {SIG_CLS[r["sg"]]}">{SIG_WORD[r["sg"]]}</small>' if r["sc"] is not None
+          else '<span class="muted">–</span>')
     return (f'<li class="scr-row" data-sym="{e(r["sym"])}"><a class="scr-main" href="{h("stocks/" + r["u"] + "/")}">'
             f'<span class="scr-sym"><b>{e(r["s"])}</b><span>{e(r["n"])}</span></span>'
             f'<span class="scr-light">{light_html(r)}</span>'
@@ -146,7 +154,7 @@ def row_html(site, r, side, depth):
             f'<span class="scr-px mono">{money(r["p"], r["c"])} <small class="{dir_cls(r["d"])}">{pct(r["d"])}</small></span>'
             f'<span class="scr-y1 {dir_cls(r["y"])}"><em>1 yr</em>{pct(r["y"], d=0)}</span>'
             f'<span class="scr-risk"><em>Crash</em>{risk}</span>'
-            f'<span class="scr-up"><em>Analysts</em>{up}</span></a>'
+            f'<span class="scr-up"><em>Score</em>{up}</span></a>'
             f'<button type="button" class="scr-star" aria-pressed="false" aria-label="Follow {e(r["s"])}" title="Follow {e(r["s"])}">☆</button></li>')
 
 
@@ -271,11 +279,11 @@ def screener(site, depth):
   <div class="scr-head"><p class="scr-sum" id="scr-sum" aria-live="polite">{summary(len(got), st)}</p>
   <label class="scr-sort"><span class="small muted">Sort</span><select id="scr-sort">{sorts}</select></label>
   <button type="button" class="linkish scr-reset" id="scr-reset" hidden>Start over</button></div>
-  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Light</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span>Crash</span><span>Analysts</span><span></span></div>
+  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Light</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span>Crash</span><span>Score</span><span></span></div>
   <ol class="scr-list" id="scr-list">{first}</ol>
   <p class="scr-empty" id="scr-empty" hidden>No names match all of that. Try fewer plays in step 4, or a wider market in step 3.</p>
   <div class="scr-foot"><button type="button" class="btn" id="scr-more"{"" if len(got) > PAGE else " hidden"}>Show {PAGE} more</button>
-  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when its light flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
+  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. Score is your signal's 0 to 100: Buy, Hold or Sell by the factors you weight (Weights, in step 4). The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when its light flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
 </div>
 </div>
 </section>"""

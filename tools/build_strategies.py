@@ -36,7 +36,8 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
-GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist"}
+GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
+                  "playset.json", "events.json", "events"}   # data/events/ (earnings and rating history) is only read at build time
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json"}
@@ -198,6 +199,9 @@ def main():
     from qstrat.playset import playset_json
     with open(os.path.join(out, "data", "playset.json"), "w", encoding="utf-8") as f:
         f.write(playset_json(site))
+    from qstrat.newsevents import events_json
+    with open(os.path.join(out, "data", "events.json"), "w", encoding="utf-8") as f:
+        f.write(events_json(site))
     with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
         f.write(reads_json(site))
     from qstrat import screen, theory

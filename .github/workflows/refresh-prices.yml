@@ -22,7 +22,7 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 55        # the earnings and ratings fetch takes about 15 minutes
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,11 +42,15 @@ jobs:
       - name: Fetch news and filings for the chart markers
         timeout-minutes: 12
         run: python tools/fetch_news.py || true
+      - name: Earnings dates and analyst rating changes (for News that moves stocks)
+        if: github.event.schedule != '15 10 * * *'
+        timeout-minutes: 25
+        run: python tools/fetch_events.py || true
       - name: Commit the new prices
         run: |
           git config user.name "bethepuck-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/prices data/macro data/fundamentals data/universe data/news
+          git add data/prices data/macro data/fundamentals data/universe data/news data/events
           if git diff --cached --quiet; then
             echo "No price changes"
           else

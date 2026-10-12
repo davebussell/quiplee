@@ -6,7 +6,8 @@
  *   POST /api/account/logout
  *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about)
  *   POST /api/account/alerts  {on, level: "light"|"all"}
- *   POST /api/account/plays   {plays: {p: "all"|"top1"|"top3"|"half"|"custom", s: [play slugs]}} -> the plays that count (assets/plays.js)
+ *   POST /api/account/plays   {plays?: {p: "all"|"top1"|"top3"|"half"|"custom", s: [play slugs]},
+ *                              signal?: {w: {factor: weight}, buy, sell}} -> the plays that count and the reader's signal (assets/plays.js)
  *   POST /api/account/email   {email, password}                  -> add or change the address (re-confirm)
  *   POST /api/account/resend                                     -> send the confirm link again
  *   GET  /api/account/confirm?t=                                 -> confirms, back to /me/?confirmed=1
@@ -57,7 +58,7 @@ function view(acct) {
   return {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,
     confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], alerts: acct.alerts || { on: false, level: "all" },
-    rules: acct.rules || null, plays: acct.plays || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
+    rules: acct.rules || null, plays: acct.plays || null, signal: acct.signal || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
     last_sent: acct.last_sent || null,
   };
 }
@@ -193,11 +194,29 @@ function cleanPlays(c) {
   return { p, s: p === "custom" ? s : [] };
 }
 
+/** The reader's signal: factor weights (0-100) and their Buy and Sell lines. */
+function cleanSignal(c) {
+  if (!c || typeof c !== "object" || !c.w || typeof c.w !== "object") return null;
+  const w = {};
+  for (const [k, v] of Object.entries(c.w).slice(0, 40)) {
+    const n = Math.round(Number(v));
+    if (/^[a-z]{1,12}$/.test(k) && n > 0) w[k] = Math.min(100, n);
+  }
+  if (!Object.keys(w).length) return null;
+  const buy = Math.min(95, Math.max(50, Math.round(Number(c.buy) || 60)));
+  const sell = Math.min(buy - 5, Math.max(5, Math.round(Number(c.sell) || 40)));
+  return { w, buy, sell };
+}
+
 async function plays(req, s, sess) {
   const b = await readBody(req);
-  const out = await updateAccount(s, sess.u, (a) => ({ ...a, plays: cleanPlays(b.plays) }));
+  const out = await updateAccount(s, sess.u, (a) => ({
+    ...a,
+    ...("plays" in b ? { plays: cleanPlays(b.plays) } : {}),
+    ...("signal" in b ? { signal: cleanSignal(b.signal) } : {}),
+  }));
   if (out.error) return reply({ error: out.error }, out.status || 400);
-  return reply({ ok: true, plays: out.acct.plays });
+  return reply({ ok: true, plays: out.acct.plays || null, signal: out.acct.signal || null });
 }
 
 async function changeEmail(req, s, sess) {

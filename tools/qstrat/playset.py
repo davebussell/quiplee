@@ -10,6 +10,9 @@ signed in) and draws the chooser; it reads data/playset.json, written here:
              t: 1 if it is its family's most accurate}
   t[sym]    every covered name's call on every play, one character per play in the
             order of plays: 1 in, 0 out, - no call
+  fx, fg, wp, wd, x[sym], v[sym]   the factors a reader can weight (tools/qstrat/factors.py):
+            their names and groups, the ready-made weightings, the defaults, and every
+            name's points (0-100) and shown value on each factor, in the order of fx
 
 /guides/your-plays/ explains it to readers: how a play is graded, the Mayer Multiple,
 every play by how often it was right, and the three steps to use the filter.
@@ -43,9 +46,40 @@ def playset_json(site):
             continue
         t[sym] = "".join("-" if site.R.get((sym, p["slug"])) is None or site.R[(sym, p["slug"])]["state"] is None
                          else str(site.R[(sym, p["slug"])]["state"]) for p in TIMED)
-    return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "since": GRADE_YEAR, "n": ns, "min": TOP_MIN_CALLS,
-                       "fams": [[k, name] for k, name, _ in FAMILIES], "plays": plays, "t": t},
-                      ensure_ascii=False, separators=(",", ":"))
+    from .factors import factors_json
+    out = {"asof": site.asof.strftime("%Y-%m-%d"), "since": GRADE_YEAR, "n": ns, "min": TOP_MIN_CALLS,
+           "fams": [[k, name] for k, name, _ in FAMILIES], "plays": plays, "t": t}
+    out.update(factors_json(site))
+    return json.dumps(out, ensure_ascii=False, separators=(",", ":"))
+
+
+def signal_section(site, h):
+    """The guide's Your signal section: what each factor measures and scores, the ready-made weightings, a worked example."""
+    from .factors import FACTORS, GROUPS, PRESETS, BUY, SELL, score, SIG_WORD
+    gname = dict(GROUPS)
+    rows = "".join(f'<tr><td><b>{e(n)}</b></td><td class="small">{e(gname[g])}</td><td class="small">{e(d)}</td></tr>' for k, n, g, d in FACTORS)
+    fname = {k: n for k, n, _, _ in FACTORS}
+    presets = "".join(f'<li><button type="button" class="chip-btn" data-ps-wset="{k}">{e(n)}</button> <span class="small muted">'
+                      + e(", ".join(f"{fname[f]} {w}" for f, w in sorted(w.items(), key=lambda z: -z[1]))) + '</span></li>' for k, n, w in PRESETS)
+    ex = ""
+    t = next((x for x in TICKERS if x["sym"] == "SHOP.TO"), None)
+    if t and (t["sym"], "buy-and-hold") in site.R:
+        s1, g1, p1 = score(site, t)
+        s2, g2, _ = score(site, t, {"plays": 100})
+        up = next((x for x in p1 if x["k"] == "upside"), None)
+        pl = next((x for x in p1 if x["k"] == "plays"), None)
+        if s1 is not None and s2 is not None and up and pl and up["p"] is not None:
+            ex = (f'<p><b>An example.</b> On the {dlong(site.asof)} close, {pl["v"]} of the plays held {e(t["name"])} ({e(t["short"])}), so its light read Start. '
+                  f'But analysts\' average target sat at {e(up["v"].split(" (")[0])} from the price, which scores {up["p"]}. With the standard weights its score is {s1}: {SIG_WORD[g1]}. '
+                  f'Set analysts\' upside to 0 and it scores {s2}: {SIG_WORD[g2]}. Neither is right or wrong; the weights say what you think matters.</p>')
+    return f"""<section class="card prose" id="your-signal"><p class="eyebrow">Your signal</p><h2 class="h2">Build your own Buy, Hold and Sell</h2>
+<p>The Start/Stop light reads only the plays. <b>Your signal</b> is yours to set: weight any of {len(FACTORS)} factors, from the plays and analysts to P/E, growth, debt, trend and crash exposure. Each factor scores a stock from 0 to 100, higher meaning more in favour of buying. Your score is the weighted average of the factors you weight, and your lines turn it into a signal: <b>Buy</b> at {BUY} or more, <b>Sell</b> at {SELL} or less and <b>Hold</b> in between, unless you move them.</p>
+<p>Company numbers like P/E score by rank: a P/E lower than 80% of the {n_stocks()} stocks we cover scores 80. A loss-maker scores 0 on P/E. A stock with no number for a factor (a fund has no P/E) is scored on the rest, and gets no score if less than half your weight applies. The standard weights, half plays and half analysts' upside, give the same score the site has always shown.</p>
+{ex}
+<div class="ps-steps-row"><button type="button" class="btn sm primary" data-ps-open="weights">Set your weights</button><span class="small muted">Or start from a ready-made mix:</span></div>
+<ul class="sig-presets">{presets}</ul>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th>Group</th><th>What it measures and how it scores</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p class="small muted">Signals and scores are mechanical summaries of the numbers you choose to weight, not advice. {DISCLAIMER}</p></section>"""
 
 
 def guide_page(site):
@@ -86,8 +120,8 @@ def guide_page(site):
     ex = next((t for t in TICKERS if t["sym"] == "NVDA"), TICKERS[0])
     body = f"""
 <nav class="crumbs"><a href="{h('guides/')}">Guides</a><span>/</span><span>Your plays</span></nav>
-<section class="pair-head"><p class="eyebrow">Guide</p><h1 class="h1">Pick the plays you trust</h1>
-<p class="lede">Be The Puck runs {len(TIMED)} published trading plays on every stock each night. You don't have to count all of them. This page shows how each play is graded, which ones have been right most often, and how to make every page on the site count only the plays you choose.</p></section>
+<section class="pair-head"><p class="eyebrow">Guide</p><h1 class="h1">Pick your plays, build your signal</h1>
+<p class="lede">Be The Puck runs {len(TIMED)} published trading plays on every stock each night. You don't have to count all of them, and you decide what makes a Buy: weight the plays, analysts, P/E, growth, debt, trend and more. This page shows how each play is graded, which ones have been right most often, how your signal is scored, and how to make every page on the site follow your choices.</p></section>
 
 <section aria-labelledby="try-h"><div class="sec-head"><h2 class="h2" id="try-h">Try it in three steps</h2><p>Your choice follows you around the site. Signed in, it's saved to your account; otherwise it stays in this browser.</p></div>
 <ol class="ps-steps">
@@ -114,6 +148,8 @@ def guide_page(site):
 <p><a href="{h('strategies/mayer-multiple/')}">The Mayer play on every stock</a></p></div>
 </section>
 
+{signal_section(site, h)}
+
 <section aria-labelledby="fam-h"><div class="sec-head"><h2 class="h2" id="fam-h">The most accurate play in each family</h2><p>Ranked by share of calls right on {ns} stocks since {GRADE_YEAR}. The ready-made set <i>Most accurate in each family</i> counts these seven.</p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Family</th><th>Most accurate play</th><th class="r" data-sort-first="desc">Calls right</th><th class="r" data-sort-first="desc">Family average</th><th class="r">Plays</th></tr></thead>
 <tbody>{fam_rows}</tbody></table></div></section>
@@ -123,7 +159,7 @@ def guide_page(site):
 <tbody>{rows}</tbody></table></div>
 <p class="small muted">{DISCLAIMER}</p></section>
 """
-    site.add(path, site.shell(path, "Pick the plays you trust · Be The Puck guide",
+    site.add(path, site.shell(path, "Pick your plays, build your signal · Be The Puck guide",
                               f"How Be The Puck grades its {len(TIMED)} trading plays, which were right most often on {ns} stocks since {GRADE_YEAR}, the Mayer Multiple, "
                               "and how to make every page count only the plays you choose.",
                               body, active="guides/", scripts=("assets/plays.js",)))
