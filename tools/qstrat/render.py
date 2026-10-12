@@ -1334,7 +1334,9 @@ class Site:
         if t.get("index"):
             idx_note = ('<p class="note-line">An index is a scoreboard, not something you can buy directly. Investors hold it through an index fund or ETF, '
                         'which tracks it closely. The plays read the index itself.</p>')
-        fund_html = sv.fundamentals_card(t, fund, bh["price"], learn=h("learn/valuation/"))
+        from .factors import card_numbers
+        used, srcs = card_numbers(self, t)
+        fund_html = sv.fundamentals_card(t, fund, bh["price"], learn=h("learn/valuation/"), used=used, srcs=srcs)
         crash_html = sv.crash_card(t, rk, h) if rk else ""
         deep = ""
         if fund_html or crash_html:

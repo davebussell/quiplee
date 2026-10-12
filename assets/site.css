@@ -1909,3 +1909,4 @@ html.ps-lock, html.ps-lock body { overflow: hidden; }
 tr[data-ps-play] { scroll-margin-top: 90px; }
 tr[data-ps-play]:target td, tr.ps-focus td { background: rgba(124, 108, 245, .16); }
 tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
+.sig-src { display: block; font-weight: 500; color: var(--muted); margin-top: 2px; }

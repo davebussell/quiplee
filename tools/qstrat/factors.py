@@ -7,6 +7,9 @@ Every factor turns into points from 0 to 100, higher meaning more in favour of b
             score (stockview.upside_points: -20% scores 0, +50% full marks; 3+ analysts)
   - rating: the analysts' average recommendation, strong buy 1.0 = 100, hold 3.0 or worse = 0
   - calm:   100 minus 10 points per point of crash exposure on the storm test (0 to 10)
+  - company numbers (P/E, P/S, P/B, dividend yield, growth, margin, ROE, debt) come from the
+    company's SEC filings where it files 10-Qs (secfund.py, dated by filing), else Yahoo Finance,
+    and every one passes the quality gate (quality.py) first
   - every other factor (P/E, growth, margins, debt, trend, momentum...) scores by rank:
     where the stock sits among every covered company with that number, so a P/E lower
     than 80% of them scores 80. A loss-maker scores 0 on P/E; a stock with no number
@@ -32,14 +35,14 @@ FACTORS = [
     ("plays", "Plays in", "signals", "The share of the plays you count that hold it now."),
     ("upside", "Analysts' upside", "signals", "How far analysts' average 12-month target sits above the price (3+ analysts). −20% scores 0, +50% full marks."),
     ("rating", "Analysts' rating", "signals", "The analysts' average recommendation: strong buy scores 100, hold or worse 0."),
-    ("pe", "P/E", "value", "Price over the last 12 months' earnings per share. Lower ranks higher; a loss scores 0."),
+    ("pe", "P/E", "value", "Price over the last four quarters' earnings per share. Lower ranks higher; a loss scores 0."),
     ("fpe", "Forward P/E", "value", "Price over next year's expected earnings. Lower ranks higher; an expected loss scores 0."),
     ("peg", "PEG", "value", "P/E divided by expected earnings growth. Lower ranks higher; around 1 is often read as fair for the growth."),
     ("ps", "Price to sales", "value", "Market value over the last 12 months' revenue. Lower ranks higher."),
     ("pb", "Price to book", "value", "Price over book value (assets minus debts) per share. Lower ranks higher."),
     ("dy", "Dividend yield", "value", "Dividends over the last year as a share of the price. Higher ranks higher; no dividend scores 0."),
-    ("eg", "Earnings growth", "quality", "Earnings growth on the same quarter a year ago. Higher ranks higher."),
-    ("rg", "Revenue growth", "quality", "Revenue growth on the same quarter a year ago. Higher ranks higher."),
+    ("eg", "Earnings growth", "quality", "Earnings per share over the last four quarters against the four before (the latest quarter on a year earlier where filings aren't available). Higher ranks higher."),
+    ("rg", "Revenue growth", "quality", "Revenue over the last four quarters against the four before (the latest quarter on a year earlier where filings aren't available). Higher ranks higher."),
     ("pm", "Profit margin", "quality", "Net profit as a share of revenue. Higher ranks higher."),
     ("roe", "Return on equity", "quality", "Profit as a share of shareholders' equity. Higher ranks higher."),
     ("de", "Debt to equity", "quality", "Debt against shareholders' equity. Lower ranks higher; negative equity scores 0."),
@@ -103,6 +106,11 @@ def compute(site):
     from .content import TICKERS
     names = [t for t in TICKERS if (t["sym"], "buy-and-hold") in site.R]
     out = {t["sym"]: {} for t in names}
+    from . import secfund, quality
+    from .engine import cad_per_usd
+    gate = site.__dict__["_gate"] = quality.Gate(site.asof, cad_per_usd())
+    src_map = site.__dict__["_factor_src"] = {}   # {sym: {key: where the number came from}}
+    used = site.__dict__["_factor_val"] = {}      # {sym: {key: the number used, or "loss"/"negative"}} for the fundamentals card
     raw = {k: {} for k in KEYS}           # values to rank: {key: {sym: value}}
     fixed = {k: {} for k in KEYS}         # points set without ranking (losses, no dividend...)
     shown = {k: {} for k in KEYS}
@@ -122,43 +130,60 @@ def compute(site):
             word = "strong buy" if rm < 1.5 else "buy" if rm < 2.5 else "hold" if rm < 3.5 else "sell"
             shown["rating"][sym] = f"{rm:.1f} · {word}"
         if eq:
-            pe, eps = _num(f.get("trailingPE")), _num(f.get("trailingEps"))
-            if pe is not None and pe > 0:
-                raw["pe"][sym], shown["pe"][sym] = pe, _x(pe)
-            elif eps is not None and eps < 0:
-                fixed["pe"][sym], shown["pe"][sym] = 0, "loss"
-            fpe = _num(f.get("forwardPE"))
-            if fpe is not None and fpe > 0:
-                raw["fpe"][sym], shown["fpe"][sym] = fpe, _x(fpe)
-            elif fpe is not None and fpe < 0:
-                fixed["fpe"][sym], shown["fpe"][sym] = 0, "loss expected"
-            peg = _num(f.get("trailingPegRatio")) or _num(f.get("pegRatio"))
-            if peg is not None and peg > 0:
-                raw["peg"][sym], shown["peg"][sym] = peg, f"{peg:.2f}"
-            elif peg is not None:
-                fixed["peg"][sym], shown["peg"][sym] = 0, f"{peg:.2f}"
-            ps = _num(f.get("priceToSalesTrailing12Months"))
-            if ps is not None and ps > 0:
-                raw["ps"][sym], shown["ps"][sym] = ps, _x(ps)
-            pb = _num(f.get("priceToBook"))
-            if pb is not None and pb > 0:
-                raw["pb"][sym], shown["pb"][sym] = pb, _x(pb)
-            elif pb is not None:
-                fixed["pb"][sym], shown["pb"][sym] = 0, "negative book"
-            dy = _num(f.get("dividendYield"))       # yfinance gives it in percent
+            # company numbers: from SEC filings where the company files 10-Qs (secfund), else Yahoo;
+            # every one passes the quality gate (quality.py) first
+            yf = {} if gate.stale(t, f) else f
+            sec = secfund.ratios(t, site.r(sym, "buy-and-hold")["price"], site.asof, gate.fx) if secfund.has(t) else {}
+            srcs = src_map.setdefault(sym, {})
+
+            def pick(key, yv):
+                if key in sec:
+                    srcs[key] = sec["src"]
+                    return gate.check(t, key, sec[key], "SEC filings")
+                if yv is not None:
+                    srcs[key] = "Yahoo Finance"
+                    return gate.check(t, key, yv, "Yahoo Finance")
+                return None
+
+            def put(key, v, show, neg_word=None):
+                if v is not None:
+                    used.setdefault(sym, {})[key] = v
+                if isinstance(v, str):
+                    fixed[key][sym], shown[key][sym] = 0, neg_word or v
+                elif v is not None:
+                    raw[key][sym], shown[key][sym] = v, show(v)
+
+            pe_y, eps_y = _num(yf.get("trailingPE")), _num(yf.get("trailingEps"))
+            put("pe", pick("pe", pe_y if pe_y and pe_y > 0 else ("loss" if eps_y is not None and eps_y < 0 else None)), _x)
+            fpe = _num(yf.get("forwardPE"))
+            if fpe is not None:
+                srcs["fpe"] = "Yahoo Finance"
+            put("fpe", gate.check(t, "fpe", fpe if fpe is None or fpe > 0 else "loss expected", "Yahoo Finance"), _x)
+            peg = _num(yf.get("trailingPegRatio")) or _num(yf.get("pegRatio"))
+            if peg is not None:
+                srcs["peg"] = "Yahoo Finance"
+                peg = gate.check(t, "peg", peg, "Yahoo Finance")
+                if peg is not None and peg > 0:
+                    raw["peg"][sym], shown["peg"][sym] = peg, f"{peg:.2f}"
+                elif peg is not None:
+                    fixed["peg"][sym], shown["peg"][sym] = 0, f"{peg:.2f}"
+            ps_y = _num(yf.get("priceToSalesTrailing12Months"))
+            ps_y = gate.ps_currency(t, yf, ps_y) if ps_y is not None and ps_y > 0 and "ps" not in sec else None
+            put("ps", pick("ps", ps_y), _x)
+            pb_y = _num(yf.get("priceToBook"))
+            put("pb", pick("pb", pb_y if pb_y is None or pb_y > 0 else "negative"), _x, "negative book")
+            dy_y = _num(yf.get("dividendYield"))          # Yahoo gives it in percent
+            dy = pick("dy", None if dy_y is None else dy_y / 100)
+            if dy is not None:
+                used.setdefault(sym, {})["dy"] = dy
             if dy is not None and dy > 0:
-                raw["dy"][sym], shown["dy"][sym] = dy, f"{dy:.1f}%"
+                raw["dy"][sym], shown["dy"][sym] = dy, f"{dy * 100:.1f}%"
             elif dy is not None:
                 fixed["dy"][sym], shown["dy"][sym] = 0, "none"
             for k, fld in (("eg", "earningsGrowth"), ("rg", "revenueGrowth"), ("pm", "profitMargins"), ("roe", "returnOnEquity")):
-                v = _num(f.get(fld))
-                if v is not None:
-                    raw[k][sym], shown[k][sym] = v, _p(v, sign=k in ("eg", "rg"))
-            de = _num(f.get("debtToEquity"))         # yfinance gives it in percent
-            if de is not None and de >= 0:
-                raw["de"][sym], shown["de"][sym] = de / 100, _x(de / 100, 2)
-            elif de is not None:
-                fixed["de"][sym], shown["de"][sym] = 0, "negative equity"
+                put(k, pick(k, _num(yf.get(fld))), lambda v, k=k: _p(v, sign=k in ("eg", "rg")))
+            de_y = _num(yf.get("debtToEquity"))           # Yahoo gives it in percent
+            put("de", pick("de", None if de_y is None else (de_y / 100 if de_y >= 0 else "negative")), lambda v: _x(v, 2), "negative equity")
         # price and risk: every name
         o = meta.get("ohlc")
         if o is not None and len(o) >= 200:
@@ -258,8 +283,9 @@ def signal_card(site, t, h):
     allrows = ""
     for key, name, _, desc in FACTORS:
         p, v = ((round(100 * k / n) if n else None), (f"{round(100 * k / n)}%" if n else None)) if key == "plays" else pts.get(key, (None, None))
+        src = (site.__dict__.get("_factor_src") or {}).get(t["sym"], {}).get(key)
         allrows += (f'<tr data-sig-f="{key}"><td>{e(name)}</td><td>{e(v or "–")}</td><td class="r">{"–" if p is None else p}</td>'
-                    f'<td class="small muted">{e(desc)}</td></tr>')
+                    f'<td class="small muted">{e(desc)}{(" <b class=sig-src>Source: " + e(src) + ".</b>") if src else ""}</td></tr>')
     pos = 50 if s is None else s
     alert = "" if t.get("index") else (f'<a class="btn sm sig-alert" href="{h("alerts/")}?t={e(t["slug"])}" data-signed-out>Email me when it flips</a>'
                                        f'<a class="btn sm sig-alert" href="{h("me/")}#alerts" data-signed-in hidden>My alerts</a>')
@@ -275,3 +301,10 @@ def signal_card(site, t, h):
 <p class="small muted sig-note">Your signal is the one call Be The Puck makes on a stock, and you set it: weight the plays, analysts, P/E, growth, debt, trend and more, and move the Buy and Sell lines. Every page follows your choice. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></p>
 <details class="sig-all"><summary>All {len(FACTORS)} factors for {e(t["short"])}</summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th>{e(t["short"])}</th><th class="r">Points</th><th>What it is</th></tr></thead><tbody data-sig-all>{allrows}</tbody></table></div></details>
 </section>"""
+
+
+def card_numbers(site, t):
+    """The company numbers Your signal used for this stock (SEC filings or quality-checked Yahoo),
+    so the stock page's business card shows the same P/E, growth and the rest: ({key: value}, {key: source})."""
+    compute(site)
+    return (site.__dict__.get("_factor_val") or {}).get(t["sym"], {}), (site.__dict__.get("_factor_src") or {}).get(t["sym"], {})

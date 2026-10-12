@@ -246,10 +246,13 @@ REC = {"strong_buy": "Strong buy", "buy": "Buy", "hold": "Hold", "underperform":
        "strong_sell": "Strong sell", "none": None}
 
 
-def fundamentals_card(t, fund, price, learn="#"):
+def fundamentals_card(t, fund, price, learn="#", used=None, srcs=None):
+    """The business card on a stock page. `used`/`srcs` (factors.card_numbers) are the numbers Your
+    signal used, from SEC filings or quality-checked Yahoo figures; they replace Yahoo's own."""
     if not is_equity(t, fund):
         return ""
     f = fund
+    used, srcs = used or {}, srcs or {}
     tc = CUR_SIGN.get(f.get("currency"), t["cur"] or "$")
     fc = CUR_SIGN.get(f.get("financialCurrency") or f.get("currency"), tc)
     mcap, rev = num(f.get("marketCap")), num(f.get("totalRevenue"))
@@ -265,6 +268,29 @@ def fundamentals_card(t, fund, price, learn="#"):
     rec = REC.get(f.get("recommendationKey") or "none")
     if pe is not None and pe <= 0:
         pe = None
+    # the numbers Your signal used (same P/E, growth... on the card and in the factor table)
+    if "pe" in used:
+        pe = used["pe"] if not isinstance(used["pe"], str) else None
+        if isinstance(used["pe"], str):
+            eps = -1
+    if "pb" in used:
+        pb = used["pb"] if not isinstance(used["pb"], str) else None
+    if "ps" in used and not isinstance(used["ps"], str):
+        ps = used["ps"]
+    for k in ("pm", "rg", "eg", "roe"):
+        if k in used and not isinstance(used[k], str):
+            if k == "pm":
+                margin = used[k]
+            elif k == "rg":
+                rg = used[k]
+            elif k == "eg":
+                eg = used[k]
+            else:
+                roe = used[k]
+    if "dy" in used and not isinstance(used["dy"], str):
+        dy = used["dy"] * 100
+    four_q = srcs.get("rg", "").startswith("SEC")
+    sec_src = next((v for v in srcs.values() if v.startswith("SEC")), None)
 
     def row(label, val, read=""):
         return f'<tr><th scope="row">{label}</th><td class="r mono">{val}</td><td class="muted">{read}</td></tr>'
@@ -287,7 +313,7 @@ def fundamentals_card(t, fund, price, learn="#"):
     if margin is not None:
         prof += row("Profit margin", pc(margin), f"Keeps {abs(margin) * 100:.0f}¢ of each dollar of sales as profit." if margin > 0 else "Spends more than it brings in.")
     if rg is not None:
-        prof += row("Revenue growth", pc(rg, sign=True), "Last quarter's sales against the same quarter a year earlier.")
+        prof += row("Revenue growth", pc(rg, sign=True), "The last four quarters' sales against the four before." if four_q else "Last quarter's sales against the same quarter a year earlier.")
     if eg is not None:
         prof += row("Earnings growth", pc(eg, sign=True), "Same comparison for profit.")
     if roe is not None and equity and equity > 0:
@@ -327,7 +353,8 @@ def fundamentals_card(t, fund, price, learn="#"):
     return (f'<div class="card fund-card"><div class="chart-top"><h3 class="h3">The business behind the price</h3>'
             f'<a class="small" href="{learn}">How to judge these numbers</a></div>{about}'
             f'<div class="fund-grid">{body}</div>'
-            f'<p class="chart-note">Company figures from Yahoo Finance{", fetched " + pd.Timestamp(when).strftime("%b %-d, %Y") if when else ""}. '
+            f'<p class="chart-note">{("P/E, price to sales and book, growth, margin and return on equity from the company&#39;s " + e(sec_src.replace("SEC filings to ", "SEC filings for the quarter to ")) + "; other ") if sec_src else ""}'
+            f'{"c" if sec_src else "C"}ompany figures from Yahoo Finance{", fetched " + pd.Timestamp(when).strftime("%b %-d, %Y") if when else ""}. '
             f'Analyst targets are opinions, not forecasts Be The Puck checks.</p></div>')
 
 

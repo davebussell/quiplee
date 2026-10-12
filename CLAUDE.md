@@ -2,7 +2,7 @@
 
 Read this first in every session. The README explains how the site works; this file
 says how to work on it. Requests and open work live in Linear (team Audit Demand,
-project **Be The Puck**): check it at the start of a session, add anything Dave asks
+project **Be The Puck**, https://linear.app/auditdemand/project/be-the-puck-935312b13bf3): check it at the start of a session, add anything Dave asks
 for that isn't there, and move an issue to Done only once the change is live.
 
 ## Standing rules (from Dave)
@@ -49,6 +49,10 @@ for that isn't there, and move an issue to Done only once the change is live.
   `tools/qstrat/render.py` and friends write the pages.
 - `.github/workflows/refresh-prices.yml` refreshes `data/` twice a day (prices, macro,
   fundamentals, news, earnings and ratings) and commits; that push triggers a deploy.
+- Company numbers: `tools/fetch_sec.py` keeps each SEC filer's quarters in `data/sec/` (dated by
+  filing, so backtests never see the future); `tools/qstrat/secfund.py` turns them into P/E,
+  growth, margins and debt. Yahoo (`tools/fetch_fundamentals.py`) covers the rest (TSX-only
+  names, forward estimates, analyst targets). Prefer SEC numbers wherever a company files 10-Qs.
 - `netlify/functions/` is the live API (accounts, alerts, watchlist queue, PayPal).
 - Readers' choices (plays counted, signal weights) live in `localStorage` and, when signed
   in, in their account (`/api/account/plays`).
