@@ -16,6 +16,7 @@ from .icons import icon
 from .media import pic, page_art, PAGE_ART
 from .linker import link_terms
 from . import stockview as sv
+from .engine import GRADE_START
 from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, GROUP_ORDER, BAR_WORD,
                       FAMILIES, FAMILY, FAMILY_ORDER, credit)
 
@@ -27,6 +28,17 @@ def universe():
     """The curated list. Reader-requested tickers get their own pages but stay out
     of the cross-stock tables and counts, which would otherwise shift as readers add names."""
     return [t for t in TICKERS if not t.get("requested")]
+
+
+# "Real stocks" for ranking plays: no indexes, index or sector funds, or crypto.
+NON_STOCK_GROUPS = ("Sectors", "Indexes & ETFs", "Market indexes", "Crypto")
+GRADE_YEAR = GRADE_START.year   # calls are graded from here on
+TOP_MIN_CALLS = 500     # to be ranked, a play needs this many finished calls across the stocks,
+                        # on at least half of them (the Mayer Multiple, say, only ever flips on a few)
+
+
+def is_stock(t):
+    return not t.get("crypto") and not t.get("index") and t["group"] not in NON_STOCK_GROUPS
 
 
 def slugify_group(g):
@@ -466,6 +478,7 @@ class Site:
         self.out = None   # set to a folder to write each page as it is made (keeps memory flat)
         self.ver = self.asof.strftime("%Y%m%d")
         self._sum = {}
+        self._acc, self._top = {}, None
         from .learn import Learn
         self.learn = Learn(self)
 
@@ -603,6 +616,76 @@ class Site:
         }
         self._sum[s["slug"]] = out
         return out
+
+    def play_accuracy(self, s):
+        """How often a play's finished calls went the right way (an in call followed by a rise,
+        an out call by a fall) across the real stocks: {"bat", "right", "calls", "stocks"}."""
+        hit = self._acc.get(s["slug"])
+        if hit is None:
+            right = calls = stocks = 0
+            for t in universe():
+                if not is_stock(t):
+                    continue
+                b = self.r(t["sym"], s["slug"])["batting"]
+                right, calls, stocks = right + b["right"], calls + b["n"], stocks + (1 if b["n"] else 0)
+            hit = self._acc[s["slug"]] = {"bat": right / calls if calls else None, "right": right, "calls": calls, "stocks": stocks}
+        return hit
+
+    def timed_family(self, fk):
+        return [p for p in TIMED if p["family"] == fk]
+
+    def top_plays(self):
+        """The most accurate play in each family, as [(family key, play, accuracy)].
+        Plays with too few finished calls, or calls on too few stocks, aren't ranked."""
+        if self._top is None:
+            out, n_stocks = [], sum(1 for x in universe() if is_stock(x))
+            for fk in FAMILY_ORDER:
+                ok = [(self.play_accuracy(p), p) for p in self.timed_family(fk)]
+                ok = [(a, p) for a, p in ok if a["bat"] is not None and a["calls"] >= TOP_MIN_CALLS and 2 * a["stocks"] >= n_stocks]
+                if ok:
+                    a, p = max(ok, key=lambda ap: (ap[0]["bat"], ap[0]["calls"]))
+                    out.append((fk, p, a))
+            self._top = out
+        return self._top
+
+    def top_plays_block(self, t, h):
+        """Stock overview: the most accurate play in each family and what it says about this stock now."""
+        top = self.top_plays()
+        if not top:
+            return ""
+        n_stocks = sum(1 for x in universe() if is_stock(x))
+        cards = ""
+        for fk, p, a in top:
+            x = self.r(t["sym"], p["slug"])
+            b = x["batting"]
+            here = (f'On {e(t["short"])}: right {b["right"]} of {b["n"]}' if b["n"] else f'No finished calls on {e(t["short"])} yet')
+            since = (f'{"In" if x["state"] == 1 else "Out"} since {dlong(x["since"])}' if x["state"] is not None and x.get("since") is not None else "")
+            cards += (f'<a class="card tp" href="{h(self.pair_path(t, p))}"><span class="tp-fam">{icon(fk)}{e(FAMILY[fk][0])}</span>'
+                      f'<span class="tp-name"><b>{e(p["name"])}</b>{pill(x["state"])}</span>'
+                      f'<span class="tp-acc"><b>{pct(a["bat"], sign=False, d=0)}</b> of {a["calls"]:,} calls right</span>'
+                      f'<span class="tp-here">{here}{" · " + since if since else ""}</span></a>')
+        return f"""<section class="top-plays" aria-labelledby="tp-h"><div class="sec-head"><h2 class="h2" id="tp-h">The most accurate play in each family</h2>
+<p>Each family's play whose calls went the right way most often, tested on {n_stocks} stocks since {GRADE_YEAR}, and what it says about {e(t['short'])} now.</p></div>
+<div class="tp-grid">{cards}</div>
+<p class="muted small">A call is right when the stock rose after an in call or fell after an out call. Trend plays are built to take many small losses for a few big wins, so their hit rates run lower; being right often isn't the same as making the most money. <a href="{h('method/')}">How we test a play</a>.</p></section>"""
+
+    def mayer_tile(self, t, h):
+        """Stock overview: price over its 200-day average, against Mayer's 2.4 line and the stock's own history."""
+        d = self.prices.get(t["sym"]) if self.prices else None
+        if d is None or len(d) < 220:
+            return ""
+        cl = d["close"]
+        mm = (cl / cl.rolling(200).mean()).dropna()
+        m = float(mm.iloc[-1])
+        hist = mm[mm.index >= pd.Timestamp(f"{GRADE_YEAR}-01-01")]
+        if len(hist) < 20:
+            hist = mm
+        share = round(100 * float((hist < m).mean()))
+        gap = m - 1
+        return (f'<a class="card tile tile-link" href="{h(self.pair_path(t, PLAY["mayer-multiple"]))}"><span class="tile-label">Mayer Multiple</span>'
+                f'<span class="tile-value {"down" if m >= 2.4 else ""}">{m:.2f}<small>×</small></span>{fill_bar(round(min(m, 2.4) * 100), 240)}'
+                f'<span class="tile-note">Price ÷ its 200-day average ({pct(gap, d=0)}). Higher than on {share}% of days since {hist.index[0].year}. '
+                f'Above 2.4 is Mayer\'s overheated zone.</span></a>')
 
     def light(self, t):
         """{"state": "start"|"stop"|None, "share", "k", "n", "since"}: the latched Start/Stop
@@ -1179,12 +1262,7 @@ class Site:
         read = sv.read_lines(self, t, meta, fund) if meta else []
         read_html = "".join(f"<li>{e(x)}</li>" for x in read)
         lvl = rk["level"] if rk else None
-        trend_tile = ""
-        if meta.get("ohlc") is not None and len(meta["ohlc"]) >= 200:
-            cc = meta["ohlc"]["close"]
-            gap = float(cc.iloc[-1] / cc.iloc[-200:].mean() - 1)
-            trend_tile = (f'<div class="card tile"><span class="tile-label">Against its 200-day average</span><span class="tile-value {dir_cls(gap)}">{pct(gap, d=0)}</span>'
-                          f'<span class="tile-note">{"Above: the long trend is up." if gap >= 0 else "Below: the long trend is down."}</span></div>')
+        trend_tile = self.mayer_tile(t, h)
         crash_tile = (f'<a class="card tile tile-link" href="#crash"><span class="tile-label">Crash exposure</span><span class="tile-value lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>'
                       f'<span class="tile-note">{rk["score"]} of 10 on the storm test</span></a>') if lvl else ""
         ol = sv.outlook(self, t)
@@ -1238,6 +1316,7 @@ class Site:
 <section class="card read-card"><div class="read-top"><p class="eyebrow">The read</p>{watch_btn}</div><ul class="read">{read_html}</ul>
 <p class="muted small">{DISCLAIMER} <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
 {summary}
+{self.top_plays_block(t, h)}
 {chart}
 {heat}
 <section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p>All {len(TIMED)} plays, by family.</p></div>

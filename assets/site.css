@@ -432,6 +432,26 @@ button.btn { cursor: pointer; }
 .tile-value small { font-size: 16px; color: var(--muted); font-weight: 500; }
 .tile .fillbar { width: 100%; }
 .tile-link { color: var(--ink); }
+/* stock overview: the most accurate play in each family */
+.tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 10px; }
+.tp { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; color: var(--ink); min-width: 0; }
+.tp:hover { text-decoration: none; border-color: var(--line-2); background: var(--panel-2); }
+.tp-fam { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.tp-name { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; line-height: 1.25; }
+.tp-name b { min-width: 0; overflow-wrap: anywhere; }
+.tp-name .pill { flex: none; }
+.tp-acc { font-size: 13px; color: var(--ink-2); }
+.tp-acc b { font: 600 20px var(--ui); color: var(--ink); margin-right: 2px; }
+.tp-here { font-size: 12.5px; color: var(--muted); }
+.top-plays > .small { margin-top: 10px; }
+@media (max-width: 600px) {
+  .tp-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tp { padding: 12px; gap: 5px; }
+  .tp-name { flex-direction: column; align-items: flex-start; gap: 5px; font-size: 14px; }
+  .tp-acc b { font-size: 18px; }
+  .tp-here { font-size: 12px; }
+  .tp:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
 .tile-link:hover { text-decoration: none; border-color: var(--line-2); background: var(--panel-2); }
 .lvl-calm { color: var(--calm); } .lvl-watch { color: var(--watch); } .lvl-warning { color: var(--warning); }
 .lvl { font: 600 12px var(--data); letter-spacing: .03em; }
