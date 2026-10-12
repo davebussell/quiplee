@@ -80,4 +80,4 @@ def me_page(site):
 """
     site.add(path, site.shell(path, "My Puck: your stocks and their alerts",
                               "One free Be The Puck account: follow your stocks, get an email when the Start/Stop light flips, test theories on them, and use every member tool free until January 1, 2027.",
-                              body, active="", scripts=("assets/widgets.js", "assets/me.js"), link=False))
+                              body, active="", scripts=("assets/widgets.js", "assets/plays.js", "assets/me.js"), link=False))

@@ -396,6 +396,8 @@ class Guides:
 <section class="pair-head has-art">{page_art(h, PAGE_ART["guides/"], "50% 62%")}<p class="eyebrow">Guides</p><h1 class="h1">Which predictions actually work?</h1>
 <p class="lede">Every trading play is a prediction about what a price will do next. They come in seven kinds: trends continue, breakouts run, strength persists, dips snap back, volume leads price, patterns warn of a turn, and the calendar matters. Be The Puck runs all {len(TIMED)} plays on {len(self.univ)} stocks, funds and coins every night. Here is what the record says about each kind of bet, with a guide to every family and every play.</p></section>
 
+<a class="card ps-callout" href="{h("guides/your-plays/")}"><span class="eyebrow">New</span><b>Pick the plays you trust</b><span class="small muted">Every play ranked by how often its calls were right, the Mayer Multiple explained, and how to make every page on the site count only the plays you choose.</span></a>
+
 <section><div class="sec-head"><h2 class="h2">Five things {allm['n']:,} backtests say</h2><p>Each play against simply holding the same stock over the same dates since 2005, after costs, as of the {dlong(self.s.asof)} close.</p></div>
 <ol class="g-findings">{"".join(f"<li>{x}</li>" for x in findings)}</ol></section>
 

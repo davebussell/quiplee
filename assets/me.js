@@ -70,6 +70,17 @@
   }
 
   // ---------------------------------------------------------------- dashboard
+  // plays in for a name: the plays the reader counts (plays.js), else every play from reads.json
+  var PS = window.BPPlays;
+  function kn(s) {
+    var t = R.t[s];
+    if (PS && PS.loaded() && !PS.isAll() && PS.data().t[s]) { var c = PS.count(s); return [c.k, c.n]; }
+    return [t.k || 0, t.of || 0];
+  }
+  function psChip() {
+    return '<button type="button" class="ps-chip ps-chip-sm" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>' +
+      esc(PS && PS.loaded() ? PS.label(false) : 'All 100') + '</b><span class="ps-caret" aria-hidden="true">▾</span></button>';
+  }
   function followRows() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     if (!list.length) {
@@ -77,10 +88,10 @@
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div></div>';
     }
     return '<ul class="me-list">' + list.map(function (s) {
-      var t = R.t[s], fresh = t.since && R.asof && daysBetween(t.since, R.asof) <= 7;
+      var t = R.t[s], fresh = t.since && R.asof && daysBetween(t.since, R.asof) <= 7, c = kn(s);
       return '<li><a class="me-row" href="' + esc(STOCK.replace('{u}', t.u)) + '">' +
         '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + pill(t.L) +
-        '<span class="mp-bar">' + bar(t.k, t.of) + '<span>' + t.k + '/' + t.of + '</span></span>' +
+        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + '</span></span>' +
         '<span class="mp-px mono">' + money(t.p, t.cur) + (t.d1 != null ? ' <small class="' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</span>' +
         '<span class="mp-since">' + (fresh ? '<b class="me-new">Flipped ' + esc(day(t.since)) + '</b>' : t.since ? 'since ' + esc(day(t.since)) : '') + '</span></a>' +
         '<button type="button" class="me-x" data-remove="' + esc(s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></li>';
@@ -93,12 +104,12 @@
     var al = A.alerts || {};
     var mailState = !A.email ? ['Add your email', 'warn'] : !A.email_ok ? ['Confirm your email', 'warn'] : al.on ? ['On', 'on'] : ['Off', ''];
     var k = 0, n = 0;
-    list.forEach(function (s) { k += R.t[s].k || 0; n += R.t[s].of || 0; });
+    list.forEach(function (s) { var c = kn(s); k += c[0]; n += c[1]; });
     var avg = n ? Math.round(100 * k / n) : null;
     return '<div class="me-kpis">' +
       '<div class="card tile"><span class="tile-label">Your stocks on Start</span><span class="tile-value"><b data-count="' + on.length + '">' + on.length + '</b><small> of ' + list.length + '</small></span>' + bar(on.length, list.length || 1) + '<span class="tile-note">' + (list.length ? (list.length - on.length) + ' on Stop' : 'Follow a few to begin') + '</span></div>' +
       '<div class="card tile"><span class="tile-label">Flipped in the last week</span><span class="tile-value">' + flipped.length + '</span><span class="tile-note">' + (flipped.length ? flipped.slice(0, 4).map(function (s) { return esc(R.t[s].s); }).join(', ') : 'No changes on your list') + '</span></div>' +
-      '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small> of 100</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average, across your list') + '</span></div>' +
+      '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list, of ' + (PS && PS.loaded() ? PS.label(true).replace(/^All/, 'all').replace(/^Your/, 'your') : 'all 100 plays')) + '</span></div>' +
       '<div class="card tile"><span class="tile-label">Email alerts</span><span class="tile-value me-mail ' + mailState[1] + '">' + mailState[0] + '</span><span class="tile-note">' + (A.last_sent ? 'Last sent after the ' + esc(day(A.last_sent)) + ' close' : 'Sent after the close, only on a change') + '</span></div>' +
       '</div>';
   }
@@ -200,6 +211,7 @@
       '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
       notice() + kpis() +
       '<div class="me-grid"><section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
+      '<div class="ps-bar ps-bar-me">' + psChip() + '<p class="small muted">Plays in counts only the plays you pick, here and across the site.</p></div>' +
       '<div class="me-add"><input type="search" data-add-q placeholder="Follow a stock: NVDA, Shopify, gold…" autocomplete="off" aria-label="Follow a stock"><div class="me-sug" data-sug hidden></div></div>' +
       (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Follow the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
@@ -278,6 +290,10 @@
       return getJSON(app.getAttribute('data-reads')).catch(function () { return { asof: null, t: {} }; }).then(function (res) {
         R = res;
         draw();
+        if (PS) {
+          PS.ready(function () { if (A.plays) PS.adopt(A.plays); draw(); });
+          PS.onChange(function () { draw(); });
+        }
         if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ block: 'start' }); }
       });
     });

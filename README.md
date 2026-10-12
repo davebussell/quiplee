@@ -37,6 +37,7 @@ tools/qstrat/render.py       HTML for home, plays, analysts, stocks, pairs, meth
 tools/qstrat/stockview.py    stock-page blocks: candlesticks, heatmap, the read, fundamentals, crash card
 tools/qstrat/markets.py      /markets/: weather, index and sector tables, gauges, past tops, simulator
 tools/qstrat/watchlist.py    /watchlist/ page and data/watch.json
+tools/qstrat/playset.py      the play filter's data/playset.json and the /guides/your-plays/ guide
 tools/qstrat/screen.py       the home page: step 1 (crash gauges) and the screener; data/screen.json, data/tickers.json
 tools/qstrat/theory.py       /theory/ (the Theory tester) and data/theory/<slug>.json
 tools/qstrat/articles.py     /articles/: macro pieces, stock and sector briefs (rebuilt nightly)
@@ -47,6 +48,7 @@ netlify/functions/watch.mjs  the request queue (Netlify Function + Blobs) behind
 assets/site.js, learn.js     line charts; quizzes, flashcards, Call it (progress in localStorage)
 assets/widgets.js            candlesticks, plays heatmap, positioning simulator, core toggle
 assets/lab.js, watchlist.js  Learn widgets and step-by-step lessons; the watchlist app
+assets/plays.js, playview.js the play filter every dashboard shares (window.BPPlays); a stock page under it
 ```
 
 ```bash
@@ -73,6 +75,18 @@ Calendar plays report the date of their next change.
 **Refresh.** `.github/workflows/refresh-prices.yml` runs after each U.S. close:
 it adds reader-requested tickers, fetches prices, macro series and fundamentals,
 and commits `data/`; that push triggers the Netlify build.
+
+**Pick your plays.** Readers can count only the plays they trust: a ready-made set (the
+most accurate play in each family, the top 3 in each family, plays right more than half the
+time) or their own pick. `assets/plays.js` keeps the choice in the browser and, signed in, on
+the account (`POST /api/account/plays`); `?plays=top1|top3|half|all|<slug.slug>` shares a view.
+The home screener (with a "Most accurate plays agree" sort), the stock list (Plays in, Score,
+the family board), each stock page (Plays in, the score, the most accurate play in each family,
+the full list with each play's calls right on that stock), the watchlist and My Puck all
+recount from `data/playset.json`. "Accurate" is the share of a play's finished calls that went
+the right way on the real stocks (no funds, indexes or coins) since 2005; a play needs 500+
+calls on at least half the stocks to be ranked (`render.rankable`). The Start/Stop light, Top 10
+and Top picks always use every play.
 
 **Bring your own stocks.** The watchlist keeps each reader's list in their
 browser. Tickers Be The Puck doesn't cover are POSTed to `/api/watch` (symbols only).

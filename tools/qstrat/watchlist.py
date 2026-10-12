@@ -12,7 +12,7 @@ import json
 import math
 
 from .content import TICKERS, TIMED, FAMILIES
-from .render import next_move
+from .render import next_move, ps_bar
 from . import stockview as sv
 from .members import member_tag, PRICE
 
@@ -112,11 +112,8 @@ def watchlist_page(site):
 <p class="small muted" id="wl-al-msg" aria-live="polite"></p></div>
 </div>
 <noscript><p class="note-line">The watchlist needs JavaScript. Every covered stock also has its own page under <a href="{h('stocks/')}">Stocks</a>.</p></noscript>
-<div class="wl-plays"><span class="small muted">Plays to count</span>
-<div class="seg seg-sm" role="group" aria-label="Plays to count" id="wl-mode"><button type="button" data-v="all" aria-pressed="true">All {len(TIMED)}</button><button type="button" data-v="pick" aria-pressed="false">Pick plays</button></div>
-<a class="small" href="{h('rules/')}">Your own Start/Stop rules and portfolio limits (members)</a>
-</div>
-<div class="card wl-picker" id="wl-picker" hidden></div>
+{ps_bar(h, "Pick the plays you trust. Plays in, the strip and the sort count only those.", "wl-ps")}
+<p class="small wl-rules"><a href="{h('rules/')}">Your own Start/Stop rules and portfolio limits (members)</a></p>
 <div id="wl-sum" class="wl-sum"></div>
 <div id="wl-list"></div>
 </section>
@@ -128,7 +125,7 @@ def watchlist_page(site):
 <li><b>New names join the queue.</b> After the next U.S. close Be The Puck checks each one has a price history, runs all {len(TIMED)} plays on it and publishes its page, with a full page for every play.</li>
 </ol></div>
 <div class="card prose"><p class="eyebrow">What the columns mean</p><ul>
-<li><b>Plays in:</b> how many of the plays you picked hold the stock now. Most in usually means a strong, broad trend; a split means the plays disagree.</li>
+<li><b>Plays in:</b> how many of the plays you count hold the stock now (all of them, or the ones you pick with Plays counted). Most in usually means a strong, broad trend; a split means the plays disagree.</li>
 <li><b>Strip:</b> one square per play, green for in, red for out, in family order.</li>
 <li><b>Crash exposure:</b> the storm test of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
 <li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
@@ -139,4 +136,4 @@ def watchlist_page(site):
 """
     site.add(path, site.shell(path, "Watchlist · check your stocks against every play",
                               f"Paste tickers or upload a Wealthsimple or broker CSV. See what {len(TIMED)} published trading plays, the trend and crash exposure say about each name; new names are analysed after the next close.",
-                              body, active="watchlist/", scripts=("assets/widgets.js", "assets/watchlist.js")))
+                              body, active="watchlist/", scripts=("assets/widgets.js", "assets/plays.js", "assets/watchlist.js")))

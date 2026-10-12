@@ -2,6 +2,8 @@
  * many plays must agree) filter every covered name live; data/screen.json comes from
  * tools/qstrat/screen.py, whose filter rules and row markup this mirrors.
  * URL: ?side=buy|sell&mkt=us|ca|crypto|fund&sec=<group>&risk=low|high&min=0-100&fresh=1&q=&sort=
+ * The plays counted come from the play filter (plays.js): with the reader's own choice, each
+ * name's plays in, family bars and accuracy-weighted share are recounted from data/playset.json.
  * The ☆ on a row follows the name: on the account when signed in, else in this
  * browser's watchlist (with a nudge to make a free account for the emails). */
 (function () {
@@ -41,6 +43,15 @@
 
   // ---------------------------------------------------------------- filter and sort (as screen.py)
   function agree(r) { return S.side === 'buy' ? r.k : r.o - r.k; }
+  // the share of the counted plays that agree, each weighted by how often its calls were right
+  function agreeW(r) { if (r.w == null) return r.o ? agree(r) / r.o : 0; return S.side === 'buy' ? r.w : 1 - r.w; }
+  var PS = window.BPPlays;
+  function recount() {
+    if (!DATA || !PS || !PS.loaded()) return;
+    var D = PS.data();
+    DATA.t.forEach(function (r) { if (!D.t[r.sym]) return; var c = PS.count(r.sym); r.k = c.k; r.o = c.n; r.f = c.f; r.w = c.w; });
+  }
+  function counted() { return !PS || PS.isAll() ? 'the 100' : 'your ' + PS.size(); }
   function days(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 864e5); }
   function match(r) {
     if (!r.o) return false;
@@ -65,6 +76,7 @@
   function sorted(rows) {
     var by = {
       agree: function (a, b) { return agree(b) / b.o - agree(a) / a.o || b.o - a.o || (a.s < b.s ? -1 : 1); },
+      acc: function (a, b) { return agreeW(b) - agreeW(a) || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
       day: function (a, b) { return cmpNum(Math.abs(a.d || 0) || null, Math.abs(b.d || 0) || null, true); },
       y1: function (a, b) { return cmpNum(a.y, b.y, true); },
       up: function (a, b) { return cmpNum(a.up, b.up, true) || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
@@ -101,7 +113,7 @@
   }
   function summary(n) {
     var bits = [MKT[S.mkt], S.sec, S.risk === 'low' ? 'low or moderate crash exposure' : S.risk === 'high' ? 'high crash exposure' : '', S.fresh ? 'flipped this week' : '', S.q ? '“' + S.q + '”' : ''].filter(Boolean);
-    return '<b>' + n + ' name' + (n === 1 ? '' : 's') + '</b> where at least <b>' + S.min + ' of 100</b> plays agree with <b>' + (S.side === 'buy' ? 'buying' : 'selling') + '</b>' +
+    return '<b>' + n + ' name' + (n === 1 ? '' : 's') + '</b> where at least <b>' + S.min + '% of ' + counted() + '</b> plays agree with <b>' + (S.side === 'buy' ? 'buying' : 'selling') + '</b>' +
       (bits.length ? ' · ' + esc(bits.join(' · ')) : '');
   }
 
@@ -124,7 +136,8 @@
     [].forEach.call(root.querySelectorAll('[data-risk]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-risk') === S.risk)); });
     [].forEach.call(root.querySelectorAll('[data-min]'), function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-min') === S.min)); });
     minIn.value = S.min;
-    minOut.innerHTML = S.min ? 'At least <b>' + S.min + '</b> of 100' : 'Any number';
+    minOut.innerHTML = S.min ? 'At least <b>' + S.min + '%</b> of ' + counted() + ' plays' : 'Any number';
+    root.classList.toggle('ps-custom', !!(PS && !PS.isAll()));
     fresh.checked = S.fresh;
     qIn.value = S.q;
     sortSel.value = S.sort;
@@ -233,6 +246,10 @@
   Promise.all([fetch(SRC).then(function (r) { return r.json(); }), loadFollowing()]).then(function (res) {
     DATA = res[0];
     FAMS = DATA.fam.map(function (f) { return f[1]; });
+    if (PS) {
+      PS.ready(function () { recount(); paintControls(); draw(); });
+      PS.onChange(function () { recount(); shown = PAGE; paintControls(); draw(); });
+    }
     paintControls();
     draw();
   }).catch(function () { /* the server-rendered first page stays */ });

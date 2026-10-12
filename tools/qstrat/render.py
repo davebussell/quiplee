@@ -41,6 +41,23 @@ def is_stock(t):
     return not t.get("crypto") and not t.get("index") and t["group"] not in NON_STOCK_GROUPS
 
 
+def n_stocks():
+    return sum(1 for t in universe() if is_stock(t))
+
+
+def rankable(a, n=None):
+    """Whether a play's accuracy (Site.play_accuracy) rests on enough calls, on enough stocks, to rank."""
+    n = n_stocks() if n is None else n
+    return a["bat"] is not None and a["calls"] >= TOP_MIN_CALLS and 2 * a["stocks"] >= n
+
+
+def ps_bar(h, note, cls=""):
+    """The play-filter button (assets/plays.js fills in the label and opens the chooser) and a line on what it changes."""
+    return (f'<div class="ps-bar{" " + cls if cls else ""}"><button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog">'
+            f'<span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button>'
+            f'<p class="small muted">{note} <a href="{h("guides/your-plays/")}">How it works</a></p></div>')
+
+
 def slugify_group(g):
     return "".join(c if c.isalnum() else "-" for c in g.lower()).strip("-").replace("--", "-")
 
@@ -566,7 +583,7 @@ class Site:
 <p>{len(TIMED)} published trading plays run on real prices after every U.S. close, with the price that would change each one's mind. It takes no positions in the names it covers.</p></div>
 <div><p class="foot-h">Stocks</p><a href="{h('stocks/')}">All stocks</a><a href="{h('watchlist/')}">Watchlist</a><a href="{h('markets/')}">Markets</a><a href="{h('desk/')}">Live desk</a></div>
 <div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}">My Puck</a></div>
-<div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
+<div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('guides/your-plays/')}">Pick your plays</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
 <div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
 </div>
 {FOOT_DISCLAIM}
@@ -638,10 +655,10 @@ class Site:
         """The most accurate play in each family, as [(family key, play, accuracy)].
         Plays with too few finished calls, or calls on too few stocks, aren't ranked."""
         if self._top is None:
-            out, n_stocks = [], sum(1 for x in universe() if is_stock(x))
+            out, ns = [], n_stocks()
             for fk in FAMILY_ORDER:
                 ok = [(self.play_accuracy(p), p) for p in self.timed_family(fk)]
-                ok = [(a, p) for a, p in ok if a["bat"] is not None and a["calls"] >= TOP_MIN_CALLS and 2 * a["stocks"] >= n_stocks]
+                ok = [(a, p) for a, p in ok if rankable(a, ns)]
                 if ok:
                     a, p = max(ok, key=lambda ap: (ap[0]["bat"], ap[0]["calls"]))
                     out.append((fk, p, a))
@@ -653,19 +670,18 @@ class Site:
         top = self.top_plays()
         if not top:
             return ""
-        n_stocks = sum(1 for x in universe() if is_stock(x))
         cards = ""
         for fk, p, a in top:
             x = self.r(t["sym"], p["slug"])
             b = x["batting"]
             here = (f'On {e(t["short"])}: right {b["right"]} of {b["n"]}' if b["n"] else f'No finished calls on {e(t["short"])} yet')
             since = (f'{"In" if x["state"] == 1 else "Out"} since {dlong(x["since"])}' if x["state"] is not None and x.get("since") is not None else "")
-            cards += (f'<a class="card tp" href="{h(self.pair_path(t, p))}"><span class="tp-fam">{icon(fk)}{e(FAMILY[fk][0])}</span>'
+            cards += (f'<a class="card tp" data-fam="{fk}" href="{h(self.pair_path(t, p))}"><span class="tp-fam">{icon(fk)}{e(FAMILY[fk][0])}</span>'
                       f'<span class="tp-name"><b>{e(p["name"])}</b>{pill(x["state"])}</span>'
                       f'<span class="tp-acc"><b>{pct(a["bat"], sign=False, d=0)}</b> of {a["calls"]:,} calls right</span>'
                       f'<span class="tp-here">{here}{" · " + since if since else ""}</span></a>')
-        return f"""<section class="top-plays" aria-labelledby="tp-h"><div class="sec-head"><h2 class="h2" id="tp-h">The most accurate play in each family</h2>
-<p>Each family's play whose calls went the right way most often, tested on {n_stocks} stocks since {GRADE_YEAR}, and what it says about {e(t['short'])} now.</p></div>
+        return f"""<section class="top-plays" id="top-plays" aria-labelledby="tp-h"><div class="sec-head"><h2 class="h2" id="tp-h">The most accurate play in each family</h2>
+<p data-ps-tp-sub>Each family's play whose calls went the right way most often, tested on {n_stocks()} stocks since {GRADE_YEAR}, and what it says about {e(t['short'])} now.</p></div>
 <div class="tp-grid">{cards}</div>
 <p class="muted small">A call is right when the stock rose after an in call or fell after an out call. Trend plays are built to take many small losses for a few big wins, so their hit rates run lower; being right often isn't the same as making the most money. <a href="{h('method/')}">How we test a play</a>.</p></section>"""
 
@@ -811,6 +827,8 @@ class Site:
         from .guides import Guides
         self.guides = Guides(self)
         self.guides.build()
+        from .playset import guide_page
+        guide_page(self)
         from .rules import rules_page
         rules_page(self, self.guides)
         self.learn.build()
@@ -828,7 +846,7 @@ class Site:
         walk = [("step-1", "Is the market about to crash?", "Nine crash gauges and the plays on the S&amp;P 500"),
                 ("step-2", "Buying or selling?", "Tell the screener your play"),
                 ("step-3", "Where are you looking?", "Market, sector and crash exposure"),
-                ("step-4", f"How many of the {len(TIMED)} plays must agree?", "From any of them to nearly all")]
+                ("step-4", "Which plays, and how many must agree?", f"Count all {len(TIMED)} or just the ones you trust")]
         walk_html = "".join(f'<li><a href="#{a}"><span class="step-n">{i}</span><b>{t}</b><span>{d}</span></a></li>' for i, (a, t, d) in enumerate(walk, 1))
         more = [("theory/", "Theory tester", "Test one theory on one stock", "Every play's reason to buy or not, one at a time, with the price that would change its mind."),
                 ("markets/", "Market weather", "All nine crash gauges", "Each one's history back to the 1920s, and where it stood at past market tops."),
@@ -861,7 +879,7 @@ class Site:
         extra = f'<script type="application/ld+json">{json.dumps(ld)}</script>\n'
         self.add(path, self.shell(path, "Be The Puck · Is the market about to crash? Which stocks do the plays agree on?",
                                   f"Nine crash gauges, then a screener of {len(universe())} stocks, funds and coins: pick buying or selling, where to look and how many of {len(TIMED)} published trading plays from {n_an} analysts must agree.",
-                                  body, active="", extra_head=extra, scripts=("assets/screen.js",)))
+                                  body, active="", extra_head=extra, scripts=("assets/plays.js", "assets/screen.js")))
 
     def board_html(self, depth, curated=False, top=None):
         """Stocks x play families: how many plays in each family hold each stock.
@@ -885,11 +903,11 @@ class Site:
                 cells = ""
                 for k, name, ps in fams:
                     kk, nn = self.consensus(t, ps)
-                    cells += (f'<td class="c fam-cell" data-v="{sortv(kk / nn if nn else None)}"><a href="{h("stocks/" + t["slug"] + "/")}#fam-{k}" title="{e(name)} on {e(t["short"])}: {kk} of {nn} in">'
+                    cells += (f'<td class="c fam-cell" data-v="{sortv(kk / nn if nn else None)}" data-ps-fam="{k}"><a href="{h("stocks/" + t["slug"] + "/")}#fam-{k}" title="{e(name)} on {e(t["short"])}: {kk} of {nn} in">'
                               f'{fill_bar(kk, nn)}<span>{kk}/{nn}</span></a></td>')
                 k_, n_ = self.consensus(t)
-                rows += (f'<tr><td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a>'
-                         f'<span class="sym-sub">{e(t["name"])}</span></td>{cells}<td class="r" data-v="{sortv(k_ / n_ if n_ else None)}">{count_in(k_, n_)}</td></tr>')
+                rows += (f'<tr data-ps-row="{e(t["sym"])}"><td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a>'
+                         f'<span class="sym-sub">{e(t["name"])}</span></td>{cells}<td class="r" data-v="{sortv(k_ / n_ if n_ else None)}" data-ps-plays>{count_in(k_, n_)}</td></tr>')
         return (f'<div class="tbl-wrap"><table class="tbl board"><thead><tr><th class="stick" scope="col">Stock</th>{head}<th class="r" scope="col">All plays</th></tr></thead>'
                 f'<tbody>{rows}</tbody></table></div>')
 
@@ -1159,10 +1177,11 @@ class Site:
             lvl = rk.get("level")
             up = ol["upside"] if ol["ok"] else None
             score = round(ol["score"] * 100) if ol["ok"] else None
+            upp = f'{sv.upside_points(up):.4f}' if ol["ok"] else ""
             gslug = slugify_group(t["group"])
             lt = self.light(t)
             ndx_attr = (' data-ndx="1"' if t.get("ndx") else "") + (' data-tsx="1"' if t.get("tsx") else "")
-            rows += (f'<tr data-group="{gslug}"{ndx_attr} data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
+            rows += (f'<tr data-group="{gslug}"{ndx_attr} data-sym="{e(t["sym"])}" data-upp="{upp}" data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                      f'<td data-v="{0 if lt["state"] == "start" else 1 if lt["state"] == "stop" else 2}">{light_badge(lt)}</td>'
                      f'<td class="small muted grp-col">{e(t["group"])}</td>'
@@ -1170,9 +1189,9 @@ class Site:
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
                      f'<td class="r {dir_cls(y1)}" data-v="{sortv(y1)}">{pct(y1, d=0)}</td>'
                      f'<td class="r {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
-                     f'<td data-v="{sortv(k / n if n else None)}">{count_in(k, n)}</td>'
+                     f'<td data-v="{sortv(k / n if n else None)}" data-ps-plays>{count_in(k, n)}</td>'
                      f'<td class="r {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
-                     f'<td class="r" data-v="{score if score is not None else ""}">{f"<b>{score}</b>" if score is not None else "–"}</td>'
+                     f'<td class="r" data-v="{score if score is not None else ""}" data-ps-scorecell>{f"<b>{score}</b>" if score is not None else "–"}</td>'
                      f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
         chips = ('<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>'
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>'
@@ -1185,7 +1204,8 @@ class Site:
         body = f"""
 <section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and how many plays agree</h1>
 <p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list: how many of the {len(TIMED)} plays hold each one, how far analysts' targets sit above the price, the combined score and how exposed it is to a crash. Sort by any column, filter by group, or open a name for its chart and every play.</p>
-<div class="seg seg-sm st-views" role="group" aria-label="View"><button type="button" aria-pressed="true" data-view="list">Stock list</button><button type="button" aria-pressed="false" data-view="families">By play family</button></div></section>
+<div class="seg seg-sm st-views" role="group" aria-label="View"><button type="button" aria-pressed="true" data-view="list">Stock list</button><button type="button" aria-pressed="false" data-view="families">By play family</button></div>
+{ps_bar(h, "Pick the plays you trust. Plays in, the score, the sorts and the family view count only those.", "st-ps")}</section>
 
 <section class="st-list" id="list">
 <div class="st-tools">
@@ -1198,7 +1218,7 @@ class Site:
 <th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th class="r" data-sort-first="desc">Score</th><th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
-<p class="muted small">Score: half the share of plays in, half analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
+<p class="muted small">Score: half the share of the plays you count that hold it, half analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
 
 <section class="st-fams" id="families" hidden>
@@ -1207,7 +1227,7 @@ class Site:
 </section>"""
         self.add(path, self.shell(path, "Stocks · every stock and how many plays agree",
                                   f"Every stock, ETF, index and coin Be The Puck covers: how many of {len(TIMED)} plays hold it, analysts' upside, a combined score and crash exposure, sortable and filterable.",
-                                  body, active="stocks/", scripts=("assets/stocks.js",)))
+                                  body, active="stocks/", scripts=("assets/plays.js", "assets/stocks.js")))
 
     def stock_page(self, t):
         path, depth = f"stocks/{t['slug']}/", 2
@@ -1223,11 +1243,14 @@ class Site:
         for fk, fname, _ in FAMILIES:
             ps = [p for p in TIMED if p["family"] == fk]
             kk, nn = self.consensus(t, ps)
-            tiles += (f'<a class="card fam-tile" href="#fam-{fk}"><span class="tile-label">{icon(fk)}{e(fname)}</span>'
-                      f'<span class="fam-n"><b>{kk}</b> of {nn} in</span>{fill_bar(kk, nn)}</a>')
-            rows += f'<tr class="grp" id="fam-{fk}"><td colspan="6">{icon(fk)} {e(fname)}</td></tr>'
+            tiles += (f'<a class="card fam-tile" href="#fam-{fk}" data-ps-ftile="{fk}"><span class="tile-label">{icon(fk)}{e(fname)}</span>'
+                      f'<span class="fam-n"><b data-k>{kk}</b> of <span data-n>{nn}</span> in</span>{fill_bar(kk, nn)}</a>')
+            rows += f'<tr class="grp" id="fam-{fk}" data-ps-grp="{fk}"><td colspan="7">{icon(fk)} {e(fname)}</td></tr>'
             for s in ps:
                 x = self.r(sym, s["slug"])
+                bt = x["batting"]
+                right_here = (f'<td class="r nowrap" data-v="{bt["avg"]:.4f}">{pct(bt["avg"], sign=False, d=0)} <span class="muted">{bt["right"]}/{bt["n"]}</span></td>'
+                              if bt["n"] else '<td class="r muted" data-v="">–</td>')
                 nm = next_move(x, s, t)
                 since_move = x["price"] / x["since_price"] - 1 if x.get("since_price") else None
                 dv = abs(nm["dist"]) if nm["dist"] is not None else (nm.get("dist_days", 0) / 365 if nm.get("dist_days") is not None else None)
@@ -1235,14 +1258,19 @@ class Site:
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
                 name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages else f'<b>{e(s["name"])}</b>')
-                rows += (f'<tr><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
+                rows += (f'<tr data-ps-play="{s["slug"]}"><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
                          f'<td>{pill(x["state"])}{band}</td><td class="nowrap" data-v="{pd.Timestamp(x["since"]).strftime("%Y-%m-%d") if x["since"] is not None else ""}">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
-                         f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td><td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
+                         f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td>{right_here}<td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
                          f'<td class="r nowrap" data-v="{sortv(a.get("maxdd"))}">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td></tr>')
         b = bh["stats"]["full"]["bh"] or {}
-        rows += (f'<tr class="grp"><td colspan="6">Benchmark</td></tr><tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
-                 f'<td>{pill(1)}</td><td class="nowrap">{dlong(bh["stats"]["start"])}</td><td class="muted">Always in</td>'
+        rows += (f'<tr class="grp"><td colspan="7">Benchmark</td></tr><tr><td><a href="{h("strategies/buy-and-hold/")}"><b>Buy &amp; Hold</b></a><span class="sym-sub">John C. Bogle · benchmark</span></td>'
+                 f'<td>{pill(1)}</td><td class="nowrap">{dlong(bh["stats"]["start"])}</td><td class="muted">Always in</td><td class="r muted">–</td>'
                  f'<td class="r">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td></tr>')
+        # this stock's record on every play, for the play filter (assets/playview.js): [right, calls, in/out since]
+        here = []
+        for p_ in TIMED:
+            x_ = self.r(sym, p_["slug"])
+            here.append([x_["batting"]["right"], x_["batting"]["n"], pd.Timestamp(x_["since"]).strftime("%Y-%m-%d") if x_.get("since") is not None else None])
         others = self.stock_select("jump-stock", e(h("stocks/{v}/")), t, depth)
         start_y = bh['stats']['start'].year if bh['stats']['start'] is not None else ""
 
@@ -1266,13 +1294,14 @@ class Site:
         crash_tile = (f'<a class="card tile tile-link" href="#crash"><span class="tile-label">Crash exposure</span><span class="tile-value lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>'
                       f'<span class="tile-note">{rk["score"]} of 10 on the storm test</span></a>') if lvl else ""
         ol = sv.outlook(self, t)
-        out_tile = ""
+        out_tile, upp = "", None
         if ol["ok"]:
-            out_tile = (f'<a class="card tile tile-link" href="{h("articles/green-across-the-board/")}"><span class="tile-label">Plays + analysts\' upside</span>'
-                        f'<span class="tile-value">{round(ol["score"] * 100)}<small> / 100</small></span>{fill_bar(round(ol["score"] * 100), 100)}'
+            upp = sv.upside_points(ol["upside"])
+            out_tile = (f'<a class="card tile tile-link" href="{h("articles/green-across-the-board/")}" data-ps-score="{e(sym)}" data-upp="{upp:.4f}"><span class="tile-label">Plays + analysts\' upside</span>'
+                        f'<span class="tile-value"><span data-v>{round(ol["score"] * 100)}</span><small> / 100</small></span>{fill_bar(round(ol["score"] * 100), 100)}'
                         f'<span class="tile-note">Target <b class="{dir_cls(ol["upside"])}">{pct(ol["upside"], d=0)}</b> from {ol["n_an"]} analysts; half the score is the plays.</span></a>')
         summary = f"""<section class="sum-tiles">
-<div class="card tile"><span class="tile-label">Plays in</span><span class="tile-value">{k}<small> / {n}</small></span>{fill_bar(k, n)}<span class="tile-note">Every play Be The Puck tests, in {len(FAMILIES)} families.</span></div>
+<div class="card tile" data-ps-tile="{e(sym)}"><span class="tile-label">Plays in</span><span class="tile-value"><span data-k>{k}</span><small> / <span data-n>{n}</span></small></span>{fill_bar(k, n)}<span class="tile-note" data-note>Every play Be The Puck tests, in {len(FAMILIES)} families.</span></div>
 {out_tile}{crash_tile}{trend_tile}
 </section>"""
         req_note = ""
@@ -1306,6 +1335,8 @@ class Site:
                        f'<a class="btn sm" href="{e(h("alerts/"))}?t={e(t["slug"])}" data-signed-out>Email me</a>'
                        f'<a class="btn sm" href="{e(h("me/"))}#alerts" data-signed-in hidden>My alerts</a>'
                        f'<a class="btn sm primary" href="{e(h("theory/"))}?s={e(t["slug"])}">Test a theory</a></div>')
+        here_json = json.dumps({"sym": sym, "s": t["short"], "b": here, "upp": None if upp is None else round(upp, 4), "tw": sv.TREND_WEIGHT,
+                                "pair": h("stocks/" + t["slug"] + "/{s}/")}, separators=(",", ":")).replace("</", "<\\/")
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><span>{e(t['short'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(t['group'])}</p><h1 class="h1">{e(t['name'])} <span class="muted">({e(t['short'])})</span></h1>
@@ -1315,21 +1346,23 @@ class Site:
 {idx_note}{req_note}</section>
 <section class="card read-card"><div class="read-top"><p class="eyebrow">The read</p>{watch_btn}</div><ul class="read">{read_html}</ul>
 <p class="muted small">{DISCLAIMER} <a href="{h('learn/')}">New to this? Start with the basics.</a></p></section>
+{ps_bar(h, "Pick the plays you trust. The tiles, the most accurate plays and the full list below count only those, on this page and every other.")}
 {summary}
 {self.top_plays_block(t, h)}
 {chart}
 {heat}
-<section><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p>All {len(TIMED)} plays, by family.</p></div>
+<section id="every-play"><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p data-ps-all-sub>All {len(TIMED)} plays, by family.</p></div>
 <div class="fam-tiles">{tiles}</div>
-<p class="muted small">Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p>
-<div class="tbl-wrap" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+<p class="muted small">Calls right: how often the play's calls on {e(t['short'])} went the right way since {GRADE_YEAR}. Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p>
+<div class="tbl-wrap" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r" data-sort-first="desc">Calls right</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+<script type="application/json" id="ps-here">{here_json}</script>
 {deep}
 {exposed}
 {arts}
 <section class="jump"><label class="small muted" for="jump-stock">Another stock</label>{others}</section>
 {act_bar}
 """
-        self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js",)))
+        self.add(path, self.shell(path, f"{t['name']} ({t['short']}) · plays, chart and crash exposure", f"What {len(TIMED)} published trading plays say about {t['name']} ({t['short']}) now, the exact levels that flip them, its candlestick chart, fundamentals and crash exposure.", body, active="stocks/", scripts=("assets/widgets.js", "assets/plays.js", "assets/playview.js")))
 
     def articles_for(self, t, depth):
         h = lambda x: self.href(depth, x)
@@ -1524,7 +1557,7 @@ class Site:
 <p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
 <section class="card prose" id="light"><p class="eyebrow">The Start/Stop light</p>
 <p>Every stock gets one light that sums up all {len(TIMED)} plays. It reads <b>Start</b> when {round(LIGHT_ON * 100)}% or more of the plays with a call hold the stock, and stays Start until the share falls to {round(LIGHT_OFF * 100)}% or less, when it turns <b>Stop</b>. It turns back to Start only at {round(LIGHT_ON * 100)}% again. The gap in the middle keeps a stock that hovers around half from flipping every few days. The light's history is walked through the last two years of weekly calls, then today's close.</p>
-<p>Each play counts once, whatever its family or how often it trades. Members can choose which plays count and where the thresholds sit. {DISCLAIMER}</p></section>
+<p>Each play counts once, whatever its family or how often it trades. Anyone can choose which plays count on the screener, the stock list, each stock page, the watchlist and My Puck (<a href="{h('guides/your-plays/')}">pick your plays</a>); the light itself always sums up every play. Members can also set their own Start/Stop thresholds. {DISCLAIMER}</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>

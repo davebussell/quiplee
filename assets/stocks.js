@@ -64,6 +64,8 @@
     if (s && COL[s] != null) sortBy(s);
     apply();
   }
+  // the play filter (plays.js) recounts Plays in, the score and data-share; filter again after
+  if (window.BPPlays) { window.BPPlays.ready(function () { apply(); }); window.BPPlays.onChange(function () { apply(); }); }
   // sortable.js adds its header buttons on DOMContentLoaded; run after it
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(start, 0); });
   else setTimeout(start, 0);

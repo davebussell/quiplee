@@ -195,6 +195,9 @@ def main():
         f.write(site.names_json())
     with open(os.path.join(out, "data", "plays.json"), "w", encoding="utf-8") as f:
         f.write(site.plays_json())
+    from qstrat.playset import playset_json
+    with open(os.path.join(out, "data", "playset.json"), "w", encoding="utf-8") as f:
+        f.write(playset_json(site))
     with open(os.path.join(out, "data", "reads.json"), "w", encoding="utf-8") as f:
         f.write(reads_json(site))
     from qstrat import screen, theory

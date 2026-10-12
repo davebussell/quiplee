@@ -229,6 +229,9 @@
     else [].forEach.call(root.querySelectorAll('table'), decorate);
   }
 
+  // Re-apply a table's chosen sort after its values change in place (plays.js recounts cells).
+  window.BPSort = { resort: function (table) { var saved = table && state[keyFor(table)]; if (saved && saved.dir) apply(table, saved.col, saved.dir); } };
+
   function init() {
     injectStyle();
     scan(document.body);

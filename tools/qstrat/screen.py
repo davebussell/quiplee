@@ -21,7 +21,7 @@ RISK = ["Low", "Moderate", "High", "Very high"]
 RISK_CLS = ["calm", "watch", "warning", "warning"]
 MARKETS = [("", "All"), ("us", "U.S."), ("ca", "Canada"), ("crypto", "Crypto"), ("fund", "Funds & indexes")]
 FUND_GROUPS = ("Market indexes", "Sectors", "Indexes & ETFs")
-SORTS = [("up", "Most analyst upside"), ("agree", "Most plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
+SORTS = [("up", "Most analyst upside"), ("agree", "Most plays agree"), ("acc", "Most accurate plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
          ("risk", "Least crash exposure"), ("az", "A to Z")]
 DEFAULT_MIN = 60
 DEFAULT_SORT = "up"          # the screener opens on Most analyst upside
@@ -154,7 +154,7 @@ def summary(n, st):
     who = "buying" if st["side"] == "buy" else "selling"
     where = dict(MARKETS)[st["mkt"]] if st["mkt"] else ""
     bits = [b for b in (where, st["sec"]) if b]
-    return (f'<b>{n} name{"" if n == 1 else "s"}</b> where at least <b>{st["min"]} of 100</b> plays agree with <b>{who}</b>'
+    return (f'<b>{n} name{"" if n == 1 else "s"}</b> where at least <b>{st["min"]}% of the {len(TIMED)}</b> plays agree with <b>{who}</b>'
             + (f' · {e(" · ".join(bits))}' if bits else ""))
 
 
@@ -220,6 +220,7 @@ def preset_screen(site, kw):
 
 
 def screener(site, depth):
+    from .render import ps_bar
     h = lambda x: site.href(depth, x)
     st = state()
     got = ranked(site, st)
@@ -256,9 +257,10 @@ def screener(site, depth):
     <span class="scr-lab">Crash exposure</span><div class="chips scr-risk" role="group" aria-label="Crash exposure">{risk}</div>
     <label class="scr-lab" for="scr-q">Or look up a name</label><input type="search" id="scr-q" placeholder="NVDA, Shopify, gold…" autocomplete="off" spellcheck="false">
   </fieldset>
-  <fieldset class="scr-step" id="step-4"><legend><span class="step-n">4</span>How many of the 100 plays must agree?</legend>
-    <div class="scr-min"><output id="scr-min-out" for="scr-min">At least <b>{DEFAULT_MIN}</b> of 100</output>
-    <input type="range" id="scr-min" min="0" max="100" step="5" value="{DEFAULT_MIN}" aria-label="Plays that must agree, out of 100"></div>
+  <fieldset class="scr-step" id="step-4"><legend><span class="step-n">4</span>Which plays count, and how many must agree?</legend>
+    {ps_bar(h, "Count all of them, or only the plays you trust. The most accurate in each family is a good place to start.", "scr-ps")}
+    <div class="scr-min"><output id="scr-min-out" for="scr-min">At least <b>{DEFAULT_MIN}%</b> of the {len(TIMED)} plays</output>
+    <input type="range" id="scr-min" min="0" max="100" step="5" value="{DEFAULT_MIN}" aria-label="Share of the plays that must agree, in percent"></div>
     <div class="chips scr-mins" role="group" aria-label="Quick picks">{mins}</div>
     <label class="auth-check scr-fresh"><input type="checkbox" id="scr-fresh"><span>Only lights that flipped in the last week</span></label>
   </fieldset>
@@ -273,7 +275,7 @@ def screener(site, depth):
   <ol class="scr-list" id="scr-list">{first}</ol>
   <p class="scr-empty" id="scr-empty" hidden>No names match all of that. Try fewer plays in step 4, or a wider market in step 3.</p>
   <div class="scr-foot"><button type="button" class="btn" id="scr-more"{"" if len(got) > PAGE else " hidden"}>Show {PAGE} more</button>
-  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when its light flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
+  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. The seven bars are the plays by family: {e(fam_names)}. Tap ☆ to follow a name and get an email when its light flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
 </div>
 </div>
 </section>"""

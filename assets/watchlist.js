@@ -190,7 +190,13 @@
   }
 
   // ---------------------------------------------------------------- reading the list
+  // the plays counted come from the site-wide play filter (plays.js) when it has loaded
   function selected() {
+    var PS = window.BPPlays;
+    if (PS && PS.loaded()) {
+      if (PS.isAll()) return D.plays.map(function (p, i) { return i; });
+      return D.plays.map(function (p, i) { return PS.onSlug(p.s) ? i : -1; }).filter(function (i) { return i >= 0; });
+    }
     if (st.mode === 'all') return D.plays.map(function (p, i) { return i; });
     if (st.mode === 'pick' && st.pick.length) return D.plays.map(function (p, i) { return st.pick.indexOf(p.s) >= 0 ? i : -1; }).filter(function (i) { return i >= 0; });
     return D.plays.map(function (p, i) { return p.c ? i : -1; }).filter(function (i) { return i >= 0; });
@@ -359,9 +365,8 @@
   }
   function setMode(m) {
     st.mode = m; saveMode();
-    [].forEach.call($('wl-mode').children, function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === m)); });
-    $('wl-picker').hidden = m !== 'pick';
-    if (m === 'pick') picker();
+    if ($('wl-mode')) [].forEach.call($('wl-mode').children, function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-v') === m)); });
+    if ($('wl-picker')) { $('wl-picker').hidden = m !== 'pick'; if (m === 'pick') picker(); }
     render();
   }
 
@@ -444,7 +449,16 @@
       st.items = Q.watchGet().items || [];
       if (!st.items.length) loadExample();
     }
-    [].forEach.call($('wl-mode').children, function (b) { b.addEventListener('click', function () { setMode(b.getAttribute('data-v')); }); });
+    if ($('wl-mode')) [].forEach.call($('wl-mode').children, function (b) { b.addEventListener('click', function () { setMode(b.getAttribute('data-v')); }); });
+    var PS = window.BPPlays;
+    if (PS) {
+      PS.ready(function () {
+        // a pick made here before the site-wide filter existed carries over once
+        if (!PS.hadChoice() && st.mode === 'pick' && st.pick.length) PS.set({ p: 'custom', s: st.pick });
+        render();
+      });
+      PS.onChange(function () { render(); });
+    }
     $('wl-go').addEventListener('click', function () {
       var v = $('wl-in').value; if (!v.trim()) { msg('Type or paste at least one ticker.', 'warn-text'); return; }
       addEntries(parseText(v)); $('wl-in').value = '';

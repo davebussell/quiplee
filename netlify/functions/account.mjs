@@ -6,6 +6,7 @@
  *   POST /api/account/logout
  *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about)
  *   POST /api/account/alerts  {on, level: "light"|"all"}
+ *   POST /api/account/plays   {plays: {p: "all"|"top1"|"top3"|"half"|"custom", s: [play slugs]}} -> the plays that count (assets/plays.js)
  *   POST /api/account/email   {email, password}                  -> add or change the address (re-confirm)
  *   POST /api/account/resend                                     -> send the confirm link again
  *   GET  /api/account/confirm?t=                                 -> confirms, back to /me/?confirmed=1
@@ -56,7 +57,7 @@ function view(acct) {
   return {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,
     confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], alerts: acct.alerts || { on: false, level: "all" },
-    rules: acct.rules || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
+    rules: acct.rules || null, plays: acct.plays || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
     last_sent: acct.last_sent || null,
   };
 }
@@ -181,6 +182,22 @@ async function rules(req, s, sess) {
   const out = await updateAccount(s, sess.u, (a) => ({ ...a, rules: cleanRules(b.rules) }));
   if (out.error) return reply({ error: out.error }, out.status || 400);
   return reply({ ok: true, rules: out.acct.rules });
+}
+
+/** The play filter's choice: a ready-made set, or a list of play slugs. */
+function cleanPlays(c) {
+  if (!c || typeof c !== "object") return null;
+  const p = ["all", "top1", "top3", "half", "custom"].includes(c.p) ? c.p : "custom";
+  const s = Array.isArray(c.s) ? [...new Set(c.s.filter((x) => typeof x === "string" && /^[a-z0-9-]{1,48}$/.test(x)))].slice(0, 300) : [];
+  if (p === "custom" && !s.length) return { p: "all", s: [] };
+  return { p, s: p === "custom" ? s : [] };
+}
+
+async function plays(req, s, sess) {
+  const b = await readBody(req);
+  const out = await updateAccount(s, sess.u, (a) => ({ ...a, plays: cleanPlays(b.plays) }));
+  if (out.error) return reply({ error: out.error }, out.status || 400);
+  return reply({ ok: true, plays: out.acct.plays });
 }
 
 async function changeEmail(req, s, sess) {
@@ -312,6 +329,7 @@ export default async (req, context) => {
     if (route === "follow") return await follow(req, s, sess);
     if (route === "alerts") return await alerts(req, s, sess);
     if (route === "rules") return await rules(req, s, sess);
+    if (route === "plays") return await plays(req, s, sess);
     if (route === "email") return await changeEmail(req, s, sess);
     if (route === "resend") return await resend(req, context, s, sess);
     if (route === "password") return await changePassword(req, s, sess);
