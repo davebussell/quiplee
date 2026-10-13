@@ -53,6 +53,11 @@ for that isn't there, and move an issue to Done only once the change is live.
   filing, so backtests never see the future); `tools/qstrat/secfund.py` turns them into P/E,
   growth, margins and debt. Yahoo (`tools/fetch_fundamentals.py`) covers the rest (TSX-only
   names, forward estimates, analyst targets). Prefer SEC numbers wherever a company files 10-Qs.
+- Earnings: `tools/fetch_earnings.py` has Claude read each new earnings press release (8-K
+  Exhibit 99.1) into `data/earnings/` (guidance raised/kept/cut, one-offs, a plain headline).
+  `.github/workflows/earnings.yml` runs it weekday mornings; the nightly refresh runs it too.
+  Needs the `ANTHROPIC_API_KEY` repo secret. Run the workflow by hand with `backfill` to read
+  each company's past releases.
 - `netlify/functions/` is the live API (accounts, alerts, watchlist queue, PayPal).
 - Readers' choices (plays counted, signal weights) live in `localStorage` and, when signed
   in, in their account (`/api/account/plays`).

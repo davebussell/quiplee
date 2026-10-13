@@ -1,0 +1,54 @@
+# Weekday mornings, after the pre-market earnings releases: check the SEC for new earnings 8-Ks
+# from covered companies and have Claude read each new press release into data/earnings/
+# (guidance raised, kept or cut; see tools/fetch_earnings.py). Commits, and so triggers a
+# deploy, only when a new release was read. After-close releases are read by the evening
+# price refresh. Needs the ANTHROPIC_API_KEY repo secret; without it the read step does nothing.
+# Run it by hand with "backfill" set to read each company's last few releases (a one-off history).
+name: Earnings releases
+
+on:
+  schedule:
+    - cron: "40 12 * * 1-5"   # 8:40 ET in summer, 7:40 ET in winter
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Releases per company to read (1 = only the newest)"
+        default: "1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-prices      # never alongside the price refresh, which commits to the same folders
+  cancel-in-progress: false
+
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -r requirements.txt
+      - name: New filings from the SEC
+        run: python tools/fetch_sec.py || true
+      - name: Claude reads the new press releases
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EARNINGS_MAX: ${{ github.event.inputs.backfill && '400' || '60' }}
+        run: python tools/fetch_earnings.py --backfill "${{ github.event.inputs.backfill || '1' }}"
+      - name: Commit if a release was read
+        run: |
+          git config user.name "bethepuck-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/earnings data/sec 2>/dev/null || true
+          if git diff --cached --quiet -- data/earnings; then
+            echo "No new earnings releases read"
+          else
+            git commit -m "Earnings releases $(date -u +%F)"
+            git pull --rebase -q origin main
+            git push
+          fi

@@ -55,7 +55,9 @@ BENCH_NAME = {"^GSPC": "the S&P 500", "^GSPTSE": "the S&P/TSX"}
 
 # ------------------------------------------------------------------ the kinds of news
 # key: label, source, expected direction (+1 up, -1 down, 0 none), plural noun for sentences, what counts
-SRC = {"earn": "Earnings report", "rating": "Analyst rating", "sec": "SEC filing (8-K)", "news": "News headline"}
+SRC = {"earn": "Earnings report", "rating": "Analyst rating", "sec": "SEC filing (8-K)", "news": "News headline",
+       "release": "Earnings release, read by Claude"}
+EARNINGS_DIR = os.path.join(ROOT, "data", "earnings")
 CATS = {
     "big-beat": ("Big beat", "earn", 1, "big beats", "Earnings per share 20% or more above analysts' average estimate going in."),
     "beat": ("Earnings beat", "earn", 1, "earnings beats", "Earnings per share 5% to 20% above analysts' average estimate going in."),
@@ -73,6 +75,9 @@ CATS = {
     "financing": ("Financing", "sec", 0, "financing filings", "8-K items 2.03 and 3.02: new debt, or shares sold privately."),
     "restructure": ("Restructuring or write-down", "sec", 0, "restructuring filings", "8-K items 2.05 and 2.06: restructuring costs or a material impairment."),
     "other-8k": ("Other material event", "sec", 0, "other 8-K filings", "8-K items 7.01, 8.01, 3.01 and 4.02: other disclosures the company deems material."),
+    "r-raised": ("Outlook raised", "release", 1, "raised outlooks", "The company's earnings release raises its outlook (read from the release by Claude; tools/fetch_earnings.py)."),
+    "r-kept": ("Outlook kept", "release", 0, "kept outlooks", "The earnings release repeats the outlook it gave before."),
+    "r-cut": ("Outlook cut or withdrawn", "release", -1, "cut or withdrawn outlooks", "The earnings release lowers or withdraws its outlook."),
     "n-guide-up": ("Guidance raised", "news", 1, "guidance-raised headlines", "A headline says the company raised its outlook or forecast."),
     "n-guide-down": ("Guidance cut", "news", -1, "guidance-cut headlines", "A headline says the company cut or withdrew its outlook, or warned."),
     "n-beat": ("Beat, in the headlines", "news", 1, "beat headlines", "A headline says results beat or topped estimates."),
@@ -127,7 +132,7 @@ FILLER = re.compile(r"\b(shares of|stake in|position in|holdings in|stock positi
 # insiders' trades and analysts' calls: not sorted from headlines (the ratings cover analysts), but still shown as context
 ASIDE = re.compile(r"\b(insiders?|officer|director|ceo|cfo|price target|rating|upgrades?|downgrades?|analysts? (says?|sees?|raises?|cuts?|lifts?|lowers?)|"
                    r"valuation forecast|eps forecast|gets (weaker|stronger|lower|higher))\b", re.I)
-GUIDE_BEAT = {"n-guide-up", "n-guide-down", "n-beat", "n-miss"}   # headlines about the report itself: not confounded by it
+GUIDE_BEAT = {"n-guide-up", "n-guide-down", "n-beat", "n-miss", "r-raised", "r-kept", "r-cut"}   # headlines about the report itself: not confounded by it
 
 
 # ------------------------------------------------------------------ small helpers
@@ -411,6 +416,16 @@ def build_events(t, S, items=None, ev=None, tally=None):
             uk.add(key)
             out.append(_ev(None, ts, i, h, "news", it.get("u", ""), {"src": it.get("s", "")}))
     out += list(sk.values()) + list(nk.values())
+    # what the earnings release itself said about the outlook (tools/fetch_earnings.py)
+    rel = _load(os.path.join(EARNINGS_DIR, t["slug"] + ".json"))
+    for acc, r in (rel or {}).items():
+        cat = {"raised": "r-raised", "kept": "r-kept", "cut": "r-cut", "withdrawn": "r-cut"}.get(r.get("dir"))
+        ts = _secs(r.get("at") or "") or _secs((r.get("filed") or "") + "T21:00:00Z")
+        if not cat or ts is None:
+            continue
+        i = S.react(ts)
+        if i is not None:
+            out.append(_ev(cat, ts, i, r.get("headline", ""), "release", r.get("url", ""), {"period": r.get("period", ""), "dir": r.get("dir")}))
     for x in out:
         x["d1"], x["d5"], x["z"] = S.measure(x["r"])
         x["pre"] = S.before(x["r"])

@@ -236,7 +236,31 @@ def read_lines(site, t, meta, fund):
             sign = CUR_SIGN.get(fund.get("currency"), t["cur"])
             lines.append(f"Analysts' average 12-month target is {sign}{tgt:,.2f}, {abs(tgt / last - 1) * 100:.0f}% "
                          f"{'above' if tgt >= last else 'below'} the close ({int(n_an)} analysts).")
+    rel = latest_release(t)
+    if rel:
+        when = pd.Timestamp(rel["filed"]).strftime("%b %-d")
+        word = {"raised": "raised its outlook", "cut": "cut its outlook", "withdrawn": "withdrew its outlook", "kept": "kept its outlook",
+                "started": "gave an outlook", "mixed": "raised some targets and cut others"}.get(rel.get("dir"))
+        lines.append(f"Latest results ({when}): {rel['headline'].rstrip('.')}." + (f" The company {word}." if word and word not in rel["headline"].lower() else ""))
     return lines
+
+
+def latest_release(t, max_age_days=120):
+    """The newest earnings press release Claude has read for this stock (tools/fetch_earnings.py), if recent."""
+    p = os.path.join(os.path.dirname(NEWS_DIR), "earnings", t["slug"] + ".json")
+    try:
+        recs = [r for r in json.load(open(p)).values() if r.get("headline") and not r.get("skip")]
+    except (OSError, ValueError):
+        return None
+    if not recs:
+        return None
+    r = max(recs, key=lambda x: x.get("filed", ""))
+    try:
+        if (pd.Timestamp.now() - pd.Timestamp(r["filed"])).days > max_age_days:
+            return None
+    except Exception:
+        return None
+    return r
 
 
 # --------------------------------------------------------------------------

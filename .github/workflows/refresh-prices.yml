@@ -42,6 +42,12 @@ jobs:
       - name: Company filings from the SEC (point-in-time numbers, earnings 8-Ks)
         timeout-minutes: 15
         run: python tools/fetch_sec.py || true
+      - name: Claude reads new earnings press releases (needs the ANTHROPIC_API_KEY secret)
+        if: github.event.schedule != '15 10 * * *'
+        timeout-minutes: 15
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python tools/fetch_earnings.py || true
       - name: Fetch news and filings for the chart markers
         timeout-minutes: 12
         run: python tools/fetch_news.py || true
@@ -53,10 +59,12 @@ jobs:
         run: |
           git config user.name "bethepuck-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/prices data/macro data/fundamentals data/universe data/news data/events data/sec
+          mkdir -p data/earnings
+          git add data/prices data/macro data/fundamentals data/universe data/news data/events data/sec data/earnings
           if git diff --cached --quiet; then
             echo "No price changes"
           else
             git commit -m "Prices $(date -u +%F)"
+            git pull --rebase -q origin main
             git push
           fi

@@ -9,7 +9,7 @@ file, data/sec/<slug>.json:
      "q": [[end, filed, revenue, net income, diluted EPS, operating cash flow, capex,
             gross profit, operating income, dividends per share, diluted shares], ...],   # one row per quarter
      "b": [[end, filed, equity, debt, cash, shares outstanding], ...],     # balance sheet dates
-     "earn": [[filed, accession, primary document], ...]}                  # 8-Ks with Item 2.02
+     "earn": [[filed, accession, primary document, accepted at], ...]}     # 8-Ks with Item 2.02 (results)
 
 Every value is the one first reported for that quarter (later restatements are ignored),
 with the date it was filed, so a backtest only ever sees what was public at the time.
@@ -266,9 +266,11 @@ def submissions(cik):
     if not d:
         return None
     r = d["filings"]["recent"]
-    rows = list(zip(r["form"], r["filingDate"], r["accessionNumber"], r.get("items", [""] * len(r["form"])), r["primaryDocument"]))
+    n = len(r["form"])
+    rows = list(zip(r["form"], r["filingDate"], r["accessionNumber"], r.get("items", [""] * n), r["primaryDocument"],
+                    r.get("acceptanceDateTime", [""] * n)))
     last = max((f for form, f, *_ in rows if form in PERIODIC), default=None)
-    earn = [[f, a, doc] for form, f, a, items, doc in rows if form in ("8-K", "8-K/A") and "2.02" in (items or "")][:12]
+    earn = [[f, a, doc, acc_t] for form, f, a, items, doc, acc_t in rows if form in ("8-K", "8-K/A") and "2.02" in (items or "")][:12]
     return {"name": d.get("name"), "last_filed": last, "earn": earn}
 
 
