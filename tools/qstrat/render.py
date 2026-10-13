@@ -91,7 +91,13 @@ CS_MARK = ('<span class="cs-mark" role="img" aria-label="Click Shift"><span clas
 MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>')
 FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
                 '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
-FOOT_DISCLAIM = f'<p class="foot-disclaim"><b>Not financial advice.</b> {DISCLAIMER}</p>'
+def foot_disclaim(guide_href):
+    """The disclaimer that closes every page, with a link to who can advise, country by country."""
+    return (f'<p class="foot-disclaim"><b>Not financial advice.</b> {DISCLAIMER} '
+            f'<a href="{guide_href}">Ways to invest in your country, and how to check an advisor</a>.</p>')
+
+
+FOOT_DISCLAIM = foot_disclaim("/guides/ways-to-invest/")     # the hand-written pages (absolute link)
 # The plays-only light (retired as a verdict in October 2026; Your signal replaced it). Only the
 # Top 10's published rule and the members' /rules/ page still use it. It turns to Start when this
 # share of the plays with a call hold the stock, and back to Stop only when the share falls
@@ -154,6 +160,7 @@ def nav_menus():
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
                         ("learn/call-it/", "Practise: Call it", "Read the plays on real charts")],
         "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
+                   ("guides/ways-to-invest/", "Ways to invest, by country", "Who can advise you, what they must promise, how they've done"),
                    ("learn/#track-basics", "Track 1: Stock basics", "Shares, candlesticks, trends, P/E, debt and risk"),
                    ("learn/#track-plays", "Track 2: The plays", "How each family of trading rules works"),
                    ("learn/#track-markets", "Track 3: Markets and risk", "Indexes, bubbles, crashes and positioning"),
@@ -619,7 +626,7 @@ class Site:
 <div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('guides/your-plays/')}">Pick your plays</a><a href="{h('guides/news-that-moves-stocks/')}">News that moves stocks</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
 <div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
 </div>
-{FOOT_DISCLAIM}
+{foot_disclaim(h('guides/ways-to-invest/'))}
 <p class="foot-meta">Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close</p>
 {FOOT_CREDITS}
 </div></footer>
@@ -884,6 +891,8 @@ class Site:
         news_guide(self)
         from .rules import rules_page
         rules_page(self, self.guides)
+        from .waystoinvest import ways_to_invest_page
+        ways_to_invest_page(self)
         self.learn.build()
         self.method_page()
         return self.pages

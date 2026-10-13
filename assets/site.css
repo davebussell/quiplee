@@ -1930,3 +1930,40 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .me-changes ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .me-changes li { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .me-ch-none { margin: 2px 0 8px; }
+
+/* Ways to invest, by country (tools/qstrat/waystoinvest.py) */
+.wti-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 14px; }
+.wti-pick[hidden], .wti-country[hidden] { display: none; }
+.wti-country { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 80px; }
+.wti-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.wti-opt { display: flex; flex-direction: column; gap: 10px; color: var(--ink-2); }
+.wti-opt h3 { color: var(--ink); }
+.wti-opt dl { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.wti-opt dt { font: 600 11.5px/1.4 var(--ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+.wti-opt dd { margin: 0; }
+.wti-opt .small:last-child { margin-top: auto; }
+.wti-src { white-space: normal; }
+.wti-src + .wti-src::before { content: "· "; color: var(--muted); }
+.wti-check { list-style: none; padding-left: 0 !important; gap: 10px !important; }
+.wti-check li { display: block; }
+.wti-tag { display: inline-block; font: 600 10.5px/1 var(--ui); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 6px;
+  border: 1px solid var(--line-2); color: var(--ink-2); margin-right: 4px; vertical-align: 1px; }
+.wti-tag[data-kind="official"] { border-color: var(--in-edge); background: var(--in-wash); color: var(--ink); }
+.wti-tag[data-kind="commercial"] { border-color: var(--out-edge); background: var(--out-wash); color: var(--ink); }
+.wti-bars { display: flex; flex-direction: column; gap: 8px; }
+.wti-bar { display: grid; grid-template-columns: minmax(0, 7em) minmax(0, 1fr) 4.2em; align-items: center; gap: 10px; font: 13px var(--data); color: var(--ink-2); }
+.wti-bar i { display: block; height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--out) var(--w), var(--line) var(--w)); }
+.wti-bar b { text-align: right; color: var(--ink); font-weight: 600; }
+.wti-top .wti-bar { grid-template-columns: minmax(0, 13em) minmax(0, 1fr) 4.2em; }
+.wti-top .wti-bar span { display: flex; flex-direction: column; color: var(--ink); }
+.wti-top .wti-bar small { color: var(--muted); font-size: 11.5px; }
+.wti-short { max-width: none; }
+.wti-short ol, .wti-short p { max-width: 75ch; }
+.wti-ex { max-width: none; }
+.wti-ex .tbl td { white-space: normal; min-width: 9em; }
+@media (max-width: 560px) {
+  .wti-top .wti-bar { grid-template-columns: minmax(0, 1fr) 4.2em; }
+  .wti-top .wti-bar i { grid-column: 1 / -1; grid-row: 2; }
+}
+.wti-country > .card.prose { max-width: none; }
+.wti-country > .card.prose > ul, .wti-country > .card.prose > p { max-width: 80ch; }

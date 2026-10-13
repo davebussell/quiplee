@@ -112,7 +112,12 @@ more of the list by value.
 **Disclaimer on every page.** The footer of every page carries `render.DISCLAIMER`; Netlify's
 not-found page is the site's own `404.html` (`Site.not_found_html`). The build stops if any page
 lacks the disclaimer (`build_strategies.pages_without_disclaimer`) and `tools/smoke.py` checks it on
-every page it opens.
+every page it opens. The footer links to **Ways to invest, by country** (`/guides/ways-to-invest/`,
+`tools/qstrat/waystoinvest.py`): for Canada (with Quebec), the U.S., the U.K. and Australia, the kinds
+of help, the duty each owes by law, costs, official registers, SPIVA results, investor protection,
+tax-sheltered accounts, red flags and some firms' own published prices (alphabetical, never ranked).
+Every fact links its source; `CHECKED` is the date they were last checked. Recheck the account limits
+each January and the SPIVA figures when new scorecards come out (March and September).
 
 **News that moves stocks.** `tools/fetch_events.py` (nightly) keeps each company's earnings
 dates with EPS surprises and its analyst rating changes; `tools/qstrat/newsevents.py` sorts them,

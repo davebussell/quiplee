@@ -109,6 +109,9 @@ def main():
     if "alerts" in extra:
         from qstrat.alerts import alerts_page
         alerts_page(site)
+    if "invest" in extra:
+        from qstrat.waystoinvest import ways_to_invest_page
+        ways_to_invest_page(site)
     if "method" in extra:
         site.method_page()
     if "guide" in extra:
