@@ -4,7 +4,7 @@ pages you're working on, in about a minute.
     python tools/dev_render.py engine                  # every play on every ticker, cached in .cache/
     python tools/dev_render.py render MU,SHOP.TO       # those stock pages + the data files, into .cache/prev/
     python tools/dev_render.py render ALL              # every stock page
-    PAGES=home,stocks,watchlist,me,guide,strategies python tools/dev_render.py render SPY
+    PAGES=home,stocks,watchlist,me,guide,strategies,articles python tools/dev_render.py render SPY
     python tools/dev_render.py render SPY --report     # also print each play's accuracy by family
     python tools/dev_render.py full                    # the whole site from the cache, as Netlify would build it (~10 min)
 
@@ -112,6 +112,13 @@ def main():
         guide_page(site)
         from qstrat.newsevents import guide_page as news_guide
         news_guide(site)
+    if "articles" in extra:
+        from qstrat.articles import Articles
+        A = Articles(site)
+        A.plan()
+        from qstrat.riskarticles import RiskArticles
+        RiskArticles(A).build()
+        A.hub()
     if "--report" in sys.argv:
         from qstrat.plays import FAMILIES
         for fk, fname, _ in FAMILIES:

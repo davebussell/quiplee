@@ -80,7 +80,7 @@
     return true;
   }
   function wPreset() { for (var i = 0; i < D.wp.length; i++) if (sameW(wts.w, D.wp[i].w)) return D.wp[i]; return null; }
-  function wlabel() { if (!D || !wts) return 'Plays + analysts'; var p = wPreset(); return p ? p.n : 'Your weights'; }
+  function wlabel() { if (!D || !wts) return 'Standard'; var p = wPreset(); return p ? p.n : 'Your weights'; }
   function isDefaultW() { return !wts || (sameW(wts.w, D.wd.w) && wts.buy === D.wd.buy && wts.sell === D.wd.sell); }
   /** A name's score with the reader's weights: {s: 0-100 or null, sig: 1|0|-1|null, parts: [{k, n, v, p, w, add}], cov}. */
   function score(sym, wIn) {

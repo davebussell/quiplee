@@ -148,6 +148,8 @@ class Articles:
                   "How each family of plays did through the 2008 crash, the COVID drop, the 2022 bear market and the long bull markets in between.", "live", None))
         L.append(("strategies", "articles/what-backtests-say/", "What thousands of backtests say about timing the market",
                   "Every play on every stock against buying and holding: where timing earned its keep, where it didn't, and how not to fool yourself.", "live", None))
+        from .riskarticles import PIECES
+        L.extend(PIECES)
         for g in self.sector_groups():
             L.append(("strategies", f"articles/sectors/{slugify(g)}/", f"{e(g)}: what the plays say",
                       f"Every covered {e(g.lower())} name through the same lenses: plays, trend, run-up and crash exposure.", "live", None))
@@ -166,6 +168,8 @@ class Articles:
         self.core20()
         self.regimes()
         self.backtests()
+        from .riskarticles import RiskArticles
+        RiskArticles(self).build()
         for g in self.sector_groups():
             self.sector(g)
         for t in TICKERS:

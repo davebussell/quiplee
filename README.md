@@ -93,12 +93,13 @@ use every play.
 
 **Your signal.** Readers weight 17 factors (`tools/qstrat/factors.py`): plays in, analysts'
 upside and rating, P/E, forward P/E, PEG, price to sales and book, dividend yield, earnings and
-revenue growth, profit margin, return on equity, debt to equity, trend, 1-year momentum and crash
-exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
+revenue growth, profit margin, return on equity, debt to equity, trend, 1-year momentum, off the
+1-year high and crash exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
 is the weighted average over the factors the stock has, and the reader's Buy and Sell lines (60/40
 to start) make it Buy, Hold or Sell on the stock page (with a factor-by-factor breakdown), the
-stock list, the screener, the watchlist and My Puck. The standard weights (plays 50, analysts'
-upside 50) give the site's existing score. Saved like the plays; `?w=plays50.pe20&buy=60&sell=40`.
+stock list, the screener, the watchlist and My Puck. The standard weights (plays 40, off the
+high 20, trend 20, analysts' upside 20; October 2026) put four-fifths of the default on graded
+factors; analysts' upside scores at most 50 while a stock is below its 200-day average. Saved like the plays; `?w=plays50.pe20&buy=60&sell=40`.
 
 **News that moves stocks.** `tools/fetch_events.py` (nightly) keeps each company's earnings
 dates with EPS surprises and its analyst rating changes; `tools/qstrat/newsevents.py` sorts them,

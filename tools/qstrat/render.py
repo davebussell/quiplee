@@ -56,7 +56,7 @@ def ps_bar(h, note, cls=""):
     return (f'<div class="ps-bar{" " + cls if cls else ""}"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog">'
             f'<span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button>'
             f'<button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog">'
-            f'<span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>'
+            f'<span class="ps-chip-k">Weights</span><b data-ps-wlabel>Standard</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>'
             f'<p class="small muted">{note} <a href="{h("guides/your-plays/")}">How it works</a></p></div>')
 
 
@@ -1234,7 +1234,7 @@ class Site:
 <th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small" id="st-count"></p>
-<p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. With the standard weights, half is the share of the plays you count that hold it and half is analysts' upside; change the weights to bring in P/E, growth, debt, trend and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines. Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
+<p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. The standard weights are the share of the plays you count that hold it (40), how far it sits off its 1-year high (20), its trend (20) and analysts' upside (20); change the weights to bring in P/E, growth, debt, trend and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines. Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
 
 <section class="st-fams" id="families" hidden>

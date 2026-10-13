@@ -4,7 +4,11 @@ Every factor turns into points from 0 to 100, higher meaning more in favour of b
   - plays:  the share of the plays the reader counts that hold the stock (worked out in
             the browser by assets/plays.js, since it depends on their choice of plays)
   - upside: analysts' average 12-month target against the price, as in the existing
-            score (stockview.upside_points: -20% scores 0, +50% full marks; 3+ analysts)
+            score (stockview.upside_points: -20% scores 0, +50% full marks; 3+ analysts).
+            Targets lag the price, so a falling stock shows more "upside" just by falling:
+            while the price is below its 200-day average, upside scores at most 50 (neutral)
+  - dd:     how far the price sits below its highest close of the last year, ranked; the
+            factor that turns a stock that keeps falling toward Sell (October 2026)
   - rating: the analysts' average recommendation, strong buy 1.0 = 100, hold 3.0 or worse = 0
   - calm:   100 minus 10 points per point of crash exposure on the storm test (0 to 10)
   - company numbers (P/E, P/S, P/B, dividend yield, growth, margin, ROE, debt) come from the
@@ -18,8 +22,10 @@ Every factor turns into points from 0 to 100, higher meaning more in favour of b
 A reader's score is the weighted average of the points they weight, over the factors the
 stock has. With less than half their weight available (a fund has no P/E), there's no score.
 Buy at or above their buy line (default 60), Sell at or below their sell line (default 40),
-Hold in between. The default weights are plays 50, analysts' upside 50. Your signal is the
-site's one headline call on a stock (October 2026: it replaced the Start/Stop light).
+Hold in between. The default weights (October 2026) are plays 40, off the high 20, trend 20,
+analysts' upside 20: four-fifths of the default rests on factors graded since 2011 (factorgrade.py),
+where it used to be half plays, half analysts' upside, which has no record to grade. Your signal is
+the site's one headline call on a stock (October 2026: it replaced the Start/Stop light).
 """
 import math
 
@@ -33,7 +39,7 @@ GROUPS = [("signals", "Plays and analysts"), ("value", "Value"), ("quality", "Gr
 # key, name, group, what it is (shown in the chooser)
 FACTORS = [
     ("plays", "Plays in", "signals", "The share of the plays you count that hold it now."),
-    ("upside", "Analysts' upside", "signals", "How far analysts' average 12-month target sits above the price (3+ analysts). −20% scores 0, +50% full marks."),
+    ("upside", "Analysts' upside", "signals", "How far analysts' average 12-month target sits above the price (3+ analysts). −20% scores 0, +50% full marks. Targets lag the price, so below its 200-day average a stock scores at most 50 here."),
     ("rating", "Analysts' rating", "signals", "The analysts' average recommendation: strong buy scores 100, hold or worse 0."),
     ("pe", "P/E", "value", "Price over the last four quarters' earnings per share. Lower ranks higher; a loss scores 0."),
     ("fpe", "Forward P/E", "value", "Price over next year's expected earnings. Lower ranks higher; an expected loss scores 0."),
@@ -48,15 +54,20 @@ FACTORS = [
     ("de", "Debt to equity", "quality", "Debt against shareholders' equity. Lower ranks higher; negative equity scores 0."),
     ("trend", "Trend", "price", "How far the price sits above its 200-day average. Higher ranks higher."),
     ("mom", "1-year momentum", "price", "The price change over the last 12 months. Higher ranks higher."),
+    ("dd", "Off the high", "price", "How far the price sits below its highest close of the last year. Nearer the high ranks higher; a stock that keeps falling sinks toward Sell."),
     ("calm", "Low crash exposure", "price", "The storm test: 100 for no exposure, 10 points off per point of exposure."),
 ]
 KEYS = [k for k, _, _, _ in FACTORS]
 
-DEFAULT = {"plays": 50, "upside": 50}
+DEFAULT = {"plays": 40, "dd": 20, "trend": 20, "upside": 20}
+MODEL = "s2"        # bump with the standard weights or a factor's scoring (netlify/functions/alerts-nightly.mjs MODEL too)
+UPSIDE_CAP = 50     # most points analysts' upside can give while the price is below its 200-day average
 BUY, SELL = 60, 40
 PRESETS = [
-    ("default", "Plays + analysts", DEFAULT),
+    ("default", "Standard", DEFAULT),
     ("plays", "Plays only", {"plays": 100}),
+    ("analysts", "Plays + analysts", {"plays": 50, "upside": 50}),
+    ("exit", "Plays + exit rule", {"plays": 40, "dd": 30, "trend": 30}),
     ("value", "Value", {"plays": 20, "pe": 20, "fpe": 20, "ps": 15, "pb": 10, "dy": 15}),
     ("growth", "Growth", {"plays": 25, "rg": 25, "eg": 25, "peg": 15, "upside": 10}),
     ("quality", "Quality", {"plays": 20, "roe": 20, "pm": 20, "de": 20, "calm": 20}),
@@ -126,9 +137,18 @@ def compute(site):
         meta = site.meta.get(sym) or {}
         # analysts
         ol = sv.outlook(site, t)
+        o = meta.get("ohlc")
+        below = None
+        if o is not None and len(o) >= 200:
+            c = o["close"]
+            below = bool(c.iloc[-1] < c.iloc[-200:].mean())
         if ol["ok"]:
-            fixed["upside"][sym] = int(round(100 * sv.upside_points(ol["upside"])))
+            up = int(round(100 * sv.upside_points(ol["upside"])))
             shown["upside"][sym] = _p(ol["upside"]) + f" · {ol['n_an']} analysts"
+            if below and up > UPSIDE_CAP:
+                up = UPSIDE_CAP
+                shown["upside"][sym] += " · held to 50 below the 200-day"
+            fixed["upside"][sym] = up
         rm, na = _num(f.get("recommendationMean")), _num(f.get("numberOfAnalystOpinions")) or 0
         if eq and rm is not None and na >= sv.MIN_ANALYSTS:
             fixed["rating"][sym] = int(round(100 * min(1, max(0, (3 - rm) / 2))))
@@ -190,11 +210,14 @@ def compute(site):
             de_y = _num(yf.get("debtToEquity"))           # Yahoo gives it in percent
             put("de", pick("de", None if de_y is None else (de_y / 100 if de_y >= 0 else "negative")), lambda v: _x(v, 2), "negative equity")
         # price and risk: every name
-        o = meta.get("ohlc")
         if o is not None and len(o) >= 200:
             c = o["close"]
             gap = float(c.iloc[-1] / c.iloc[-200:].mean() - 1)
             raw["trend"][sym], shown["trend"][sym] = gap, _p(gap) + " vs 200-day"
+        if o is not None and len(o) >= 252:
+            c = o["close"]
+            off = float(c.iloc[-1] / c.iloc[-252:].max() - 1)
+            raw["dd"][sym], shown["dd"][sym] = off, ("at its 1-year high" if off > -0.005 else _p(off) + " from 1-year high")
         try:
             y1 = site.one_year(t)
         except Exception:
@@ -272,7 +295,7 @@ def factors_json(site):
         return out
     gf, gp = g.get("factors", {}), g.get("presets", {})
     return {"fx": [{"k": k, "n": n, "g": g_, "d": d, "r": rec(gf.get(k))} for k, n, g_, d in FACTORS], "fg": [list(x) for x in GROUPS],
-            "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL},
+            "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL, "v": MODEL},
             "gs": g.get("since", "")[:4], "x": x, "v": v}
 
 
@@ -320,7 +343,7 @@ def signal_card(site, t, h):
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
 <div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
-<div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button>
+<div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Standard</b><span class="ps-caret" aria-hidden="true">▾</span></button>
 <button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>
 {alert}</div>
 <p class="small muted sig-note">Your signal is the one call Be The Puck makes on a stock, and you set it: weight the plays, analysts, P/E, growth, debt, trend and more, and move the Buy and Sell lines. Every page follows your choice. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></p>

@@ -29,7 +29,7 @@ START = pd.Timestamp("2011-01-01")
 HORIZONS = (63, 252)    # sessions: about three months and a year
 BUY, AVOID = 60, 40
 COMPANY = ("pe", "ps", "pb", "dy", "eg", "rg", "pm", "roe", "de")
-GRADED = ("plays", "trend", "mom") + COMPANY
+GRADED = ("plays", "trend", "mom", "dd") + COMPANY
 LOWER_BETTER = {"pe", "fpe", "peg", "ps", "pb", "de"}
 NO_HISTORY = {"upside": "no record of past analyst targets", "rating": "no record of past analyst ratings",
               "fpe": "no record of past earnings estimates", "peg": "no record of past growth estimates",
@@ -123,6 +123,10 @@ def grade(site):
                 raw["trend"][sym] = p0 / ma[i] - 1
             if i >= 252 and c[i - 252] > 0:
                 raw["mom"][sym] = p0 / c[i - 252] - 1
+            if i >= 251:
+                hi = c[i - 251:i + 1].max()
+                if hi > 0:
+                    raw["dd"][sym] = p0 / hi - 1
             k, n = plays[sym][0][di], plays[sym][1][di]
             if n >= 20:
                 raw["plays"][sym] = k / n

@@ -108,7 +108,7 @@
   function sigTile(list) {
     var n = { '1': 0, '0': 0, '-1': 0 };
     list.forEach(function (s) { var r = sg(s); if (r && r.sig != null) n[r.sig]++; });
-    var wl = PS && PS.loaded() ? PS.wlabel() : 'Plays + analysts';
+    var wl = PS && PS.loaded() ? PS.wlabel() : 'Standard';
     return '<div class="card tile"><span class="tile-label">Your signal on your stocks</span><span class="tile-value"><b class="sig-n buy" data-count="' + n['1'] + '">' + n['1'] + '</b><small> Buy of ' + list.length + '</small></span>' +
       bar(n['1'], list.length || 1) + '<span class="tile-note">' + (list.length ? n['0'] + ' Hold · ' + n['-1'] + ' Sell · weights: ' + esc(wl) : 'Follow a few to begin') + '</span></div>';
   }
