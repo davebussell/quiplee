@@ -14,6 +14,7 @@ import argparse
 import asyncio
 import datetime as dt
 import json
+import os
 import sys
 import time
 import urllib.request
@@ -57,9 +58,20 @@ def wait_for_commit(base, sha, minutes):
     return False
 
 
+WARNINGS = []      # live functions that answered with an error: worth knowing, not a broken page
+
+
 async def run(base, local):
     from playwright.async_api import async_playwright
     fails, host = [], base.split("//", 1)[-1].split("/")[0]
+
+    def on_response(r, errs, path):
+        if r.status < 400 or host not in r.url or "favicon" in r.url:
+            return
+        if "/api/" in r.url or "/.netlify/functions/" in r.url:
+            WARNINGS.append(f"{path}: {r.status} {r.url.split(host, 1)[-1][:90]}")
+        else:
+            errs.append(f"{r.status} {r.url}")
     ix = (lambda p: p + "index.html" if p.endswith("/") else p) if local else (lambda p: p)
     pages = LOCAL_PAGES if local else PAGES
     async with async_playwright() as pw:
@@ -70,8 +82,7 @@ async def run(base, local):
                 pg = await ctx.new_page()
                 errs = []
                 pg.on("pageerror", lambda e: errs.append("script error: " + str(e)[:160]))
-                pg.on("response", lambda r: (r.status >= 400 and host in r.url and "/api/" not in r.url and "favicon" not in r.url)
-                      and errs.append(f"{r.status} {r.url}"))
+                pg.on("response", lambda r, errs=errs, path=path: on_response(r, errs, path))
                 try:
                     resp = await pg.goto(base + ix(path), wait_until="load", timeout=60000)
                     if not resp or resp.status >= 400:
@@ -84,6 +95,11 @@ async def run(base, local):
                         errs.append("no headline")
                     if path.startswith("/stocks/") and path.count("/") == 3:
                         badge = await pg.evaluate(STOCK_CHECK)
+                        for _ in range(10):            # the signal redraws once data/playset.json has loaded
+                            if badge in ("Buy", "Hold", "Sell", "No score"):
+                                break
+                            await pg.wait_for_timeout(500)
+                            badge = await pg.evaluate(STOCK_CHECK)
                         if badge not in ("Buy", "Hold", "Sell", "No score"):
                             errs.append(f"signal didn't draw ({badge!r})")
                 except Exception as ex:
@@ -99,9 +115,12 @@ async def run(base, local):
                 pg = await ctx.new_page()
                 try:
                     await pg.goto(base + old, wait_until="load", timeout=60000)
-                    if not pg.url.split(host, 1)[-1].startswith(new):
+                    got = pg.url.split(host, 1)[-1]
+                    # the stock page turns ?play=x into #play-x once it has marked the row
+                    ok = got.startswith(new) or got == new.replace("?play=", "#play-")
+                    if not ok:
                         fails.append(f"forward {old}: ended at {pg.url}, expected {new}")
-                    print(f"{'ok  ' if pg.url.split(host, 1)[-1].startswith(new) else 'FAIL'} forward {old}")
+                    print(f"{'ok  ' if ok else 'FAIL'} forward {old}")
                 except Exception as ex:
                     fails.append(f"forward {old}: {ex}")
                 await pg.close()
@@ -131,10 +150,13 @@ def main():
         fails.append(f"no build.json: {ex}")
     fails += asyncio.run(run(base, args.local))
     print()
+    gha = os.environ.get("GITHUB_ACTIONS") == "true"
+    for w in sorted(set(WARNINGS)):
+        print(("::warning::" if gha else "warning: ") + w)
     if fails:
         print(f"{len(fails)} problem(s):")
         for f in fails:
-            print(" -", f)
+            print(("::error::" if gha else " - ") + f)
         sys.exit(1)
     print("all clear")
 
