@@ -381,9 +381,9 @@
   function recText(r, preset) {
     if (!r) return '';
     if (r.why) return 'Not graded: ' + r.why + '.';
-    var e = r.e > 0 ? '+' + r.e : String(r.e);
+    var e = (r.e > 0 ? '+' : '') + Number(r.e).toFixed(1);
     var t = 'Since ' + D.gs + ', its Buys beat the market over the next year ' + r.bb + '% of the time and its Avoids ' + r.ab + '%: edge ' + e + ' pts.';
-    if (preset && r.gw != null && r.gw < 100) t += ' Graded on ' + r.gw + '% of its weight (' + r.lo.join(', ') + ' has no history).';
+    if (preset && r.gw != null && r.gw < 100) t += ' Graded on ' + r.gw + '% of its weight (' + r.lo.join(', ') + (r.lo.length > 1 ? ' have' : ' has') + ' no history).';
     return t;
   }
   function recCls(r) { return !r || r.why ? 'na' : r.e >= 3 ? 'good' : r.e <= 0 ? 'poor' : 'some'; }
@@ -398,7 +398,7 @@
       'and your Buy and Sell lines turn it into a signal on every page. P/E, growth and the other company numbers score by rank against the ' + D.n + ' stocks we cover.';
     var pr = wPreset();
     ov.querySelector('.ps-presets').innerHTML = D.wp.map(function (x) {
-      var e = x.r && !x.r.why ? ' <span class="ps-edge ' + recCls(x.r) + '">' + (x.r.e > 0 ? '+' : '') + x.r.e + '</span>' : '';
+      var e = x.r && !x.r.why ? ' <span class="ps-edge ' + recCls(x.r) + '">' + (x.r.e > 0 ? '+' : '') + Number(x.r.e).toFixed(1) + '</span>' : '';
       return '<button type="button" class="chip-btn" data-ps-wset="' + x.k + '" aria-pressed="' + (!!pr && pr.k === x.k) + '">' + esc(x.n) + e + '</button>';
     }).join('') + '<p class="small ps-prec" aria-live="polite"></p>';
     ov.querySelector('.ps-tools').innerHTML =

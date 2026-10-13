@@ -65,6 +65,11 @@ PRESETS = [
 ]
 
 
+def _rnd(x):
+    """Round half up, as JavaScript's Math.round does, so a score is the same in the page, the emails and here."""
+    return int(math.floor(x + 0.5))
+
+
 def _num(v):
     try:
         v = float(v)
@@ -225,7 +230,7 @@ def score(site, t, weights=None, plays_share=None):
             continue
         tot += wi
         if key == "plays":
-            p, v = (None, None) if plays_share is None else (round(100 * plays_share), f"{round(100 * plays_share)}%")
+            p, v = (None, None) if plays_share is None else (_rnd(100 * plays_share), f"{_rnd(100 * plays_share)}%")
         else:
             p, v = pts.get(key, (None, None))
         parts.append({"k": key, "n": name, "w": wi, "p": p, "v": v})
@@ -234,7 +239,7 @@ def score(site, t, weights=None, plays_share=None):
             acc += wi * p
     if not tot or avail < tot / 2:
         return None, None, parts
-    s = round(acc / avail)
+    s = _rnd(acc / avail)
     for x in parts:
         x["add"] = None if x["p"] is None else round(x["w"] * x["p"] / avail, 1)
     return s, (1 if s >= BUY else -1 if s <= SELL else 0), parts
@@ -302,7 +307,7 @@ def signal_card(site, t, h):
                    f'<td class="r">{x["w"]}</td><td class="r">{"–" if x.get("add") is None else x["add"]}</td></tr>' for x in parts)
     allrows = ""
     for key, name, _, desc in FACTORS:
-        p, v = ((round(100 * k / n) if n else None), (f"{round(100 * k / n)}%" if n else None)) if key == "plays" else pts.get(key, (None, None))
+        p, v = ((_rnd(100 * k / n) if n else None), (f"{_rnd(100 * k / n)}%" if n else None)) if key == "plays" else pts.get(key, (None, None))
         src = (site.__dict__.get("_factor_src") or {}).get(t["sym"], {}).get(key)
         allrows += (f'<tr data-sig-f="{key}"><td>{e(name)}</td><td>{e(v or "–")}</td><td class="r">{"–" if p is None else p}</td>'
                     f'<td class="small muted">{e(desc)}{(" <b class=sig-src>Source: " + e(src) + ".</b>") if src else ""}</td></tr>')
