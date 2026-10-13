@@ -247,8 +247,28 @@ def factors_json(site):
     for sym, d in pts.items():
         x[sym] = [None if k == "plays" else d.get(k, (None, None))[0] for k in KEYS]
         v[sym] = [None if k == "plays" else d.get(k, (None, None))[1] for k in KEYS]
-    return {"fx": [{"k": k, "n": n, "g": g, "d": d} for k, n, g, d in FACTORS], "fg": [list(g) for g in GROUPS],
-            "wp": [{"k": k, "n": n, "w": w} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL}, "x": x, "v": v}
+    from .factorgrade import cached
+    g = cached(site)
+
+    def rec(r):
+        """A factor's or preset's graded record, short for the chooser (assets/plays.js)."""
+        if not r:
+            return None
+        if r.get("why"):
+            return {"why": r["why"]}
+        y, q = r.get("12m"), r.get("3m")
+        if not y:
+            return None
+        out = {"bb": round(100 * y["buys_beat"]), "ab": round(100 * y["avoids_beat"]), "e": round(100 * y["edge"], 1),
+               "e3": round(100 * q["edge"], 1) if q else None}
+        if "graded_weight" in r:
+            out["gw"] = r["graded_weight"]
+            out["lo"] = [next(n for k2, n, _, _ in FACTORS if k2 == k) for k in r.get("left_out", [])]
+        return out
+    gf, gp = g.get("factors", {}), g.get("presets", {})
+    return {"fx": [{"k": k, "n": n, "g": g_, "d": d, "r": rec(gf.get(k))} for k, n, g_, d in FACTORS], "fg": [list(x) for x in GROUPS],
+            "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL},
+            "gs": g.get("since", "")[:4], "x": x, "v": v}
 
 
 SIG_WORD = {1: "Buy", 0: "Hold", -1: "Sell", None: "No score"}

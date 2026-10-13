@@ -28,7 +28,7 @@ HEAVY = ("window", "calls")   # the bulky parts of a result: the chart window an
 class Result(dict):
     """One play x ticker result. With run(spill=folder), the bulky parts (HEAVY)
     are kept in one file per ticker instead of in memory, and load on first use;
-    "last_call" and "n_calls" stay in memory for the cross-stock pages."""
+    "last_call", "n_calls", "call_days" and "call_states" stay in memory for the cross-stock pages."""
     __slots__ = ()
 
     def __missing__(self, key):
@@ -421,6 +421,9 @@ def evaluate(t, play, d, bench_close, irx, now, future):
         "equity": equity, "window": {"price": win, "lines": lines, "panel": pnl, "pos": pos_win},
         "periods": periods, "hist": hist,
         "last_call": calls[-1] if calls else None, "n_calls": len(calls),
+        # every call's date and state, small enough to stay in memory (the factor grading reads them)
+        "call_days": np.array([c["date"].value // 86_400_000_000_000 for c in calls], dtype=np.int32),
+        "call_states": np.array([c["state"] for c in calls], dtype=np.int8),
     })
 
 

@@ -377,14 +377,30 @@
     ov.querySelector('.ps-saved').textContent = auth() ? 'Saved to your account' : origin === 'link' ? 'From a shared link' : 'Saved in this browser';
   }
   function hereScore() { return here && D.x[here.sym] ? score(here.sym) : null; }
+  // a factor's or preset's record (factorgrade.py): Buys and Avoids against the market over a year
+  function recText(r, preset) {
+    if (!r) return '';
+    if (r.why) return 'Not graded: ' + r.why + '.';
+    var e = r.e > 0 ? '+' + r.e : String(r.e);
+    var t = 'Since ' + D.gs + ', its Buys beat the market over the next year ' + r.bb + '% of the time and its Avoids ' + r.ab + '%: edge ' + e + ' pts.';
+    if (preset && r.gw != null && r.gw < 100) t += ' Graded on ' + r.gw + '% of its weight (' + r.lo.join(', ') + ' has no history).';
+    return t;
+  }
+  function recCls(r) { return !r || r.why ? 'na' : r.e >= 3 ? 'good' : r.e <= 0 ? 'poor' : 'some'; }
+  function presetRec() {
+    var pr = wPreset(), el = ov && ov.querySelector('.ps-prec');
+    if (!el) return;
+    el.innerHTML = pr && pr.r ? '<b>' + esc(pr.n) + '.</b> ' + esc(recText(pr.r, true)) : 'Your own mix: it hasn’t been graded as a whole. Each factor’s record is under its slider.';
+  }
   function paintWeights() {
     ov.querySelector('#ps-h').textContent = 'Your signal';
     ov.querySelector('.ps-lede').textContent = 'Weight what matters to you. Each factor scores a stock from 0 to 100; your score is the weighted average, ' +
       'and your Buy and Sell lines turn it into a signal on every page. P/E, growth and the other company numbers score by rank against the ' + D.n + ' stocks we cover.';
     var pr = wPreset();
     ov.querySelector('.ps-presets').innerHTML = D.wp.map(function (x) {
-      return '<button type="button" class="chip-btn" data-ps-wset="' + x.k + '" aria-pressed="' + (!!pr && pr.k === x.k) + '">' + esc(x.n) + '</button>';
-    }).join('');
+      var e = x.r && !x.r.why ? ' <span class="ps-edge ' + recCls(x.r) + '">' + (x.r.e > 0 ? '+' : '') + x.r.e + '</span>' : '';
+      return '<button type="button" class="chip-btn" data-ps-wset="' + x.k + '" aria-pressed="' + (!!pr && pr.k === x.k) + '">' + esc(x.n) + e + '</button>';
+    }).join('') + '<p class="small ps-prec" aria-live="polite"></p>';
     ov.querySelector('.ps-tools').innerHTML =
       '<label class="ps-line">Buy at or above <b data-ps-lv="buy">' + wts.buy + '</b><input type="range" min="50" max="95" step="5" value="' + wts.buy + '" data-ps-line="buy" aria-label="Buy line"></label>' +
       '<label class="ps-line">Sell at or below <b data-ps-lv="sell">' + wts.sell + '</b><input type="range" min="5" max="50" step="5" value="' + wts.sell + '" data-ps-line="sell" aria-label="Sell line"></label>';
@@ -406,11 +422,13 @@
         html += '<li class="ps-wrow' + (wv ? ' on' : '') + '" data-f="' + f.k + '"><div class="ps-wtop"><span class="ps-nm">' + esc(f.n) + '</span>' +
           '<span class="ps-wval"><b data-ps-wv="' + f.k + '">' + wv + '</b> <span class="muted" data-ps-ws="' + f.k + '">' + (tot && wv ? Math.round(100 * wv / tot) + '%' : '') + '</span></span></div>' +
           '<input type="range" min="0" max="100" step="5" value="' + wv + '" data-ps-w="' + f.k + '" aria-label="Weight for ' + esc(f.n) + '">' +
-          '<div class="ps-wsub"><span class="ps-wd">' + esc(f.d) + '</span>' + hv + '</div></li>';
+          '<div class="ps-wsub"><span class="ps-wd">' + esc(f.d) + '</span>' + hv + '</div>' +
+          (f.r ? '<p class="ps-rec ' + recCls(f.r) + '">' + esc(recText(f.r)) + '</p>' : '') + '</li>';
       });
       html += '</ul></section>';
     });
-    html += '<p class="small ps-wnote">Weights are relative: 20 and 20 count the same as 50 and 50. A stock without a number for a factor (a fund has no P/E) is scored on the rest, ' +
+    html += '<p class="small ps-wnote">Edge: how much more often a factor’s Buys beat the market over the next year than its Avoids did, tested monthly since ' + D.gs +
+      ' on numbers public at the time. Small edges are the norm; none of these is a sure thing. Weights are relative: 20 and 20 count the same as 50 and 50. A stock without a number for a factor (a fund has no P/E) is scored on the rest, ' +
       'and gets no score if less than half your weight applies. <button type="button" class="linkish" data-ps-wreset>Back to the standard weights</button></p>';
     keepFocus(ov.querySelector('.ps-body'), html, ['data-ps-w']);
     paintWeightsLive();
@@ -432,6 +450,7 @@
     ['buy', 'sell'].forEach(function (k) { var el = ov.querySelector('[data-ps-lv="' + k + '"]'), r = ov.querySelector('[data-ps-line="' + k + '"]'); if (el) el.textContent = wts[k]; if (r && +r.value !== wts[k]) r.value = wts[k]; });
     var pr = wPreset();
     [].forEach.call(ov.querySelectorAll('[data-ps-wset]'), function (b) { b.setAttribute('aria-pressed', String(!!pr && pr.k === b.getAttribute('data-ps-wset'))); });
+    presetRec();
     var hs = hereScore(), n = Object.keys(wts.w).length;
     ov.querySelector('.ps-count').innerHTML = hs ? esc(here.s) + ': <b>' + (hs.s == null ? 'no score' : hs.s) + '</b>' + (hs.sig == null ? '' : ' ' + sigPill(hs.sig))
       : '<b>' + n + '</b> factor' + (n === 1 ? '' : 's') + ' weighted';

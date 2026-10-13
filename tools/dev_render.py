@@ -68,6 +68,14 @@ def main():
         print(f"full site: {len(pages)} pages, {n} files in {time.time() - t0:.0f}s ->", out)
         return
     site = Site(results, preview=True, prices=prices, irx=irx, meta=meta)
+    # the factor grading takes a minute or two; reuse the last one (delete .cache/factorgrade.json to redo it)
+    fg = os.path.join(CACHE_DIR, "factorgrade.json")
+    if os.path.exists(fg):
+        import json
+        site.__dict__["_factorgrade"] = json.load(open(fg))
+    else:
+        from qstrat.factorgrade import grade_json
+        open(fg, "w").write(grade_json(site))
     want = sys.argv[2] if len(sys.argv) > 2 else "SPY"
     syms = [t["sym"] for t in TICKERS] if want == "ALL" else want.split(",")
     for t in TICKERS:

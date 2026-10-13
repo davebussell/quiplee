@@ -1910,3 +1910,11 @@ tr[data-ps-play] { scroll-margin-top: 90px; }
 tr[data-ps-play]:target td, tr.ps-focus td { background: rgba(124, 108, 245, .16); }
 tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .sig-src { display: block; font-weight: 500; color: var(--muted); margin-top: 2px; }
+
+/* each factor's graded record in the weights chooser (factorgrade.py) */
+.ps-rec { margin: 4px 0 0; font-size: 12px; line-height: 1.45; color: var(--muted); }
+.ps-rec.good::before, .ps-rec.some::before, .ps-rec.poor::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.ps-rec.good::before { background: var(--in); } .ps-rec.some::before { background: var(--band); } .ps-rec.poor::before { background: var(--out); }
+.ps-edge { font: 600 11px var(--data); margin-left: 4px; padding: 1px 5px; border-radius: 6px; background: var(--panel-2); color: var(--ink-2); }
+.ps-edge.good { color: var(--in); } .ps-edge.poor { color: var(--out); } .ps-edge.some { color: var(--band); }
+.ps-prec { flex-basis: 100%; margin: 6px 0 0; color: var(--ink-2); line-height: 1.5; }

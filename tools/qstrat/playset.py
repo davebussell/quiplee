@@ -57,10 +57,52 @@ def signal_section(site, h):
     """The guide's Your signal section: what each factor measures and scores, the ready-made weightings, a worked example."""
     from .factors import FACTORS, GROUPS, PRESETS, BUY, SELL, score, SIG_WORD
     gname = dict(GROUPS)
-    rows = "".join(f'<tr><td><b>{e(n)}</b></td><td class="small">{e(gname[g])}</td><td class="small">{e(d)}</td></tr>' for k, n, g, d in FACTORS)
+    from .factorgrade import cached
+    grade = cached(site)
+    gf, gp = grade.get("factors", {}), grade.get("presets", {})
+
+    def ptx(v):
+        """An edge in percentage points: "+4.4 pts"."""
+        return f"{'+' if v > 0 else '−' if v < 0 else ''}{abs(v) * 100:.1f} pts"
+
+    def edge_cells(r):
+        if not r or r.get("why"):
+            return f'<td class="r muted" data-v="">–</td><td class="r muted" data-v="">–</td>', f'Not graded: {e((r or {}).get("why", "no history"))}.'
+        y, q = r.get("12m") or {}, r.get("3m") or {}
+        ey, eq = y.get("edge"), q.get("edge")
+        cls = lambda v: "up" if v is not None and v >= 0.03 else ("down" if v is not None and v <= 0 else "")
+        return (f'<td class="r {cls(eq)}" data-v="{eq if eq is not None else ""}">{ptx(eq) if eq is not None else "–"}</td>'
+                f'<td class="r {cls(ey)}" data-v="{ey if ey is not None else ""}"><b>{ptx(ey) if ey is not None else "–"}</b></td>'), \
+            f'Over a year its Buys beat the market {round(100 * y["buys_beat"])}% of the time, its Avoids {round(100 * y["avoids_beat"])}%.'
+    def frow(k, n, g, d):
+        cells, rec_txt = edge_cells(gf.get(k))
+        return f'<tr><td><b>{e(n)}</b><span class="sym-sub">{e(gname[g])}</span></td>{cells}<td class="small">{e(d)}<span class="sym-sub">{rec_txt}</span></td></tr>'
+    rows = "".join(frow(k, n, g, d) for k, n, g, d in FACTORS)
     fname = {k: n for k, n, _, _ in FACTORS}
+    graded = sorted([(k, n, gf[k]["12m"]["edge"]) for k, n, _, _ in FACTORS if gf.get(k, {}).get("12m")], key=lambda z: -z[2])
+    low = lambda n: n if n == "P/E" else n[0].lower() + n[1:]
+    best = ", ".join(f"{low(n)} ({ptx(v)})" for _, n, v in graded[:3])
+    worst = [(low(n), v) for _, n, v in graded if v <= 0]
+    since = grade.get("since", "")[:4]
+    pbest = max(((k, n, gp[k]["12m"]["edge"]) for k, n, _ in PRESETS if (gp.get(k) or {}).get("12m")), key=lambda z: z[2], default=None)
+    finding = ""
+    if graded:
+        finding = (f'<p><b>How each factor has done.</b> Every month since {since}, each stock got its points on each factor from the numbers public at the time '
+                   f'(prices, the plays\' calls, and company figures as filed with the SEC), then we checked whether it beat its market over the next three months and the next year. '
+                   f'The <b>edge</b> is how much more often a factor\'s Buys (60 points or more) beat the market than its Avoids (40 or less). '
+                   f'The strongest over a year: {e(best)}.'
+                   + (f' {e((" and ".join(n for n, _ in worst)).capitalize())} had no edge at all: the stocks {"they" if len(worst) > 1 else "it"} rated highly did no better.' if worst else "")
+                   + (f' Of the ready-made mixes, {e(pbest[1])} has the best record ({ptx(pbest[2])}).' if pbest else "")
+                   + ' Small edges are the norm, and these use today\'s list of stocks, which flatters every factor alike. '
+                   + 'Analysts\' targets and ratings, forward P/E, PEG and crash exposure have no record of past values, so they can\'t be tested this way.</p>')
+    def pedge(k):
+        r = (gp.get(k) or {}).get("12m")
+        if not r:
+            return ""
+        part = f' (graded on {gp[k]["graded_weight"]}% of its weight)' if gp[k].get("graded_weight", 100) < 100 else ""
+        return f' · <b class="{"up" if r["edge"] >= 0.03 else "down" if r["edge"] <= 0 else ""}">edge {ptx(r["edge"])}</b> over a year{part}'
     presets = "".join(f'<li><button type="button" class="chip-btn" data-ps-wset="{k}">{e(n)}</button> <span class="small muted">'
-                      + e(", ".join(f"{fname[f]} {w}" for f, w in sorted(w.items(), key=lambda z: -z[1]))) + '</span></li>' for k, n, w in PRESETS)
+                      + e(", ".join(f"{fname[f]} {w}" for f, w in sorted(w.items(), key=lambda z: -z[1]))) + pedge(k) + '</span></li>' for k, n, w in PRESETS)
     ex = ""
     t = next((x for x in TICKERS if x["sym"] == "SHOP.TO"), None)
     if t and (t["sym"], "buy-and-hold") in site.R:
@@ -78,7 +120,8 @@ def signal_section(site, h):
 {ex}
 <div class="ps-steps-row"><button type="button" class="btn sm primary" data-ps-open="weights">Set your weights</button><span class="small muted">Or start from a ready-made mix:</span></div>
 <ul class="sig-presets">{presets}</ul>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th>Group</th><th>What it measures and how it scores</th></tr></thead><tbody>{rows}</tbody></table></div>
+{finding}
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th class="r" data-sort-first="desc">Edge, 3 months</th><th class="r" data-sort-first="desc">Edge, 1 year</th><th>What it measures, and its record</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="small muted">Signals and scores are mechanical summaries of the numbers you choose to weight, not advice. {DISCLAIMER}</p></section>"""
 
 

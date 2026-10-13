@@ -1572,6 +1572,8 @@ class Site:
     # ------------------------------------------------------------ method
     def method_page(self):
         from .factors import FACTORS as SIG_FACTORS, BUY as SIG_BUY, SELL as SIG_SELL
+        from .factorgrade import cached as fg_cached
+        fg_since = (fg_cached(self).get("since") or "2011")[:4]
         path, depth = "method/", 1
         h = lambda x: self.href(depth, x)
         body = f"""
@@ -1580,9 +1582,12 @@ class Site:
 <section class="card prose" id="signal"><span id="light"></span><p class="eyebrow">Your signal: the one call on each stock</p>
 <p>Every stock gets one call, <b>Buy</b>, <b>Hold</b> or <b>Sell</b>, and the reader sets it. Each of {len(SIG_FACTORS)} factors turns into points from 0 to 100: the share of the plays you count that hold the stock, analysts' upside and rating, P/E and the other value measures, growth, margins, debt, trend, momentum and crash exposure. Company numbers score by rank among every covered company, so a P/E lower than 80% of them scores 80. Your score is the weighted average of the factors you weight, over the ones the stock has; with less than half your weight available (a fund has no P/E) there's no score. Buy at {SIG_BUY} or more, Sell at {SIG_SELL} or less, unless you move the lines.</p>
 <p>The standard weights are half plays, half analysts' upside. Change them, or the plays you count, from any stock page, the stock list, the screener or the watchlist, and every page follows (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Until October 2026 the site also showed a Start/Stop light, which read only the plays; the same reading is your signal with every weight on the plays. {DISCLAIMER}</p></section>
+<section class="card prose" id="factor-grades"><p class="eyebrow">How the factors are graded</p>
+<p>Every factor gets a record, like every play. Each month since {fg_since}, every stock got its points on each factor from numbers public at the time: prices to that close, the plays' calls to that close, and company figures from the SEC filings filed by that date (each value dated by the filing that first reported it). A factor's <b>Buys</b> are stocks it scored 60 or more; its <b>Avoids</b>, 40 or less. Each is checked against its market (the S&amp;P 500, or the TSX) over the next three months and the next year. The <b>edge</b> is how much more often the Buys beat the market than the Avoids did; it's shown beside every slider and in <a href="{h('guides/your-plays/')}#your-signal">the guide</a>. Analysts' targets and ratings, forward P/E, PEG and crash exposure have no record of past values and aren't graded. The test uses today's list of covered stocks, which flatters every factor alike.</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>
+<li>Company numbers come from SEC filings (XBRL) for companies that file 10-Qs, dated by filing, and from Yahoo Finance for the rest; every one passes a quality check that holds back impossible values and corrects currency mix-ups (data/quality.json).</li>
 <li>Cash earns the 13-week U.S. Treasury bill yield (^IRX). Canadian names use the same rate, which slightly flatters or penalises them.</li>
 <li>Every signal uses finished bars only. Today's price is ignored until the market has closed, and weekly or monthly plays wait for the week or month to end.</li>
 </ul></div>
