@@ -109,6 +109,13 @@ emails re-baseline quietly instead of mailing every flip the change caused. Save
 reader last looked (per browser, `BPPlays.changes`), and the watchlist flags one name being 25% or
 more of the list by value.
 
+**Old vs new, tested.** `tools/model_compare.py` (from the dev engine cache; a few minutes) runs
+`tools/qstrat/modelcompare.py` and writes `data/modelcompare.json`, which the free article
+`/articles/old-vs-new-signal/` reads: every month-end since 2006, the new standard, the plays alone and
+a dozen candidate refinements scored point-in-time, with how often Buys and Sells beat the market,
+how often they fell 30%+ within a year, and how often calls flip; plus the old standard rebuilt from
+the price targets in `data/events/` (July 2024 on). Rerun it whenever the model changes.
+
 **Disclaimer on every page.** The footer of every page carries `render.DISCLAIMER`; Netlify's
 not-found page is the site's own `404.html` (`Site.not_found_html`). The build stops if any page
 lacks the disclaimer (`build_strategies.pages_without_disclaimer`) and `tools/smoke.py` checks it on

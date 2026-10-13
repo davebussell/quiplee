@@ -47,7 +47,9 @@ for that isn't there, and move an issue to Done only once the change is live.
   trend 30; AUD-30). Change them only with a better graded record (`factorgrade.grade(site,
   extra_presets=...)`), and bump `factors.MODEL` whenever the standard weights or a factor's
   scoring change, so saved old-standard weights migrate and alerts re-baseline instead of
-  mailing every flip the change caused.
+  mailing every flip the change caused. Test a change with `tools/model_compare.py` first (12-month
+  edge since 2006 and by era, Sells that fell 30%+, flips a year), add it to `modelcompare.MODELS`,
+  and rerun it after the change so `/articles/old-vs-new-signal/` stays current.
 
 ## How it fits together
 

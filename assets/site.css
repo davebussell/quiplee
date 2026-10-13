@@ -1967,3 +1967,17 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 }
 .wti-country > .card.prose { max-width: none; }
 .wti-country > .card.prose > ul, .wti-country > .card.prose > p { max-width: 80ch; }
+
+/* edge-by-year bars (riskpieces.old_vs_new) */
+.yb { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 0 4px; height: 190px; margin: 6px 0 4px; }
+.yb-col { display: grid; grid-template-rows: 1fr 1fr auto; min-width: 0; }
+.yb-top { display: flex; align-items: flex-end; border-bottom: 1px solid var(--line-2); }
+.yb-bot { display: flex; align-items: flex-start; }
+.yb-col i { display: block; width: 100%; border-radius: 2px; min-height: 1px; }
+.yb-up { background: var(--in); }
+.yb-down { background: var(--out); }
+.yb-lab { font: 10.5px/1 var(--data); color: var(--muted); text-align: center; padding-top: 6px; white-space: nowrap; }
+.ovn td.r { white-space: nowrap; }
+@media (max-width: 560px) { .yb { gap: 0 2px; } .yb-col:nth-child(even) .yb-lab { visibility: hidden; } }
+.ovn th { white-space: normal; vertical-align: bottom; }
+.ovn td:first-child { min-width: 12em; }

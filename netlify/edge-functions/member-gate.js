@@ -96,5 +96,6 @@ export const config = {
   excludedPath: ["/articles/", "/articles/index.html",
     "/articles/why-your-signal-changed", "/articles/why-your-signal-changed/", "/articles/why-your-signal-changed/index.html",
     "/articles/when-to-sell", "/articles/when-to-sell/", "/articles/when-to-sell/index.html",
-    "/articles/one-stock-too-many", "/articles/one-stock-too-many/", "/articles/one-stock-too-many/index.html"],
+    "/articles/one-stock-too-many", "/articles/one-stock-too-many/", "/articles/one-stock-too-many/index.html",
+    "/articles/old-vs-new-signal", "/articles/old-vs-new-signal/", "/articles/old-vs-new-signal/index.html"],
 };
