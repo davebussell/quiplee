@@ -24,7 +24,10 @@ from .members import locked_page, member_tag, PRICE
 
 e = html.escape
 WRITTEN = pd.Timestamp("2026-10-03")
-BUCKETS = [("stocks", "Stocks", "A brief on every covered name, rebuilt each night, plus the names the plays agree on and the ones a crash would hit hardest."),
+from .riskpieces import FREE as FREE_PIECES  # noqa: E402
+FREE_TAG = '<span class="tag">Free</span>'
+BUCKETS = [("risk", "Risk and selling", "When to get out, how much to put in one name, and how the signal changed to carry an exit rule. Free to read."),
+           ("stocks", "Stocks", "A brief on every covered name, rebuilt each night, plus the names the plays agree on and the ones a crash would hit hardest."),
            ("strategies", "Strategies & sectors", "What the plays are, when each family works, what the backtests really say, and a brief on each sector."),
            ("macro", "Macro", "Bubbles, crashes and the gauges that came before them, and how to think about cash versus staying invested.")]
 SECTOR_ETF = {"Semiconductors": "SMH", "Big tech": "XLK", "Software & devices": "XLK", "Healthcare": "XLV", "Financials": "XLF",
@@ -78,7 +81,7 @@ class Articles:
         k, n = self.s.consensus(t, plays)
         return (k / n if n else 0), k, n
 
-    def shell(self, path, bucket, title, dek, body, sources=(), live=False, related="", desc=None, date=None):
+    def shell(self, path, bucket, title, dek, body, sources=(), live=False, related="", desc=None, date=None, free=False):
         depth = path.count("/")
         h = self.h(depth)
         bname = dict((k, n) for k, n, _ in BUCKETS)[bucket]
@@ -104,7 +107,8 @@ class Articles:
                                       active="articles/", scripts=("assets/widgets.js",)))
         crumbs = f'<nav class="crumbs"><a href="{h("articles/")}">Articles</a><span>/</span><a href="{h("articles/")}#{bucket}">{e(bname)}</a></nav>'
         head = f'<header class="pair-head{art_cls}">{art}<p class="eyebrow">{e(bname)} · {e(when)}</p><h1 class="h1">{title}</h1><p class="lede">{dek}</p></header>'
-        locked_page(self.s, path, plain, desc or html.unescape(dek), head, what="report", active="articles/", crumbs=crumbs)
+        if not free:      # free pieces are left out of the paywall (member-gate.js excludedPath)
+            locked_page(self.s, path, plain, desc or html.unescape(dek), head, what="report", active="articles/", crumbs=crumbs)
 
     def gauge_table(self, depth):
         M = self.s.macro
@@ -123,13 +127,17 @@ class Articles:
         cards = ""
         for b, sp, title, dek, kind, _ in self.list:
             if sp in slugs:
-                cards += f'<a class="card art-card" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])}</span><span class="name">{title}</span><span class="muted small">{dek}</span>{member_tag()}</a>'
+                tag = '<span class="tag">Free</span>' if sp in FREE_PIECES else member_tag()
+                cards += f'<a class="card art-card" href="{h(sp)}"><span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])}</span><span class="name">{title}</span><span class="muted small">{dek}</span>{tag}</a>'
         return f'<section><h2 class="h2">Keep reading</h2><div class="grid grid-3">{cards}</div></section>' if cards else ""
 
     # ------------------------------------------------------------- registry
     def plan(self):
         """Register every piece first so the hub and 'keep reading' can link them all."""
         L = self.list
+        from .riskpieces import PIECES
+        for sp, title, dek in PIECES:
+            L.append(("risk", sp, title, dek, "live", None))
         L.append(("macro", "articles/is-this-a-bubble/", "Is this a bubble? The gauges in October 2026",
                   "Valuations and concentration rival 2000. Credit, jobs and volatility are calm. Rates are the highest since 2007 and the Fed is raising again. What history says to make of that.", "written", WRITTEN))
         L.append(("macro", "articles/bubbles-and-crashes/", "A century of bubbles and crashes, and the signs that came first",
@@ -157,6 +165,8 @@ class Articles:
 
     def build(self):
         self.plan()
+        from . import riskpieces
+        riskpieces.build(self)
         self.bubble()
         self.history()
         self.cash()
@@ -183,7 +193,7 @@ class Articles:
             for b, sp, title, dek, kind, _ in self.list:
                 if b != key or "/sectors/" in sp:
                     continue
-                tag = '<span class="art-tags">' + ('<span class="tag live">Live</span>' if kind == "live" else "") + member_tag() + '</span>'
+                tag = '<span class="art-tags">' + ('<span class="tag live">Live</span>' if kind == "live" else "") + ('<span class="tag">Free</span>' if sp in FREE_PIECES else member_tag()) + '</span>'
                 cards += f'<a class="card art-card" href="{h(sp)}">{tag}<span class="name">{title}</span><span class="muted small">{dek}</span></a>'
             extra = ""
             if key == "stocks":
@@ -199,14 +209,14 @@ class Articles:
                 extra = f'<div class="card"><p class="h3">Sector briefs</p><div class="chips" style="margin-top:10px">{chips}</div></div>'
             secs += f'<section id="{key}"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>{extra}<div class="grid grid-3">{cards}</div></section>'
         feat = ""
-        for sp in ["articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
+        for sp in ["articles/why-your-signal-changed/", "articles/when-to-sell/", "articles/one-stock-too-many/", "articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
                    "articles/debt-and-crashes/", "articles/green-across-the-board/"]:
             b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
             when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
             slug = sp.strip("/").split("/")[-1]
             thumb = (f'<span class="more-img">{pic(h, ARTICLE_ART[slug], sizes="(max-width: 700px) 100vw, 380px", decorative=True)}</span>' if slug in ARTICLE_ART else "")
             feat += (f'<a class="card art-card feat more-card" href="{h(sp)}">{thumb}<span class="eyebrow">{e(dict((k, n) for k, n, _ in BUCKETS)[b])} · {e(when)}</span>'
-                     f'<span class="name">{title}</span><span class="muted small">{dek}</span>{member_tag()}</a>')
+                     f'<span class="name">{title}</span><span class="muted small">{dek}</span>{FREE_TAG if sp in FREE_PIECES else member_tag()}</a>')
         feat += (f'<a class="card art-card feat more-card" href="{h("stories/the-hertz-lesson.html")}"><span class="more-img">{pic(h, "rental-lot", sizes="(max-width: 700px) 100vw, 380px", decorative=True)}</span><span class="eyebrow">Story · Sep 30, 2026</span>'
                  f'<span class="name">The Hertz lesson: why a crash doesn\'t care about your revenue</span>'
                  f'<span class="muted small">How a car-rental giant fell 85% in a housing crash, and the five checks that sort survivors from casualties.</span></a>')

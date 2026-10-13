@@ -54,6 +54,15 @@
     if (z.length === 3) { z[0].style.width = W.sell + '%'; z[1].style.width = (W.buy - W.sell) + '%'; z[2].style.width = (100 - W.buy) + '%'; }
     if (dot) { dot.style.left = (r.s == null ? 50 : r.s) + '%'; dot.hidden = r.s == null; }
     card.querySelector('[data-sig-why]').textContent = why(r, W);
+    var tl = card.querySelector('[data-sig-tested]');
+    if (tl) {
+      var share = P.tested(r.parts), un = r.parts.filter(function (q) { var f = D.fx.filter(function (x) { return x.k === q.k; })[0]; return q.p != null && !(f && f.r && !f.r.why); }).map(function (q) { return q.n; });
+      tl.textContent = (P.migrated() ? 'The standard weights changed on Oct 13, 2026: you’re now on the new ones. ' : '') +
+        (share == null ? '' : share >= 0.995 ? 'Every factor in this score has a tested record: each was checked month by month since ' + D.gs + ' on numbers public at the time.'
+          : share < 0.005 ? 'None of this score rests on a factor with a tested record.'
+          : Math.round(100 * share) + '% of this score rests on factors with a tested record; the rest (' + un.join(', ') + ') has none.');
+      tl.classList.toggle('warn', share != null && share < 0.75);
+    }
     card.querySelector('[data-sig-rows]').innerHTML = r.parts.map(function (p) {
       return '<tr><td>' + esc(p.n) + '</td><td>' + esc(p.v == null ? '–' : p.v) + '</td><td class="r">' + (p.p == null ? '–' : p.p) + '</td><td class="r">' + p.w + '</td><td class="r">' + (p.add == null ? '–' : p.add) + '</td></tr>';
     }).join('');

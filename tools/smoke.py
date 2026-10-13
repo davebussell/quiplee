@@ -31,6 +31,9 @@ FORWARDS = {
     "/stocks/mu/rsi-30-70/": "/stocks/mu/?play=rsi-30-70",
     "/stocks/mu/golden-cross/": "/stocks/mu/?play=golden-cross",
 }
+MISSING = "/no-such-page-smoke-test/"
+# every page carries the disclaimer (render.DISCLAIMER; Dave's rule)
+DISCLAIMER_KEY = "This analysis does not constitute trading advice."
 WIDTHS = (390, 1280)
 MAX_AGE_DAYS = 4
 STOCK_CHECK = """() => { const b = document.querySelector('[data-sig-badge]'); return b ? b.textContent.trim() : 'no-signal-card'; }"""
@@ -88,11 +91,14 @@ async def run(base, local):
                     if not resp or resp.status >= 400:
                         errs.append(f"page status {resp.status if resp else 'none'}")
                     await pg.wait_for_timeout(1500)
-                    got = await pg.evaluate("() => ({sw: document.documentElement.scrollWidth, h1: !!document.querySelector('h1, .h1')})")
+                    got = await pg.evaluate("() => ({sw: document.documentElement.scrollWidth, h1: !!document.querySelector('h1, .h1'), "
+                                            "disc: document.body.innerText.includes(" + json.dumps(DISCLAIMER_KEY) + ")})")
                     if got["sw"] > w + 1:
                         errs.append(f"sideways scroll: {got['sw']}px wide at {w}px")
                     if not got["h1"]:
                         errs.append("no headline")
+                    if not got["disc"]:
+                        errs.append("no disclaimer")
                     if path.startswith("/stocks/") and path.count("/") == 3:
                         badge = await pg.evaluate(STOCK_CHECK)
                         for _ in range(10):            # the signal redraws once data/playset.json has loaded
@@ -111,6 +117,17 @@ async def run(base, local):
             await ctx.close()
         if not local:
             ctx = await browser.new_context()
+            pg = await ctx.new_page()           # an address that isn't on the site gets the site's own 404 page
+            try:
+                resp = await pg.goto(base + MISSING, wait_until="load", timeout=60000)
+                txt = await pg.evaluate("() => document.body.innerText")
+                ok = resp is not None and resp.status == 404 and DISCLAIMER_KEY in txt and "be the puck" in (await pg.title()).lower()
+                if not ok:
+                    fails.append(f"404 page: status {resp.status if resp else 'none'}, title {await pg.title()!r}")
+                print(f"{'ok  ' if ok else 'FAIL'} 404 page")
+            except Exception as ex:
+                fails.append(f"404 page: {ex}")
+            await pg.close()
             for old, new in FORWARDS.items():
                 pg = await ctx.new_page()
                 try:

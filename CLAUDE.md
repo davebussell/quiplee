@@ -13,6 +13,8 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **Ship with example or filler data**, so a first visit shows a populated, working state, never an empty shell.
 - **Disclaimer wording**, exactly: "This analysis does not constitute trading advice. Please meet
   with an advisor or independently review sources before making any decision." (`DISCLAIMER` in render.py.)
+  It is on **every page** (the footer, and the site's own 404). The build refuses to publish a page
+  without it and smoke.py checks it, so a new page type must use `Site.shell`.
 - Financial content states facts and evidence, never a recommendation addressed to the reader.
 - **Never label any ticker as Dave's own holding** on the site.
 - **MGRC stays excluded** from the universe.
@@ -41,6 +43,11 @@ for that isn't there, and move an issue to Done only once the change is live.
   Link with `site.pair_link(t, play)`, never by building the path by hand.
 - Every factor and play shows how often it has been right (`calls right`). New factors
   get graded the same way before they get a slider.
+- **The standard weights use only graded factors** (`factors.DEFAULT`: plays 40, off the high 30,
+  trend 30; AUD-30). Change them only with a better graded record (`factorgrade.grade(site,
+  extra_presets=...)`), and bump `factors.MODEL` whenever the standard weights or a factor's
+  scoring change, so saved old-standard weights migrate and alerts re-baseline instead of
+  mailing every flip the change caused.
 
 ## How it fits together
 

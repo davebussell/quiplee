@@ -205,7 +205,10 @@ function cleanSignal(c) {
   if (!Object.keys(w).length) return null;
   const buy = Math.min(95, Math.max(50, Math.round(Number(c.buy) || 60)));
   const sell = Math.min(buy - 5, Math.max(5, Math.round(Number(c.sell) || 40)));
-  return { w, buy, sell };
+  // which signal model the weights were saved under (plays.js), so a later change of the standard
+  // weights moves readers who were simply on the old standard, and nobody else
+  const mv = Math.min(99, Math.max(1, Math.round(Number(c.mv) || 1)));
+  return { w, buy, sell, mv };
 }
 
 async function plays(req, s, sess) {

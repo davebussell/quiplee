@@ -50,14 +50,14 @@ export default async () => {
       }
       if (!fresh || !rec.confirmed) return;
       const last = rec.last || {};
-      const flips = [];
+      const flips = [], mark = "s" + (R.mv || 1);   // the signal model the stored value came from
       let changed = false;
       for (const sym of rec.tickers || []) {
         const t = R.t[sym];
         if (!t || t.S == null) continue;
-        const now = [t.S, t.k, t.of, "s"];
-        // first sight, or a record from the Start/Stop light days (no "s" marker): record quietly
-        if (!last[sym] || last[sym][3] !== "s") { last[sym] = now; changed = true; continue; }
+        const now = [t.S, t.k, t.of, mark];
+        // first sight, or a value from an older model (the light, or old standard weights): record quietly
+        if (!last[sym] || last[sym][3] !== mark) { last[sym] = now; changed = true; continue; }
         if (last[sym][0] !== t.S) flips.push({ sym, t, was: last[sym] });
         if (last[sym][0] !== t.S || last[sym][1] !== t.k) { last[sym] = now; changed = true; }
       }
@@ -111,7 +111,7 @@ async function accounts(R, fresh) {
         if (!t) continue;
         const g = PS.x[sym] ? signalFor(PS, sym, acct.plays, acct.signal, sel) : { s: t.sc, sig: t.S };
         if (g.sig == null) continue;
-        const last = snap.S && snap.S[sym];
+        const last = snap.mv === (R.mv || 1) && snap.S && snap.S[sym];   // a new model re-baselines quietly
         if (last && last[0] !== g.sig) flips.push({ sym, t: { ...t, S: g.sig, sc: g.s }, was: last, W });
         S[sym] = [g.sig, g.s];
       }
@@ -130,7 +130,7 @@ async function accounts(R, fresh) {
         msgs.push(nightlyMsg(u, acct, flips, plays, R, member && al.level !== "light"));
         writes.push([u, { last_sent: R.asof }, "patch"]);
       }
-      writes.push(["as/" + u, { asof: R.asof, S, p: psnap }]);
+      writes.push(["as/" + u, { asof: R.asof, mv: R.mv || 1, S, p: psnap }]);
     }
   }
   return { s, msgs, writes, n: keys.length };

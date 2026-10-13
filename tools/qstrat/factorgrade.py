@@ -29,7 +29,7 @@ START = pd.Timestamp("2011-01-01")
 HORIZONS = (63, 252)    # sessions: about three months and a year
 BUY, AVOID = 60, 40
 COMPANY = ("pe", "ps", "pb", "dy", "eg", "rg", "pm", "roe", "de")
-GRADED = ("plays", "trend", "mom") + COMPANY
+GRADED = ("plays", "offhigh", "trend", "mom") + COMPANY
 LOWER_BETTER = {"pe", "fpe", "peg", "ps", "pb", "de"}
 NO_HISTORY = {"upside": "no record of past analyst targets", "rating": "no record of past analyst ratings",
               "fpe": "no record of past earnings estimates", "peg": "no record of past growth estimates",
@@ -78,10 +78,11 @@ def _plays_share(site, t, dates):
     return k, n
 
 
-def grade(site):
+def grade(site, extra_presets=None):
     """{"since", "to", "months", "factors": {key: record}, "presets": {key: record}}, each record
     {"3m": {...}, "12m": {...}} (see rec())."""
-    from .factors import PRESETS
+    from .factors import PRESETS, offhigh_points
+    PRESETS = list(PRESETS) + list(extra_presets or [])
     from .engine import _read, PRICE_DIR
     stocks = _stocks(site)
     if not stocks:
@@ -100,7 +101,7 @@ def grade(site):
         c = site.prices[t["sym"]]["close"]
         b = site.prices[t["bench"]]["close"]
         rows[t["sym"]] = (t, c.values.astype(float), c.rolling(200).mean().values, c.index.searchsorted(dates, side="right") - 1,
-                          b.values.astype(float), b.index.searchsorted(dates, side="right") - 1)
+                          b.values.astype(float), b.index.searchsorted(dates, side="right") - 1, c.rolling(252, min_periods=120).max().values)
     plays = {t["sym"]: _plays_share(site, t, dates) for t in stocks}
     hz = {h: {"f": {k: ([], []) for k in GRADED}, "p": {pk: ([], []) for pk, _, _ in PRESETS}} for h in HORIZONS}
     names = {k: set() for k in GRADED}
@@ -109,7 +110,7 @@ def grade(site):
         fixed = {k: {} for k in GRADED}
         excess = {h: {} for h in HORIZONS}
         fxd = float(fx.iloc[fx.index.searchsorted(d, side="right") - 1]) if fx is not None and len(fx) else None
-        for sym, (t, c, ma, pos, b, bpos) in rows.items():
+        for sym, (t, c, ma, pos, b, bpos, hi) in rows.items():
             i, j = pos[di], bpos[di]
             if i < 0 or j < 0 or c[i] <= 0 or b[j] <= 0:
                 continue
@@ -123,6 +124,8 @@ def grade(site):
                 raw["trend"][sym] = p0 / ma[i] - 1
             if i >= 252 and c[i - 252] > 0:
                 raw["mom"][sym] = p0 / c[i - 252] - 1
+            if hi[i] > 0:
+                raw["offhigh"][sym] = p0 / hi[i] - 1
             k, n = plays[sym][0][di], plays[sym][1][di]
             if n >= 20:
                 raw["plays"][sym] = k / n
@@ -139,7 +142,12 @@ def grade(site):
         pts = {}
         for key in GRADED:
             p = dict(fixed[key])
-            p.update({s_: int(round(100 * v)) for s_, v in raw[key].items()} if key == "plays" else _rank(raw[key], key not in LOWER_BETTER))
+            if key == "plays":
+                p.update({s_: int(round(100 * v)) for s_, v in raw[key].items()})
+            elif key == "offhigh":
+                p.update({s_: offhigh_points(v) for s_, v in raw[key].items()})
+            else:
+                p.update(_rank(raw[key], key not in LOWER_BETTER))
             pts[key] = p
             names[key].update(p)
         scores = {}

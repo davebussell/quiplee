@@ -58,7 +58,7 @@ function crossSite(req) {
 const mask = (email) => email.replace(/^(.)(.*)(@.*)$/, (m, a, b, c) => a + "•".repeat(Math.min(6, b.length)) + c);
 
 /** Today's signal for each ticker (standard weights), so a new subscriber hears only about later flips. */
-const lastFor = (tickers, R, prev = {}) => Object.fromEntries(tickers.map((s) => [s, prev[s] || (R.t[s] && R.t[s].S != null ? [R.t[s].S, R.t[s].k, R.t[s].of, "s"] : null)]));
+const lastFor = (tickers, R, prev = {}) => Object.fromEntries(tickers.map((s) => [s, prev[s] || (R.t[s] && R.t[s].S != null ? [R.t[s].S, R.t[s].k, R.t[s].of, "s" + (R.mv || 1)] : null)]));
 
 async function subscribe(req, context, s) {
   const b = await readBody(req);

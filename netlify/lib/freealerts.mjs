@@ -85,7 +85,7 @@ export function flipEmail(id, email, flips, R) {
       (read ? `<ul style="margin:0 0 10px;padding-left:20px">${read}</ul>` : "") +
       `<p style="margin:0"><a href="${esc(url)}">See the full analysis for ${esc(t.s)}</a></p></div>`;
   }).join("");
-  const intro = "<p>Be The Puck's signal is its one call on a stock: Buy, Hold or Sell from a score of 0 to 100. These use the standard weights, half the plays and half analysts' upside; " +
+  const intro = "<p>Be The Puck's signal is its one call on a stock: Buy, Hold or Sell from a score of 0 to 100. These use the standard weights (" + esc(R.wt || "40% Plays in, 30% Off the high and 30% Trend") + "); " +
     `<a href="${esc(siteUrl() + "/me/")}">a free account</a> lets you set your own and get emails on those. Here's what changed on your stocks at the latest close.</p>`;
   const html = mail.shell(subject, intro + blocks, footer(id));
   const text = flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S).toUpperCase()}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of)} ${(f.t.read || []).join(" ")} ${siteUrl()}/stocks/${f.t.u}/`).join("\n\n") +

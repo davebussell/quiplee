@@ -239,6 +239,38 @@
     return { w: w, byValue: useVal };
   }
 
+  var SIGW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] };
+  function pillEl(sig) { var w = SIGW[sig]; return el('span', { 'class': 'sig-pill ' + (w ? w[1] : 'na'), text: w ? w[0] : '–' }); }
+  // what changed on this list since the reader last looked (plays.js changes(): only the market, never their settings)
+  function changesNote(box, cov) {
+    var PS = window.BPPlays;
+    if (st.example || !PS || !PS.loaded()) return;
+    var ch = PS.changes('watch', cov.map(function (x) { return x.sym; }));
+    if (!ch || !ch.since) return;
+    var when = new Date(ch.since + 'T12:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    if (!ch.list.length) {
+      box.appendChild(el('p', { 'class': 'small muted wl-changes-none', text: 'No signal changed on this list since the ' + when + ' close.' }));
+      return;
+    }
+    var items = ch.list.map(function (c) {
+      var t = D.t[c.sym];
+      return el('li', {}, [el('a', { 'class': 'sym', href: STOCK.replace('{u}', t.u), text: t.s }), ' ', pillEl(c.from), ' → ', pillEl(c.to), el('span', { 'class': 'muted small', text: ' score ' + c.s })]);
+    });
+    box.appendChild(el('div', { 'class': 'card wl-changes' }, [el('p', { 'class': 'h3', text: 'Signal changes since the ' + when + ' close' }), el('ul', {}, items),
+      el('p', { 'class': 'small muted', text: 'From the prices and filings at the latest close, with your weights. Sign in on My Puck to get these by email.' })]));
+  }
+  // one name that dominates the list by value: what a fall in it alone would do to the whole list
+  function concentrationNote(box, cov, W) {
+    if (!W.byValue || cov.length < 2) return;
+    var top = cov.reduce(function (a, x) { return !a || W.w[x.sym] > W.w[a.sym] ? x : a; }, null);
+    var share = W.w[top.sym];
+    if (share < 0.25) return;
+    var t = D.t[top.sym], pc = Math.round(100 * share);
+    box.appendChild(el('div', { 'class': 'card wl-conc' }, [el('p', { 'class': 'h3', text: t.s + ' is ' + pc + '% of this list by value' }),
+      el('p', { 'class': 'small', text: 'If it fell 20%, the whole list would fall about ' + Math.round(20 * share) + '% from that one name, whatever the others did. ' +
+        'A signal on one stock can\u2019t make up for that; how much rides on one name is a separate decision. ' }, [el('a', { href: BASE + 'articles/one-stock-too-many/', text: 'What concentration does to a list' })])]));
+  }
+
   function render() {
     var sel = selected();
     var list = $('wl-list'), sum = $('wl-sum');
@@ -251,6 +283,8 @@
     var W = weights();
     // summary
     var cov = st.items.filter(function (x) { return D.t[x.sym]; });
+    changesNote(sum, cov);
+    concentrationNote(sum, cov, W);
     var qd = st.items.filter(function (x) { var s = status(x.sym); return s === 'queued' || s === 'sending' || s === 'new'; });
     var bands = { in: 0, split: 0, out: 0 }, risk = { calm: 0, watch: 0, warning: 0, none: 0 }, up = 0, avg = 0;
     cov.forEach(function (x) {

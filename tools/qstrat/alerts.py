@@ -9,7 +9,7 @@ import html
 
 from .content import TICKERS
 from .render import DISCLAIMER, dlong, sig_pill, fx_score
-from .factors import BUY, SELL, SIG_WORD
+from .factors import BUY, SELL, SIG_WORD, default_words
 from . import stockview as sv
 from .media import page_art, PAGE_ART
 
@@ -72,7 +72,7 @@ def alerts_page(site):
 {_example(site, depth)}
 
 <section class="card prose"><h2 class="h3">How the signal works</h2>
-<p>The signal is Be The Puck's one call on a stock. Each factor scores it from 0 to 100, and the score is their weighted average. These emails use the standard weights: half the share of the plays that hold the stock, half analysts' upside. Buy at {BUY} or more, Sell at {SELL} or less, Hold in between. With a free account, alerts follow your own weights, your Buy and Sell lines and the plays you count. <a href="{h('method/')}#signal">More on the method</a>.</p>
+<p>The signal is Be The Puck's one call on a stock. Each factor scores it from 0 to 100, and the score is their weighted average. These emails use the standard weights: {e(default_words())}. Buy at {BUY} or more, Sell at {SELL} or less, Hold in between. With a free account, alerts follow your own weights, your Buy and Sell lines and the plays you count. <a href="{h('method/')}#signal">More on the method</a>.</p>
 <p class="small muted">{e(DISCLAIMER)}</p></section>
 """
     site.add(path, site.shell(path, "Free email alerts: get an email when the signal flips",

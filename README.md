@@ -91,14 +91,28 @@ the right way on the real stocks (no funds, indexes or coins) since 2005; a play
 calls on at least half the stocks to be ranked (`render.rankable`). Top 10 and Top picks always
 use every play.
 
-**Your signal.** Readers weight 17 factors (`tools/qstrat/factors.py`): plays in, analysts'
+**Your signal.** Readers weight 18 factors (`tools/qstrat/factors.py`): plays in, analysts'
 upside and rating, P/E, forward P/E, PEG, price to sales and book, dividend yield, earnings and
-revenue growth, profit margin, return on equity, debt to equity, trend, 1-year momentum and crash
-exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
+revenue growth, profit margin, return on equity, debt to equity, off the high, trend, 1-year
+momentum and crash exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
 is the weighted average over the factors the stock has, and the reader's Buy and Sell lines (60/40
 to start) make it Buy, Hold or Sell on the stock page (with a factor-by-factor breakdown), the
-stock list, the screener, the watchlist and My Puck. The standard weights (plays 50, analysts'
-upside 50) give the site's existing score. Saved like the plays; `?w=plays50.pe20&buy=60&sell=40`.
+stock list, the screener, the watchlist and My Puck. The standard weights (`DEFAULT`: plays 40, off the high 30, trend 30, since October 13, 2026) use
+only factors with a tested record (`factorgrade.py`: +6.0 points of 12-month edge, against +4.4 for
+the old plays 50 / analysts' upside 50). **Off the high** is the exit rule: 100 points at the 1-year
+high, none at 30% or more below. Analysts' upside is capped at 50 points while the price is under
+its 200-day average, so a falling stock can't score better because its target now looks further
+away. `factors.MODEL` is bumped whenever the standard weights or a factor's scoring change: saved
+weights that were just the old standard move to the new one (plays.js, signal.mjs), and the alert
+emails re-baseline quietly instead of mailing every flip the change caused. Saved like the plays;
+`?w=plays50.pe20&buy=60&sell=40`. The watchlist and My Puck note which signals changed since the
+reader last looked (per browser, `BPPlays.changes`), and the watchlist flags one name being 25% or
+more of the list by value.
+
+**Disclaimer on every page.** The footer of every page carries `render.DISCLAIMER`; Netlify's
+not-found page is the site's own `404.html` (`Site.not_found_html`). The build stops if any page
+lacks the disclaimer (`build_strategies.pages_without_disclaimer`) and `tools/smoke.py` checks it on
+every page it opens.
 
 **News that moves stocks.** `tools/fetch_events.py` (nightly) keeps each company's earnings
 dates with EPS surprises and its analyst rating changes; `tools/qstrat/newsevents.py` sorts them,
@@ -130,7 +144,9 @@ was taken down 30 Sep 2026). It is tested with 12/21 EMAs; change the lengths in
 and drop its `flag` in `plays.py` once confirmed.
 
 **Members.** `/picks/` (the top-picks tracker), `/rules/` (their own Start/Stop
-rules) and every report under `/articles/` (not the hub) are for members. `netlify/edge-functions/member-gate.js`
+rules) and every report under `/articles/` (not the hub) are for members, except the free
+"Risk and selling" pieces (`tools/qstrat/riskpieces.py`, listed in its `FREE` and in
+`member-gate.js` `excludedPath`). `netlify/edge-functions/member-gate.js`
 serves the full page only with a signed member cookie; otherwise it serves the
 page's locked version (title, opening line, sign-in / join card) that
 `tools/qstrat/members.py` builds under `/locked/`. `netlify/functions/member.mjs`

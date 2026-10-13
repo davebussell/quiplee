@@ -81,6 +81,7 @@
     var t = R.t[s];
     return t && t.sc != null ? { s: t.sc, sig: t.S } : { s: null, sig: null };
   }
+  function pillOnly(sig) { var w = SIGW[sig]; return w ? '<span class="sig-pill ' + w[1] + '">' + w[0] + '</span>' : '<span class="sig-pill na">–</span>'; }
   function sgPill(r) {
     var w = r && r.sig != null ? SIGW[r.sig] : null;
     return w ? '<span class="sig-pill ' + w[1] + '">' + w[0] + '</span> <b class="sig-n ' + w[1] + '">' + r.s + '</b>' : '<span class="sig-pill na">–</span>';
@@ -89,13 +90,25 @@
     return '<button type="button" class="ps-chip ps-chip-sm" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>' +
       esc(PS && PS.loaded() ? PS.label(false) : 'All 100') + '</b><span class="ps-caret" aria-hidden="true">▾</span></button>';
   }
+  // signals that changed on the stocks you follow since this browser last looked (plays.js changes())
+  function changesHtml(list) {
+    if (!PS || !PS.loaded()) return '';
+    var ch = PS.changes('me', list);
+    if (!ch || !ch.since) return '';
+    var when = day(ch.since);
+    if (!ch.list.length) return '<p class="small muted me-ch-none">No signal changed on your stocks since the ' + esc(when) + ' close.</p>';
+    return '<div class="me-changes"><p class="h3">Changed since the ' + esc(when) + ' close</p><ul>' + ch.list.map(function (c) {
+      var t = R.t[c.sym];
+      return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b></a> ' + pillOnly(c.from) + ' → ' + sgPill({ sig: c.to, s: c.s }) + '</li>';
+    }).join('') + '</ul></div>';
+  }
   function followRows() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     if (!list.length) {
       return '<div class="me-empty"><p><b>Follow a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div></div>';
     }
-    return '<ul class="me-list">' + list.map(function (s) {
+    return changesHtml(list) + '<ul class="me-list">' + list.map(function (s) {
       var t = R.t[s], c = kn(s);
       return '<li><a class="me-row" href="' + esc(STOCK.replace('{u}', t.u)) + '">' +
         '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + '<span class="mp-sig">' + sgPill(sg(s)) + '</span>' +
@@ -108,7 +121,7 @@
   function sigTile(list) {
     var n = { '1': 0, '0': 0, '-1': 0 };
     list.forEach(function (s) { var r = sg(s); if (r && r.sig != null) n[r.sig]++; });
-    var wl = PS && PS.loaded() ? PS.wlabel() : 'Plays + analysts';
+    var wl = PS && PS.loaded() ? PS.wlabel() : 'Plays + exit rules';
     return '<div class="card tile"><span class="tile-label">Your signal on your stocks</span><span class="tile-value"><b class="sig-n buy" data-count="' + n['1'] + '">' + n['1'] + '</b><small> Buy of ' + list.length + '</small></span>' +
       bar(n['1'], list.length || 1) + '<span class="tile-note">' + (list.length ? n['0'] + ' Hold · ' + n['-1'] + ' Sell · weights: ' + esc(wl) : 'Follow a few to begin') + '</span></div>';
   }

@@ -33,7 +33,7 @@ GROUPS = [("signals", "Plays and analysts"), ("value", "Value"), ("quality", "Gr
 # key, name, group, what it is (shown in the chooser)
 FACTORS = [
     ("plays", "Plays in", "signals", "The share of the plays you count that hold it now."),
-    ("upside", "Analysts' upside", "signals", "How far analysts' average 12-month target sits above the price (3+ analysts). −20% scores 0, +50% full marks."),
+    ("upside", "Analysts' upside", "signals", "How far analysts' average 12-month target sits above the price (3+ analysts). −20% scores 0, +50% full marks; at most 50 while the price is below its 200-day average, since targets lag a falling price."),
     ("rating", "Analysts' rating", "signals", "The analysts' average recommendation: strong buy scores 100, hold or worse 0."),
     ("pe", "P/E", "value", "Price over the last four quarters' earnings per share. Lower ranks higher; a loss scores 0."),
     ("fpe", "Forward P/E", "value", "Price over next year's expected earnings. Lower ranks higher; an expected loss scores 0."),
@@ -46,16 +46,36 @@ FACTORS = [
     ("pm", "Profit margin", "quality", "Net profit as a share of revenue. Higher ranks higher."),
     ("roe", "Return on equity", "quality", "Profit as a share of shareholders' equity. Higher ranks higher."),
     ("de", "Debt to equity", "quality", "Debt against shareholders' equity. Lower ranks higher; negative equity scores 0."),
+    ("offhigh", "Off the high", "price", "How far the price sits below its highest close of the last year: 100 points at the high, none at 30% or more below. The exit rule: a stock that keeps falling loses points whatever else it has going for it."),
     ("trend", "Trend", "price", "How far the price sits above its 200-day average. Higher ranks higher."),
     ("mom", "1-year momentum", "price", "The price change over the last 12 months. Higher ranks higher."),
     ("calm", "Low crash exposure", "price", "The storm test: 100 for no exposure, 10 points off per point of exposure."),
 ]
 KEYS = [k for k, _, _, _ in FACTORS]
 
-DEFAULT = {"plays": 50, "upside": 50}
+OFFHIGH_FLOOR = 0.30      # this far below the 1-year high scores 0 on Off the high
+UPSIDE_CAP = 50           # analysts' upside points while the price is below its 200-day average
+MODEL = 2                 # bumped when the standard weights or a factor's scoring change (alerts re-baseline quietly)
+# The standard weights (October 13, 2026): only factors with a track record (factorgrade.py), and
+# 60% of them the price's own exit rules. Before that they were plays 50 / analysts' upside 50,
+# half of it on targets that can't be tested and that look better the further a stock falls.
+DEFAULT = {"plays": 40, "offhigh": 30, "trend": 30}
+OLD_DEFAULT = {"plays": 50, "upside": 50}
 BUY, SELL = 60, 40
+
+
+def default_words(w=None):
+    """The standard weights in words for pages and emails: "40% Plays in, 30% Off the high and 30% Trend"."""
+    w = w or DEFAULT
+    label = {k: lab for k, lab, _, _ in FACTORS}
+    tot = sum(w.values()) or 1
+    bits = [f"{round(100 * v / tot)}% {label[k]}" for k, v in w.items()]
+    return bits[0] if len(bits) == 1 else ", ".join(bits[:-1]) + " and " + bits[-1]
+
+
 PRESETS = [
-    ("default", "Plays + analysts", DEFAULT),
+    ("default", "Plays + exit rules", DEFAULT),
+    ("analysts", "Plays + analysts", OLD_DEFAULT),
     ("plays", "Plays only", {"plays": 100}),
     ("value", "Value", {"plays": 20, "pe": 20, "fpe": 20, "ps": 15, "pb": 10, "dy": 15}),
     ("growth", "Growth", {"plays": 25, "rg": 25, "eg": 25, "peg": 15, "upside": 10}),
@@ -63,6 +83,11 @@ PRESETS = [
     ("momentum", "Momentum", {"plays": 40, "trend": 30, "mom": 30}),
     ("balanced", "Balanced", {"plays": 30, "upside": 10, "fpe": 10, "eg": 10, "roe": 10, "de": 10, "mom": 10, "calm": 10}),
 ]
+
+
+def offhigh_points(dd):
+    """Points on Off the high for a drawdown dd (0 at the high, -0.3 for 30% below)."""
+    return _rnd(100 * max(0.0, min(1.0, 1 + dd / OFFHIGH_FLOOR)))
 
 
 def _rnd(x):
@@ -191,10 +216,21 @@ def compute(site):
             put("de", pick("de", None if de_y is None else (de_y / 100 if de_y >= 0 else "negative")), lambda v: _x(v, 2), "negative equity")
         # price and risk: every name
         o = meta.get("ohlc")
+        gap = None
         if o is not None and len(o) >= 200:
             c = o["close"]
             gap = float(c.iloc[-1] / c.iloc[-200:].mean() - 1)
             raw["trend"][sym], shown["trend"][sym] = gap, _p(gap) + " vs 200-day"
+        # off the high: an absolute exit rule, not a ranking (in a broad sell-off every stock loses points)
+        pc_ = (site.prices or {}).get(sym)
+        if pc_ is not None and len(pc_) >= 120:
+            cl = pc_["close"].iloc[-252:]
+            dd = float(cl.iloc[-1] / cl.max() - 1)
+            fixed["offhigh"][sym], shown["offhigh"][sym] = offhigh_points(dd), ("at its 1-year high" if dd > -0.005 else _p(dd) + " from its 1-year high")
+        # analysts' targets lag a falling price, so their upside counts for at most half while the trend is broken
+        if gap is not None and gap < 0 and fixed["upside"].get(sym, 0) > UPSIDE_CAP:
+            fixed["upside"][sym] = UPSIDE_CAP
+            shown["upside"][sym] = (shown["upside"].get(sym) or "") + " · capped: below 200-day"
         try:
             y1 = site.one_year(t)
         except Exception:
@@ -273,7 +309,7 @@ def factors_json(site):
     gf, gp = g.get("factors", {}), g.get("presets", {})
     return {"fx": [{"k": k, "n": n, "g": g_, "d": d, "r": rec(gf.get(k))} for k, n, g_, d in FACTORS], "fg": [list(x) for x in GROUPS],
             "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL},
-            "gs": g.get("since", "")[:4], "x": x, "v": v}
+            "wo": OLD_DEFAULT, "mv": MODEL, "gs": g.get("since", "")[:4], "x": x, "v": v}
 
 
 SIG_WORD = {1: "Buy", 0: "Hold", -1: "Sell", None: "No score"}
@@ -319,8 +355,9 @@ def signal_card(site, t, h):
 <div class="sig-row"><span class="sig-badge {SIG_CLS[sig]}" data-sig-badge>{SIG_WORD[sig]}</span><span class="sig-score"><b data-sig-score>{"–" if s is None else s}</b><small> / 100</small></span></div></div>
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
+<p class="small sig-tested" data-sig-tested>{e(tested_line(site, parts))}</p>
 <div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
-<div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button>
+<div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + exit rules</b><span class="ps-caret" aria-hidden="true">▾</span></button>
 <button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>
 {alert}</div>
 <p class="small muted sig-note">Your signal is the one call Be The Puck makes on a stock, and you set it: weight the plays, analysts, P/E, growth, debt, trend and more, and move the Buy and Sell lines. Every page follows your choice. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></p>
@@ -333,3 +370,20 @@ def card_numbers(site, t):
     so the stock page's business card shows the same P/E, growth and the rest: ({key: value}, {key: source})."""
     compute(site)
     return (site.__dict__.get("_factor_val") or {}).get(t["sym"], {}), (site.__dict__.get("_factor_src") or {}).get(t["sym"], {})
+
+
+def tested_line(site, parts):
+    """How much of a score rests on factors with a track record (factorgrade.py); assets/playview.js says the same."""
+    from .factorgrade import cached, GRADED
+    since = (cached(site).get("since") or "2011")[:4]
+    have = [x for x in parts if x["p"] is not None]
+    a = sum(x["w"] for x in have)
+    if not a:
+        return ""
+    g = sum(x["w"] for x in have if x["k"] in GRADED)
+    share = round(100 * g / a)
+    if share >= 100:
+        return f"Every factor in this score has a tested record: each was checked month by month since {since} on numbers public at the time."
+    if share == 0:
+        return "None of this score rests on a factor with a tested record."
+    return f"{share}% of this score rests on factors with a tested record; the rest ({', '.join(x['n'] for x in have if x['k'] not in GRADED)}) has none."

@@ -51,7 +51,16 @@ export function count(D, sym, sel) {
 }
 
 /** The standard weights unless the reader saved valid ones (assets/plays.js cleanW). */
+const sameW = (a, b) => {
+  const ka = Object.keys(a || {}).filter((k) => a[k] > 0), kb = Object.keys(b || {}).filter((k) => b[k] > 0);
+  if (ka.length !== kb.length || !ka.length) return false;
+  const r = a[ka[0]] / (b[ka[0]] || NaN);
+  return ka.every((k) => b[k] && Math.abs(a[k] / b[k] - r) < 1e-9);
+};
+
 export function weights(D, c) {
+  // weights saved before the standard changed that were just the old standard move to the new one (as in plays.js)
+  if (c && D.wo && (c.mv || 1) < (D.mv || 1) && sameW(c.w, D.wo)) c = { ...c, w: { ...D.wd.w } };
   const w = {};
   let any = false;
   for (const f of D.fx) {

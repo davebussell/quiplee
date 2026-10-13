@@ -56,7 +56,7 @@ def ps_bar(h, note, cls=""):
     return (f'<div class="ps-bar{" " + cls if cls else ""}"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog">'
             f'<span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button>'
             f'<button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog">'
-            f'<span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + analysts</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>'
+            f'<span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + exit rules</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>'
             f'<p class="small muted">{note} <a href="{h("guides/your-plays/")}">How it works</a></p></div>')
 
 
@@ -91,7 +91,7 @@ CS_MARK = ('<span class="cs-mark" role="img" aria-label="Click Shift"><span clas
 MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>')
 FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
                 '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
-FOOT_DISCLAIM = f'<p class="foot-disclaim"><b>Not trading advice.</b> {DISCLAIMER}</p>'
+FOOT_DISCLAIM = f'<p class="foot-disclaim"><b>Not financial advice.</b> {DISCLAIMER}</p>'
 # The plays-only light (retired as a verdict in October 2026; Your signal replaced it). Only the
 # Top 10's published rule and the members' /rules/ page still use it. It turns to Start when this
 # share of the plays with a call hold the stock, and back to Stop only when the share falls
@@ -641,6 +641,24 @@ class Site:
                 f.write(page)
             page = None
         self.pages[path] = page
+
+    def not_found_html(self):
+        """404.html: what Netlify serves for an address that isn't on the site. It can be served at
+        any depth, so a <base href="/"> makes its links resolve from the site root."""
+        h = lambda x: self.href(0, x)
+        links = [("stocks/", "All stocks", f"Your signal on all {len(universe())} stocks and funds"),
+                 ("watchlist/", "Watchlist", "The stocks you follow, in one list"),
+                 ("strategies/", "Plays", f"All {len(TIMED)} published plays and how often they've been right"),
+                 ("articles/", "Reports", "What the numbers say this week"),
+                 ("learn/", "Learn", "How to read a play, a backtest and a signal")]
+        items = "".join(f'<li><a href="{h(u)}"><b>{e(t)}</b></a> <span class="muted">{e(d)}</span></li>' for u, t, d in links)
+        body = f"""
+<section class="pair-head"><p class="eyebrow">Page not found</p><h1 class="h1">That page isn't here</h1>
+<p class="lede">The address may have changed, or the page was retired. A stock's page is at /stocks/ and its ticker, like <a href="{h('stocks/mu/')}">/stocks/mu/</a>.</p></section>
+<section class="card prose"><ul>{items}</ul></section>"""
+        page = self.shell("", "Page not found · Be The Puck", "That page isn't on Be The Puck.", body, link=False,
+                          extra_head='<base href="/">\n<meta name="robots" content="noindex">\n')
+        return page.replace(f'<link rel="canonical" href="{BASE}">\n', "")
 
     # ----- aggregates -----
     def strat_summary(self, s):
@@ -1571,7 +1589,7 @@ class Site:
 
     # ------------------------------------------------------------ method
     def method_page(self):
-        from .factors import FACTORS as SIG_FACTORS, BUY as SIG_BUY, SELL as SIG_SELL
+        from .factors import FACTORS as SIG_FACTORS, BUY as SIG_BUY, SELL as SIG_SELL, default_words
         from .factorgrade import cached as fg_cached
         fg_since = (fg_cached(self).get("since") or "2011")[:4]
         path, depth = "method/", 1
@@ -1581,7 +1599,7 @@ class Site:
 <p class="lede">The same test for all {len(TIMED)} plays and all {len(universe())} stocks, written down so anyone can check it.</p></section>
 <section class="card prose" id="signal"><span id="light"></span><p class="eyebrow">Your signal: the one call on each stock</p>
 <p>Every stock gets one call, <b>Buy</b>, <b>Hold</b> or <b>Sell</b>, and the reader sets it. Each of {len(SIG_FACTORS)} factors turns into points from 0 to 100: the share of the plays you count that hold the stock, analysts' upside and rating, P/E and the other value measures, growth, margins, debt, trend, momentum and crash exposure. Company numbers score by rank among every covered company, so a P/E lower than 80% of them scores 80. Your score is the weighted average of the factors you weight, over the ones the stock has; with less than half your weight available (a fund has no P/E) there's no score. Buy at {SIG_BUY} or more, Sell at {SIG_SELL} or less, unless you move the lines.</p>
-<p>The standard weights are half plays, half analysts' upside. Change them, or the plays you count, from any stock page, the stock list, the screener or the watchlist, and every page follows (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Until October 2026 the site also showed a Start/Stop light, which read only the plays; the same reading is your signal with every weight on the plays. {DISCLAIMER}</p></section>
+<p>The standard weights are {e(default_words())}, chosen in October 2026 because every factor in them has a tested record (below) and the last two are exit rules: a stock that keeps falling, or breaks below its 200-day average, loses its Buy. Before that they were half plays, half analysts' upside, and the targets behind upside can't be tested and look better the further a stock falls. Change them, or the plays you count, from any stock page, the stock list, the screener or the watchlist, and every page follows (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Until October 2026 the site also showed a Start/Stop light, which read only the plays; the same reading is your signal with every weight on the plays. {DISCLAIMER}</p></section>
 <section class="card prose" id="factor-grades"><p class="eyebrow">How the factors are graded</p>
 <p>Every factor gets a record, like every play. Each month since {fg_since}, every stock got its points on each factor from numbers public at the time: prices to that close, the plays' calls to that close, and company figures from the SEC filings filed by that date (each value dated by the filing that first reported it). A factor's <b>Buys</b> are stocks it scored 60 or more; its <b>Avoids</b>, 40 or less. Each is checked against its market (the S&amp;P 500, or the TSX) over the next three months and the next year. The <b>edge</b> is how much more often the Buys beat the market than the Avoids did; it's shown beside every slider and in <a href="{h('guides/your-plays/')}#your-signal">the guide</a>. Analysts' targets and ratings, forward P/E, PEG and crash exposure have no record of past values and aren't graded. The test uses today's list of covered stocks, which flatters every factor alike.</p></section>
 <section class="split">

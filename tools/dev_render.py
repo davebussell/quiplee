@@ -64,6 +64,7 @@ def main():
         with open(os.path.join(out, "sitemap.xml"), "w") as f:
             f.write(site.sitemap())
         B.link_static_pages(out)
+        B.write_404(site, out)
         n = sum(len(fs) for _, _, fs in os.walk(out))
         print(f"full site: {len(pages)} pages, {n} files in {time.time() - t0:.0f}s ->", out)
         return
@@ -96,6 +97,9 @@ def main():
             if t["sym"] in syms:
                 for s in site.headline_plays():
                     site.pair_page(t, s)
+    if "articles" in extra:
+        from qstrat.articles import Articles
+        Articles(site).build()
     if "watchlist" in extra:
         from qstrat.watchlist import watchlist_page
         watchlist_page(site)
@@ -123,7 +127,11 @@ def main():
     os.makedirs(OUT)
     B.copy_static(OUT)
     B.write_pages({k: v for k, v in site.pages.items() if v is not None}, OUT)
+    B.write_404(site, OUT)
     B.write_data(site, OUT, quick=True)
+    missing = B.pages_without_disclaimer(OUT)
+    if missing:
+        print("pages without the disclaimer:", *missing, sep="\n  ")
     print("pages:", len(site.pages), f"in {time.time() - t0:.0f}s ->", OUT)
 
 

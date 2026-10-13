@@ -34,7 +34,7 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
-GENERATED = {"index.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
+GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
                   "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec"}   # data/events/ (earnings and rating history) is only read at build time
@@ -105,7 +105,8 @@ def reads_json(site):
         out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),
                     "g": t["group"], "d1": None if d1 is None else round(d1, 5),
                     "S": sg, "sc": sc, "k": k, "of": n, "y1": None if site.one_year(t) is None else round(float(site.one_year(t)), 4), "read": read}
-    return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "t": out}, ensure_ascii=False, separators=(",", ":"))
+    from qstrat.factors import MODEL, default_words
+    return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "mv": MODEL, "wt": default_words(), "t": out}, ensure_ascii=False, separators=(",", ":"))
 
 
 def static_footer():
@@ -160,6 +161,29 @@ def write_pages(pages, out):
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(html)
+
+
+def write_404(site, out):
+    with open(os.path.join(out, "404.html"), "w", encoding="utf-8") as f:
+        f.write(site.not_found_html())
+
+
+def pages_without_disclaimer(out):
+    """Every page a reader can open must carry the disclaimer (Dave's rule; render.DISCLAIMER).
+    Returns the pages that don't. Files with no <body> (fragments, verification files) don't count."""
+    from qstrat.render import DISCLAIMER
+    key = DISCLAIMER[:60]
+    missing = []
+    for d, _, fs in os.walk(out):
+        for fn in fs:
+            if not fn.endswith((".html", ".htm")):
+                continue
+            path = os.path.join(d, fn)
+            with open(path, encoding="utf-8", errors="replace") as f:
+                text = f.read()
+            if "<body" in text.lower() and key not in text:
+                missing.append(os.path.relpath(path, out))
+    return sorted(missing)
 
 
 def write_data(site, out, quick=False):
@@ -250,6 +274,11 @@ def main():
     with open(os.path.join(out, "sitemap.xml"), "w") as f:
         f.write(site.sitemap())
     print("glossary-linked:", ", ".join(link_static_pages(out)))
+    write_404(site, out)
+    missing = pages_without_disclaimer(out)
+    if missing:
+        print(f"{len(missing)} page(s) without the disclaimer:", *missing[:50], sep="\n  ")
+        sys.exit("refusing to publish pages without the disclaimer")
     if not os.environ.get("QSTRAT_SPILL"):
         shutil.rmtree(spill, ignore_errors=True)
     print(f"wrote the site to {out} in {time.time() - t0:.0f}s")

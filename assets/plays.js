@@ -31,7 +31,7 @@
   var NAME = { all: 'All plays', top1: 'Most accurate in each family', top3: 'Top 3 in each family', half: 'Right more than half the time', custom: 'Your own pick' };
   var SIG_WORD = { '1': 'Buy', '0': 'Hold', '-1': 'Sell' }, SIG_CLS = { '1': 'buy', '0': 'hold', '-1': 'sell' };
   var D = null, IDX = {}, FAMI = {}, FXI = {}, sel = null, choice = { p: 'all', s: [] }, origin = 'default';
-  var wts = null, worigin = 'default', tab = 'plays';
+  var wts = null, worigin = 'default', tab = 'plays', migrated = false;
   var subs = [], waiting = [], here = null, sortBy = 'acc', ov = null, opener = null, saveT = null, wsaveT = null;
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -62,7 +62,40 @@
     if (!any) w = Object.assign({}, D.wd.w);
     var buy = Math.min(95, Math.max(50, Math.round(+c.buy || D.wd.buy)));
     var sell = Math.min(buy - 5, Math.max(5, Math.round(+c.sell || D.wd.sell)));
-    return { w: w, buy: buy, sell: sell };
+    return { w: w, buy: buy, sell: sell, mv: D.mv || 1 };
+  }
+  // weights saved before the standard changed (model version D.mv) that were simply the old
+  // standard move to the new one; anything the reader set themselves is kept
+  function migrate(c) {
+    if (!c || !D || !D.wo || (c.mv || 1) >= (D.mv || 1) || !sameW(c.w, D.wo)) return c;
+    migrated = true;
+    return { w: Object.assign({}, D.wd.w), buy: c.buy, sell: c.sell, mv: D.mv };
+  }
+  // signal changes since this browser last looked: {since: the earlier close, list: [{sym, from, to, s}]}.
+  // Kept per page (scope) and reset whenever the reader's weights or plays change, so only the
+  // market can produce a "change". A reload on the same close shows the same list again.
+  function changes(scope, syms) {
+    if (!D || !wts) return null;
+    var key = JSON.stringify([D.mv || 1, Object.keys(wts.w).sort().map(function (k) { return k + wts.w[k]; }), wts.buy, wts.sell, choice.p, (choice.s || []).join('.')]);
+    var store = 'bp.seen.' + scope, seen = lsGet(store) || {}, same = seen.key === key;
+    if (same && seen.asof === D.asof) return { since: seen.since || null, list: seen.last || [] };
+    var out = [], sig = {};
+    syms.forEach(function (sym) {
+      var r = score(sym);
+      if (r.sig == null) return;
+      sig[sym] = r.sig;
+      var was = same && seen.sig ? seen.sig[sym] : undefined;
+      if (was != null && was !== r.sig) out.push({ sym: sym, from: was, to: r.sig, s: r.s });
+    });
+    var since = same ? seen.asof : null;
+    lsSet({ key: key, asof: D.asof, since: since, sig: sig, last: out }, store);
+    return { since: since, list: out };
+  }
+  // how much of a score rests on factors with a track record (factorgrade.py), 0 to 1
+  function tested(parts) {
+    var a = 0, g = 0;
+    parts.forEach(function (q) { if (q.p == null) return; a += q.w; var f = D.fx[FXI[q.k]]; if (f && f.r && !f.r.why) g += q.w; });
+    return a ? g / a : null;
   }
   function wFromParam(q) {
     var v = q.get('w');
@@ -80,7 +113,7 @@
     return true;
   }
   function wPreset() { for (var i = 0; i < D.wp.length; i++) if (sameW(wts.w, D.wp[i].w)) return D.wp[i]; return null; }
-  function wlabel() { if (!D || !wts) return 'Plays + analysts'; var p = wPreset(); return p ? p.n : 'Your weights'; }
+  function wlabel() { if (!D || !wts) return 'Plays + exit rules'; var p = wPreset(); return p ? p.n : 'Your weights'; }
   function isDefaultW() { return !wts || (sameW(wts.w, D.wd.w) && wts.buy === D.wd.buy && wts.sell === D.wd.sell); }
   /** A name's score with the reader's weights: {s: 0-100 or null, sig: 1|0|-1|null, parts: [{k, n, v, p, w, add}], cov}. */
   function score(sym, wIn) {
@@ -394,7 +427,8 @@
   }
   function paintWeights() {
     ov.querySelector('#ps-h').textContent = 'Your signal';
-    ov.querySelector('.ps-lede').textContent = 'Weight what matters to you. Each factor scores a stock from 0 to 100; your score is the weighted average, ' +
+    ov.querySelector('.ps-lede').textContent = (migrated ? 'The standard weights changed on October 13, 2026, to factors with a tested record. You were on the old standard (plays and analysts’ upside), so you’re now on the new one; pick “Plays + analysts” to go back. ' : '') +
+      'Weight what matters to you. Each factor scores a stock from 0 to 100; your score is the weighted average, ' +
       'and your Buy and Sell lines turn it into a signal on every page. P/E, growth and the other company numbers score by rank against the ' + D.n + ' stocks we cover.';
     var pr = wPreset();
     ov.querySelector('.ps-presets').innerHTML = D.wp.map(function (x) {
@@ -517,7 +551,9 @@
       if (!D) return;
       c = clean(c);
       if (c && origin === 'default') { origin = 'account'; lsSet(c); apply(c, 'account'); }
+      var raw = sig;
       sig = cleanW(sig);
+      if (sig) { sig.mv = (raw && raw.mv) || 1; sig = migrate(sig); }
       if (sig && worigin === 'default') { worigin = 'account'; lsSet(sig, WKEY); applyW(sig, 'account'); }
     },
     // your signal
@@ -525,6 +561,9 @@
     weights: function () { return wts; },
     wlabel: wlabel,
     isDefaultWeights: isDefaultW,
+    migrated: function () { return migrated; },
+    changes: changes,
+    tested: tested,
     setWeights: function (c) { if (D) applyW(c, 'user'); },
     sigWord: function (sig) { return sig == null ? 'No score' : SIG_WORD[sig]; },
     sigClass: function (sig) { return sig == null ? 'na' : SIG_CLS[sig]; }
@@ -537,7 +576,10 @@
     D.plays.forEach(function (p, i) { IDX[p.s] = i; });
     D.fams.forEach(function (f, i) { FAMI[f[0]] = i; });
     D.fx.forEach(function (f, i) { FXI[f.k] = i; });
-    var q = new URLSearchParams(location.search), wl = wFromParam(q), wm = cleanW(lsGet(WKEY));
+    var q = new URLSearchParams(location.search), wl = wFromParam(q), stored = lsGet(WKEY), wm = cleanW(stored);
+    if (wm && stored) wm.mv = stored.mv || 1;
+    wm = migrate(wm);
+    if (migrated) lsSet(wm, WKEY);
     if (wl) { worigin = 'link'; wts = wl; } else if (wm) { worigin = 'browser'; wts = wm; } else wts = cleanW(D.wd);
     var link = fromParam(q.get('plays')), mine = clean(lsGet());
     if (link) { origin = 'link'; choice = link; }

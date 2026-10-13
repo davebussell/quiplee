@@ -1,7 +1,7 @@
 /* member-gate.js: the Be The Puck Members paywall.
  *
- * Runs in front of /picks/, /rules/ and every report under /articles/ (the hub stays
- * open). With a valid member cookie the page is served as built. Without one,
+ * Runs in front of /picks/, /rules/ and every report under /articles/ (the hub and the free
+ * pieces on risk and selling stay open). With a valid member cookie the page is served as built. Without one,
  * the page's locked version is served at the same URL: its title and opening
  * line plus a sign-in / join card, built under /locked/<path> by
  * tools/qstrat/members.py. A subscriber whose short-lived cookie has run out
@@ -92,5 +92,9 @@ export default async (req, context) => {
 
 export const config = {
   path: ["/picks", "/picks/*", "/articles/*", "/rules", "/rules/*"],
-  excludedPath: ["/articles/", "/articles/index.html"],
+  // the hub, and the free pieces on risk and selling (tools/qstrat/riskpieces.py FREE)
+  excludedPath: ["/articles/", "/articles/index.html",
+    "/articles/why-your-signal-changed", "/articles/why-your-signal-changed/", "/articles/why-your-signal-changed/index.html",
+    "/articles/when-to-sell", "/articles/when-to-sell/", "/articles/when-to-sell/index.html",
+    "/articles/one-stock-too-many", "/articles/one-stock-too-many/", "/articles/one-stock-too-many/index.html"],
 };
