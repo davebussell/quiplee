@@ -1,9 +1,14 @@
 # Netlify builds the plays site from the cached prices in data/prices/ on every
-# push (the nightly price refresh is a push), then publishes _site/. The live
+# push (the nightly price refresh is a push), then publishes _site/, unless the build
+# has moved to GitHub Actions (see `ignore` below and .github/workflows/deploy.yml). The live
 # desk's serverless functions deploy from netlify/functions as before.
 [build]
   command = "python -m pip install -q -r requirements.txt && python tools/build_strategies.py --out _site"
   publish = "_site"
+  # Once GitHub Actions builds and deploys the site (.github/workflows/deploy.yml), an empty
+  # .deploy-from-actions file in the repo makes Netlify skip its own builds. Without it,
+  # Netlify builds every push as before.
+  ignore = "test -f .deploy-from-actions"
 
 [build.environment]
   NODE_VERSION = "20"       # ensures global fetch() is available in functions

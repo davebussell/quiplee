@@ -49,6 +49,10 @@ for that isn't there, and move an issue to Done only once the change is live.
   `tools/qstrat/render.py` and friends write the pages.
 - `.github/workflows/refresh-prices.yml` refreshes `data/` twice a day (prices, macro,
   fundamentals, news, earnings and ratings) and commits; that push triggers a deploy.
+- Deploys: Netlify builds each push (~7 minutes) until the build moves to GitHub Actions
+  (`.github/workflows/deploy.yml`, waiting on the `NETLIFY_AUTH_TOKEN` secret; the steps to
+  switch over are at the top of that file). Every push costs a deploy, so batch your commits
+  and push once per piece of work.
 - Company numbers: `tools/fetch_sec.py` keeps each SEC filer's quarters in `data/sec/` (dated by
   filing, so backtests never see the future); `tools/qstrat/secfund.py` turns them into P/E,
   growth, margins and debt. Yahoo (`tools/fetch_fundamentals.py`) covers the rest (TSX-only

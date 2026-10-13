@@ -1,0 +1,71 @@
+# Builds the site here in GitHub Actions (free for public repos) and uploads it to Netlify,
+# which then only stores and serves it; Netlify uploads only the files that changed. Runs on
+# every push to main and after each data refresh, then smoke-tests the live site.
+#
+# Switching on (one time):
+#   1. Add the NETLIFY_AUTH_TOKEN repo secret (a Netlify personal access token).
+#      Until it exists this workflow does nothing and Netlify keeps building as before.
+#   2. Once a run here has deployed (bethepuck.com/data/build.json shows its commit),
+#      commit an empty file named .deploy-from-actions: netlify.toml's `ignore` then skips
+#      Netlify's own builds, so each change is built once, here. Delete the file to go back.
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Refresh prices", "Earnings releases"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true          # a newer commit supersedes an older build
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: 37feaf82-92b5-457b-88bc-747fee390af4
+    steps:
+      - name: Is the Netlify token set?
+        id: gate
+        run: |
+          if [ -z "$NETLIFY_AUTH_TOKEN" ]; then
+            echo "on=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::NETLIFY_AUTH_TOKEN isn't set, so Netlify builds the site itself (see the top of this file)."
+          else
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.on == 'true'
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.on == 'true'
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.on == 'true'
+        with:
+          node-version: "20"
+      - name: Build the site
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          pip install -q -r requirements.txt
+          COMMIT_REF="$(git rev-parse HEAD)" python tools/build_strategies.py --out _site
+      - name: Deploy to Netlify (changed files only)
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          npm install --no-audit --no-fund
+          npx -y netlify-cli@18 deploy --prod --dir _site --functions netlify/functions \
+            --site "$NETLIFY_SITE_ID" --message "Actions build $(git rev-parse --short HEAD)"
+      - name: Smoke test the live site
+        if: steps.gate.outputs.on == 'true'
+        run: |
+          pip install -q playwright
+          python -m playwright install --with-deps chromium
+          python tools/smoke.py https://bethepuck.com --commit "$(git rev-parse HEAD)" --wait 10
