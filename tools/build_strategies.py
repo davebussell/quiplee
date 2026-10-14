@@ -116,7 +116,7 @@ def static_footer():
     css = ("<style>.bp-foot{border-top:1px solid #232d42;background:#0b0f17;color:#8a95a9;font:13px/1.55 Geist,-apple-system,'Segoe UI',Roboto,sans-serif}"
            ".bp-foot .in{max-width:1160px;margin:0 auto;padding:20px 16px 36px;display:flex;flex-direction:column;gap:12px}"
            ".bp-foot p{margin:0}.bp-foot .foot-disclaim{color:#c3cad8;padding:12px 14px;border:1px solid #232d42;border-radius:10px;background:#131927}"
-           ".bp-foot .foot-disclaim b{color:#eef2f9}.bp-foot .foot-credits{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px}"
+           ".bp-foot .foot-disclaim b{color:#eef2f9}.bp-foot .foot-disclaim a{color:#a99dff}.bp-foot .foot-credits{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px}"
            ".bp-foot .foot-credits a{display:inline-flex;align-items:center;gap:9px;color:#c3cad8;text-decoration:none}"
            ".bp-foot .cs-mark{display:inline-flex;align-items:center;gap:6px;line-height:1}.bp-foot .cs-click svg{width:17px;height:17px;display:block}"
            ".bp-foot .cs-shift{display:inline-flex;align-items:center;gap:5px;font:600 11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.5px;color:#0c0d10;"

@@ -12,7 +12,7 @@
   var H = JSON.parse(cfg.textContent);
   P.here(H);
   var top = document.getElementById('top-plays');
-  var grid = top && top.querySelector('.tp-grid'), grid0 = grid ? grid.innerHTML : '';
+  var grid = top && top.querySelector('.tp-grid'), grid0 = grid ? grid.innerHTML.replace(/ rv(-in)?\b/g, '') : '';   // without the fade-in classes, so a redraw never comes back hidden
   var head = top && top.querySelector('#tp-h'), head0 = head ? head.textContent : '';
   var sub = top && top.querySelector('[data-ps-tp-sub]'), sub0 = sub ? sub.innerHTML : '';
   var allSub = document.querySelector('[data-ps-all-sub]'), allSub0 = allSub ? allSub.innerHTML : '';

@@ -92,7 +92,7 @@ section { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .small { font-size: 13px; }
 .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
 .sec-head p { color: var(--muted); font-size: 13.5px; max-width: 70ch; }
-.crumbs { font: 12.5px var(--data); color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.crumbs { font: 12.5px var(--data); color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .crumbs a { color: var(--muted); }
 .crumbs a:hover { color: var(--ink); }
 .prose { max-width: 68ch; display: flex; flex-direction: column; gap: 12px; color: var(--ink-2); }
@@ -1250,7 +1250,10 @@ body { font-size: 16px; }
 .h1 em, .me-h1 em, .hero-h1 em { font-style: italic; color: var(--violet-ink); }
 .me-h1 { font-size: clamp(36px, 5.4vw, 60px); line-height: 1.02; }
 .me-auth-card { position: sticky; top: 80px; padding: 24px; box-shadow: 0 30px 60px -40px rgba(124, 108, 245, .5); border-color: var(--line-2); }
-@media (max-width: 900px) { .me-out-grid { grid-template-columns: 1fr; } .me-auth-card { position: static; order: -1; } }
+.me-out-grid { grid-template-areas: "head auth" "rest auth"; row-gap: 18px; }
+.me-out-head { grid-area: head; } .me-out-rest { grid-area: rest; } .me-auth-card { grid-area: auth; }
+/* on a phone: the heading first, then the form, then what you get */
+@media (max-width: 900px) { .me-out-grid { grid-template-columns: 1fr; grid-template-areas: "head" "auth" "rest"; } .me-auth-card { position: static; } }
 .me-preview { margin-top: 8px; }
 .mp-frame { border: 1px solid var(--line-2); border-radius: 14px; overflow: hidden; background: var(--bg-2); box-shadow: 0 30px 70px -40px rgba(0, 0, 0, .9); }
 .mp-chrome { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid var(--line); background: var(--panel); font: 12px var(--data); color: var(--muted); }
@@ -1644,6 +1647,8 @@ html, body { overflow-x: clip; }
 .crash-card { position: relative; background: linear-gradient(180deg, #16224a 0%, #101a38 55%, #0d1530 100%); border-color: rgba(124, 108, 245, .28); }
 /* cards that lead somewhere get a picture */
 .more-card { padding-top: 0; overflow: hidden; }
+.more-card.no-img { padding-top: 20px; }
+.more-card:not(:has(.more-img)) { padding-top: 20px; }
 .more-img { display: block; margin: 0 -20px 8px; aspect-ratio: 16 / 8; overflow: hidden; background: var(--bg-2); border-bottom: 1px solid var(--line); }
 .more-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease, opacity .3s ease; opacity: .9; }
 .more-card:hover .more-img img { transform: scale(1.04); opacity: 1; }
@@ -1946,7 +1951,7 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .wti-src + .wti-src::before { content: "· "; color: var(--muted); }
 .wti-check { list-style: none; padding-left: 0 !important; gap: 10px !important; }
 .wti-check li { display: block; }
-.wti-tag { display: inline-block; font: 600 10.5px/1 var(--ui); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 6px;
+.wti-tag { display: inline-block; font: 600 11px/1 var(--ui); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 6px;
   border: 1px solid var(--line-2); color: var(--ink-2); margin-right: 4px; vertical-align: 1px; }
 .wti-tag[data-kind="official"] { border-color: var(--in-edge); background: var(--in-wash); color: var(--ink); }
 .wti-tag[data-kind="commercial"] { border-color: var(--out-edge); background: var(--out-wash); color: var(--ink); }
@@ -1976,8 +1981,39 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .yb-col i { display: block; width: 100%; border-radius: 2px; min-height: 1px; }
 .yb-up { background: var(--in); }
 .yb-down { background: var(--out); }
-.yb-lab { font: 10.5px/1 var(--data); color: var(--muted); text-align: center; padding-top: 6px; white-space: nowrap; }
+.yb-lab { font: 11px/1 var(--data); color: var(--muted); text-align: center; padding-top: 6px; white-space: nowrap; }
 .ovn td.r { white-space: nowrap; }
 @media (max-width: 560px) { .yb { gap: 0 2px; } .yb-col:nth-child(even) .yb-lab { visibility: hidden; } }
 .ovn th { white-space: normal; vertical-align: bottom; }
 .ovn td:first-child { min-width: 12em; }
+
+/* ---- phone fixes (October 13 sweep) ---- */
+.narrow-only, .scr-narrow { display: none; }
+@media (max-width: 640px) { .wide-only { display: none; } .narrow-only { display: inline; } li.wide-only { display: none; } }
+@media (max-width: 1180px) { .scr-wide { display: none; } .scr-narrow { display: inline; } }
+/* iOS Safari zooms the page on focus when a field's text is under 16px */
+@media (max-width: 760px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { font-size: 16px !important; }
+}
+/* thumb-sized targets on touch screens */
+@media (pointer: coarse) {
+  summary { padding-block: 8px; }
+  .wl-x { min-width: 40px; min-height: 40px; display: inline-grid; place-items: center; }
+  .chips a, .chip-btn { padding: 9px 12px; }
+  .seg button { padding: 11px 14px; }
+  .linkish { padding-block: 8px; }
+  .crumbs a { display: inline-block; padding-block: 6px; }
+}
+.sim-row select { width: 100%; max-width: 100%; text-overflow: ellipsis; }
+@media (max-width: 560px) {
+  .wti-pick .seg { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .wti-pick .seg button { text-align: center; }
+  .wti-ex .tbl-wrap { border: 0; background: none; }
+}
+.to-top { position: fixed; right: 14px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40; width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink); font: 600 18px/1 var(--ui); cursor: pointer;
+  opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity .2s, transform .2s; box-shadow: 0 8px 24px rgba(0, 0, 0, .35); }
+.to-top.on { opacity: .92; pointer-events: auto; transform: none; }
+@media (min-width: 900px) { .to-top { bottom: 28px; } }
+/* a list that scrolls inside its card fades at the bottom, so it doesn't look cut off */
+.th-list { -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); padding-bottom: 28px; }

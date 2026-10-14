@@ -61,10 +61,11 @@ def me_page(site):
 
 <section class="me-out has-art" data-me-out>{page_art(h, PAGE_ART["me/"], "50% 60%")}
 <div class="me-out-grid">
-<div class="me-out-copy"><p class="eyebrow">My Puck</p>
+<div class="me-out-copy me-out-head"><p class="eyebrow">My Puck</p>
 <h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>
 <p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening your signal on one flips, and opens every member tool until {FREE_UNTIL}.</p>
-<ul class="check-list"><li>Follow up to 100 stocks, funds and coins</li><li>An email with the analysis when a light flips, the same evening</li>
+</div>
+<div class="me-out-copy me-out-rest"><ul class="check-list"><li>Follow up to 100 stocks, funds and coins</li><li>An email with the analysis when a light flips, the same evening</li>
 <li>Test any theory on the stocks you follow, from one play to all of them</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
 <div class="me-preview">{_preview(site, depth)}</div>
 </div>

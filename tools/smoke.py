@@ -31,7 +31,7 @@ FORWARDS = {
     "/stocks/mu/rsi-30-70/": "/stocks/mu/?play=rsi-30-70",
     "/stocks/mu/golden-cross/": "/stocks/mu/?play=golden-cross",
 }
-MISSING = "/no-such-page-smoke-test/"
+MISSING = "/no-such-page/smoke-test/"      # two folders deep, so a page that only works at the root fails
 # every page carries the disclaimer (render.DISCLAIMER; Dave's rule)
 DISCLAIMER_KEY = "This analysis does not constitute trading advice."
 WIDTHS = (390, 1280)
@@ -121,9 +121,10 @@ async def run(base, local):
             try:
                 resp = await pg.goto(base + MISSING, wait_until="load", timeout=60000)
                 txt = await pg.evaluate("() => document.body.innerText")
-                ok = resp is not None and resp.status == 404 and DISCLAIMER_KEY in txt and "be the puck" in (await pg.title()).lower()
+                styled = await pg.evaluate("() => getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)'")
+                ok = resp is not None and resp.status == 404 and DISCLAIMER_KEY in txt and "be the puck" in (await pg.title()).lower() and styled
                 if not ok:
-                    fails.append(f"404 page: status {resp.status if resp else 'none'}, title {await pg.title()!r}")
+                    fails.append(f"404 page: status {resp.status if resp else 'none'}, title {await pg.title()!r}, styled {styled}")
                 print(f"{'ok  ' if ok else 'FAIL'} 404 page")
             except Exception as ex:
                 fails.append(f"404 page: {ex}")

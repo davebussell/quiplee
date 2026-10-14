@@ -198,7 +198,7 @@ def guide_page(site):
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Family</th><th>Most accurate play</th><th class="r" data-sort-first="desc">Calls right</th><th class="r" data-sort-first="desc">Family average</th><th class="r">Plays</th></tr></thead>
 <tbody>{fam_rows}</tbody></table></div></section>
 
-<section aria-labelledby="all-h" id="every-play"><div class="sec-head"><h2 class="h2" id="all-h">Every play, by how often it was right</h2><p>Tick plays in or out here, or use the chooser. Click a column to sort.</p></div>
+<section aria-labelledby="all-h" id="every-play"><div class="sec-head"><h2 class="h2" id="all-h">Every play, by how often it was right</h2><p>Tick plays in or out here, or use the chooser. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p></div>
 <div class="tbl-wrap"><table class="tbl ps-all"><thead><tr><th>Play <span class="muted">(tick to count it)</span></th><th>Family</th><th class="r" data-sort-first="desc">Calls right</th><th class="r" data-sort-first="desc">Calls</th><th class="r" data-sort-first="desc">Stocks</th></tr></thead>
 <tbody>{rows}</tbody></table></div>
 <p class="small muted">{DISCLAIMER}</p></section>

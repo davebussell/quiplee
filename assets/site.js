@@ -412,6 +412,20 @@
     }
   }
 
+  // ---------------------------------------------------------------- long pages get a way back to the top
+  function initTop() {
+    if (document.documentElement.scrollHeight < window.innerHeight * 6) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'to-top'; b.setAttribute('aria-label', 'Back to the top'); b.textContent = '↑';
+    b.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    document.body.appendChild(b);
+    var shown = false;
+    window.addEventListener('scroll', function () {
+      var on = window.scrollY > window.innerHeight * 3;
+      if (on !== shown) { shown = on; b.classList.toggle('on', on); }
+    }, { passive: true });
+  }
+
   // ---------------------------------------------------------------- motion: sections settle in, numbers count up
   function initMotion() {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -428,6 +442,19 @@
       });
     }, { rootMargin: '0px 0px -6% 0px' });
     els.forEach(function (el) { io.observe(el); });
+    // anything a script redraws later with the fade-in class still on it gets watched too, so it can't stay hidden
+    if ('MutationObserver' in window) {
+      new MutationObserver(function (muts) {
+        muts.forEach(function (m) {
+          [].forEach.call(m.addedNodes, function (n) {
+            if (n.nodeType !== 1) return;
+            var list = n.classList.contains('rv') ? [n] : [];
+            [].push.apply(list, n.querySelectorAll('.rv:not(.rv-in)'));
+            list.forEach(function (el) { if (!el.classList.contains('rv-in')) io.observe(el); });
+          });
+        });
+      }).observe(document.querySelector('main') || document.body, { childList: true, subtree: true });
+    }
     // <b data-count="37454">37,454</b>: the real number stays in the HTML for crawlers and no-JS readers
     var nums = [].slice.call(document.querySelectorAll('[data-count]'));
     var io2 = new IntersectionObserver(function (ents) {
@@ -450,7 +477,7 @@
     nums.forEach(function (el) { io2.observe(el); });
   }
 
-  function init() { initCharts(); initPicker(); initNav(); initMenus(); initHints(); initHead(); initMotion(); }
+  function init() { initCharts(); initPicker(); initNav(); initMenus(); initHints(); initHead(); initMotion(); initTop(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();

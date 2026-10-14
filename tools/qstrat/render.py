@@ -664,8 +664,9 @@ class Site:
 <p class="lede">The address may have changed, or the page was retired. A stock's page is at /stocks/ and its ticker, like <a href="{h('stocks/mu/')}">/stocks/mu/</a>.</p></section>
 <section class="card prose"><ul>{items}</ul></section>"""
         page = self.shell("", "Page not found · Be The Puck", "That page isn't on Be The Puck.", body, link=False,
-                          extra_head='<base href="/">\n<meta name="robots" content="noindex">\n')
-        return page.replace(f'<link rel="canonical" href="{BASE}">\n', "")
+                          extra_head='<meta name="robots" content="noindex">\n')
+        # <base> has to come before every relative URL in the head, or the stylesheet loads from the wrong folder
+        return page.replace(f'<link rel="canonical" href="{BASE}">\n', "").replace("<head>\n", '<head>\n<base href="/">\n', 1)
 
     # ----- aggregates -----
     def strat_summary(self, s):
@@ -1157,7 +1158,7 @@ class Site:
                          f'<td class="r" data-v="{sm["beat_cagr"] / max(1, sm["graded"])}">{sm["beat_cagr"]} of {sm["graded"]}</td>'
                          f'<td class="r" data-v="{sm["beat_sharpe"] / max(1, sm["graded"])}">{sm["beat_sharpe"]} of {sm["graded"]}</td>'
                          f'<td class="r" data-v="{sm["cut_dd"] / max(1, sm["graded"])}">{sm["cut_dd"]} of {sm["graded"]}</td></tr>')
-            extra = f"""<section><div class="sec-head"><h2 class="h2">The skeptic's scoreboard</h2><p>How often each play beat simply holding the stock, over the same dates, after costs. Click a column to sort.</p></div>
+            extra = f"""<section><div class="sec-head"><h2 class="h2">The skeptic's scoreboard</h2><p>How often each play beat simply holding the stock, over the same dates, after costs. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Family</th><th class="r">Beat on return</th><th class="r">Beat on Sharpe</th><th class="r">Cut drawdown</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small">A play that cuts drawdowns but loses on return is doing what Zakamulin's research predicts: paying for crash protection with years of lag.</p></section>"""
         else:
@@ -1401,7 +1402,7 @@ class Site:
 {heat}
 <section id="every-play"><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p data-ps-all-sub>All {len(TIMED)} plays, by family.</p></div>
 <div class="fam-tiles">{tiles}</div>
-<p class="muted small">Calls right: how often the play's calls on {e(t['short'])} went the right way since {GRADE_YEAR}. Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. Click a column to sort.</p>
+<p class="muted small">Calls right: how often the play's calls on {e(t['short'])} went the right way since {GRADE_YEAR}. Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p>
 <div class="tbl-wrap" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r" data-sort-first="desc">Calls right</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 <script type="application/json" id="ps-here">{here_json}</script>
 {deep}
@@ -1552,8 +1553,8 @@ class Site:
         rows += f'<tr><td>Time invested</td><td class="r">{pct(st["invested"], sign=False, d=0)}</td><td class="r muted">100%</td><td></td><td></td></tr>'
         rows += f'<tr><td>Switches per year</td><td class="r">{st["switches_per_year"]:.1f}</td><td class="r muted">0</td><td></td><td></td></tr>'
         start_y = st["start"].year if st["start"] is not None else "–"
-        stats_tbl = (f'<div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th></th><th class="r">Play, since {start_y}</th><th class="r">Buy &amp; hold</th>'
-                     f'<th class="r">Play, 5 yrs</th><th class="r">Buy &amp; hold</th></tr></thead><tbody>{rows}</tbody></table></div>')
+        stats_tbl = (f'<div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th></th><th class="r">Play, since {start_y}</th><th class="r">Hold, since {start_y}</th>'
+                     f'<th class="r">Play, 5 yrs</th><th class="r">Hold, 5 yrs</th></tr></thead><tbody>{rows}</tbody></table></div>')
 
         bat = x["batting"]
         shown = 12

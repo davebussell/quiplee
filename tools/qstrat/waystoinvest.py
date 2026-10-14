@@ -426,6 +426,7 @@ def ways_to_invest_page(site):
     h = lambda x: site.href(depth, x)
     picker = "".join(f'<button type="button" data-wti-pick="{c["key"]}" aria-pressed="false">{e(c["short"])}</button>' for c in COUNTRIES)
     body = f"""
+<nav class="crumbs"><a href="{h('guides/')}">Guides</a><span>/</span><span>Ways to invest</span></nav>
 <section class="pair-head"><p class="eyebrow">Guide</p><h1 class="h1">Ways to invest, by country</h1>
 <p class="lede">Be The Puck tests published trading rules on real prices. It isn't registered to advise anyone, and it doesn't know your goals, taxes or timeline. People who can are listed here, country by country: the kinds of help, what each must promise you by law, what it costs, where to check one, and how professional fund managers have done against simply owning the index.</p>
 <div class="wti-pick" data-wti-root hidden><span class="small muted">Your country:</span><div class="seg" role="group" aria-label="Country">{picker}</div></div></section>

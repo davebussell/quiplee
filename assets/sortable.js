@@ -259,7 +259,7 @@
   var NIL = /^(|–|—|-|n\/a)$/i;
   var lastW = (typeof WeakMap === 'function') ? new WeakMap() : null;
   var SEL = 'table.tbl, table.atable';
-  var CSS = '.stack-sort{display:none}@media (max-width:640px){.stack-sort{display:flex;align-items:center;gap:8px;align-self:flex-start;margin-bottom:8px;font-size:12.5px;color:var(--muted)}.stack-sort[hidden]{display:none}.stack-sort select{font:500 13px var(--ui,inherit);color:var(--ink,var(--text));background:var(--panel-2);border:1px solid var(--line-2,var(--border));border-radius:8px;padding:6px 8px;max-width:70vw}table.stacked thead{display:none}table.stacked,table.stacked tbody{display:block;width:100%}table.stacked tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--line,var(--border));position:relative}table.stacked tr:last-child{border-bottom:none}table.stacked td,table.stacked tbody th{display:block;min-width:0!important;padding:0;border:0;text-align:left;white-space:normal;position:static;background:none}table.stacked td::before,table.stacked tbody th::before{content:attr(data-label);display:block;margin-bottom:3px;font:600 10.5px/1.25 var(--data,ui-monospace,monospace);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}table.stacked td[data-label=""]::before,table.stacked tbody th[data-label=""]::before{content:none}table.stacked tr>:first-child{grid-column:1/-1;font-size:14px}table.stacked td.wide,table.stacked td.why-col{grid-column:1/-1}table.stacked td.nil{display:none}table.stacked tbody tr:hover td{background:none}table.stacked tr.stack-grp,table.stacked tr.grp{display:block;padding:0;background:var(--bg-2)}table.stacked tr.stack-grp td,table.stacked tr.grp td{display:block;padding:8px 14px}table.stacked tr.stack-grp td:empty,table.stacked tr.grp td:empty{display:none}table.stacked .consensus{display:flex;flex-direction:column;align-items:flex-start;gap:5px;white-space:nowrap}table.stacked .fam-cell a{display:flex;flex-direction:column;align-items:flex-start;gap:4px;white-space:normal}table.stacked .fillbar{width:100%;max-width:120px}table.stacked .stick{min-width:0}table.stacked td.nowrap,table.stacked td .nowrap,table.stacked td.r,table.stacked td.c{white-space:normal;text-align:left}table.stacked td:has(>.wl-x:only-child){position:absolute;top:10px;right:12px}table.stacked td:has(>.wl-x:only-child)::before{content:none}}';
+  var CSS = '.stack-sort{display:none}@media (max-width:640px){.stack-sort{display:flex;align-items:center;gap:8px;align-self:flex-start;margin-bottom:8px;font-size:12.5px;color:var(--muted)}.stack-sort[hidden]{display:none}.stack-sort select{font:500 13px var(--ui,inherit);color:var(--ink,var(--text));background:var(--panel-2);border:1px solid var(--line-2,var(--border));border-radius:8px;padding:6px 8px;max-width:70vw}table.stacked thead{display:none}table.stacked,table.stacked tbody{display:block;width:100%}table.stacked tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--line,var(--border));position:relative}table.stacked tr:last-child{border-bottom:none}table.stacked td,table.stacked tbody th{display:block;min-width:0!important;padding:0;border:0;text-align:left;white-space:normal;position:static;background:none}table.stacked td::before,table.stacked tbody th::before{content:attr(data-label);display:block;margin-bottom:3px;font:600 10.5px/1.25 var(--data,ui-monospace,monospace);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}table.stacked.stack-tall td::before,table.stacked.stack-tall tbody th::before{min-height:var(--lbl-h,2.5em);display:flex;align-items:flex-end}table.stacked tr.st2{grid-template-columns:repeat(2,minmax(0,1fr))}table.stacked tr>td.st-last{grid-column:span 2}table.stacked.mcap tbody tr.mcap-x{display:none}.mcap-more{margin-top:10px}.mcap-more[hidden]{display:none}table.stacked td[data-label=""]::before,table.stacked tbody th[data-label=""]::before{content:none}table.stacked tr>:first-child{grid-column:1/-1;font-size:14px}table.stacked td.wide,table.stacked td.why-col{grid-column:1/-1}table.stacked td.nil{display:none}table.stacked tbody tr:hover td{background:none}table.stacked tr.stack-grp,table.stacked tr.grp{display:block;padding:0;background:var(--bg-2)}table.stacked tr.stack-grp td,table.stacked tr.grp td{display:block;padding:8px 14px}table.stacked tr.stack-grp td:empty,table.stacked tr.grp td:empty{display:none}table.stacked .consensus{display:flex;flex-direction:column;align-items:flex-start;gap:5px;white-space:nowrap}table.stacked .fam-cell a{display:flex;flex-direction:column;align-items:flex-start;gap:4px;white-space:normal}table.stacked .fillbar{width:100%;max-width:120px}table.stacked .stick{min-width:0}table.stacked td.nowrap,table.stacked td .nowrap,table.stacked td.r,table.stacked td.c{white-space:normal;text-align:left}table.stacked td:has(>.wl-x:only-child){position:absolute;top:10px;right:12px}table.stacked td:has(>.wl-x:only-child)::before{content:none}}';
 
   function injectStyle() {
     if (document.getElementById('stack-css')) return;
@@ -292,20 +292,30 @@
   function label(table) {
     var labels = headLabels(table);
     if (!labels) return false;
+    // labels that wrap to two lines push their values down; give every label two lines so values in a row line up
+    var longest = labels.slice(1).reduce(function (m, l) { return Math.max(m, l.length); }, 0);
+    if (longest > 13) {
+      table.classList.add('stack-tall');
+      table.style.setProperty('--lbl-h', (Math.min(4, Math.ceil(longest / 12)) * 1.25) + 'em');
+    }
     [].forEach.call(table.tBodies, function (tb) {
       [].forEach.call(tb.rows, function (tr) {
         if (tr.dataset.stackLbl) return;
         tr.dataset.stackLbl = '1';
         var spans = [].some.call(tr.cells, function (c) { return (c.colSpan || 1) > 1; });
         if (spans) { tr.classList.add('stack-grp'); return; }
-        var col = 0;
+        var col = 0, shown = [];
         [].forEach.call(tr.cells, function (c) {
           c.setAttribute('data-label', col === 0 ? '' : (labels[col] || ''));
           var t = clean(c.textContent);
           if (col > 0 && NIL.test(t) && !c.querySelector('input, select, button, img, svg, .fillbar, .pill')) c.classList.add('nil');
           if (col > 0 && t.length > 26) c.classList.add('wide');
+          if (col > 0 && !c.classList.contains('nil') && !c.classList.contains('wide') && !c.querySelector('.wl-x:only-child')) shown.push(c);
           col += c.colSpan || 1;
         });
+        // four values read better as two pairs than as three and one; a last value alone on its row takes two columns
+        if (shown.length === 4 || shown.length === 2) tr.classList.add('st2');
+        else if (shown.length % 3 === 1) shown[shown.length - 1].classList.add(shown.length === 1 ? 'wide' : 'st-last');
       });
     });
     return true;
@@ -347,11 +357,52 @@
     if (need && label(table)) {
       table.classList.add('stacked');
       sortMenu(table);
+      cap(table);
     }
+    if (table.dataset.capDone) markCap(table);
     if (was !== table.classList.contains('stacked')) {
       var m = wrap.previousElementSibling;
       if (m && m.classList.contains('stack-sort')) m.hidden = !table.classList.contains('stacked');
     }
+  }
+
+  // a long table becomes a very long scroll on a phone: show the first CAP rows that are showing
+  // (filters hide rows, sorting reorders them) and a button for the rest
+  var CAP = 25;
+  function markCap(table) {
+    var on = table.classList.contains('mcap'), k = 0;
+    [].forEach.call(table.tBodies, function (tb) {
+      [].forEach.call(tb.rows, function (tr) {
+        if (tr.hidden || tr.classList.contains('stack-grp')) { tr.classList.remove('mcap-x'); return; }
+        k++;
+        tr.classList.toggle('mcap-x', on && k > CAP);
+      });
+    });
+    var wrap = table.closest('.tbl-wrap') || table, more = wrap.nextElementSibling;
+    if (more && more.classList.contains('mcap-more')) {
+      more.hidden = !(on && table.classList.contains('stacked') && k > CAP);
+      more.textContent = 'Show all ' + k;
+    }
+  }
+  function cap(table) {
+    if (table.dataset.capDone || table.hasAttribute('data-nocap')) return;
+    var n = 0;
+    [].forEach.call(table.tBodies, function (tb) { n += tb.rows.length; });
+    if (n <= CAP + 15) return;
+    table.dataset.capDone = '1';
+    table.classList.add('mcap');
+    var wrap = table.closest('.tbl-wrap') || table;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn sm mcap-more';
+    b.addEventListener('click', function () { table.classList.remove('mcap'); markCap(table); });
+    wrap.parentNode.insertBefore(b, wrap.nextSibling);
+    var q = 0;
+    if (window.MutationObserver) new MutationObserver(function () {
+      if (q) return;
+      q = requestAnimationFrame(function () { q = 0; markCap(table); });
+    }).observe(table, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
+    markCap(table);
   }
 
   var ro = window.ResizeObserver ? new ResizeObserver(function (ents) {

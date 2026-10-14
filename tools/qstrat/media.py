@@ -57,4 +57,6 @@ PAGE_ART = {"theory/": "theory-board", "guides/": "puck-row", "alerts/": "phone-
             "articles/": "cracked-ice"}
 # article covers, by article slug
 ARTICLE_ART = {"is-this-a-bubble": "bubble", "bubbles-and-crashes": "cracked-ice", "cash-or-invested": "wx-stormy",
-               "debt-and-crashes": "puck-ice", "green-across-the-board": "hero-trail", "the-hertz-lesson": "rental-lot", "top-10": "puck-row"}
+               "debt-and-crashes": "puck-ice", "green-across-the-board": "hero-trail", "the-hertz-lesson": "rental-lot", "top-10": "puck-row",
+               "why-your-signal-changed": "phone-alert", "when-to-sell": "wx-unsettled", "one-stock-too-many": "skates",
+               "old-vs-new-signal": "theory-board"}

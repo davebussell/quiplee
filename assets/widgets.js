@@ -437,10 +437,23 @@
       while (s.length > 3 && ctx.measureText(s + '…').width > w) s = s.slice(0, -1);
       return s + '…';
     }
+    var FAMN = { trend: 'Trend', breakout: 'Breakout', momentum: 'Momentum', reversion: 'Mean reversion', volume: 'Volume', pattern: 'Patterns', patterns: 'Patterns', calendar: 'Calendar' };
+    // on a phone, 100 rows are unreadable: one row per family, shaded by the share of its plays that were in
+    function byFamily(src) {
+      var order = [], by = {};
+      src.forEach(function (r) { if (!by[r.fam]) { by[r.fam] = []; order.push(r.fam); } by[r.fam].push(r); });
+      return order.map(function (f) {
+        var h = [];
+        for (var w = 0; w < W0; w++) { var k = 0, n = 0; by[f].forEach(function (r) { var c = r.h[w]; if (c === '1') { k++; n++; } else if (c === '0') n++; }); h.push(n ? k / n : null); }
+        return { name: (FAMN[f] || f) + ' (' + by[f].length + ')', fam: f, core: true, h: h, share: true, href: null };
+      });
+    }
     function draw() {
-      rows = st.core ? D.rows.filter(function (r) { return r.core; }) : D.rows;
       var W = box.clientWidth, narrow = W < 560;
-      var lab = narrow ? 96 : 176, top = 46, rh = st.core ? (narrow ? 14 : 16) : (narrow ? 9 : 11), famGap = st.core ? 4 : 6;
+      rows = st.core ? D.rows.filter(function (r) { return r.core; }) : D.rows;
+      if (narrow && rows.length > 24) rows = byFamily(rows);
+      var fams = rows.length && rows[0].share;
+      var lab = narrow ? (fams ? 118 : 96) : 176, top = 46, rh = fams ? 26 : st.core ? (narrow ? 14 : 16) : (narrow ? 9 : 11), famGap = fams ? 3 : st.core ? 4 : 6;
       var H = top + 6, last = null;
       rows.forEach(function (r) { if (last !== null && r.fam !== last) H += famGap; last = r.fam; H += rh; });
       var dpr = window.devicePixelRatio || 1;
@@ -469,8 +482,8 @@
         ctx.fillText(fit(ctx, r.name, lab - 8), 0, y + rh / 2);
         for (var w2 = 0; w2 < W0; w2++) {
           var c = r.h[w2];
-          ctx.fillStyle = c === '1' ? cin : c === '0' ? cout : cna;
-          ctx.globalAlpha = c === '-' ? 0.5 : 0.82;
+          if (r.share) { ctx.fillStyle = c == null ? cna : c >= 0.5 ? cin : cout; ctx.globalAlpha = c == null ? 0.5 : 0.25 + 0.7 * Math.abs(c - 0.5) * 2; }
+          else { ctx.fillStyle = c === '1' ? cin : c === '0' ? cout : cna; ctx.globalAlpha = c === '-' ? 0.5 : 0.82; }
           ctx.fillRect(lab + w2 * cw, y + 0.5, Math.max(1, cw - (cw > 3 ? 0.8 : 0.3)), rh - (rh > 10 ? 2 : 1));
         }
         ctx.globalAlpha = 1;
@@ -490,7 +503,7 @@
       var h = at(e);
       if (!h) return;
       var c = h.r.h[h.w];
-      tip.textContent = h.r.name + ' · week of ' + D.weeks[h.w] + ' · ' + (c === '1' ? 'IN' : c === '0' ? 'OUT' : 'no call yet') + ' ';
+      tip.textContent = h.r.name + ' · week of ' + D.weeks[h.w] + ' · ' + (h.r.share ? (c == null ? 'no calls yet' : Math.round(c * 100) + '% of its plays in') : (c === '1' ? 'IN' : c === '0' ? 'OUT' : 'no call yet')) + ' ';
       if (h.r.href) tip.appendChild(el('a', { href: h.r.href, text: 'Open this play →' }));
     }
     canvas.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') show(e); });

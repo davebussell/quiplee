@@ -670,7 +670,7 @@ class Learn:
 <p>The result is that timing plays spend long stretches trailing buy-and-hold. Meb Faber's own ten-year review of his 10-month rule found it shone in the 2008 crash, then lagged stocks in six of the next eight years. Professor Valeriy Zakamulin, testing 155 years of US data, found the rules' advantage came mainly from a handful of severe bear markets.</p>
 </section>
 <section>
-<div class="sec-head"><h2 class="h2">Every trend play on the S&amp;P 500</h2><p>On SPY since 2005, after trading costs. Click a column to sort.</p></div>
+<div class="sec-head"><h2 class="h2">Every trend play on the S&amp;P 500</h2><p>On SPY since 2005, after trading costs. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p></div>
 {self.spy_table("trend")}
 </section>
 <section class="prose">
@@ -1015,7 +1015,7 @@ class Learn:
 </ul>
 </section>
 <section><div class="tiles">{tiles}</div></section>
-<section><div class="sec-head"><h2 class="h2">Every play</h2><p>Medians and counts across all {len(TICKERS)} stocks, since 2005 or each stock's first full year. Click a column to sort; group headers hide while sorted.</p></div>
+<section><div class="sec-head"><h2 class="h2">Every play</h2><p>Medians and counts across all {len(TICKERS)} stocks, since 2005 or each stock's first full year. <span class="wide-only">Click a column to sort; group headers hide while sorted.</span></p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Checks</th><th class="r">Switches / yr</th><th class="r">Calls right</th><th class="r">Cut drawdown</th><th class="r">Beat B&amp;H Sharpe</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 <section class="prose">
 <h2 class="h2">Gaps the authors left</h2>

@@ -151,9 +151,9 @@ def market_table(rows):
 
 
 SCENARIOS = [
-    {"key": "gfc", "label": "2008: bought at the October 2007 peak", "from": "2007-11", "to": "2012-12"},
-    {"key": "covid", "label": "2020: bought at the February 2020 peak", "from": "2020-03", "to": "2021-08"},
-    {"key": "y2022", "label": "2022: bought at the January 2022 peak", "from": "2022-01", "to": "2024-06"},
+    {"key": "gfc", "label": "2008 crash, from the Oct 2007 peak", "from": "2007-11", "to": "2012-12"},
+    {"key": "covid", "label": "2020 crash, from the Feb 2020 peak", "from": "2020-03", "to": "2021-08"},
+    {"key": "y2022", "label": "2022 fall, from the Jan 2022 peak", "from": "2022-01", "to": "2024-06"},
     {"key": "all", "label": "Everything since 2005", "from": "2005-01", "to": None},
     {"key": "last5", "label": "The last five years", "from": None, "to": None},
 ]

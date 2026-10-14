@@ -333,3 +333,17 @@ a.tab.tab-link { color: var(--violet-2); }
   .rail-left { position: static; }
   .market-pill { display: none; }
 }
+
+/* phone fixes (October 13 sweep): the background was repeating once per screen height,
+   fields under 16px made iOS zoom in, and the filters were too small to tap */
+body { background-repeat: no-repeat; background-attachment: scroll; }
+@media (max-width: 760px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { font-size: 16px !important; }
+}
+@media (pointer: coarse) {
+  .tchip { padding: 9px 13px; font-size: 13px; }
+  .type-chips { gap: 8px; }
+  .seg button { padding: 10px 8px; }
+  .check { margin: 11px 0; }
+  .check input { width: 20px; height: 20px; }
+}

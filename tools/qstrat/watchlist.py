@@ -126,7 +126,7 @@ def watchlist_page(site):
 </ol></div>
 <div class="card prose"><p class="eyebrow">What the columns mean</p><ul>
 <li><b>Plays in:</b> how many of the plays you count hold the stock now (all of them, or the ones you pick with Plays counted). Most in usually means a strong, broad trend; a split means the plays disagree.</li>
-<li><b>Strip:</b> one square per play, green for in, red for out, in family order.</li>
+<li class="wide-only"><b>Strip:</b> one square per play, green for in, red for out, in family order (on a wider screen).</li>
 <li><b>Crash exposure:</b> the storm test of market swings, past crashes, debt and run-up. <a href="{h('markets/')}#ex-h">More on Markets</a>.</li>
 <li><b>Target:</b> how far analysts' average 12-month price target sits above the price (3+ analysts). The list is sorted half on plays in and half on this upside, the same score as <a href="{h('articles/green-across-the-board/')}">Green across the board</a>.</li>
 <li><b>Weight:</b> your share of the list by value, when your file includes quantities or market values. Otherwise every name counts equally.</li>

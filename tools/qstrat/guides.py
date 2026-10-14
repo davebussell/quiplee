@@ -20,7 +20,7 @@ from .icons import icon
 
 e = html.escape
 
-WINDOWS = [("2008 crash", "2007-10-09", "2009-03-09"), ("Recovery 2009–19", "2009-03-09", "2020-02-19"), ("COVID drop", "2020-02-19", "2020-03-23"),
+WINDOWS = [("2008 crash", "2007-10-09", "2009-03-09"), ("Recovery 2009⁠–⁠19", "2009-03-09", "2020-02-19"), ("COVID drop", "2020-02-19", "2020-03-23"),
            ("2020–21 rally", "2020-03-23", "2022-01-03"), ("2022 bear", "2022-01-03", "2022-10-12"), ("Since Oct 2022", "2022-10-12", None)]
 
 LESSON = {"trend": "trend-following", "breakout": "breakouts", "momentum": "momentum", "reversion": "oscillators",
@@ -367,7 +367,7 @@ class Guides:
         rho = float(pd.Series(sws).rank().corr(pd.Series(shs).rank())) if len(allp) > 5 else 0.0
         crash = [(name, dict((lab, v) for lab, v, nn in fm["regimes"])) for fk, name, desc, fm in fams]
         c08 = max(crash, key=lambda z: z[1].get("2008 crash") or -9)
-        rally = min(crash, key=lambda z: z[1].get("Recovery 2009–19") or 9)
+        rally = min(crash, key=lambda z: z[1].get("Recovery 2009⁠–⁠19") or 9)
         findings = [
             f"<b>Protection is common; beating the market isn't.</b> Across {allm['n']:,} play-and-stock tests, {round(100 * allm['cut'] / allm['n'])}% cut the worst fall, "
             f"{round(100 * allm['beat_sh'] / allm['n'])}% beat holding on risk-adjusted return, and only {round(100 * allm['beat_cg'] / allm['n'])}% made more money than holding.",
@@ -406,7 +406,7 @@ class Guides:
 <section><div class="sec-head"><h2 class="h2">The seven bets</h2><p>Open a family for what it predicts, the research behind it, when it works and when it fails.</p></div>
 <div class="grid grid-3">{cards}</div></section>
 
-<section><div class="sec-head"><h2 class="h2">The scorecard</h2><p>Share of play-and-stock tests where the family's plays did better than holding. Click a column to sort.</p></div>
+<section><div class="sec-head"><h2 class="h2">The scorecard</h2><p>Share of play-and-stock tests where the family's plays did better than holding. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Family</th><th class="r">Plays</th><th data-sort-first="desc">Cut the worst fall</th><th data-sort-first="desc">Beat holding, risk-adjusted</th><th data-sort-first="desc">Beat holding on return</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 
 <section><div class="sec-head"><h2 class="h2">Market by market</h2><p>Median gap in return between each family's plays and holding the same stock through each stretch (crypto excluded): per year over stretches longer than 18 months, for the whole stretch otherwise. Positive means the play did better.</p></div>
@@ -454,7 +454,7 @@ class Guides:
 <section class="split"><div class="card prose"><h2 class="h3">Why it might work</h2><p>{e(g['why'])}</p><h2 class="h3">When it fails</h2><p>{e(g['fails'])}</p></div>
 <div class="card prose"><h2 class="h3">What the research says</h2><ul>{ev}</ul></div></section>
 
-<section><div class="sec-head"><h2 class="h2">Every {e(name.lower())} play, ranked</h2><p>Share of stocks where each play did better than holding, since 2005 or as long as the stock has traded, after costs. Click a column to sort.</p></div>
+<section><div class="sec-head"><h2 class="h2">Every {e(name.lower())} play, ranked</h2><p>Share of stocks where each play did better than holding, since 2005 or as long as the stock has traded, after costs. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p></div>
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th data-sort-first="desc">Beat holding, risk-adjusted</th><th data-sort-first="desc">Cut the worst fall</th><th data-sort-first="desc">Beat holding on return</th><th class="r">Calls right</th><th class="r">Switches / yr</th><th class="r">Time in</th><th class="r">In now</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 
 <section><div class="sec-head"><h2 class="h2">When it worked</h2><p>{self.regime_sentence(fm['regimes'], 'The family')} Median gap in return against holding (per year over stretches longer than 18 months; crypto excluded).</p></div>
