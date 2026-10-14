@@ -79,8 +79,14 @@ def watch_json(site):
     for a, s in EXTRA_ALIASES.items():
         if s in out:
             alias.setdefault(a, s)
+    usdcad = None
+    try:           # Canadian dollars per U.S. dollar at the latest close, so a list's values add up in one currency
+        from .engine import _read, PRICE_DIR
+        usdcad = _r(float(_read("CAD=X", PRICE_DIR)["close"].dropna().iloc[-1]), 5)
+    except Exception:
+        pass
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "plays": plays, "fams": [[k, n] for k, n, _ in FAMILIES],
-                       "t": out, "alias": alias}, separators=(",", ":"), allow_nan=False)
+                       "t": out, "alias": alias, "usdcad": usdcad}, separators=(",", ":"), allow_nan=False)
 
 
 def watchlist_page(site):
@@ -116,6 +122,7 @@ def watchlist_page(site):
 <p class="small wl-rules"><a href="{h('rules/')}">Portfolio limits (members)</a></p>
 <div id="wl-sum" class="wl-sum"></div>
 <div id="wl-list"></div>
+<div id="wl-acct"></div>
 </section>
 
 <section class="split how">
@@ -136,4 +143,4 @@ def watchlist_page(site):
 """
     site.add(path, site.shell(path, "Watchlist · check your stocks against every play",
                               f"Paste tickers or upload a Wealthsimple or broker CSV. See what {len(TIMED)} published trading plays, the trend and crash exposure say about each name; new names are analysed after the next close.",
-                              body, active="watchlist/", scripts=("assets/widgets.js", "assets/plays.js", "assets/watchlist.js")))
+                              body, active="watchlist/", scripts=("assets/widgets.js", "assets/plays.js", "assets/acctcheck.js", "assets/watchlist.js")))

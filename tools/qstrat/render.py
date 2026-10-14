@@ -160,6 +160,7 @@ def nav_menus():
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
                         ("learn/call-it/", "Practise: Call it", "Read the plays on real charts")],
         "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
+                   ("guides/plan-an-account/", "Planning an account", "How many stocks, a core and caps: what mixes did since 2006"),
                    ("guides/ways-to-invest/", "Ways to invest, by country", "Who can advise you, what they must promise, how they've done"),
                    ("learn/#track-basics", "Track 1: Stock basics", "Shares, candlesticks, trends, P/E, debt and risk"),
                    ("learn/#track-plays", "Track 2: The plays", "How each family of trading rules works"),
@@ -894,6 +895,8 @@ class Site:
         rules_page(self, self.guides)
         from .waystoinvest import ways_to_invest_page
         ways_to_invest_page(self)
+        from .accountplan import guide_page as plan_page
+        plan_page(self)
         self.learn.build()
         self.method_page()
         return self.pages

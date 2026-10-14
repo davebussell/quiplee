@@ -90,15 +90,17 @@
     var rows = csvRows(text), hi = -1, col = {};
     for (var i = 0; i < Math.min(rows.length, 15); i++) {
       var r = rows[i].map(function (x) { return String(x).trim().toLowerCase(); });
-      var si = r.findIndex(function (x) { return /^(symbol|ticker|ticker symbol|security symbol)$/.test(x); });
+      var si = r.findIndex(function (x) { return /^(symbol|ticker|ticker symbol|security symbol|equity symbol|symbol\/cusip|stock symbol)$/.test(x); });
       if (si >= 0) {
         hi = i; col.sym = si;
         r.forEach(function (x, j) {
           if (col.ex == null && /^(exchange|mic|market|listing exchange)$/.test(x)) col.ex = j;
-          if (col.qty == null && /^(quantity|qty|shares|units|position)$/.test(x)) col.qty = j;
-          if (col.mv == null && /^market value( \(cad\))?$|^value$|^current value$/.test(x)) col.mv = j;
+          // headers seen in Wealthsimple, Questrade, IBKR, TD, RBC, Schwab, Fidelity, Vanguard and E*TRADE exports
+          if (col.qty == null && (/^(quantity|qty|shares|units|position|open qty|quantity owned|shares owned)$/.test(x) || /^qty \(quantity\)$/.test(x))) col.qty = j;
+          if (col.mv == null && !/book|cost|price|change|gain/.test(x) && (/market val|mkt val|current value|total value/.test(x) || /^value( \(?\$\)?)?$/.test(x))) col.mv = j;
           if (col.name == null && /^(name|security name|description|security)$/.test(x)) col.name = j;
           if (col.type == null && /^(security type|type|asset type|asset class)$/.test(x)) col.type = j;
+          if (col.mcur == null && /^(market value currency|currency|value currency|market currency)$/.test(x)) col.mcur = j;
         });
         break;
       }
@@ -110,7 +112,7 @@
       var type = col.type != null ? r[col.type] : '';
       if (!raw || /option|cash|bond|gic/i.test(type || '')) return;
       out.push({ raw: raw, ex: col.ex != null ? r[col.ex] : '', name: col.name != null ? r[col.name] : '', type: type,
-        qty: col.qty != null ? num(r[col.qty]) : null, mv: col.mv != null ? num(r[col.mv]) : null });
+        qty: col.qty != null ? num(r[col.qty]) : null, mv: col.mv != null ? num(r[col.mv]) : null, mcur: col.mcur != null ? String(r[col.mcur] || '').trim() : '' });
     });
     return out;
   }
@@ -145,6 +147,7 @@
       var it = { sym: r.sym };
       if (en.qty != null) it.qty = en.qty;
       if (en.mv != null) it.mv = en.mv;
+      if (en.mcur) it.mcur = en.mcur.slice(0, 4);
       st.items.push(it); have[r.sym] = it; added++;
       if (!D.t[r.sym]) fresh.push(r.sym);
     });
@@ -231,7 +234,13 @@
 
   function weights() {
     var cov = st.items.filter(function (x) { return D.t[x.sym]; });
-    var vals = cov.map(function (x) { return x.mv != null ? x.mv : (x.qty != null && D.t[x.sym].p ? x.qty * D.t[x.sym].p : null); });
+    // values in Canadian dollars: a file's value column is in its own currency column when there is one, else the listing's
+    var fx = D.usdcad || 1.37;
+    var cad = function (v, cur) { return v == null ? null : (/C\$|CAD/i.test(cur || '') ? v : v * fx); };
+    var vals = cov.map(function (x) {
+      var t = D.t[x.sym];
+      return x.mv != null ? cad(x.mv, x.mcur || t.cur) : (x.qty != null && t.p ? cad(x.qty * t.p, t.cur) : null);
+    });
     var useVal = vals.length && vals.every(function (v) { return v != null && v > 0; });
     var tot = 0, w = {};
     cov.forEach(function (x, i) { var v = useVal ? vals[i] : 1; w[x.sym] = v; tot += v; });
@@ -387,6 +396,15 @@
     tbl.appendChild(thead); tbl.appendChild(tb);
     list.appendChild(el('div', { 'class': 'tbl-wrap' }, [tbl]));
     if (st.example) list.appendChild(el('p', { 'class': 'small muted', text: 'This is an example list. Add your own tickers above and it will be replaced.' }));
+    account(cov, W);
+  }
+  // the account check (acctcheck.js): this mix, at these amounts, through the price history since 2006
+  function account(cov, W) {
+    var box = $('wl-acct');
+    if (!box || !window.BPAcct) return;
+    var hs = cov.map(function (x) { var t = D.t[x.sym]; return { sym: x.sym, s: t.s, u: t.u, g: t.g, w: W.w[x.sym] }; }).filter(function (h) { return h.w > 0; });
+    hs.byValue = W.byValue;
+    window.BPAcct.render(box, hs, BASE);
   }
 
   // ---------------------------------------------------------------- play picker

@@ -2017,3 +2017,30 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 @media (min-width: 900px) { .to-top { bottom: 28px; } }
 /* a list that scrolls inside its card fades at the bottom, so it doesn't look cut off */
 .th-list { -webkit-mask-image: linear-gradient(#000 88%, transparent); mask-image: linear-gradient(#000 88%, transparent); padding-bottom: 28px; }
+
+/* account check on the watchlist (assets/acctcheck.js) */
+#wl-acct { margin-top: 18px; }
+.acct { display: flex; flex-direction: column; gap: 12px; }
+.acct-comp { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px 28px; }
+.acct-bars { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.acct-bars li { display: grid; grid-template-columns: minmax(0, 8.5em) minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; font-size: 13.5px; }
+.acct-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.acct-b { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.acct-b i { display: block; height: 100%; background: var(--violet-ink); border-radius: 4px; }
+.acct-v { text-align: right; font: 12.5px var(--data); color: var(--ink-2); }
+.acct-ctl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px 24px; }
+.acct-sl { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+.acct-sl output { font: 600 13.5px var(--data); color: var(--ink); }
+.acct-sl input[type=range] { width: 100%; accent-color: var(--violet); }
+.acct-sl select { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; font: inherit; }
+.acct-chart-wrap { margin-top: 4px; }
+.acct-chart { width: 100%; height: auto; display: block; }
+.acct-chart .acct-grid { stroke: var(--line); stroke-width: 1; }
+.acct-chart polyline { stroke-width: 2; vector-effect: non-scaling-stroke; }
+.acct-l-mine { stroke: var(--violet-ink); }
+.acct-l-alt { stroke: var(--in); }
+.acct-l-core { stroke: var(--muted); stroke-dasharray: 4 4; }
+.acct-chart-axis { display: flex; justify-content: space-between; }
+.acct-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; color: var(--ink-2); }
+.acct-key i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; margin-right: -4px; }
+.acct-key .k-mine { background: var(--violet-ink); } .acct-key .k-alt { background: var(--in); } .acct-key .k-core { background: var(--muted); }

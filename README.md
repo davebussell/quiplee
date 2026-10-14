@@ -116,6 +116,18 @@ a dozen candidate refinements scored point-in-time, with how often Buys and Sell
 how often they fell 30%+ within a year, and how often calls flip; plus the old standard rebuilt from
 the price targets in `data/events/` (July 2024 on). Rerun it whenever the model changes.
 
+**Planning an account.** `/guides/plan-an-account/` (`tools/qstrat/accountplan.py`) reads
+`data/accountplan.json`, written by `tools/account_study.py` from the dev cache: 2,000 random
+portfolios per setting from the covered stocks with full history since 2006 (1 to 30 stocks, a core
+with a slice of picks, one big position capped or not). The "core" there is all of those stocks in
+equal amounts, so survivors are compared with survivors; the page says why SPY isn't. The build
+writes `data/px/<slug>.json` (weekly closes since 2006) for the watchlist's **account check**
+(`assets/acctcheck.js`): the reader's own mix at their own amounts (in Canadian dollars, using
+`usdcad` in watch.json), its worst fall, worst week and crash results, next to the same mix with a
+cap on any one name and an index core (SPY or XIU). It all runs in the browser. The watchlist's
+file import reads holdings exports from Wealthsimple ("Holdings report (CSV)"), Questrade, IBKR, TD,
+RBC, Schwab, Fidelity, Vanguard and E*TRADE by their column names.
+
 **Disclaimer on every page.** The footer of every page carries `render.DISCLAIMER`; Netlify's
 not-found page is the site's own `404.html` (`Site.not_found_html`). The build stops if any page
 lacks the disclaimer (`build_strategies.pages_without_disclaimer`) and `tools/smoke.py` checks it on
