@@ -1,6 +1,6 @@
 {
  "beta": 0.645,
- "bookValue": 34.76561,
+ "bookValue": 34.754738,
  "cash_bs": 58328000.0,
  "country": "Canada",
  "currency": "CAD",
@@ -35,7 +35,7 @@
  "operatingMargins": 0.35637,
  "payoutRatio": 0.1877,
  "pegRatio": null,
- "priceToBook": 0.80827004,
+ "priceToBook": 0.8085229,
  "priceToSalesTrailing12Months": 2.5869682,
  "profitMargins": 0.54964,
  "quickRatio": 0.752,
@@ -56,8 +56,8 @@
  "totalDebt": 815180992,
  "totalRevenue": 1044723008,
  "total_debt_bs": 40814000.0,
- "trailingEps": 8.22,
- "trailingPE": 3.4184914,
+ "trailingEps": 8.14,
+ "trailingPE": 3.4520884,
  "trailingPegRatio": null,
  "website": "https://www.parexresources.com"
 }
