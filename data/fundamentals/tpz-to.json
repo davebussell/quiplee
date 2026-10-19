@@ -14,7 +14,7 @@
  "equity": 1520477000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-17",
+ "fetched": "2026-10-18",
  "fiftyTwoWeekHigh": 33.91,
  "fiftyTwoWeekLow": 24.45,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 545390976,
  "totalRevenue": 368948000,
  "total_debt_bs": 570768000.0,
- "trailingEps": 1.1,
- "trailingPE": 27.590908,
+ "trailingEps": 1.12,
+ "trailingPE": 27.098215,
  "trailingPegRatio": null,
  "website": "https://www.topazenergy.ca"
 }

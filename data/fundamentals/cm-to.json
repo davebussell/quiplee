@@ -14,7 +14,7 @@
  "equity": 64129000000.0,
  "equity_date": "2025-10-31",
  "exchange": "TOR",
- "fetched": "2026-10-17",
+ "fetched": "2026-10-18",
  "fiftyTwoWeekHigh": 172.87,
  "fiftyTwoWeekLow": 112.8,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 296073003008,
  "totalRevenue": 30005999616,
  "total_debt_bs": 227761000000.0,
- "trailingEps": 10.42,
- "trailingPE": 15.24664,
+ "trailingEps": 10.45,
+ "trailingPE": 15.20287,
  "trailingPegRatio": 1.7125,
  "website": "https://www.cibc.com"
 }
