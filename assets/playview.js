@@ -63,6 +63,8 @@
           : Math.round(100 * share) + '% of this score rests on factors with a tested record; the rest (' + un.join(', ') + ') has none.');
       tl.classList.toggle('warn', share != null && share < 0.75);
     }
+    var fe = card.querySelector('[data-sig-flip]');
+    if (fe) { var pin = D.pi && D.pi[H.sym]; fe.textContent = pin ? P.flipWords(P.flips(H.sym), H.cur || '$', pin.p) : ''; }
     card.querySelector('[data-sig-rows]').innerHTML = r.parts.map(function (p) {
       return '<tr><td>' + esc(p.n) + '</td><td>' + esc(p.v == null ? '–' : p.v) + '</td><td class="r">' + (p.p == null ? '–' : p.p) + '</td><td class="r">' + p.w + '</td><td class="r">' + (p.add == null ? '–' : p.add) + '</td></tr>';
     }).join('');

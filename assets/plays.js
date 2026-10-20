@@ -133,6 +133,69 @@
     parts.forEach(function (q) { if (q.p != null) q.add = Math.round(10 * q.w * q.p / avail) / 10; });
     return { s: s, sig: s >= W.buy ? 1 : s <= W.sell ? -1 : 0, parts: parts, cov: avail / tot };
   }
+  // ---------------------------------------------------------------- the price that would change the signal's mind
+  // The same arithmetic as factors.flip_lines: re-score a candidate price with the plays and company numbers held
+  // where they are; off the high, trend, momentum and analysts' upside move with the price.
+  function offPts(dd) { return Math.round(100 * Math.min(Math.max(1 + dd / 0.30, 0), 1)); }
+  function rankAt(v, vals, own) {
+    var lo = 0, hi = 0, n = 0, skipped = false;
+    for (var i = 0; i < vals.length; i++) {
+      if (!skipped && own != null && vals[i] === own) { skipped = true; continue; }
+      n++;
+      if (vals[i] < v) lo++; else if (vals[i] === v) hi++;
+    }
+    n++;                                            // this stock
+    if (n <= 1) return 50;
+    var r = lo + 1 + hi / 2;
+    return Math.round(100 * (r - 1) / (n - 1));
+  }
+  function upPtsAt(u) { return Math.round(100 * (Math.min(Math.max(u, -0.2), 0.5) + 0.2) / 0.7); }
+  function flips(sym, wIn) {
+    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], pin = D.pi && D.pi[sym];
+    if (!x || !pin || !pin.p || !D.rk) return null;
+    var c = count(sym), plays = c.n ? Math.round(100 * c.k / c.n) : null;
+    function sigAt(price) {
+      var tot = 0, avail = 0, acc = 0;
+      D.fx.forEach(function (f, i) {
+        var wi = w[f.k] || 0;
+        if (!wi) return;
+        tot += wi;
+        var p = x[i];
+        if (f.k === 'plays') p = plays;
+        else if (f.k === 'offhigh' && pin.hi) p = offPts(price / Math.max(pin.hi, price) - 1);
+        else if (f.k === 'trend' && pin.ma) p = rankAt(price / pin.ma - 1, D.rk.trend, pin.gap);
+        else if (f.k === 'mom' && pin.py) p = rankAt(price / pin.py - 1, D.rk.mom, pin.y1);
+        else if (f.k === 'upside' && pin.tgt) {
+          var u = pin.tgt / price - 1;
+          p = u <= 1 ? upPtsAt(u) : null;
+          if (p != null && pin.ma && price < pin.ma && p > (D.uc || 50)) p = D.uc || 50;
+        }
+        if (p != null) { avail += wi; acc += wi * p; }
+      });
+      if (!tot || avail < tot / 2) return null;
+      var s = Math.round(acc / avail);
+      return s >= W.buy ? 1 : s <= W.sell ? -1 : 0;
+    }
+    var p0 = pin.p, now = sigAt(p0), out = { now: now, down: null, up: null }, i, px, sg;
+    if (now == null) return null;
+    for (i = 1; i <= 80; i++) { px = p0 * (1 - i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.down = [px, sg]; break; } }
+    for (i = 1; i <= 160; i++) { px = p0 * (1 + i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.up = [px, sg]; break; } }
+    return out;
+  }
+  function flipWords(fl, cur, p0) {
+    if (!fl) return '';
+    var bits = [];
+    [['down', 'below'], ['up', 'above']].forEach(function (z) {
+      var x = fl[z[0]];
+      if (!x) return;
+      var pct = x[0] / p0 - 1;
+      bits.push('turns ' + SIG_WORD[x[1]] + ' ' + z[1] + ' ' + (cur || '$') + x[0].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+        ' (' + (pct > 0 ? '+' : '\u2212') + Math.round(Math.abs(pct) * 100) + '%)');
+    });
+    if (!bits.length) return 'Stays ' + SIG_WORD[fl.now] + ' anywhere from 40% below to 80% above the latest close.';
+    var out = bits.join(' \u00b7 ');
+    return out.charAt(0).toUpperCase() + out.slice(1);
+  }
   function sigPill(sig) { return sig == null ? '<span class="sig-pill na">–</span>' : '<span class="sig-pill ' + SIG_CLS[sig] + '">' + SIG_WORD[sig] + '</span>'; }
   function applyW(c, why) {
     c = cleanW(c) || cleanW(D.wd);
@@ -558,6 +621,8 @@
     },
     // your signal
     score: score,
+    flips: flips,
+    flipWords: flipWords,
     weights: function () { return wts; },
     wlabel: wlabel,
     isDefaultWeights: isDefaultW,

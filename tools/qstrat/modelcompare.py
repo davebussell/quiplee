@@ -109,7 +109,9 @@ def panel(site):
         cv, bv = c.values.astype(float), b.values.astype(float)
         bhi = b.rolling(252, min_periods=120).max().values
         ma = c.rolling(200).mean().values
+        ma50 = c.rolling(50).mean().values
         hi = c.rolling(252, min_periods=120).max().values
+        hi63 = c.rolling(63).max().values
         vol = (c.pct_change().rolling(252, min_periods=120).std() * np.sqrt(252)).values
         pos = c.index.searchsorted(dates, side="right") - 1
         bpos = b.index.searchsorted(dates, side="right") - 1
@@ -123,6 +125,8 @@ def panel(site):
             r = {"d": d, "sym": t["sym"], "plays": (100 * k[di] / n[di]) if n[di] >= 20 else np.nan,
                  "dd": p0 / hi[i] - 1 if hi[i] > 0 else np.nan, "vol": vol[i],
                  "gap": p0 / ma[i] - 1 if ma[i] > 0 else np.nan,
+                 "gap50": p0 / ma50[i] - 1 if ma50[i] > 0 else np.nan,
+                 "dd63": p0 / hi63[i] - 1 if hi63[i] > 0 else np.nan,
                  "mom": p0 / cv[i - 252] - 1 if cv[i - 252] > 0 else np.nan,
                  "mom121": cv[i - 21] / cv[i - 252] - 1 if cv[i - 252] > 0 else np.nan,
                  "spx_up": spx_up[d], "bdd": bv[j] / bhi[j] - 1 if bhi[j] > 0 else np.nan}
@@ -156,7 +160,7 @@ def panel(site):
     df["p_offrel"] = (100 * (1 + (df.dd - df.bdd) / 0.30).clip(0, 1)).round()
     floor = (1.5 * df.vol).clip(0.15, 0.60)
     df["p_offvol"] = (100 * (1 + df.dd / floor).clip(0, 1)).round()
-    for raw, col in (("gap", "p_trend"), ("mom", "p_mom"), ("mom121", "p_mom121"), ("rev", "p_rev"), ("roe", "p_roe")):
+    for raw, col in (("gap", "p_trend"), ("gap50", "p_trend50"), ("mom", "p_mom"), ("mom121", "p_mom121"), ("rev", "p_rev"), ("roe", "p_roe")):
         df[col] = df.groupby("d")[raw].transform(_rank) if raw in df else np.nan
     if "de" in df:
         df["p_de"] = 100 - df.groupby("d")["de"].transform(_rank)
@@ -167,6 +171,9 @@ def panel(site):
     from .stockview import upside_points
     df["p_up"] = df.get("up", pd.Series(np.nan, index=df.index)).map(lambda u: 100 * upside_points(u) if pd.notna(u) else np.nan)
     df["p_upcap"] = np.where(df.gap < 0, np.minimum(df.p_up, 50), df.p_up)
+    # the 200-day trend, but at most 40 points once the price is under its 50-day average (a broken run)
+    df["p_trendx"] = np.where(df.gap50 < 0, np.minimum(df.p_trend, 40), df.p_trend)
+    df["p_off3m"] = (100 * (1 + df.dd63 / 0.15).clip(0, 1)).round()      # off the 3-month high, 15% floor
     df["p_plays"] = df.plays.round()
     return df
 
@@ -180,6 +187,11 @@ MODELS = {
     # refinements tried
     "off20": ("Exit rule at 20% off the high", {"p_plays": 40, "p_off20": 30, "p_trend": 30}, False),
     "off40": ("Exit rule at 40% off the high", {"p_plays": 40, "p_off40": 30, "p_trend": 30}, False),
+    "trend50": ("Trend measured against the 50-day average", {"p_plays": 40, "p_offhigh": 30, "p_trend50": 30}, False),
+    "trendx": ("Trend capped at 40 once the price is under its 50-day average", {"p_plays": 40, "p_offhigh": 30, "p_trendx": 30}, False),
+    "off20x": ("Exit at 20% off the high, trend capped under the 50-day", {"p_plays": 40, "p_off20": 30, "p_trendx": 30}, False),
+    "off3m": ("Exit rule off the 3-month high (15% floor)", {"p_plays": 40, "p_off3m": 30, "p_trend": 30}, False),
+    "halfhalf": ("Half slow, half fast: 1-year and 3-month exits, 200-day and 50-day trends", {"p_plays": 40, "p_offhigh": 15, "p_off3m": 15, "p_trend": 15, "p_trend50": 15}, False),
     "offvol": ("Exit rule scaled to each stock's volatility", {"p_plays": 40, "p_offvol": 30, "p_trend": 30}, False),
     "mom121": ("12-month momentum (skipping the last month) for trend", {"p_plays": 40, "p_offhigh": 30, "p_mom121": 30}, False),
     "offrel": ("Exit rule measured against the market's own fall", {"p_plays": 40, "p_offrel": 30, "p_trend": 30}, False),

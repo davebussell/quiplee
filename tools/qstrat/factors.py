@@ -144,6 +144,7 @@ def compute(site):
     raw = {k: {} for k in KEYS}           # values to rank: {key: {sym: value}}
     fixed = {k: {} for k in KEYS}         # points set without ranking (losses, no dividend...)
     shown = {k: {} for k in KEYS}
+    pins = {}                             # per stock: the price-dependent inputs the flip lines need
     for t in names:
         sym = t["sym"]
         f = site.fund.get(sym) or {}
@@ -217,16 +218,23 @@ def compute(site):
         # price and risk: every name
         o = meta.get("ohlc")
         gap = None
+        pin = {"p": float(site.R[(sym, "buy-and-hold")]["price"])}       # what the flip lines need (price_inputs)
         if o is not None and len(o) >= 200:
             c = o["close"]
-            gap = float(c.iloc[-1] / c.iloc[-200:].mean() - 1)
+            ma200 = float(c.iloc[-200:].mean())
+            gap = float(c.iloc[-1] / ma200 - 1)
             raw["trend"][sym], shown["trend"][sym] = gap, _p(gap) + " vs 200-day"
+            pin["ma"], pin["gap"] = ma200, gap
         # off the high: an absolute exit rule, not a ranking (in a broad sell-off every stock loses points)
         pc_ = (site.prices or {}).get(sym)
         if pc_ is not None and len(pc_) >= 120:
             cl = pc_["close"].iloc[-252:]
             dd = float(cl.iloc[-1] / cl.max() - 1)
             fixed["offhigh"][sym], shown["offhigh"][sym] = offhigh_points(dd), ("at its 1-year high" if dd > -0.005 else _p(dd) + " from its 1-year high")
+            pin["hi"] = float(cl.max())
+        if ol["ok"]:
+            pin["tgt"] = float(pin["p"] * (1 + ol["upside"]))
+        pins[sym] = pin
         # analysts' targets lag a falling price, so their upside counts for at most half while the trend is broken
         if gap is not None and gap < 0 and fixed["upside"].get(sym, 0) > UPSIDE_CAP:
             fixed["upside"][sym] = UPSIDE_CAP
@@ -237,6 +245,8 @@ def compute(site):
             y1 = None
         if y1 is not None:
             raw["mom"][sym], shown["mom"][sym] = float(y1), _p(float(y1))
+            if float(y1) > -0.999:
+                pin["py"], pin["y1"] = float(pin["p"] / (1 + float(y1))), float(y1)
         rk = meta.get("risk") or {}
         if rk.get("score") is not None:
             fixed["calm"][sym] = int(max(0, 100 - 10 * rk["score"]))
@@ -248,6 +258,10 @@ def compute(site):
         for sym, p in pts.items():
             out[sym][k] = (p, shown[k].get(sym))
     site.__dict__["_factors"] = out
+    # rounded to what data/playset.json carries, so the browser's flip lines match the page's
+    r4 = lambda v: round(v, 4) if isinstance(v, float) else v
+    site.__dict__["_price_inputs"] = {"pi": {k: {kk: r4(vv) for kk, vv in d.items() if vv is not None} for k, d in pins.items()},
+                                      "rk": {"trend": sorted(r4(v) for v in raw["trend"].values()), "mom": sorted(r4(v) for v in raw["mom"].values())}}
     return out
 
 
@@ -309,11 +323,128 @@ def factors_json(site):
     gf, gp = g.get("factors", {}), g.get("presets", {})
     return {"fx": [{"k": k, "n": n, "g": g_, "d": d, "r": rec(gf.get(k))} for k, n, g_, d in FACTORS], "fg": [list(x) for x in GROUPS],
             "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL},
-            "wo": OLD_DEFAULT, "mv": MODEL, "gs": g.get("since", "")[:4], "x": x, "v": v}
+            "wo": OLD_DEFAULT, "mv": MODEL, "gs": g.get("since", "")[:4], "x": x, "v": v,
+            "pi": price_inputs(site)["pi"], "rk": price_inputs(site)["rk"], "uc": UPSIDE_CAP}
 
 
 SIG_WORD = {1: "Buy", 0: "Hold", -1: "Sell", None: "No score"}
 SIG_CLS = {1: "buy", 0: "hold", -1: "sell", None: "na"}
+
+
+def price_inputs(site):
+    """The numbers the flip lines need (flip_lines here, BPPlays.flips in the browser): per stock the price,
+    1-year high, 200-day average, price a year ago and analysts' target; and every stock's raw trend and
+    momentum values, sorted, to re-rank a candidate price among them."""
+    compute(site)
+    return site.__dict__.get("_price_inputs") or {"pi": {}, "rk": {"trend": [], "mom": []}}
+
+
+def _rank_at(v, sorted_others, n):
+    """Points by rank for a value v placed among the other stocks' values (n stocks in all), as _rank does."""
+    import bisect
+    if n <= 1:
+        return 50
+    lo, hi = bisect.bisect_left(sorted_others, v), bisect.bisect_right(sorted_others, v)
+    r = lo + 1 + (hi - lo) / 2.0           # average rank among ties
+    return int(round(100 * (r - 1) / (n - 1)))
+
+
+def _others(vals, own):
+    """The sorted values with this stock's own one taken out (it moves with the candidate price)."""
+    if own is None:
+        return vals
+    import bisect
+    i = bisect.bisect_left(vals, own)
+    return vals[:i] + vals[i + 1:] if i < len(vals) and vals[i] == own else vals
+
+
+def points_at(pin, rk, price):
+    """The price-dependent factor points at a candidate price: off the high, trend, momentum, upside."""
+    out = {}
+    if pin.get("hi"):
+        out["offhigh"] = offhigh_points(price / max(pin["hi"], price) - 1)
+    if pin.get("ma"):
+        others = _others(rk["trend"], pin.get("gap"))
+        out["trend"] = _rank_at(price / pin["ma"] - 1, others, len(others) + 1)
+    if pin.get("py"):
+        others = _others(rk["mom"], pin.get("y1"))
+        out["mom"] = _rank_at(price / pin["py"] - 1, others, len(others) + 1)
+    if pin.get("tgt"):
+        from . import stockview as sv
+        u = pin["tgt"] / price - 1
+        p = _rnd(100 * sv.upside_points(u)) if u <= 1.0 else None
+        if p is not None and pin.get("ma") and price < pin["ma"] and p > UPSIDE_CAP:
+            p = UPSIDE_CAP
+        out["upside"] = p
+    return out
+
+
+def flip_lines(site, t, weights=None, plays_share=None, buy=BUY, sell=SELL):
+    """The closes at which the signal would change, holding the plays and the company numbers where they are:
+    {"now": sig, "down": (price, sig) or None, "up": (price, sig) or None}. Scans 40% below to 80% above."""
+    w = weights or DEFAULT
+    sym = t["sym"]
+    P = price_inputs(site)
+    pin = P["pi"].get(sym)
+    if not pin or not pin.get("p"):
+        return None
+    pts = compute(site).get(sym, {})
+    if plays_share is None:
+        k, n = site.consensus(t)
+        plays_share = k / n if n else None
+    fixed = {key: pts.get(key, (None, None))[0] for key in KEYS}
+    fixed["plays"] = None if plays_share is None else _rnd(100 * plays_share)
+
+    def sig_at(price):
+        var = points_at(pin, P["rk"], price)
+        tot = avail = acc = 0.0
+        for key, wi in w.items():
+            if not wi:
+                continue
+            tot += wi
+            p = var[key] if key in var else fixed.get(key)
+            if p is not None:
+                avail += wi
+                acc += wi * p
+        if not tot or avail < tot / 2:
+            return None
+        sc = _rnd(acc / avail)
+        return 1 if sc >= buy else -1 if sc <= sell else 0
+    p0 = pin["p"]
+    now = sig_at(p0)
+    if now is None:
+        return None
+    out = {"now": now, "down": None, "up": None}
+    step = 0.005
+    for i in range(1, int(0.40 / step) + 1):
+        px = p0 * (1 - i * step)
+        sg = sig_at(px)
+        if sg is not None and sg != now:
+            out["down"] = (round(px, 2), sg)
+            break
+    for i in range(1, int(0.80 / step) + 1):
+        px = p0 * (1 + i * step)
+        sg = sig_at(px)
+        if sg is not None and sg != now:
+            out["up"] = (round(px, 2), sg)
+            break
+    return out
+
+
+def flip_words(fl, cur, p0):
+    """"Turns Sell below $849 (−6%) · turns Buy above $1,131 (+25%)" for a flip_lines result."""
+    if not fl:
+        return ""
+    bits = []
+    for side, word in (("down", "below"), ("up", "above")):
+        x = fl.get(side)
+        if x:
+            pct = x[0] / p0 - 1
+            bits.append(f"turns {SIG_WORD[x[1]]} {word} {cur}{x[0]:,.2f} ({'+' if pct > 0 else '−'}{abs(pct) * 100:.0f}%)")
+    if not bits:
+        return "Stays " + SIG_WORD[fl["now"]] + " anywhere from 40% below to 80% above the latest close."
+    out = " · ".join(bits)
+    return out[0].upper() + out[1:]
 
 
 def why(short, s, sig, parts, buy=BUY, sell=SELL):
@@ -356,6 +487,7 @@ def signal_card(site, t, h):
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
 <p class="small sig-tested" data-sig-tested>{e(tested_line(site, parts))}</p>
+<p class="small sig-flip"><span data-sig-flip>{e(flip_words(flip_lines(site, t), t.get("cur", "$"), float(site.R[(t["sym"], "buy-and-hold")]["price"])))}</span> <span class="muted">With the plays and company numbers where they are; each play's own exit price is under Next move.</span></p>
 <div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
 <div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + exit rules</b><span class="ps-caret" aria-hidden="true">▾</span></button>
 <button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>

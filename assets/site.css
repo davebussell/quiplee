@@ -2044,3 +2044,6 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .acct-key { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; color: var(--ink-2); }
 .acct-key i { display: inline-block; width: 16px; height: 3px; border-radius: 2px; margin-right: -4px; }
 .acct-key .k-mine { background: var(--violet-ink); } .acct-key .k-alt { background: var(--in); } .acct-key .k-core { background: var(--muted); }
+.sig-flip { display: block; font: 12px var(--data); color: var(--muted); margin-top: 3px; white-space: nowrap; }
+p.sig-flip { display: block; font: 13px/1.5 var(--ui); white-space: normal; margin: 0; color: var(--ink-2); }
+p.sig-flip [data-sig-flip] { color: var(--ink); font-weight: 500; }

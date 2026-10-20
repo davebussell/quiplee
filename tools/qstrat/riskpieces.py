@@ -27,6 +27,8 @@ PIECES = [
      "A Buy is not a plan for getting out. What happened after thousands of sharp drops in the stocks we cover, and the three exit rules your signal now reads."),
     ("articles/one-stock-too-many/", "One stock too many: what concentration does to an account",
      "No signal on one stock can protect an account that rides on it. The arithmetic of a big position, and how often single stocks fall hard."),
+    ("articles/calls-graded/", "This week's calls, graded",
+     "How the signal's Buys, Holds and Sells did over the latest week, name by name, and its running record since the standard weights changed."),
     ("articles/old-vs-new-signal/", "Old signal vs new: the calls compared, and what we're testing next",
      "We rebuilt the old Buy, Hold and Sell from two years of analysts' price targets and ran it against the new one, and tested the new one back to 2006. Where the new signal is better, where the old one did better, and the refinements that held up."),
 ]
@@ -184,6 +186,8 @@ def build(A):
     when_to_sell(A)
     one_stock(A)
     old_vs_new(A)
+    from .scorecard import piece as scorecard
+    scorecard(A)
 
 
 def _grade(site):
@@ -393,7 +397,7 @@ def _times(r):
 def old_vs_new(A):
     from .modelcompare import load
     s = A.s
-    path, depth = PIECES[3][0], 2
+    path, depth = PIECES[4][0], 2
     h = A.h(depth)
     J = load()
     M = J.get("models") or {}
@@ -411,7 +415,7 @@ def old_vs_new(A):
 <p class="small muted">Rows are the old standard (plays 50, analysts' upside 50), columns the new one, on tonight's numbers. The <a href="{h('articles/why-your-signal-changed/')}">names that moved most</a> are listed with the change.</p>"""
     if not M:
         body = f'<div class="prose">{live}</div>'
-        A.shell(path, "risk", PIECES[3][1], PIECES[3][2], body, live=True, free=True,
+        A.shell(path, "risk", PIECES[4][1], PIECES[4][2], body, live=True, free=True,
                 related=A.related(depth, [p for p, _, _ in PIECES[:3]]))
         return
     g = lambda k, part="all": (M.get(k) or {}).get(part) or {}
@@ -442,7 +446,10 @@ def old_vs_new(A):
              ("offrel", "Exit rule measured against the market's own fall"), ("relsticky", "That, with sticky calls"),
              ("off20", "Exit rule at 20% off the high"), ("off40", "Exit rule at 40% off the high"), ("offvol", "Exit rule scaled to each stock's volatility"),
              ("mom121", "12-month momentum, skipping the last month, for trend"), ("quality", "Adding return on equity and debt"),
-             ("mktfilter", "A Buy needs 70 while the S&P 500 is below its 200-day")]
+             ("mktfilter", "A Buy needs 70 while the S&P 500 is below its 200-day"),
+             ("trend50", "Faster: trend measured against the 50-day average"), ("trendx", "Faster: trend capped at 40 once under the 50-day"),
+             ("off20x", "Faster: exit at 20% off the high, trend capped under the 50-day"), ("off3m", "Faster: exit off the 3-month high (15% floor)"),
+             ("halfhalf", "Faster: half 1-year and 200-day, half 3-month and 50-day")]
     crash = lambda k: [(M.get(k) or {}).get("years", {}).get(y) for y in ("2008", "2020", "2022")]
 
     def rrow(k, lab):
@@ -488,11 +495,12 @@ def old_vs_new(A):
 <li><b>A market guard looks best.</b> When the stock's whole market is 15% or more below its own high, the exit rule stands down and the plays decide. It lifts the edge to {pts(gd.get('all', {}).get('edge12') or 0)} by doing less damage in 2008, 2020 and 2022, and changes nothing in calmer years.</li>
 <li><b>Sticky calls cut the noise.</b> If a Buy stays a Buy until the score falls below 50 (and a Sell until it rises above 50), signals change {gs.get('flips', 0):.1f} times a year instead of {gd.get('flips', 0):.1f} with the guard on, for {pts((gs.get('all', {}).get('edge12') or 0) - (gd.get('all', {}).get('edge12') or 0))} of edge. Fewer flips means fewer alerts that reverse a month later.</li>
 <li><b>Analysts' upside, capped, at a small weight</b> was the best of the additions in the rebuilt stretch over three months ({pts(up15.get('edge3') or 0)}, against {pts(g('new', 'an').get('edge3') or 0)} for the new signal), but two years is too short to put it back. Analysts' target revisions (raised or cut in the last 90 days) added nothing ({pts(rv15.get('edge3') or 0)}). We keep collecting targets so both can be graded properly.</li>
+<li><b>Faster exits don't pay over the long run.</b> After the week of October 13–19, when a stock that had quadrupled sat at Hold while it fell 25% from its high (its 200-day average was still far below), we tested five faster versions: trend on the 50-day average, trend capped once the price breaks its 50-day, a 20% exit floor, an exit off the 3-month high, and a half-and-half. Each would have called that stock Sell a week sooner. Over 20 years every one has a lower edge than today's standard ({pts((M.get("trend50") or {}).get("all", {}).get("edge12") or 0)} to {pts((M.get("trendx") or {}).get("all", {}).get("edge12") or 0)}) and 5–25% more flips: they leave the stocks that keep falling sooner and get whipsawed on the ones that bounce. Each stock page now shows the price at which the signal would turn instead.</li>
 <li><b>Small or mixed:</b> moving the exit rule's floor to 20% or 40%, scaling it to each stock's volatility, using 12-month momentum (skipping the latest month) for the trend, adding return on equity and debt, or asking for a 70 to Buy while the S&amp;P 500 is below its 200-day average each land within half a point of today's standard over the whole period; some do better in one stretch and worse in another. Measuring the fall against the market's own fall raised the overall edge but made the crash years worse.</li>
 </ul>
 <p>Two things would make every one of these tests more honest, and both are on the list: <b>stocks that no longer trade</b> (the test uses today's list, which flatters buying dips and hides the cases an exit rule exists for), and a <b>longer record of analysts' targets</b> and of companies' guidance, which the site has started keeping. Any change to the standard will be published here with its record first.</p>
 <h2 class="h2">The fine print</h2>
 <p class="small muted">Study run {J.get('built')} on {J.get('stocks')} covered stocks, month-ends {since} to {an_to}, with each stock scored from data public at the time. "Beat the market" compares the stock's return over the next year with its market's. Edges of a few points are normal and noisy; a year can swing by twenty. The rebuilt old signal uses targets that aren't split-adjusted, so any target more than double or less than half the price on its day is dropped. None of this knows anything about an individual account, and a better signal doesn't make one stock a safe place for most of one (<a href="{h('articles/one-stock-too-many/')}">one stock too many</a>).</p>
 </div>"""
-    A.shell(path, "risk", PIECES[3][1], PIECES[3][2], body, live=True, free=True,
-            related=A.related(depth, [p for p, _, _ in PIECES[:3]]))
+    A.shell(path, "risk", PIECES[4][1], PIECES[4][2], body, live=True, free=True,
+            related=A.related(depth, [PIECES[3][0]] + [p for p, _, _ in PIECES[:3]]))

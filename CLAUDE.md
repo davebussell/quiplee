@@ -27,8 +27,8 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **Ask Dave first** before: changing Netlify settings (including DNS), sending any email on
   his behalf, or editing Canva designs.
 - **Commits:** author `Claude <noreply@anthropic.com>`, ending with
-  `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>` and the session's
-  `Claude-Session:` line.
+  the `Co-Authored-By:` line for the Claude model in use (the session's reminder gives it) and
+  the session's `Claude-Session:` line.
 
 ## Product rules (from the October 2026 review)
 
@@ -50,6 +50,13 @@ for that isn't there, and move an issue to Done only once the change is live.
   mailing every flip the change caused. Test a change with `tools/model_compare.py` first (12-month
   edge since 2006 and by era, Sells that fell 30%+, flips a year), add it to `modelcompare.MODELS`,
   and rerun it after the change so `/articles/old-vs-new-signal/` stays current.
+- **The signal grades itself in public.** `/articles/calls-graded/` rebuilds every day's standard
+  calls since Oct 13, 2026 and scores them weekly; a change to the standard weights or `MODEL`
+  must update `scorecard.SINCE` (or the record spans two models). Never store calls to grade
+  later; rebuild them point-in-time, as every other test on the site does.
+- **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
+  50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
+  flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.
 
 ## How it fits together
 

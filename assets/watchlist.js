@@ -23,7 +23,7 @@
     'Plays in': 'How many of the plays you chose to count hold it right now.',
     'Target': 'How far analysts\u2019 average 12-month price target sits above (+) or below (\u2212) today\u2019s price. Needs 3 or more analysts.',
     'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
-    'Signal': 'Your signal, the one call on each name: Buy, Hold or Sell from your score (0 to 100) on the factors you weight. Change the weights with the Weights button.',
+    'Signal': 'Your signal, the one call on each name: Buy, Hold or Sell from your score (0 to 100) on the factors you weight, and the nearest close that would change it (the plays and company numbers held where they are). Change the weights with the Weights button.',
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
   };
@@ -349,8 +349,15 @@
     });
     function sigCell(sym, t) {
       var g = sig(sym, t, sel), w = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[g.sig];
-      return el('td', { 'data-v': g.s == null ? '' : String(g.s) }, g.s == null ? [el('span', { 'class': 'muted', text: '–' })]
-        : [el('span', { 'class': 'sig-pill ' + w[1], text: w[0] }), el('span', { 'class': 'sig-sc', text: ' ' + g.s })]);
+      if (g.s == null) return el('td', { 'data-v': '' }, [el('span', { 'class': 'muted', text: '–' })]);
+      var kids = [el('span', { 'class': 'sig-pill ' + w[1], text: w[0] }), el('span', { 'class': 'sig-sc', text: ' ' + g.s })];
+      // the nearest price that would change the call (BPPlays.flips): the line below for a Buy or Hold, above for a Sell
+      var PS = window.BPPlays, fl = PS && PS.loaded() && PS.flips ? PS.flips(sym) : null;
+      if (fl) {
+        var x = g.sig === -1 ? fl.up : (fl.down || fl.up);
+        if (x) kids.push(el('span', { 'class': 'sig-flip small muted', text: SIGW[x[1]][0] + ' ' + (x === fl.up ? 'above' : 'below') + ' ' + (t.cur || '$') + x[0].toLocaleString('en-US', { maximumFractionDigits: x[0] < 10 ? 2 : 0 }) }));
+      }
+      return el('td', { 'data-v': String(g.s) }, kids);
     }
     rows.forEach(function (it) {
       var t = D.t[it.sym], s = status(it.sym);

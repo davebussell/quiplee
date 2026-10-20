@@ -100,6 +100,14 @@ def reads_json(site):
             read = sv.read_lines(site, t, meta, site.fund.get(sym)) if meta else []
         except Exception:
             read = []
+        # the price that would change the standard signal's mind, for the alert emails and My Puck
+        try:
+            from qstrat.factors import flip_lines, flip_words
+            fw = flip_words(flip_lines(site, t), t.get("cur", "$"), float(site.r(sym, "buy-and-hold")["price"]))
+            if fw:
+                read = list(read) + ["Your signal " + fw[0].lower() + fw[1:] + "."]
+        except Exception:
+            pass
         oh = (meta or {}).get("ohlc")
         d1 = float(oh["close"].iloc[-1] / oh["close"].iloc[-2] - 1) if oh is not None and len(oh) > 1 else None
         out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),

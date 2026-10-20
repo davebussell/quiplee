@@ -116,6 +116,20 @@ a dozen candidate refinements scored point-in-time, with how often Buys and Sell
 how often they fell 30%+ within a year, and how often calls flip; plus the old standard rebuilt from
 the price targets in `data/events/` (July 2024 on). Rerun it whenever the model changes.
 
+**The price that would change the signal's mind.** `factors.flip_lines` (and `BPPlays.flips` in the
+browser, the same arithmetic) rescans prices from 40% below to 80% above the close, moving off the
+high, trend, momentum and analysts' upside with the price and holding the plays and company numbers
+where they are, and reports the nearest close below and above at which the call changes. Shown on
+the stock page's signal card (redrawn for the reader's weights), under the watchlist's signal pill,
+and as the last line of each name's read in reads.json (so the alert emails carry it). The inputs
+(`pi`, `rk` in playset.json) are rounded to 4 decimals on both sides so the two agree.
+
+**This week's calls, graded** (`/articles/calls-graded/`, `tools/qstrat/scorecard.py`, free, nightly):
+every session's standard-weight calls since October 13, 2026 are rebuilt point-in-time from prices
+and the plays' call histories (nothing stored, so nothing can be tidied up), then graded: the latest
+week's Buys, Holds and Sells (median, share that rose, share that beat their market, best and worst
+names), the running week-by-week record, and daily equal-weight baskets against SPY.
+
 **Planning an account.** `/guides/plan-an-account/` (`tools/qstrat/accountplan.py`) reads
 `data/accountplan.json`, written by `tools/account_study.py` from the dev cache: 2,000 random
 portfolios per setting from the covered stocks with full history since 2006 (1 to 30 stocks, a core

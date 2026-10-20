@@ -209,7 +209,7 @@ class Articles:
                 extra = f'<div class="card"><p class="h3">Sector briefs</p><div class="chips" style="margin-top:10px">{chips}</div></div>'
             secs += f'<section id="{key}"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>{extra}<div class="grid grid-3">{cards}</div></section>'
         feat = ""
-        for sp in ["articles/old-vs-new-signal/", "articles/why-your-signal-changed/", "articles/when-to-sell/", "articles/one-stock-too-many/", "articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
+        for sp in ["articles/calls-graded/", "articles/old-vs-new-signal/", "articles/why-your-signal-changed/", "articles/when-to-sell/", "articles/one-stock-too-many/", "articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
                    "articles/debt-and-crashes/", "articles/green-across-the-board/"]:
             b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
             when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
