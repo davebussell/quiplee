@@ -91,6 +91,14 @@ async def run(base, local):
                     if not resp or resp.status >= 400:
                         errs.append(f"page status {resp.status if resp else 'none'}")
                     await pg.wait_for_timeout(1500)
+                    # a 5xx on one of the site's own files right after a deploy is the edge warming up: try the page once more
+                    if any(x.startswith("50") for x in errs) and not local:
+                        await pg.wait_for_timeout(4000)
+                        errs.clear()
+                        resp = await pg.goto(base + ix(path), wait_until="load", timeout=60000)
+                        if not resp or resp.status >= 400:
+                            errs.append(f"page status {resp.status if resp else 'none'}")
+                        await pg.wait_for_timeout(1500)
                     got = await pg.evaluate("() => ({sw: document.documentElement.scrollWidth, h1: !!document.querySelector('h1, .h1'), "
                                             "disc: document.body.innerText.includes(" + json.dumps(DISCLAIMER_KEY) + ")})")
                     if got["sw"] > w + 1:
