@@ -40,10 +40,11 @@
     [].forEach.call(document.querySelectorAll('[data-acct-btn]'), function (b) {
       b.classList.toggle('in', !!n);
       var lab = b.querySelector('[data-acct-label]'), ava = b.querySelector('.acct-ava');
-      if (lab) lab.textContent = n ? 'My Puck' : 'Sign in';
+      if (lab) lab.textContent = n ? 'Account' : 'Login';
       if (ava) ava.textContent = n ? n.charAt(0).toUpperCase() : '';
       b.setAttribute('title', n ? 'Signed in as ' + n : 'Sign in or create a free account');
     });
+    [].forEach.call(document.querySelectorAll('.nav-me, [data-nav-me]'), function (a) { a.textContent = n ? 'Account' : 'Login'; });
     [].forEach.call(document.querySelectorAll('[data-signed-out]'), function (el) { el.hidden = !!n; });
     [].forEach.call(document.querySelectorAll('[data-signed-in]'), function (el) { el.hidden = !n; });
   }

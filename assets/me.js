@@ -1,4 +1,4 @@
-/* me.js: My Puck (/me/). Signed out, the page shows the sign-up widget (account.js).
+/* me.js: the account page (/me/). Signed out, the page shows the sign-up widget (account.js).
  * Signed in, it draws the dashboard from /api/account/me (the account) and
  * data/reads.json (every covered name's standard signal and read): the stocks you follow,
  * your email alerts, a shortcut into the Theory tester, the member tools and settings.
@@ -233,7 +233,7 @@
     var local = [];
     try { var v = JSON.parse(localStorage.getItem('quiplee.watch.v1') || 'null'); local = ((v && v.items) || []).map(function (x) { return x.sym; }).filter(function (s) { return R.t[s] && (A.follow || []).indexOf(s) < 0; }); } catch (e) { /* storage off */ }
     box.innerHTML =
-      '<div class="me-top"><div><p class="eyebrow">My Puck</p><h1 class="h1 me-hi">' + greeting() + ', <em>' + esc(A.name) + '</em></h1>' +
+      '<div class="me-top"><div><p class="eyebrow">Your account</p><h1 class="h1 me-hi">' + greeting() + ', <em>' + esc(A.name) + '</em></h1>' +
       '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' stock' + ((A.follow || []).length === 1 ? '' : 's') + ' followed</p></div>' +
       '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
       notice() + kpis() +

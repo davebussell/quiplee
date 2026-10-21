@@ -1,4 +1,4 @@
-/* account.mjs: the one Be The Puck account, shared by My Puck (account.mjs), the
+/* account.mjs: the one Be The Puck account, shared by the account page (account.mjs), the
  * member tools (member.mjs) and the nightly emails.
  *
  * An account lives in the Blobs store "paper" (it began as the paper-trading game's,
@@ -9,7 +9,7 @@
  *   e/<hash>  {u}: who owns an email address (hash keyed with QM_SECRET)
  *   as/<name> the calls last emailed (so an email only goes out on a change)
  * <name> is the lower-cased username. Accounts made for the old game have no email until the
- * player adds one in My Puck.
+ * player adds one on the account page.
  *
  * Cookies, all signed with QM_SECRET (see qm.mjs):
  *   pt       {k: "pt", u, v}    the account session (HttpOnly, 180 days)

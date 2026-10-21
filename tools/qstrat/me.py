@@ -1,4 +1,4 @@
-"""/me/: My Puck, the one place for a Be The Puck account.
+"""/me/: the account page (Login in the menu), the one place for a Be The Puck account.
 
 Signed out, the page sells the account with a real preview (tonight's signal on a
 sample list, clearly labelled as an example) next to the sign-up form. Signed in,
@@ -34,7 +34,7 @@ def _preview(site, depth):
                  f'<span class="mp-sig">{sig_html}</span><span class="mp-bar">{fill_bar(k, n)}<span>{k}/{n} plays</span></span>'
                  f'<span class="mp-px mono">{money(x["price"], t["cur"])}</span>'
                  f'<span class="mp-since">{f"<span class={chr(34)}{dir_cls(y1)}{chr(34)}>{pct(y1, d=0)}</span> in a year" if y1 is not None else ""}</span></a></li>')
-    return f"""<div class="mp-frame" aria-label="Example of My Puck">
+    return f"""<div class="mp-frame" aria-label="Example of the account page">
 <div class="mp-chrome"><i></i><i></i><i></i><span>bethepuck.com/me/</span><b class="tag">Example</b></div>
 <div class="mp-body">
 <div class="mp-kpis">
@@ -61,7 +61,7 @@ def me_page(site):
 
 <section class="me-out has-art" data-me-out>{page_art(h, PAGE_ART["me/"], "50% 60%")}
 <div class="me-out-grid">
-<div class="me-out-copy me-out-head"><p class="eyebrow">My Puck</p>
+<div class="me-out-copy me-out-head"><p class="eyebrow">Your account</p>
 <h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>
 <p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening your signal on one flips, and opens every member tool until {FREE_UNTIL}.</p>
 </div>
@@ -69,7 +69,7 @@ def me_page(site):
 <li>Test any theory on the stocks you follow, from one play to all of them</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
 <div class="me-preview">{_preview(site, depth)}</div>
 </div>
-<div class="card me-auth-card"><div data-auth data-auth-next="/me/?welcome=1" data-auth-context="me"><noscript><p>My Puck needs JavaScript.</p></noscript></div></div>
+<div class="card me-auth-card"><div data-auth data-auth-next="/me/?welcome=1" data-auth-context="me"><noscript><p>Your account needs JavaScript.</p></noscript></div></div>
 </div>
 </section>
 
@@ -83,6 +83,6 @@ def me_page(site):
 <li><b>Privacy:</b> Be The Puck keeps your email, your username and what you follow, and nothing else.</li>
 </ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></section>
 """
-    site.add(path, site.shell(path, "My Puck: your stocks and their alerts",
+    site.add(path, site.shell(path, "Your account: your stocks and their alerts",
                               "One free Be The Puck account: follow your stocks, get an email when your signal on one flips, test theories on them, and use every member tool free until January 1, 2027.",
                               body, active="", scripts=("assets/widgets.js", "assets/plays.js", "assets/me.js"), link=False))

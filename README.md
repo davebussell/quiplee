@@ -85,7 +85,7 @@ time) or their own pick. `assets/plays.js` keeps the choice in the browser and, 
 the account (`POST /api/account/plays`); `?plays=top1|top3|half|all|<slug.slug>` shares a view.
 The home screener (with a "Most accurate plays agree" sort), the stock list (Your signal, Plays in,
 the family board), each stock page (Plays in, the score, the most accurate play in each family,
-the full list with each play's calls right on that stock), the watchlist and My Puck all
+the full list with each play's calls right on that stock), the watchlist and the account page all
 recount from `data/playset.json`. "Accurate" is the share of a play's finished calls that went
 the right way on the real stocks (no funds, indexes or coins) since 2005; a play needs 500+
 calls on at least half the stocks to be ranked (`render.rankable`). Top 10 and Top picks always
@@ -97,7 +97,7 @@ revenue growth, profit margin, return on equity, debt to equity, off the high, t
 momentum and crash exposure. Each scores a stock 0-100 (company numbers by rank among the covered stocks); the score
 is the weighted average over the factors the stock has, and the reader's Buy and Sell lines (60/40
 to start) make it Buy, Hold or Sell on the stock page (with a factor-by-factor breakdown), the
-stock list, the screener, the watchlist and My Puck. The standard weights (`DEFAULT`: plays 40, off the high 30, trend 30, since October 13, 2026) use
+stock list, the screener, the watchlist and the account page. The standard weights (`DEFAULT`: plays 40, off the high 30, trend 30, since October 13, 2026) use
 only factors with a tested record (`factorgrade.py`: +6.0 points of 12-month edge, against +4.4 for
 the old plays 50 / analysts' upside 50). **Off the high** is the exit rule: 100 points at the 1-year
 high, none at 30% or more below. Analysts' upside is capped at 50 points while the price is under
@@ -116,7 +116,7 @@ Buy…", "Market guard on…", price factors marked "stands down"), the flip lin
 thresholds, and the alert emails say "held at Buy" (reads.json `hd`, `gd`). `factors.MODEL` is bumped whenever the standard weights or a factor's scoring change: saved
 weights that were just the old standard move to the new one (plays.js, signal.mjs), and the alert
 emails re-baseline quietly instead of mailing every flip the change caused. Saved like the plays;
-`?w=plays50.pe20&buy=60&sell=40`. The watchlist and My Puck note which signals changed since the
+`?w=plays50.pe20&buy=60&sell=40`. The watchlist and the account page note which signals changed since the
 reader last looked (per browser, `BPPlays.changes`), and the watchlist flags one name being 25% or
 more of the list by value.
 
@@ -240,7 +240,7 @@ store `paper`.
 
 **One verdict: Your signal.** Since October 2026 the site makes one call per stock, Your
 signal (Buy, Hold, Sell from the reader's weights; see above). It heads every stock page and
-is the first column on the stock list, the screener, the watchlist and My Puck;
+is the first column on the stock list, the screener, the watchlist and the account page;
 `data/reads.json` carries each stock's standard signal (`S`, `sc`) and read. The old Start/Stop
 light (`Site.light`: on at 60% of plays in, off at 40%) is no longer shown; only the Top 10's
 published rule and the members' `/rules/` page still use it.
@@ -250,14 +250,14 @@ plus the Mayer Multiple) and every play on SPY (the Learn examples) get a page; 
 `/stocks/<stock>/<play>/` forwards to that play's row on the stock page (`netlify.toml`). That
 cut a deploy from about 40,000 files to about 6,000. Link with `site.pair_link`.
 
-**One account and My Puck.** A Be The Puck account (email or username plus a
-password) is shared by My Puck (`/me/`), the stocks a person follows,
+**One account (Login in the menu, `/me/`).** A Be The Puck account (email or username plus a
+password) is shared by the account page (`/me/`; the menu says Login when signed out and Account when signed in), the stocks a person follows,
 their emails and the member tools. Accounts live in the Blobs store `paper`
 (`u/<name>`, with `e/<hash>` mapping an email to its account); the logic is in
 `netlify/lib/account.mjs` and the routes in `netlify/functions/account.mjs`
 (`/api/account/*`: sign-up, sign-in, follow, alerts, email, confirm, forgot/reset
 password, unsubscribe, delete). Old username-only accounts from the retired game keep working and
-can add an email in My Puck. Signing in sets the HttpOnly `pt` session, a readable
+can add an email on the account page. Signing in sets the HttpOnly `pt` session, a readable
 `bp_name` cookie for the header, and, for accounts with an email, a `qm` cookie of
 kind `acct` that opens the member pages. **Member tools are free for every account
 until midnight on January 1, 2027 (Toronto)**: `FREE_UNTIL` in `netlify/lib/account.mjs`,

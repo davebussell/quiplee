@@ -246,6 +246,14 @@ def _load(path):
         return {}
 
 
+def _news(slug):
+    """A stock's news items (data/news/<slug>.json), without any that mention a company the site never names
+    (content.BANNED): a headline about a competitor can't put one on a page."""
+    from .content import banned_hit
+    items = _load(os.path.join(NEWS_DIR, slug + ".json")).get("items") or []
+    return [it for it in items if not banned_hit(" ".join(str(it.get(k) or "") for k in ("h", "s", "d", "x")))]
+
+
 # ------------------------------------------------------------------ prices
 _DAY0, _DAYS = dt.date(1970, 1, 1), None
 
@@ -322,7 +330,7 @@ def build_events(t, S, items=None, ev=None, tally=None):
     """Every event on a stock, measured: earnings, ratings, 8-Ks and headlines (cat None = an unsorted headline).
     tally, if given, counts how often Yahoo's earnings session matched the 8-K's ("checked", "agree")."""
     ev = _load(os.path.join(EVENTS_DIR, t["slug"] + ".json")) if ev is None else ev
-    items = (_load(os.path.join(NEWS_DIR, t["slug"] + ".json")).get("items") or []) if items is None else items
+    items = _news(t["slug"]) if items is None else items
     out, earn_r = [], set()
     # 8-K item 2.02 filings: when each report became public, to check Yahoo's times against
     sec_earn = []
@@ -466,7 +474,7 @@ class State:
         sym = t["sym"]
         if sym not in self.events:
             S = self.S(t)
-            items = _load(os.path.join(NEWS_DIR, t["slug"] + ".json")).get("items") or []
+            items = _news(t["slug"])
             ev = _load(os.path.join(EVENTS_DIR, t["slug"] + ".json"))
             self.events[sym] = self.relabel(build_events(t, S, items, ev, self.tally if sym not in self.tallied else None)) if S is not None else []
             self.tallied.add(sym)

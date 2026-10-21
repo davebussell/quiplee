@@ -17,7 +17,13 @@ for that isn't there, and move an issue to Done only once the change is live.
   without it and smoke.py checks it, so a new page type must use `Site.shell`.
 - Financial content states facts and evidence, never a recommendation addressed to the reader.
 - **Never label any ticker as Dave's own holding** on the site.
-- **MGRC stays excluded** from the universe.
+- **WSC, Transcat (TRNS) and McGrath RentCorp (MGRC) are never on the site**, in any form: a conflict
+  of interest for Dave. Not in the universe or the request queue (`content.EXCLUDED`, mirrored in
+  `netlify/functions/watch.mjs`), not in a news item (`newsevents._news` drops any that mention
+  them), not in an article, a list or an email. `content.banned_hit` is the one
+  test; the build refuses to publish a file that mentions them and smoke.py checks the live pages.
+- **The account page is "Login"** in the menu and header when signed out and "Account" when signed
+  in (never "My Puck"); its own heading is "Your account".
 - **Credentials:** never type a password, PIN, API key or token into anything. Dave enters
   PayPal, Stripe, Resend, Netlify and Anthropic keys himself (Netlify env vars or GitHub
   secrets). Never sign in to the live site's owner gate or create accounts on the live site;

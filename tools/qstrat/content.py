@@ -3,6 +3,8 @@
 Everything a reader sees about a person or a rule lives here, so it can be
 reviewed in one place. Keep claims factual and sourced; paraphrase, don't quote.
 """
+import re
+
 
 # --------------------------------------------------------------------------
 # Universe
@@ -74,10 +76,8 @@ TICKERS = [
     {"sym": "CARR", "name": "Carrier Global", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "URI", "name": "United Rentals", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "R", "name": "Ryder System", "group": "Industrials & rentals", "cur": "$"},
-    {"sym": "WSC", "name": "WillScot", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "HTZ", "name": "Hertz", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "CAR", "name": "Avis Budget", "group": "Industrials & rentals", "cur": "$"},
-    {"sym": "TRNS", "name": "Transcat", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "FLXS", "name": "Flexsteel Industries", "group": "Industrials & rentals", "cur": "$"},
     {"sym": "FC", "name": "Franklin Covey", "group": "Industrials & rentals", "cur": "$"},
     # Energy & power
@@ -391,8 +391,19 @@ GROUP_ORDER = ["Market indexes", "Sectors", "Indexes & ETFs", "Crypto", "Big tec
                "Media & telecom", "Healthcare", "Financials", "Real estate", "Industrials & materials", "Industrials & rentals", "Energy & power",
                "Metals & mining", "Crypto miners", "Micro caps"]
 
-# Tickers Be The Puck doesn't cover, even if a reader asks for them
-EXCLUDED = {"MGRC"}
+# Companies that are never on the site, in any form (a conflict of interest for the editor): not in the
+# universe or the request queue (EXCLUDED, mirrored in netlify/functions/watch.mjs), not in a news item
+# (newsevents.py drops any that mention them), not in an article, a list or an email. The build refuses to
+# publish a page or data file that mentions them (build_strategies.py), and smoke.py checks the live pages.
+EXCLUDED = {"MGRC", "WSC", "TRNS"}
+BANNED = ("MGRC", "WSC", "TRNS", "McGrath RentCorp", "McGrath", "WillScot", "Transcat")
+_BANNED_RE = re.compile(r"\b(?:MGRC|WSC|TRNS|McGrath|WillScot|Transcat)\b", re.IGNORECASE)
+
+
+def banned_hit(text):
+    """The first mention of a banned company in text, or None (whole words, any case: "transcatheter" is not one)."""
+    m = _BANNED_RE.search(text or "")
+    return m.group(0) if m else None
 
 # Reader-requested tickers (added by the nightly queue; see tools/sync_requests.py)
 import json as _json0

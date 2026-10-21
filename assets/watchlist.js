@@ -266,7 +266,7 @@
       return el('li', {}, [el('a', { 'class': 'sym', href: STOCK.replace('{u}', t.u), text: t.s }), ' ', pillEl(c.from), ' → ', pillEl(c.to), el('span', { 'class': 'muted small', text: ' score ' + c.s })]);
     });
     box.appendChild(el('div', { 'class': 'card wl-changes' }, [el('p', { 'class': 'h3', text: 'Signal changes since the ' + when + ' close' }), el('ul', {}, items),
-      el('p', { 'class': 'small muted', text: 'From the prices and filings at the latest close, with your weights. Sign in on My Puck to get these by email.' })]));
+      el('p', { 'class': 'small muted', text: 'From the prices and filings at the latest close, with your weights. Log in to get these by email.' })]));
   }
   // one name that dominates the list by value: what a fall in it alone would do to the whole list
   function concentrationNote(box, cov, W) {

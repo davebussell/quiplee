@@ -224,7 +224,7 @@
     if (acct) {
       window.BPAuth.follow(sym, on).then(function (j) {
         if (!j.ok) { following[sym] = !on; draw(); toast(esc(j.error || "That didn't save. Try again.")); return; }
-        toast(on ? 'Following ' + esc(short) + '. You&#39;ll get an email the evening your signal on it flips. <a href="' + esc(ME) + '">My Puck</a>' : 'Stopped following ' + esc(short) + '.');
+        toast(on ? 'Following ' + esc(short) + '. You&#39;ll get an email the evening your signal on it flips. <a href="' + esc(ME) + '">Your account</a>' : 'Stopped following ' + esc(short) + '.');
       });
       return;
     }

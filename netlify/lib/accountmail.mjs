@@ -92,11 +92,11 @@ export function nightlyMsg(u, acct, flips, plays, R, member) {
   const body = `<p>Here's what changed on the ${(acct.follow || []).length} stocks you follow at the ${esc(fmtDate(R.asof))} close.</p>` +
     (flipHtml ? `<p style="margin:18px 0 10px;font:600 12px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.08em;color:#6b7385;text-transform:uppercase">Your signal, with your weights</p>${flipHtml}` : "") +
     (playHtml ? `<p style="margin:20px 0 6px;font:600 12px/1 -apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:.08em;color:#6b7385;text-transform:uppercase">Play by play</p>${playHtml}` : "") +
-    mail.button(base + "/me/", "Open My Puck");
+    mail.button(base + "/me/", "Open your account");
   const html = mail.shell(subject, body, footer(u, member), flips.length ? "Your signal changed on your stocks." : "Plays moved on your stocks tonight.");
   const text = [
     ...flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S)}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of, f.W ? f.W.buy : 60, f.W ? f.W.sell : 40, !!f.t.hd, !!f.t.gd)} ${base}/stocks/${f.t.u}/`),
     ...plays.map((c) => `${c.short}: ${c.items.map((i) => i.text).join("; ")}`),
-  ].join("\n\n") + `\n\nMy Puck: ${base}/me/\n\n${DISCLAIMER}\nStop these emails: ${stopUrl(u)}`;
+  ].join("\n\n") + `\n\nYour account: ${base}/me/\n\n${DISCLAIMER}\nStop these emails: ${stopUrl(u)}`;
   return { to: acct.email, subject, html, text, headers: listUnsub(u) };
 }

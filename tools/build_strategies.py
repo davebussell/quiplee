@@ -83,7 +83,7 @@ def copy_static(out):
 
 def reads_json(site):
     """Each covered name's standard signal (S: 1 Buy, 0 Hold, -1 Sell; sc: score), plays in (k of `of`)
-    and plain-English read, for My Puck and the alert emails (netlify/lib/signal.mjs rescores
+    and plain-English read, for the account page and the alert emails (netlify/lib/signal.mjs rescores
     it with an account's own weights from data/playset.json)."""
     from qstrat import stockview as sv
     from qstrat.content import TICKERS
@@ -100,7 +100,7 @@ def reads_json(site):
             read = sv.read_lines(site, t, meta, site.fund.get(sym)) if meta else []
         except Exception:
             read = []
-        # the price that would change the standard signal's mind, for the alert emails and My Puck
+        # the price that would change the standard signal's mind, for the alert emails and the account page
         try:
             from qstrat.factors import flip_lines, flip_words
             fw = flip_words(flip_lines(site, t), t.get("cur", "$"), float(site.r(sym, "buy-and-hold")["price"]))
@@ -198,6 +198,23 @@ def pages_without_disclaimer(out):
     return sorted(missing)
 
 
+def files_naming_banned(out):
+    """Pages and data files that mention a company the site never names (content.BANNED; Dave's rule).
+    Returns [(file, the mention)]. Price history isn't published, so only .html, .json and .xml count."""
+    from qstrat.content import banned_hit
+    hits = []
+    for d, _, fs in os.walk(out):
+        for fn in fs:
+            if not fn.endswith((".html", ".htm", ".json", ".xml", ".txt")):
+                continue
+            path = os.path.join(d, fn)
+            with open(path, encoding="utf-8", errors="replace") as f:
+                hit = banned_hit(f.read())
+            if hit:
+                hits.append((os.path.relpath(path, out), hit))
+    return sorted(hits)
+
+
 def write_data(site, out, quick=False):
     """The data files the pages read in the browser (and the alert emails read). quick=True
     (tools/dev_render.py) skips the per-stock Theory tester and weekly history files."""
@@ -293,6 +310,10 @@ def main():
     if missing:
         print(f"{len(missing)} page(s) without the disclaimer:", *missing[:50], sep="\n  ")
         sys.exit("refusing to publish pages without the disclaimer")
+    named = files_naming_banned(out)
+    if named:
+        print(f"{len(named)} file(s) name a company the site never mentions:", *[f"{f}: {w}" for f, w in named[:50]], sep="\n  ")
+        sys.exit("refusing to publish pages that name an excluded company")
     if not os.environ.get("QSTRAT_SPILL"):
         shutil.rmtree(spill, ignore_errors=True)
     print(f"wrote the site to {out} in {time.time() - t0:.0f}s")

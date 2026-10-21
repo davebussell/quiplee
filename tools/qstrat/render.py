@@ -610,7 +610,7 @@ class Site:
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head"><div class="wrap head-row">
 <a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
-<nav class="site-nav" id="site-nav" aria-label="Main">{nav}<a class="nav-me" href="{h('me/')}">My Puck</a></nav>
+<nav class="site-nav" id="site-nav" aria-label="Main">{nav}<a class="nav-me" href="{h('me/')}">Login</a></nav>
 <span class="head-meta" data-mkt data-asof="{self.asof.strftime('%Y-%m-%d')}"><i aria-hidden="true"></i><span data-mkt-txt>{dshort(self.asof)} close</span></span>
 <a class="acct-btn" href="{h('me/')}" data-acct-btn><span class="acct-ava" aria-hidden="true"></span><span data-acct-label>Sign in</span></a>
 <button type="button" class="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Menu"><span></span><span></span><span></span></button>
@@ -623,7 +623,7 @@ class Site:
 <div class="foot-brand"><a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
 <p>{len(TIMED)} published trading plays run on real prices after every U.S. close, with the price that would change each one's mind. It takes no positions in the names it covers.</p></div>
 <div><p class="foot-h">Stocks</p><a href="{h('stocks/')}">All stocks</a><a href="{h('watchlist/')}">Watchlist</a><a href="{h('markets/')}">Markets</a><a href="{h('desk/')}">Live desk</a></div>
-<div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}">My Puck</a></div>
+<div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}" data-nav-me>Login</a></div>
 <div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('guides/your-plays/')}">Pick your plays</a><a href="{h('guides/news-that-moves-stocks/')}">News that moves stocks</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
 <div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
 </div>

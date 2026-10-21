@@ -144,6 +144,9 @@ def main():
     B.write_pages({k: v for k, v in site.pages.items() if v is not None}, OUT)
     B.write_404(site, OUT)
     B.write_data(site, OUT, quick=True)
+    named = B.files_naming_banned(OUT)
+    if named:
+        print(f"{len(named)} file(s) name a company the site never mentions:", *[f"{f}: {w}" for f, w in named[:20]], sep="\n  ")
     missing = B.pages_without_disclaimer(OUT)
     if missing:
         print("pages without the disclaimer:", *missing, sep="\n  ")

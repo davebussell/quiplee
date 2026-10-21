@@ -630,7 +630,7 @@
       var on = has(); b.classList.toggle('is-on', on);
       var short = !!(b.closest && b.closest('.act-bar'));
       b.textContent = acct || short ? (on ? '✓ ' + (acct ? 'Following' : 'Watching') : '+ ' + (acct ? 'Follow' : 'Watch')) : (on ? '✓ On your watchlist' : '+ Add to my watchlist');
-      link.textContent = acct ? 'Open My Puck' : 'Open my watchlist';
+      link.textContent = acct ? 'Open your account' : 'Open my watchlist';
       link.hidden = !on;
     }
     b.addEventListener('click', function () {

@@ -1,7 +1,7 @@
 /* plays.js: the play filter every dashboard shares (window.BPPlays).
  *
  * A reader picks which of the plays count. The home screener, the stock list (Plays in,
- * Score, the family board), each stock page, the watchlist and My Puck then count only
+ * Score, the family board), each stock page, the watchlist and the account page then count only
  * those. The choice is {p: "all"|"top1"|"top3"|"half"|"custom", s: [slugs for custom]}:
  *   - kept in this browser (localStorage) and, when signed in, on the account (/api/account/plays)
  *   - ?plays=top1|top3|half|all, or slugs joined by ".", applies a shared view for one visit

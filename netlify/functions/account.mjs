@@ -1,4 +1,4 @@
-/* account.mjs: one Be The Puck account for My Puck, alerts and member tools.
+/* account.mjs: one Be The Puck account for the account page (/me/), alerts and member tools.
  *
  *   GET  /api/account/me                       -> {signed_in, name, email, email_ok, follow, alerts, rules, member, ...}
  *   POST /api/account/signup  {email, password, name?}   -> signs in; emails a confirm link
@@ -53,7 +53,7 @@ function cleanTickers(list, R) {
   return out.slice(0, MAX_FOLLOW);
 }
 
-/** What the page needs to draw My Puck (never the password hash). */
+/** What the account page needs (never the password hash). */
 function view(acct) {
   return {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,

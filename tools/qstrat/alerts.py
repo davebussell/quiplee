@@ -58,7 +58,7 @@ def alerts_page(site):
 
 <div id="al-app" class="al-app" data-api="/api/alerts/" data-universe="{e(uni)}" data-stock="{e(h('stocks/{s}/'))}">
 <section class="card al-card" data-al-signup>
-<p class="al-acct" data-signed-in hidden>You're signed in: manage the stocks you follow and your emails in <a href="{h('me/')}#alerts">My Puck</a>.</p>
+<p class="al-acct" data-signed-in hidden>You're signed in: manage the stocks you follow and your emails in <a href="{h('me/')}#alerts">your account</a>.</p>
 <h2 class="h3">Your stocks</h2>
 <form class="pt-form" data-al-form novalidate>
 <label>Stocks to follow<textarea name="tickers" rows="3" placeholder="NVDA, TD.TO, Shopify, BTC…" spellcheck="false"></textarea></label>

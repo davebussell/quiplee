@@ -34,6 +34,8 @@ FORWARDS = {
 MISSING = "/no-such-page/smoke-test/"      # two folders deep, so a page that only works at the root fails
 # every page carries the disclaimer (render.DISCLAIMER; Dave's rule)
 DISCLAIMER_KEY = "This analysis does not constitute trading advice."
+# companies the site never names, in any form (Dave's rule; content.BANNED): tickers whole-word, names anywhere
+BANNED_RE = r"\b(?:MGRC|WSC|TRNS|McGrath|WillScot|Transcat)\b"
 WIDTHS = (390, 1280)
 MAX_AGE_DAYS = 4
 STOCK_CHECK = """() => { const b = document.querySelector('[data-sig-badge]'); return b ? b.textContent.trim() : 'no-signal-card'; }"""
@@ -100,13 +102,16 @@ async def run(base, local):
                             errs.append(f"page status {resp.status if resp else 'none'}")
                         await pg.wait_for_timeout(1500)
                     got = await pg.evaluate("() => ({sw: document.documentElement.scrollWidth, h1: !!document.querySelector('h1, .h1'), "
-                                            "disc: document.body.innerText.includes(" + json.dumps(DISCLAIMER_KEY) + ")})")
+                                            "disc: document.body.innerText.includes(" + json.dumps(DISCLAIMER_KEY) + "), "
+                                            "named: (document.documentElement.outerHTML.match(new RegExp(" + json.dumps(BANNED_RE) + ", 'i')) || [''])[0]})")
                     if got["sw"] > w + 1:
                         errs.append(f"sideways scroll: {got['sw']}px wide at {w}px")
                     if not got["h1"]:
                         errs.append("no headline")
                     if not got["disc"]:
                         errs.append("no disclaimer")
+                    if got["named"]:
+                        errs.append(f"names an excluded company: {got['named']!r}")
                     if path.startswith("/stocks/") and path.count("/") == 3:
                         badge = await pg.evaluate(STOCK_CHECK)
                         for _ in range(10):            # the signal redraws once data/playset.json has loaded

@@ -1,7 +1,7 @@
 """Choose the plays that count.
 
 Every count on Be The Puck (how many plays hold a stock, the home screener, the stock
-list and its score, each stock page, the watchlist and My Puck) can use only the plays
+list and its score, each stock page, the watchlist and the account page) can use only the plays
 a reader picks. assets/plays.js keeps the choice (this browser, or the account when
 signed in) and draws the chooser; it reads data/playset.json, written here:
 
@@ -177,7 +177,7 @@ def guide_page(site):
 <li class="card"><span class="step-n">3</span><b>Check one stock</b><span class="small muted">Each stock page's Plays in tile, its most accurate plays and the full list follow your choice, with how often each play was right on that stock.</span>
 <a class="btn sm" href="{h('stocks/' + ex['slug'] + '/')}#top-plays">See {e(ex['short'])}</a></li>
 </ol>
-<p class="small muted">The <a href="{h('stocks/')}">stock list</a> (Plays in, Score and the sorts), the <a href="{h('watchlist/')}">watchlist</a> and <a href="{h('me/')}">My Puck</a> follow your choice too. To share a view, add <code>?plays=top1</code> (or <code>top3</code>, <code>half</code>, <code>all</code>) to any link.</p>
+<p class="small muted">The <a href="{h('stocks/')}">stock list</a> (Plays in, Score and the sorts), the <a href="{h('watchlist/')}">watchlist</a> and <a href="{h('me/')}">your account page</a> follow your choice too. To share a view, add <code>?plays=top1</code> (or <code>top3</code>, <code>half</code>, <code>all</code>) to any link.</p>
 </section>
 
 <section class="split">
