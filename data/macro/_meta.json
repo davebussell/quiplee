@@ -1,4 +1,9 @@
 {
- "fetched_at": "2026-10-21T00:11:14Z",
- "failed": []
+ "fetched_at": "2026-10-21T15:19:35Z",
+ "failed": [
+  "fred:UNRATE",
+  "fred:BAA10Y",
+  "fred:T10Y3M",
+  "fred:USREC"
+ ]
 }
