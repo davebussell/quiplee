@@ -51,9 +51,16 @@ for that isn't there, and move an issue to Done only once the change is live.
   edge since 2006 and by era, Sells that fell 30%+, flips a year), add it to `modelcompare.MODELS`,
   and rerun it after the change so `/articles/old-vs-new-signal/` stays current.
 - **The signal grades itself in public.** `/articles/calls-graded/` rebuilds every day's standard
-  calls since Oct 13, 2026 and scores them weekly; a change to the standard weights or `MODEL`
-  must update `scorecard.SINCE` (or the record spans two models). Never store calls to grade
-  later; rebuild them point-in-time, as every other test on the site does.
+  calls since Oct 13, 2026 (`callpath.daily_path`) and scores them weekly, each day by the rules in
+  force that day (`factors.MODEL3_SINCE`); a change to the standard weights or `MODEL` must be
+  dated the same way (or `scorecard.SINCE` moved). Never store calls to grade later; rebuild them
+  point-in-time, as every other test on the site does.
+- **Model version 3 (Oct 21, 2026, AUD-34): the market guard and sticky calls** sit on top of the
+  weights (`factors.GUARD`, `PRICE_KEYS`, `MID`; the state from `callpath.py`). The guard applies to
+  every set of weights; the sticky rule only to the standard setup, because only it has a day-by-day
+  path. Any page, email or tool that scores a stock must apply both the same way as `factors.score`
+  (browser `BPPlays.score`, server `signal.mjs signalFor`), and say when a call is held or the guard
+  is on.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.

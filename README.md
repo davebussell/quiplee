@@ -102,7 +102,18 @@ only factors with a tested record (`factorgrade.py`: +6.0 points of 12-month edg
 the old plays 50 / analysts' upside 50). **Off the high** is the exit rule: 100 points at the 1-year
 high, none at 30% or more below. Analysts' upside is capped at 50 points while the price is under
 its 200-day average, so a falling stock can't score better because its target now looks further
-away. `factors.MODEL` is bumped whenever the standard weights or a factor's scoring change: saved
+away. **Model version 3** (October 21, 2026, `MODEL = 3`) adds two rules on top of the weights, both
+graded since 2006 by `modelcompare.py` first: the **market guard** (`GUARD`): while a stock's bench
+index is 15% or more below its own 1-year high, the price factors (`PRICE_KEYS`: off the high,
+trend, 1-year momentum) carry no weight and the rest of the weights decide, for every set of
+weights; and **sticky calls** (`MID`): on the standard setup only (standard weights and lines, every
+play counted), a Buy holds until the score drops below 50 and a Sell until it rises above 50. The
+state comes from `callpath.py`, the standard signal's day-by-day path rebuilt point-in-time each
+build from 2025-01-01 (nothing is stored); `playset.json` carries the guard (`gd`, `gb`), the sticky
+call with the score it goes with (`st`) and the keys, and plays.js / signal.mjs apply them only when
+their own score is the same number. The stock page says when either rule is deciding ("Held at
+Buy…", "Market guard on…", price factors marked "stands down"), the flip lines use the sticky
+thresholds, and the alert emails say "held at Buy" (reads.json `hd`, `gd`). `factors.MODEL` is bumped whenever the standard weights or a factor's scoring change: saved
 weights that were just the old standard move to the new one (plays.js, signal.mjs), and the alert
 emails re-baseline quietly instead of mailing every flip the change caused. Saved like the plays;
 `?w=plays50.pe20&buy=60&sell=40`. The watchlist and My Puck note which signals changed since the

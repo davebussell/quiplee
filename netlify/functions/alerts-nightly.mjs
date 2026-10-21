@@ -109,10 +109,10 @@ async function accounts(R, fresh) {
       for (const sym of acct.follow) {
         const t = R.t[sym];
         if (!t) continue;
-        const g = PS.x[sym] ? signalFor(PS, sym, acct.plays, acct.signal, sel) : { s: t.sc, sig: t.S };
+        const g = PS.x[sym] ? signalFor(PS, sym, acct.plays, acct.signal, sel) : { s: t.sc, sig: t.S, hd: !!t.hd, gd: !!t.gd };
         if (g.sig == null) continue;
         const last = snap.mv === (R.mv || 1) && snap.S && snap.S[sym];   // a new model re-baselines quietly
-        if (last && last[0] !== g.sig) flips.push({ sym, t: { ...t, S: g.sig, sc: g.s }, was: last, W });
+        if (last && last[0] !== g.sig) flips.push({ sym, t: { ...t, S: g.sig, sc: g.s, hd: g.hd ? 1 : 0, gd: g.gd ? 1 : 0 }, was: last, W });
         S[sym] = [g.sig, g.s];
       }
       let plays = [], psnap = snap.p || null;

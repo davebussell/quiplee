@@ -55,7 +55,17 @@ KEYS = [k for k, _, _, _ in FACTORS]
 
 OFFHIGH_FLOOR = 0.30      # this far below the 1-year high scores 0 on Off the high
 UPSIDE_CAP = 50           # analysts' upside points while the price is below its 200-day average
-MODEL = 2                 # bumped when the standard weights or a factor's scoring change (alerts re-baseline quietly)
+MODEL = 3                 # bumped when the standard weights or a factor's scoring change (alerts re-baseline quietly)
+# Model 3 (October 21, 2026; AUD-34), two rules on top of the weights, both graded since 2006 (modelcompare.py):
+# the market guard: while a stock's market (its bench index) is GUARD or more below its own 1-year high,
+#   the price factors (PRICE_KEYS) stand down and the rest of the weights decide (+4.7 pts edge vs +3.9);
+# sticky calls: on the standard weights with every play counted, a Buy holds until the score drops below
+#   MID and a Sell until it rises above MID (38% fewer flips). The state comes from the day-by-day path
+#   (callpath.py), rebuilt point-in-time each build; other weights use the plain lines.
+MODEL3_SINCE = "2026-10-21"
+GUARD = 0.15
+PRICE_KEYS = ("offhigh", "trend", "mom")
+MID = 50
 # The standard weights (October 13, 2026): only factors with a track record (factorgrade.py), and
 # 60% of them the price's own exit rules. Before that they were plays 50 / analysts' upside 50,
 # half of it on targets that can't be tested and that look better the further a stock falls.
@@ -265,24 +275,73 @@ def compute(site):
     return out
 
 
+def state(site):
+    """{sym: {"call", "plain", "score", "guard", "bdd"}} at the latest close, from the day-by-day path (callpath.py):
+    the market guard and the sticky call on the standard weights."""
+    got = site.__dict__.get("_sig_state")
+    if got is None:
+        try:
+            from .callpath import today
+            got = today(site)
+        except Exception as ex:              # the path must never stop a build
+            print("signal state skipped:", ex)
+            got = {}
+        site.__dict__["_sig_state"] = got
+    return got
+
+
+def guard_on(site, sym):
+    st = state(site).get(sym)
+    return bool(st and st.get("guard"))
+
+
+def guard_words(site, t):
+    """"Market guard on: the S&P 500 is 17% below its 1-year high, so Off the high and Trend stand down." or ""."""
+    st = state(site).get(t["sym"])
+    if not st or not st.get("guard"):
+        return ""
+    name = {"^GSPC": "the S&P 500", "^GSPTSE": "the TSX"}.get(t.get("bench"), "its market")
+    pk = [n for k, n, _, _ in FACTORS if k in PRICE_KEYS]
+    return (f"Market guard on: {name} is {abs(st['bdd']) * 100:.0f}% below its 1-year high, so {', '.join(pk[:-1])} and {pk[-1]} stand down "
+            f"and the rest of your weights decide.")
+
+
+def sticky_step(prev, s, buy=BUY, sell=SELL, mid=MID):
+    """The sticky call: the plain call on s, unless the previous call was a Buy still at or above MID or a Sell still at or below it."""
+    c = 1 if s >= buy else -1 if s <= sell else 0
+    if prev == 1 and c != 1 and s >= mid:
+        return 1
+    if prev == -1 and c != -1 and s <= mid:
+        return -1
+    return c
+
+
 def score(site, t, weights=None, plays_share=None):
-    """(score 0-100 or None, signal 1 Buy / 0 Hold / -1 Sell / None, parts) for one stock and one set of weights."""
+    """(score 0-100 or None, signal 1 Buy / 0 Hold / -1 Sell / None, parts) for one stock and one set of weights.
+    With the market guard on for the stock, the price factors carry no weight (parts mark them "stood").
+    With the standard weights and every play counted (weights and plays_share both None), the call is the
+    sticky one from the day-by-day path; otherwise the plain Buy and Sell lines."""
+    standard = weights is None and plays_share is None
     w = weights or DEFAULT
     pts = compute(site).get(t["sym"], {})
     if plays_share is None:
         k, n = site.consensus(t)
         plays_share = k / n if n else None
+    guard = guard_on(site, t["sym"])
     tot = avail = acc = 0.0
     parts = []
     for key, name, _, _ in FACTORS:
         wi = w.get(key, 0)
         if not wi:
             continue
-        tot += wi
         if key == "plays":
             p, v = (None, None) if plays_share is None else (_rnd(100 * plays_share), f"{_rnd(100 * plays_share)}%")
         else:
             p, v = pts.get(key, (None, None))
+        if guard and key in PRICE_KEYS:
+            parts.append({"k": key, "n": name, "w": wi, "p": p, "v": v, "stood": True, "add": None})
+            continue
+        tot += wi
         parts.append({"k": key, "n": name, "w": wi, "p": p, "v": v})
         if p is not None:
             avail += wi
@@ -291,8 +350,27 @@ def score(site, t, weights=None, plays_share=None):
         return None, None, parts
     s = _rnd(acc / avail)
     for x in parts:
-        x["add"] = None if x["p"] is None else round(x["w"] * x["p"] / avail, 1)
-    return s, (1 if s >= BUY else -1 if s <= SELL else 0), parts
+        if not x.get("stood"):
+            x["add"] = None if x["p"] is None else round(x["w"] * x["p"] / avail, 1)
+    sig = 1 if s >= BUY else -1 if s <= SELL else 0
+    if standard:
+        st = state(site).get(t["sym"])
+        if st and st.get("call") is not None and st.get("score") == s:
+            sig = st["call"]
+    return s, sig, parts
+
+
+def held(site, t, s, sig):
+    """True when the standard call is held by the sticky rule (it differs from the plain call on the score)."""
+    return s is not None and sig is not None and sig != (1 if s >= BUY else -1 if s <= SELL else 0)
+
+
+def held_words(s, sig, buy=BUY, sell=SELL, mid=MID):
+    if sig == 1:
+        return f"Held at Buy: {s} is under your Buy line of {buy}, and a Buy holds until the score drops below {mid}."
+    if sig == -1:
+        return f"Held at Sell: {s} is over your Sell line of {sell}, and a Sell holds until the score rises above {mid}."
+    return ""
 
 
 def factors_json(site):
@@ -324,7 +402,13 @@ def factors_json(site):
     return {"fx": [{"k": k, "n": n, "g": g_, "d": d, "r": rec(gf.get(k))} for k, n, g_, d in FACTORS], "fg": [list(x) for x in GROUPS],
             "wp": [{"k": k, "n": n, "w": w, "r": rec(gp.get(k))} for k, n, w in PRESETS], "wd": {"w": DEFAULT, "buy": BUY, "sell": SELL},
             "wo": OLD_DEFAULT, "mv": MODEL, "gs": g.get("since", "")[:4], "x": x, "v": v,
-            "pi": price_inputs(site)["pi"], "rk": price_inputs(site)["rk"], "uc": UPSIDE_CAP}
+            "pi": price_inputs(site)["pi"], "rk": price_inputs(site)["rk"], "uc": UPSIDE_CAP,
+            "gd": {k: 1 for k, st in state(site).items() if st.get("guard")},
+            "gb": {k: round(st["bdd"], 4) for k, st in state(site).items() if st.get("guard") and st.get("bdd") is not None},
+            # the sticky call on the standard setup and the score it goes with: the browser and the alert emails
+            # apply it only when their own standard score is the same number (data in flight never disagrees)
+            "st": {k: [st["call"], st["score"]] for k, st in state(site).items() if st.get("call") is not None and st.get("score") is not None},
+            "pk": list(PRICE_KEYS), "mid": MID, "ms": MODEL3_SINCE, "gt": GUARD}
 
 
 SIG_WORD = {1: "Buy", 0: "Hold", -1: "Sell", None: "No score"}
@@ -382,6 +466,7 @@ def points_at(pin, rk, price):
 def flip_lines(site, t, weights=None, plays_share=None, buy=BUY, sell=SELL):
     """The closes at which the signal would change, holding the plays and the company numbers where they are:
     {"now": sig, "down": (price, sig) or None, "up": (price, sig) or None}. Scans 40% below to 80% above."""
+    standard = weights is None and plays_share is None       # the standard setup: the sticky state applies
     w = weights or DEFAULT
     sym = t["sym"]
     P = price_inputs(site)
@@ -394,12 +479,16 @@ def flip_lines(site, t, weights=None, plays_share=None, buy=BUY, sell=SELL):
         plays_share = k / n if n else None
     fixed = {key: pts.get(key, (None, None))[0] for key in KEYS}
     fixed["plays"] = None if plays_share is None else _rnd(100 * plays_share)
+    guard = guard_on(site, sym)
+    # the call as the page shows it (score(): the path's sticky call when the path scored today's number, else the
+    # plain one) is the state the sticky rule steps from; other setups use the plain lines
+    prev = score(site, t)[1] if standard else None
 
     def sig_at(price):
         var = points_at(pin, P["rk"], price)
         tot = avail = acc = 0.0
         for key, wi in w.items():
-            if not wi:
+            if not wi or (guard and key in PRICE_KEYS):
                 continue
             tot += wi
             p = var[key] if key in var else fixed.get(key)
@@ -409,26 +498,33 @@ def flip_lines(site, t, weights=None, plays_share=None, buy=BUY, sell=SELL):
         if not tot or avail < tot / 2:
             return None
         sc = _rnd(acc / avail)
-        return 1 if sc >= buy else -1 if sc <= sell else 0
+        return sticky_step(prev, sc, buy, sell) if prev is not None else (1 if sc >= buy else -1 if sc <= sell else 0)
     p0 = pin["p"]
     now = sig_at(p0)
     if now is None:
         return None
-    out = {"now": now, "down": None, "up": None}
+    out = {"now": now, "down": None, "up": None, "guard": guard}
+    if guard:
+        return out                      # nothing price-dependent counts while the guard is on
     step = 0.005
     for i in range(1, int(0.40 / step) + 1):
         px = p0 * (1 - i * step)
         sg = sig_at(px)
         if sg is not None and sg != now:
-            out["down"] = (round(px, 2), sg)
+            out["down"] = (_cents(px), sg)
             break
     for i in range(1, int(0.80 / step) + 1):
         px = p0 * (1 + i * step)
         sg = sig_at(px)
         if sg is not None and sg != now:
-            out["up"] = (round(px, 2), sg)
+            out["up"] = (_cents(px), sg)
             break
     return out
+
+
+def _cents(px):
+    """To the cent, half up, as the browser's Math.round(px * 100) / 100."""
+    return math.floor(px * 100 + 0.5) / 100
 
 
 def flip_words(fl, cur, p0):
@@ -440,8 +536,10 @@ def flip_words(fl, cur, p0):
         x = fl.get(side)
         if x:
             pct = x[0] / p0 - 1
-            bits.append(f"turns {SIG_WORD[x[1]]} {word} {cur}{x[0]:,.2f} ({'+' if pct > 0 else '−'}{abs(pct) * 100:.0f}%)")
+            bits.append(f"turns {SIG_WORD[x[1]]} {word} {cur}{x[0]:,.2f} ({'+' if pct > 0 else '−'}{_rnd(abs(pct) * 100)}%)")
     if not bits:
+        if fl.get("guard"):
+            return "Stays " + SIG_WORD[fl["now"]] + " at any price while the market guard is on: the price factors don't count."
         return "Stays " + SIG_WORD[fl["now"]] + " anywhere from 40% below to 80% above the latest close."
     out = " · ".join(bits)
     return out[0].upper() + out[1:]
@@ -449,13 +547,17 @@ def flip_words(fl, cur, p0):
 
 def why(short, s, sig, parts, buy=BUY, sell=SELL):
     """One or two plain sentences on why the score lands where it does (assets/playview.js says the same)."""
-    have = [x for x in parts if x["p"] is not None]
+    have = [x for x in parts if x["p"] is not None and not x.get("stood")]
     if s is None:
-        miss = [x["n"] for x in parts if x["p"] is None]
+        miss = [x["n"] for x in parts if x["p"] is None and not x.get("stood")]
         return f"Not enough data for these weights: {short} has no {', '.join(miss[:4])}." if miss else "Weight at least one factor to get a score."
-    where = (f"at or above your Buy line of {buy}" if sig == 1 else f"at or below your Sell line of {sell}" if sig == -1
-             else f"between your Sell line ({sell}) and Buy line ({buy})")
-    out = f"{SIG_WORD[sig]}: {s} is {where}."
+    plain = 1 if s >= buy else -1 if s <= sell else 0
+    if sig is not None and sig != plain:
+        out = held_words(s, sig, buy, sell)
+    else:
+        where = (f"at or above your Buy line of {buy}" if sig == 1 else f"at or below your Sell line of {sell}" if sig == -1
+                 else f"between your Sell line ({sell}) and Buy line ({buy})")
+        out = f"{SIG_WORD[sig]}: {s} is {where}."
     if len(have) == 1:
         x = have[0]
         return out + f" {x['n']} ({x['v']}) scores {x['p']}."
@@ -470,8 +572,10 @@ def signal_card(site, t, h):
     s, sig, parts = score(site, t)
     pts = compute(site).get(t["sym"], {})
     k, n = site.consensus(t)
-    rows = "".join(f'<tr><td>{e(x["n"])}</td><td>{e(x["v"] or "–")}</td><td class="r">{"–" if x["p"] is None else x["p"]}</td>'
+    rows = "".join(f'<tr{" class=sig-stood" if x.get("stood") else ""}><td>{e(x["n"])}{" <small class=muted>stands down</small>" if x.get("stood") else ""}</td><td>{e(x["v"] or "–")}</td><td class="r">{"–" if x["p"] is None else x["p"]}</td>'
                    f'<td class="r">{x["w"]}</td><td class="r">{"–" if x.get("add") is None else x["add"]}</td></tr>' for x in parts)
+    gw = guard_words(site, t)
+    state_line = f'<p class="small sig-state" data-sig-state{"" if gw else " hidden"}>{e(gw)}</p>'
     allrows = ""
     for key, name, _, desc in FACTORS:
         p, v = ((_rnd(100 * k / n) if n else None), (f"{_rnd(100 * k / n)}%" if n else None)) if key == "plays" else pts.get(key, (None, None))
@@ -486,6 +590,7 @@ def signal_card(site, t, h):
 <div class="sig-row"><span class="sig-badge {SIG_CLS[sig]}" data-sig-badge>{SIG_WORD[sig]}</span><span class="sig-score"><b data-sig-score>{"–" if s is None else s}</b><small> / 100</small></span></div></div>
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
+{state_line}
 <p class="small sig-tested" data-sig-tested>{e(tested_line(site, parts))}</p>
 <p class="small sig-flip"><span data-sig-flip>{e(flip_words(flip_lines(site, t), t.get("cur", "$"), float(site.R[(t["sym"], "buy-and-hold")]["price"])))}</span> <span class="muted">With the plays and company numbers where they are; each play's own exit price is under Next move.</span></p>
 <div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
@@ -508,7 +613,7 @@ def tested_line(site, parts):
     """How much of a score rests on factors with a track record (factorgrade.py); assets/playview.js says the same."""
     from .factorgrade import cached, GRADED
     since = (cached(site).get("since") or "2011")[:4]
-    have = [x for x in parts if x["p"] is not None]
+    have = [x for x in parts if x["p"] is not None and not x.get("stood")]
     a = sum(x["w"] for x in have)
     if not a:
         return ""

@@ -79,7 +79,7 @@ export function nightlyMsg(u, acct, flips, plays, R, member) {
     return `<div style="border:1px solid #e3e6ee;border-radius:12px;padding:16px 18px;margin:0 0 12px">` +
       `<p style="margin:0 0 4px;font-size:13px;color:#6b7385">${esc(t.s)} · ${esc(t.cur)}${t.p != null ? Number(t.p).toLocaleString("en-US", { maximumFractionDigits: 2 }) : ""}</p>` +
       `<p style="margin:0 0 10px;font-size:18px;font-weight:700">${esc(t.n)} <span style="display:inline-block;margin-left:6px;padding:3px 10px;border-radius:999px;font-size:12px;letter-spacing:.06em;color:${color};background:${bg}">${word(t.S)}</span>${esc(was)}</p>` +
-      `<p style="margin:0 0 8px">${esc(sigLine(t.S, t.sc, t.k, t.of, f.W ? f.W.buy : 60, f.W ? f.W.sell : 40))}</p>` +
+      `<p style="margin:0 0 8px">${esc(sigLine(t.S, t.sc, t.k, t.of, f.W ? f.W.buy : 60, f.W ? f.W.sell : 40, !!t.hd, !!t.gd))}</p>` +
       (read ? `<ul style="margin:0 0 8px;padding-left:20px;color:#3b4252">${read}</ul>` : "") +
       `<p style="margin:0"><a href="${esc(base + "/stocks/" + t.u + "/")}" style="color:#5b4bd8">Full analysis for ${esc(t.s)}</a></p></div>`;
   }).join("");
@@ -95,7 +95,7 @@ export function nightlyMsg(u, acct, flips, plays, R, member) {
     mail.button(base + "/me/", "Open My Puck");
   const html = mail.shell(subject, body, footer(u, member), flips.length ? "Your signal changed on your stocks." : "Plays moved on your stocks tonight.");
   const text = [
-    ...flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S)}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of, f.W ? f.W.buy : 60, f.W ? f.W.sell : 40)} ${base}/stocks/${f.t.u}/`),
+    ...flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S)}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of, f.W ? f.W.buy : 60, f.W ? f.W.sell : 40, !!f.t.hd, !!f.t.gd)} ${base}/stocks/${f.t.u}/`),
     ...plays.map((c) => `${c.short}: ${c.items.map((i) => i.text).join("; ")}`),
   ].join("\n\n") + `\n\nMy Puck: ${base}/me/\n\n${DISCLAIMER}\nStop these emails: ${stopUrl(u)}`;
   return { to: acct.email, subject, html, text, headers: listUnsub(u) };

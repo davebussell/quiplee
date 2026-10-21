@@ -180,7 +180,7 @@ def panel(site):
 
 MODELS = {
     # key: (label, {points column: weight}, needs analyst history)
-    "new": ("Now: plays 40, off the high 30, trend 30", {"p_plays": 40, "p_offhigh": 30, "p_trend": 30}, False),
+    "new": ("The October 13 weights: plays 40, off the high 30, trend 30", {"p_plays": 40, "p_offhigh": 30, "p_trend": 30}, False),
     "plays": ("Plays only", {"p_plays": 100}, False),
     "old": ("Before: plays 50, analysts' upside 50", {"p_plays": 50, "p_up": 50}, True),
     "oldcap": ("Before, with the upside cap", {"p_plays": 50, "p_upcap": 50}, True),
@@ -301,7 +301,7 @@ def study(site):
                                                  "relsticky": "Exit rule against the market, and sticky calls",
                                                  "guard10": "Plays alone while the market is 10% or more below its high",
                                                  "guard20": "Plays alone while the market is 20% or more below its high",
-                                                 "guardsticky": "Market guard and sticky calls together",
+                                                 "guardsticky": "Today's standard (from October 21, 2026): market guard and sticky calls",
                                                  "guardup": "Market guard plus capped analysts' upside at 15%"}
     fall = df.dd <= -0.20
     for k, g in G.items():

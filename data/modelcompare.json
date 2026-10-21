@@ -8,7 +8,7 @@
  "an_stocks": 190,
  "models": {
   "new": {
-   "label": "Now: plays 40, off the high 30, trend 30",
+   "label": "The October 13 weights: plays 40, off the high 30, trend 30",
    "an_only": false,
    "all": {
     "n": 70605,
@@ -6363,7 +6363,7 @@
    "an_flips": 4.18
   },
   "guardsticky": {
-   "label": "Market guard and sticky calls together",
+   "label": "Today's standard (from October 21, 2026): market guard and sticky calls",
    "an_only": false,
    "all": {
     "n": 70605,

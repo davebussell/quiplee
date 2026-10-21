@@ -9,7 +9,7 @@ import html
 
 from .content import TICKERS
 from .render import DISCLAIMER, dlong, sig_pill, fx_score
-from .factors import BUY, SELL, SIG_WORD, default_words
+from .factors import BUY, SELL, MID, SIG_WORD, default_words, held, guard_on
 from . import stockview as sv
 from .media import page_art, PAGE_ART
 
@@ -34,11 +34,17 @@ def _example(site, depth):
     read = sv.read_lines(site, t, meta, site.fund.get(t["sym"])) if meta else []
     where = (f"at or above the Buy line of {BUY}" if sg == 1 else f"at or below the Sell line of {SELL}" if sg == -1
              else f"between the Sell line ({SELL}) and the Buy line ({BUY})")
+    line = f"The score is {sc}, {where}."
+    if held(site, t, sc, sg):           # the sticky rule holds the call (netlify/lib/freealerts.mjs sigLine says the same)
+        line = (f"Held at Buy: the score is {sc}, under the Buy line of {BUY}, and a Buy holds until it drops below {MID}." if sg == 1
+                else f"Held at Sell: the score is {sc}, over the Sell line of {SELL}, and a Sell holds until it rises above {MID}.")
+    if guard_on(site, t["sym"]):
+        line += " The market guard is on: its market is 15% or more below its 1-year high, so the price factors stand down."
     lis = "".join(f"<li>{e(x)}</li>" for x in read)
     return f"""<section class="card al-example" aria-label="Example alert"><p class="eyebrow">Example: an alert with the {dlong(site.asof)} numbers</p>
 <p class="al-subj"><b>Subject:</b> {e(t['name'])} ({e(t['short'])}): the signal turned {SIG_WORD[sg].upper()}</p>
 <div class="al-mail"><p class="al-head">{e(t['name'])} {sig_pill(sg)}</p>
-<p>{k} of {n} plays hold it. The score is {sc}, {where}.</p><ul>{lis}</ul>
+<p>{k} of {n} plays hold it. {e(line)}</p><ul>{lis}</ul>
 <p><a href="{h('stocks/' + t['slug'] + '/')}">See the full analysis for {e(t['short'])}</a></p>
 <p class="small muted">{e(DISCLAIMER)}</p></div></section>"""
 

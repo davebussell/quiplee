@@ -55,7 +55,7 @@ def playset_json(site):
 
 def signal_section(site, h):
     """The guide's Your signal section: what each factor measures and scores, the ready-made weightings, a worked example."""
-    from .factors import FACTORS, GROUPS, PRESETS, BUY, SELL, score, SIG_WORD, default_words
+    from .factors import FACTORS, GROUPS, PRESETS, BUY, SELL, MID, score, SIG_WORD, default_words
     gname = dict(GROUPS)
     from .factorgrade import cached
     grade = cached(site)
@@ -118,6 +118,7 @@ def signal_section(site, h):
     return f"""<section class="card prose" id="your-signal"><p class="eyebrow">Your signal</p><h2 class="h2">Build your own Buy, Hold and Sell</h2>
 <p><b>Your signal</b> is Be The Puck's one call on a stock, and it's yours to set: weight any of {len(FACTORS)} factors, from the plays and analysts to P/E, growth, debt, trend and crash exposure. Each factor scores a stock from 0 to 100, higher meaning more in favour of buying. Your score is the weighted average of the factors you weight, and your lines turn it into a signal: <b>Buy</b> at {BUY} or more, <b>Sell</b> at {SELL} or less and <b>Hold</b> in between, unless you move them.</p>
 <p>Company numbers like P/E score by rank: a P/E lower than 80% of the {n_stocks()} stocks we cover scores 80. A loss-maker scores 0 on P/E. A stock with no number for a factor (a fund has no P/E) is scored on the rest, and gets no score if less than half your weight applies. The standard weights are {e(default_words())}: only factors with a tested record, and most of the weight on the price's own exit rules, so a stock that keeps falling loses its Buy. Put every weight on the plays and you get the old plays-only reading.</p>
+<p><b>Two rules on top of the weights</b>, added October 21, 2026 after each was <a href="{h('articles/old-vs-new-signal/')}">graded month by month since 2006</a>. The <b>market guard</b>: while a stock's own market (the S&amp;P 500, or the TSX for Canadian names) is 15% or more below its 1-year high, Off the high, Trend and 1-year momentum carry no weight and the rest of your weights decide, so an exit rule doesn't sell a whole market at its bottom; the stock page says when it's on. <b>Sticky calls</b>: with the standard weights and every play counted, a Buy holds until the score drops below {MID} and a Sell until it rises above {MID}, instead of flipping back at the lines, which cuts the changes by about a third. That rule needs the score's day-by-day history, which only the standard setup has; your own weights, or your own choice of plays, use the plain lines.</p>
 {ex}
 <div class="ps-steps-row"><button type="button" class="btn sm primary" data-ps-open="weights">Set your weights</button><span class="small muted">Or start from a ready-made mix:</span></div>
 <ul class="sig-presets">{presets}</ul>

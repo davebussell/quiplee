@@ -60,11 +60,16 @@ export function confirmEmail(id, email, tickers, R) {
 const fmtDate = (iso) => (iso ? new Date(iso + "T12:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }) : "");
 
 /** One line on why a signal reads what it does. */
-export function sigLine(S, sc, k, of, buy = 60, sell = 40) {
+export function sigLine(S, sc, k, of, buy = 60, sell = 40, held = false, guard = false) {
   const plays = of ? `${k} of ${of} plays hold it. ` : "";
   if (sc == null) return plays;
+  const mid = (buy + sell) / 2;
+  const g = guard ? " The market guard is on: its market is 15% or more below its 1-year high, so the price factors stand down." : "";
+  // a call held by the sticky rule: the score has crossed the Buy or Sell line but not the middle line
+  if (held && S === 1) return `${plays}Held at Buy: the score is ${sc}, under the Buy line of ${buy}, and a Buy holds until it drops below ${mid}.${g}`;
+  if (held && S === -1) return `${plays}Held at Sell: the score is ${sc}, over the Sell line of ${sell}, and a Sell holds until it rises above ${mid}.${g}`;
   const where = S === 1 ? `at or above the Buy line of ${buy}` : S === -1 ? `at or below the Sell line of ${sell}` : `between the Sell line (${sell}) and the Buy line (${buy})`;
-  return `${plays}The score is ${sc}, ${where}.`;
+  return `${plays}The score is ${sc}, ${where}.${g}`;
 }
 
 /** One email listing every flip on a subscriber's stocks. flips: [{sym, t (reads.json entry), was: [S,k,of]}] */
@@ -81,14 +86,14 @@ export function flipEmail(id, email, flips, R) {
     return `<div style="border:1px solid #e3e6ee;border-radius:12px;padding:16px 18px;margin:0 0 14px">` +
       `<p style="margin:0 0 6px;font-size:13px;color:#6b7385">${esc(t.s)} · ${esc(t.cur)}${t.p != null ? Number(t.p).toLocaleString("en-US", { maximumFractionDigits: 2 }) : ""} at the ${esc(fmtDate(R.asof))} close</p>` +
       `<p style="margin:0 0 10px;font-size:18px;font-weight:700">${esc(t.n)}: <span style="color:${SIG_COLOR[t.S] || "#6b7385"}">${esc(word(t.S).toUpperCase())}</span>${esc(was)}</p>` +
-      `<p style="margin:0 0 10px">${esc(sigLine(t.S, t.sc, t.k, t.of))}</p>` +
+      `<p style="margin:0 0 10px">${esc(sigLine(t.S, t.sc, t.k, t.of, 60, 40, !!t.hd, !!t.gd))}</p>` +
       (read ? `<ul style="margin:0 0 10px;padding-left:20px">${read}</ul>` : "") +
       `<p style="margin:0"><a href="${esc(url)}">See the full analysis for ${esc(t.s)}</a></p></div>`;
   }).join("");
   const intro = "<p>Be The Puck's signal is its one call on a stock: Buy, Hold or Sell from a score of 0 to 100. These use the standard weights (" + esc(R.wt || "40% Plays in, 30% Off the high and 30% Trend") + "); " +
     `<a href="${esc(siteUrl() + "/me/")}">a free account</a> lets you set your own and get emails on those. Here's what changed on your stocks at the latest close.</p>`;
   const html = mail.shell(subject, intro + blocks, footer(id));
-  const text = flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S).toUpperCase()}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of)} ${(f.t.read || []).join(" ")} ${siteUrl()}/stocks/${f.t.u}/`).join("\n\n") +
+  const text = flips.map((f) => `${f.t.n} (${f.t.s}): ${word(f.t.S).toUpperCase()}. ${sigLine(f.t.S, f.t.sc, f.t.k, f.t.of, 60, 40, !!f.t.hd, !!f.t.gd)} ${(f.t.read || []).join(" ")} ${siteUrl()}/stocks/${f.t.u}/`).join("\n\n") +
     `\n\n${DISCLAIMER}\nChange your stocks: ${manageUrl(id)}\nUnsubscribe: ${unsubUrl(id)}`;
   return { to: email, subject, html, text, headers: headers(id) };
 }

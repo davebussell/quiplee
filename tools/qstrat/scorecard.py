@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from .content import TICKERS
-from .factors import DEFAULT, BUY, SELL, MODEL, offhigh_points, _rnd, SIG_WORD
+from .factors import DEFAULT, BUY, SELL, MODEL, MODEL3_SINCE, SIG_WORD
 
 e = html.escape
 PATH = "articles/calls-graded/"
@@ -23,57 +23,25 @@ SINCE = pd.Timestamp("2026-10-13")       # the standard weights of October 13, 2
 WEEK = 5                                 # sessions
 
 
-def _stocks(site):
-    from .render import is_stock
-    return [t for t in TICKERS if is_stock(t) and (t["sym"], "buy-and-hold") in site.R and t["sym"] in (site.prices or {})
-            and not t.get("requested")]
-
-
 def daily_calls(site):
-    """DataFrame of (sym, d, price, score, sig) for every covered stock and session since SINCE, point-in-time."""
-    from .factorgrade import _plays_share
+    """DataFrame of (sym, d, price, score, sig) for every covered stock and session since SINCE, point-in-time,
+    with the rules in force on each day: the plain Buy and Sell lines before MODEL3_SINCE, the market guard
+    and sticky calls from then on (callpath.py)."""
+    from .callpath import daily_path
+    from .factors import MODEL3_SINCE
+    from .render import is_stock
     got = site.__dict__.get("_daily_calls")
     if got is not None:
         return got
-    spy = site.prices["SPY"]["close"]
-    dates = spy.index[spy.index >= SINCE]
-    rows = []
-    keys = [k for k in DEFAULT if k in ("plays", "offhigh", "trend", "mom")]
-    for t in _stocks(site):
-        c = site.prices[t["sym"]]["close"]
-        pos = c.index.searchsorted(dates, side="right") - 1
-        cv = c.values.astype(float)
-        hi = c.rolling(252, min_periods=120).max().values
-        ma = c.rolling(200).mean().values
-        k, n = _plays_share(site, t, dates)
-        for i, d in enumerate(dates):
-            j = pos[i]
-            if j < 252 or c.index[j] != d or cv[j] <= 0:
-                continue
-            rows.append({"sym": t["sym"], "s": t["short"], "u": t["slug"], "g": t["group"], "cur": t.get("cur", "$"), "b": t.get("bench"), "d": d, "p": cv[j],
-                         "plays": (100 * k[i] / n[i]) if n[i] >= 20 else np.nan,
-                         "offhigh": offhigh_points(cv[j] / hi[j] - 1) if hi[j] > 0 else np.nan,
-                         "gap": cv[j] / ma[j] - 1 if ma[j] > 0 else np.nan,
-                         "mom": cv[j] / cv[j - 252] - 1 if cv[j - 252] > 0 else np.nan})
-    df = pd.DataFrame(rows)
-    if not len(df):
-        site.__dict__["_daily_calls"] = df
-        return df
-    rk = lambda col: df.groupby("d")[col].transform(lambda x: (100 * (x.rank(method="average") - 1) / (len(x) - 1)).round())
-    pts = {"plays": df.plays.round(), "offhigh": df.offhigh, "trend": rk("gap"), "mom": rk("mom")}
-    num = pd.Series(0.0, index=df.index)
-    have = pd.Series(0.0, index=df.index)
-    for key in keys:
-        w = DEFAULT[key]
-        ok = pts[key].notna()
-        num += np.where(ok, pts[key] * w, 0)
-        have += np.where(ok, w, 0)
-    tot = sum(DEFAULT[k] for k in keys)
-    sc = (num / have.replace(0, np.nan)).map(lambda v: _rnd(v) if pd.notna(v) else np.nan)
-    sc[have < tot / 2] = np.nan
-    df["score"] = sc
-    df["sig"] = np.select([df.score >= BUY, df.score <= SELL], [1, -1], 0)
-    df.loc[df.score.isna(), "sig"] = np.nan
+    df = daily_path(site)                       # from the warm-up start, so the sticky state is settled by SINCE
+    if len(df):
+        df = df[df.d >= SINCE]
+        stocks = {t["sym"] for t in TICKERS if is_stock(t) and not t.get("requested")}
+        df = df[df.sym.isin(stocks)].copy()
+        m3 = df.d >= pd.Timestamp(MODEL3_SINCE)
+        df["sig"] = np.where(m3, df.call, df.call_plain)
+        df.loc[np.where(m3, df.call.isna(), df.call_plain.isna()), "sig"] = np.nan
+        df["score"] = np.where(m3, df.score, df.score_plain)
     site.__dict__["_daily_calls"] = df
     return df
 
@@ -187,6 +155,7 @@ def piece(A):
 <p><b>{verdict}</b> Over the same sessions the S&amp;P 500 (SPY) moved {_pct(spy_r)} and the TSX {_pct(tsx_r)}. "Beat their market" compares each stock with the S&amp;P 500, or the TSX for Canadian names.</p>
 <ul>{"".join(hits)}</ul>
 <h2 class="h2">Since the standard weights changed ({SINCE.strftime("%B %-d, %Y")})</h2>
+<p class="small muted">Each day is graded by the rules in force that day: the plain Buy and Sell lines until {pd.Timestamp(MODEL3_SINCE).strftime("%B %-d")}, and from then the market guard and sticky calls of model version {MODEL} (<a href="{h('articles/old-vs-new-signal/')}">why</a>).</p>
 <p>{agg}</p>
 {run_tbl}
 <p>Put another way: $1 split equally across each day's Buys, reset every close, is worth {_pct(end[1])} more or less now than on {SINCE.strftime("%b %-d")}; the same for the Holds {_pct(end[0])}, for the Sells {_pct(end[-1])}, and for the S&amp;P 500 {_pct(spy_end)}. Tonight the signal reads Buy on {int(counts.get(1, 0))} names, Hold on {int(counts.get(0, 0))} and Sell on {int(counts.get(-1, 0))}.</p>

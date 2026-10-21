@@ -73,23 +73,35 @@ export function weights(D, c) {
   return { w: W, buy, sell };
 }
 
+/** The standard setup: the standard weights and lines with every play counted (assets/plays.js isStandard).
+ *  It is the one setup with a day-by-day path behind it, so the only one whose calls the sticky rule holds. */
+export function isStandard(D, W, plays) {
+  return !!D.st && (!plays || !plays.p || plays.p === "all") && sameW(W.w, D.wd.w) && W.buy === D.wd.buy && W.sell === D.wd.sell;
+}
+
+/** {s, sig, gd: the market guard is on, hd: the call is held by the sticky rule}, as assets/plays.js score(). */
 export function signalFor(D, sym, plays, signal, sel) {
   const x = D.x[sym];
   if (!x) return { s: null, sig: null };
   const W = weights(D, signal);
   const chosen = sel || resolve(D, plays);
+  const guard = !!(D.gd && D.gd[sym]), pk = D.pk || [];
   let tot = 0, avail = 0, acc = 0;
   D.fx.forEach((f, i) => {
     const wi = W.w[f.k] || 0;
-    if (!wi) return;
+    if (!wi || (guard && pk.includes(f.k))) return;     // a price factor stands down while the guard is on
     tot += wi;
     let p = x[i];
     if (f.k === "plays") { const c = count(D, sym, chosen); p = c.n ? Math.round((100 * c.k) / c.n) : null; }
     if (p != null) { avail += wi; acc += wi * p; }
   });
-  if (!tot || avail < tot / 2) return { s: null, sig: null };
+  if (!tot || avail < tot / 2) return { s: null, sig: null, gd: guard };
   const s = Math.round(acc / avail);
-  return { s, sig: s >= W.buy ? 1 : s <= W.sell ? -1 : 0 };
+  const plain = s >= W.buy ? 1 : s <= W.sell ? -1 : 0;
+  let sig = plain;
+  // the standard setup follows the path's sticky call, as long as the path scored the same number today
+  if (isStandard(D, W, plays) && D.st[sym] && D.st[sym][1] === s && D.st[sym][0] != null) sig = D.st[sym][0];
+  return { s, sig, gd: guard, hd: sig !== plain };
 }
 
 export const SIG_WORD = { 1: "Buy", 0: "Hold", "-1": "Sell" };

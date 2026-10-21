@@ -50,6 +50,15 @@ def main():
     with open(CACHE, "rb") as f:
         results = pickle.load(f)
     meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
+    # a cache from an earlier close than data/prices: cut the prices to the engine's close, so the
+    # pages, the signal and its day-by-day path (callpath.py) all see the same day, as a real build does
+    asof = max(r["asof"] for r in results.values())
+    cut = {k: v for k, v in prices.items() if len(v.index) and v.index[-1] > asof}
+    if cut:
+        import pandas as pd
+        for k, v in cut.items():
+            prices[k] = v[v.index <= pd.Timestamp(asof)]
+        print(f"prices cut to the engine cache's close {asof} ({len(cut)} files had newer days)")
     from qstrat.render import Site
     if mode == "full":
         out = os.path.join(CACHE_DIR, "site")

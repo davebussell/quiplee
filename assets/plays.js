@@ -94,7 +94,7 @@
   // how much of a score rests on factors with a track record (factorgrade.py), 0 to 1
   function tested(parts) {
     var a = 0, g = 0;
-    parts.forEach(function (q) { if (q.p == null) return; a += q.w; var f = D.fx[FXI[q.k]]; if (f && f.r && !f.r.why) g += q.w; });
+    parts.forEach(function (q) { if (q.p == null || q.stood) return; a += q.w; var f = D.fx[FXI[q.k]]; if (f && f.r && !f.r.why) g += q.w; });
     return a ? g / a : null;
   }
   function wFromParam(q) {
@@ -115,23 +115,40 @@
   function wPreset() { for (var i = 0; i < D.wp.length; i++) if (sameW(wts.w, D.wp[i].w)) return D.wp[i]; return null; }
   function wlabel() { if (!D || !wts) return 'Plays + exit rules'; var p = wPreset(); return p ? p.n : 'Your weights'; }
   function isDefaultW() { return !wts || (sameW(wts.w, D.wd.w) && wts.buy === D.wd.buy && wts.sell === D.wd.sell); }
-  /** A name's score with the reader's weights: {s: 0-100 or null, sig: 1|0|-1|null, parts: [{k, n, v, p, w, add}], cov}. */
+  // model version 3 (factors.py): the market guard and the sticky calls
+  function guardOn(sym) { return !!(D.gd && D.gd[sym]); }                       // this stock's market is 15%+ below its 1-year high
+  function stood(f) { return (D.pk || []).indexOf(f.k) >= 0; }                 // a price factor: stands down while the guard is on
+  // the standard setup (the standard weights and lines, every play counted): the only one with a day-by-day path to hold a call
+  function isStandard(W) { return !!D.st && choice.p === 'all' && sameW(W.w, D.wd.w) && W.buy === D.wd.buy && W.sell === D.wd.sell; }
+  function plainSig(s, W) { return s >= W.buy ? 1 : s <= W.sell ? -1 : 0; }
+  // the sticky call: a Buy holds until the score drops below the middle line, a Sell until it rises above it
+  function stickyStep(prev, s, W) {
+    var c = plainSig(s, W), mid = D.mid == null ? (W.buy + W.sell) / 2 : D.mid;
+    if (prev === 1 && c !== 1 && s >= mid) return 1;
+    if (prev === -1 && c !== -1 && s <= mid) return -1;
+    return c;
+  }
+  /** A name's score with the reader's weights: {s: 0-100 or null, sig: 1|0|-1|null, parts: [{k, n, v, p, w, add, stood}], cov,
+   *  guard: the market guard is on, held: the call is held by the sticky rule (it differs from the plain call on the score)}. */
   function score(sym, wIn) {
-    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], v = D.v[sym], tot = 0, avail = 0, acc = 0, parts = [];
-    if (!x) return { s: null, sig: null, parts: [], cov: 0 };
+    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], v = D.v[sym], tot = 0, avail = 0, acc = 0, parts = [], guard = guardOn(sym);
+    if (!x) return { s: null, sig: null, parts: [], cov: 0, guard: guard, held: false };
     D.fx.forEach(function (f, i) {
       var wi = w[f.k] || 0;
       if (!wi) return;
-      tot += wi;
       var p = x[i], val = v[i];
       if (f.k === 'plays') { var c = count(sym); p = c.n ? Math.round(100 * c.k / c.n) : null; val = p == null ? null : p + '%'; }
+      if (guard && stood(f)) { parts.push({ k: f.k, n: f.n, v: val, p: p, w: wi, add: null, stood: true }); return; }
+      tot += wi;
       parts.push({ k: f.k, n: f.n, v: val, p: p, w: wi, add: null });
       if (p != null) { avail += wi; acc += wi * p; }
     });
-    if (!tot || avail < tot / 2) return { s: null, sig: null, parts: parts, cov: tot ? avail / tot : 0 };
-    var s = Math.round(acc / avail);
-    parts.forEach(function (q) { if (q.p != null) q.add = Math.round(10 * q.w * q.p / avail) / 10; });
-    return { s: s, sig: s >= W.buy ? 1 : s <= W.sell ? -1 : 0, parts: parts, cov: avail / tot };
+    if (!tot || avail < tot / 2) return { s: null, sig: null, parts: parts, cov: tot ? avail / tot : 0, guard: guard, held: false };
+    var s = Math.round(acc / avail), sig = plainSig(s, W);
+    parts.forEach(function (q) { if (q.p != null && !q.stood) q.add = Math.round(10 * q.w * q.p / avail) / 10; });
+    // the standard setup follows the path's sticky call, as long as the path scored the same number today
+    if (isStandard(W) && D.st[sym] && D.st[sym][1] === s && D.st[sym][0] != null) sig = D.st[sym][0];
+    return { s: s, sig: sig, parts: parts, cov: avail / tot, guard: guard, held: sig !== plainSig(s, W) };
   }
   // ---------------------------------------------------------------- the price that would change the signal's mind
   // The same arithmetic as factors.flip_lines: re-score a candidate price with the plays and company numbers held
@@ -151,14 +168,15 @@
   }
   function upPtsAt(u) { return Math.round(100 * (Math.min(Math.max(u, -0.2), 0.5) + 0.2) / 0.7); }
   function flips(sym, wIn) {
-    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], pin = D.pi && D.pi[sym];
+    var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], pin = D.pi && D.pi[sym], guard = guardOn(sym);
     if (!x || !pin || !pin.p || !D.rk) return null;
     var c = count(sym), plays = c.n ? Math.round(100 * c.k / c.n) : null;
+    var prev = isStandard(W) ? score(sym, W).sig : null;        // the call as shown is the state the sticky rule steps from (standard setup only)
     function sigAt(price) {
       var tot = 0, avail = 0, acc = 0;
       D.fx.forEach(function (f, i) {
         var wi = w[f.k] || 0;
-        if (!wi) return;
+        if (!wi || (guard && stood(f))) return;
         tot += wi;
         var p = x[i];
         if (f.k === 'plays') p = plays;
@@ -174,12 +192,14 @@
       });
       if (!tot || avail < tot / 2) return null;
       var s = Math.round(acc / avail);
-      return s >= W.buy ? 1 : s <= W.sell ? -1 : 0;
+      return prev == null ? plainSig(s, W) : stickyStep(prev, s, W);
     }
-    var p0 = pin.p, now = sigAt(p0), out = { now: now, down: null, up: null }, i, px, sg;
+    var p0 = pin.p, now = sigAt(p0), out = { now: now, down: null, up: null, guard: guard }, i, px, sg;
     if (now == null) return null;
-    for (i = 1; i <= 80; i++) { px = p0 * (1 - i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.down = [px, sg]; break; } }
-    for (i = 1; i <= 160; i++) { px = p0 * (1 + i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.up = [px, sg]; break; } }
+    if (guard) return out;                              // nothing price-dependent counts while the guard is on
+    // the price is kept to the cent, as factors.flip_lines keeps it, so the percentages round the same way
+    for (i = 1; i <= 80; i++) { px = p0 * (1 - i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.down = [Math.round(px * 100) / 100, sg]; break; } }
+    for (i = 1; i <= 160; i++) { px = p0 * (1 + i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.up = [Math.round(px * 100) / 100, sg]; break; } }
     return out;
   }
   function flipWords(fl, cur, p0) {
@@ -192,9 +212,21 @@
       bits.push('turns ' + SIG_WORD[x[1]] + ' ' + z[1] + ' ' + (cur || '$') + x[0].toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
         ' (' + (pct > 0 ? '+' : '\u2212') + Math.round(Math.abs(pct) * 100) + '%)');
     });
-    if (!bits.length) return 'Stays ' + SIG_WORD[fl.now] + ' anywhere from 40% below to 80% above the latest close.';
+    if (!bits.length) {
+      if (fl.guard) return 'Stays ' + SIG_WORD[fl.now] + ' at any price while the market guard is on: the price factors don\u2019t count.';
+      return 'Stays ' + SIG_WORD[fl.now] + ' anywhere from 40% below to 80% above the latest close.';
+    }
     var out = bits.join(' \u00b7 ');
     return out.charAt(0).toUpperCase() + out.slice(1);
+  }
+  // "Held at Buy: 54 is under your Buy line of 60, and a Buy holds until the score drops below 50." (factors.held_words)
+  function heldWords(r, W) {
+    W = W || wts || D.wd;
+    var mid = D.mid == null ? (W.buy + W.sell) / 2 : D.mid;
+    if (!r || !r.held) return '';
+    if (r.sig === 1) return 'Held at Buy: ' + r.s + ' is under your Buy line of ' + W.buy + ', and a Buy holds until the score drops below ' + mid + '.';
+    if (r.sig === -1) return 'Held at Sell: ' + r.s + ' is over your Sell line of ' + W.sell + ', and a Sell holds until the score rises above ' + mid + '.';
+    return '';
   }
   function sigPill(sig) { return sig == null ? '<span class="sig-pill na">–</span>' : '<span class="sig-pill ' + SIG_CLS[sig] + '">' + SIG_WORD[sig] + '</span>'; }
   function applyW(c, why) {
@@ -623,6 +655,8 @@
     score: score,
     flips: flips,
     flipWords: flipWords,
+    guardOn: guardOn,
+    heldWords: heldWords,
     weights: function () { return wts; },
     wlabel: wlabel,
     isDefaultWeights: isDefaultW,

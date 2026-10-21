@@ -92,7 +92,7 @@ def reads_json(site):
         sym = t["sym"]
         if t.get("index") or (sym, "buy-and-hold") not in site.R:
             continue
-        from qstrat.factors import score as fx_score
+        from qstrat.factors import score as fx_score, held as fx_held, guard_on
         sc, sg, _ = fx_score(site, t)
         k, n = site.consensus(t)
         meta = site.meta.get(sym)
@@ -113,6 +113,10 @@ def reads_json(site):
         out[sym] = {"n": t["name"], "s": t["short"], "u": t["slug"], "cur": t["cur"], "p": round(float(site.r(sym, "buy-and-hold")["price"]), 4),
                     "g": t["group"], "d1": None if d1 is None else round(d1, 5),
                     "S": sg, "sc": sc, "k": k, "of": n, "y1": None if site.one_year(t) is None else round(float(site.one_year(t)), 4), "read": read}
+        if fx_held(site, t, sc, sg):
+            out[sym]["hd"] = 1              # held by the sticky rule (the plain call on the score differs)
+        if guard_on(site, sym):
+            out[sym]["gd"] = 1              # the market guard is on for this name
     from qstrat.factors import MODEL, default_words
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "mv": MODEL, "wt": default_words(), "t": out}, ensure_ascii=False, separators=(",", ":"))
 
