@@ -517,6 +517,7 @@ class Site:
         self.irx = irx
         self.asof = max(r["asof"] for r in results.values())
         self.pages = {}   # path -> html (or None once written to self.out)
+        self.on_page = None   # called with (path, html) for every page as it is made
         self.out = None   # set to a folder to write each page as it is made (keeps memory flat)
         self.ver = self.asof.strftime("%Y%m%d")
         self._sum = {}
@@ -642,6 +643,8 @@ class Site:
     def add(self, path, html_):
         from .hints import annotate
         page = annotate(html_, path)
+        if self.on_page:                     # the build's per-page check (build_strategies.note_banned)
+            self.on_page(path, page)
         if self.out:
             d = os.path.join(self.out, path)
             os.makedirs(d, exist_ok=True)

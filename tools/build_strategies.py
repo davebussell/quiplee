@@ -62,7 +62,19 @@ def glossary_json():
 
 
 def copy_static(out):
-    """Copy every hand-written file the site serves into the output folder."""
+    """Copy every hand-written file the site serves into the output folder, checking each text file for
+    a company the site never names (BANNED_HITS)."""
+    _copy_static(out)
+    for d, _, fs in os.walk(out):
+        for fn in fs:
+            if fn.endswith(TEXT_EXT):
+                path = os.path.join(d, fn)
+                hit = banned_in_file(path)
+                if hit:
+                    BANNED_HITS.append((os.path.relpath(path, out), hit))
+
+
+def _copy_static(out):
     for name in os.listdir(ROOT):
         if name in NOT_PUBLISHED or name in GENERATED or name.startswith("."):
             continue
@@ -168,16 +180,25 @@ def link_static_pages(out):
 
 
 def write_pages(pages, out):
-    for path, html in pages.items():
+    """Write each page, check it for a company the site never names, and drop its HTML from memory
+    (the sitemap and the page count only need the paths)."""
+    for path in list(pages):
+        html = pages[path]
+        if html is None:
+            continue
+        note_banned(path + "index.html", html)
         d = os.path.join(out, path)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
             f.write(html)
+        pages[path] = None
 
 
 def write_404(site, out):
+    html = site.not_found_html()
+    note_banned("404.html", html)
     with open(os.path.join(out, "404.html"), "w", encoding="utf-8") as f:
-        f.write(site.not_found_html())
+        f.write(html)
 
 
 def pages_without_disclaimer(out):
@@ -198,20 +219,49 @@ def pages_without_disclaimer(out):
     return sorted(missing)
 
 
-def files_naming_banned(out):
-    """Pages and data files that mention a company the site never names (content.BANNED; Dave's rule).
-    Returns [(file, the mention)]. Price history isn't published, so only .html, .json and .xml count."""
+# Files that would name a company the site never mentions (content.BANNED; Dave's rule): [(file, the mention)].
+# Filled as each page and data file is written (write_pages, write_data, copy_static), so the build never has
+# to read its own 300 MB of output back at the end, when its memory is highest. main() refuses to publish if any.
+BANNED_HITS = []
+TEXT_EXT = (".html", ".htm", ".json", ".xml", ".txt")
+
+
+def note_banned(rel, text):
+    """Record a mention in a file about to be written (text already in memory)."""
     from qstrat.content import banned_hit
+    hit = banned_hit(text)
+    if hit:
+        BANNED_HITS.append((rel, hit))
+    return hit
+
+
+def banned_in_file(path, chunk=1 << 20):
+    """The first mention in a file on disk, read in 1 MB pieces (a little overlap so a name split across
+    two pieces is still seen), so a big file costs no more memory than a small one."""
+    from qstrat.content import banned_hit
+    tail = ""
+    with open(path, encoding="utf-8", errors="replace") as f:
+        while True:
+            piece = f.read(chunk)
+            if not piece:
+                return None
+            hit = banned_hit(tail + piece)
+            if hit:
+                return hit
+            tail = piece[-32:]
+
+
+def files_naming_banned(out):
+    """Every page and data file under `out` that mentions a company the site never names: [(file, the mention)].
+    The slow, thorough form, for tools/dev_render.py; the build itself checks each file as it writes it."""
     hits = []
     for d, _, fs in os.walk(out):
         for fn in fs:
-            if not fn.endswith((".html", ".htm", ".json", ".xml", ".txt")):
-                continue
-            path = os.path.join(d, fn)
-            with open(path, encoding="utf-8", errors="replace") as f:
-                hit = banned_hit(f.read())
-            if hit:
-                hits.append((os.path.relpath(path, out), hit))
+            if fn.endswith(TEXT_EXT):
+                path = os.path.join(d, fn)
+                hit = banned_in_file(path)
+                if hit:
+                    hits.append((os.path.relpath(path, out), hit))
     return sorted(hits)
 
 
@@ -227,6 +277,7 @@ def write_data(site, out, quick=False):
     os.makedirs(d, exist_ok=True)
 
     def put(name, text):
+        note_banned("data/" + name, text)
         with open(os.path.join(d, name), "w", encoding="utf-8") as f:
             f.write(text)
     put("signals.json", site.signals_json())
@@ -332,21 +383,26 @@ def main():
         t1 = time.time()
         site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
         site.out = out
+        site.on_page = lambda path, html: note_banned(path + "index.html", html)
         pages = site.build()
         print(f"rendered and wrote {len(pages)} pages in {time.time() - t1:.0f}s", flush=True)
         return site, pages
     site, pages = stage("render", 4, render)
-    stage("pages", 5, lambda: write_pages({k: v for k, v in pages.items() if v is not None}, out))
+    stage("pages", 5, lambda: write_pages(pages, out))
     stage("data", 6, lambda: write_data(site, out))
 
     def finish():
         t2 = time.time()
         items = build_practice(prices, irx, now)
+        pj = practice_json(items)
+        note_banned("data/practice.json", pj)
         with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:
-            f.write(practice_json(items))
+            f.write(pj)
         print(f"built {len(items)} practice charts in {time.time() - t2:.0f}s", flush=True)
+        sm = site.sitemap()
+        note_banned("sitemap.xml", sm)
         with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
-            f.write(site.sitemap())
+            f.write(sm)
         print("glossary-linked:", ", ".join(link_static_pages(out)), flush=True)
         write_404(site, out)
     stage("finish", 7, finish)
@@ -359,7 +415,9 @@ def main():
     stage("disclaimer check", 8, disclaimer_check)
 
     def banned_check():
-        named = files_naming_banned(out)
+        # the per-stock data files other modules wrote (px, hist, theory) come from TICKERS; everything else was
+        # checked as it was written, so this is a list, not a second pass over the output
+        named = sorted(set(BANNED_HITS))
         if named:
             print(f"{len(named)} file(s) name a company the site never mentions:", *[f"{f}: {w}" for f, w in named[:50]], sep="\n  ")
             sys.exit("refusing to publish pages that name an excluded company")
