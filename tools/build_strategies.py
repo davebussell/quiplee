@@ -268,6 +268,26 @@ def build_json(site):
                        "pages": sum(1 for _ in site.pages)}, separators=(",", ":"))
 
 
+def stage(name, code, fn):
+    """Run one build stage; if it fails for any reason, print why and exit with its own code, so a build
+    host that hides its log (Netlify's needs a login) still says which stage broke through the exit code:
+    3 engine, 4 render, 5 pages, 6 data, 7 practice/sitemap/static/404, 8 disclaimer check, 9 excluded-company check."""
+    t = time.time()
+    try:
+        out = fn()
+    except SystemExit as ex:
+        if ex.code not in (None, 0):
+            print(f"stage {name} stopped the build: {ex.code}", flush=True)
+            raise SystemExit(code)
+        raise
+    except BaseException:
+        import traceback
+        traceback.print_exc()
+        print(f"stage {name} failed after {time.time() - t:.0f}s (exit {code})", flush=True)
+        raise SystemExit(code)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(ROOT, "_site"), help="output folder (default: _site)")
@@ -277,46 +297,62 @@ def main():
     out = os.path.abspath(args.out)
 
     t0 = time.time()
-    prices, irx, now = engine.load_all()
-    print(f"loaded {len(prices)} tickers (closes to {max(d.index[-1] for d in prices.values()).date()})")
-    # the bulky part of each result (chart windows, call lists) waits on disk until its page is made
-    spill = os.environ.get("QSTRAT_SPILL") or tempfile.mkdtemp(prefix="qstrat-spill-")
-    results = engine.run(prices, irx, now, workers=args.workers, spill=spill)
-    meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
-    print(f"evaluated {len(results)} play x ticker pairs in {time.time() - t0:.0f}s")
+    print(f"python {sys.version.split()[0]}, {os.cpu_count()} cpus, tmp in {tempfile.gettempdir()}, out {out}", flush=True)
 
-    # the hand-written files go in first; each generated page is then written as it is made
-    shutil.rmtree(out, ignore_errors=True)
-    os.makedirs(out)
-    copy_static(out)
+    def run_engine():
+        prices, irx, now = engine.load_all()
+        print(f"loaded {len(prices)} tickers (closes to {max(d.index[-1] for d in prices.values()).date()})", flush=True)
+        # the bulky part of each result (chart windows, call lists) waits on disk until its page is made
+        spill = os.environ.get("QSTRAT_SPILL") or tempfile.mkdtemp(prefix="qstrat-spill-")
+        results = engine.run(prices, irx, now, workers=args.workers, spill=spill)
+        meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
+        print(f"evaluated {len(results)} play x ticker pairs in {time.time() - t0:.0f}s", flush=True)
+        return prices, irx, now, spill, results, meta
+    prices, irx, now, spill, results, meta = stage("engine", 3, run_engine)
 
-    t1 = time.time()
-    site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
-    site.out = out
-    pages = site.build()
-    print(f"rendered and wrote {len(pages)} pages in {time.time() - t1:.0f}s")
-    write_pages({k: v for k, v in pages.items() if v is not None}, out)
-    write_data(site, out)
-    t2 = time.time()
-    items = build_practice(prices, irx, now)
-    with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:
-        f.write(practice_json(items))
-    print(f"built {len(items)} practice charts in {time.time() - t2:.0f}s")
-    with open(os.path.join(out, "sitemap.xml"), "w") as f:
-        f.write(site.sitemap())
-    print("glossary-linked:", ", ".join(link_static_pages(out)))
-    write_404(site, out)
-    missing = pages_without_disclaimer(out)
-    if missing:
-        print(f"{len(missing)} page(s) without the disclaimer:", *missing[:50], sep="\n  ")
-        sys.exit("refusing to publish pages without the disclaimer")
-    named = files_naming_banned(out)
-    if named:
-        print(f"{len(named)} file(s) name a company the site never mentions:", *[f"{f}: {w}" for f, w in named[:50]], sep="\n  ")
-        sys.exit("refusing to publish pages that name an excluded company")
+    def render():
+        # the hand-written files go in first; each generated page is then written as it is made
+        shutil.rmtree(out, ignore_errors=True)
+        os.makedirs(out)
+        copy_static(out)
+        t1 = time.time()
+        site = Site(results, preview=args.preview, prices=prices, irx=irx, meta=meta)
+        site.out = out
+        pages = site.build()
+        print(f"rendered and wrote {len(pages)} pages in {time.time() - t1:.0f}s", flush=True)
+        return site, pages
+    site, pages = stage("render", 4, render)
+    stage("pages", 5, lambda: write_pages({k: v for k, v in pages.items() if v is not None}, out))
+    stage("data", 6, lambda: write_data(site, out))
+
+    def finish():
+        t2 = time.time()
+        items = build_practice(prices, irx, now)
+        with open(os.path.join(out, "data", "practice.json"), "w", encoding="utf-8") as f:
+            f.write(practice_json(items))
+        print(f"built {len(items)} practice charts in {time.time() - t2:.0f}s", flush=True)
+        with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8") as f:
+            f.write(site.sitemap())
+        print("glossary-linked:", ", ".join(link_static_pages(out)), flush=True)
+        write_404(site, out)
+    stage("finish", 7, finish)
+
+    def disclaimer_check():
+        missing = pages_without_disclaimer(out)
+        if missing:
+            print(f"{len(missing)} page(s) without the disclaimer:", *missing[:50], sep="\n  ")
+            sys.exit("refusing to publish pages without the disclaimer")
+    stage("disclaimer check", 8, disclaimer_check)
+
+    def banned_check():
+        named = files_naming_banned(out)
+        if named:
+            print(f"{len(named)} file(s) name a company the site never mentions:", *[f"{f}: {w}" for f, w in named[:50]], sep="\n  ")
+            sys.exit("refusing to publish pages that name an excluded company")
+    stage("excluded-company check", 9, banned_check)
     if not os.environ.get("QSTRAT_SPILL"):
         shutil.rmtree(spill, ignore_errors=True)
-    print(f"wrote the site to {out} in {time.time() - t0:.0f}s")
+    print(f"wrote the site to {out} in {time.time() - t0:.0f}s", flush=True)
 
 
 if __name__ == "__main__":
