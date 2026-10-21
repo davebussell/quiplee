@@ -101,10 +101,10 @@ export function flipEmail(id, email, flips, R) {
 /** Send a list of {to, subject, html, text, headers} through Resend's batch endpoint (100 at a time). */
 export async function sendAll(msgs) {
   if (!mail.configured() || !msgs.length) return { sent: 0 };
-  const from = env("QM_FROM") || "Be The Puck <alerts@bethepuck.com>";
+  const who = mail.sender();
   let sent = 0;
   for (let i = 0; i < msgs.length; i += 100) {
-    const chunk = msgs.slice(i, i + 100).map((m) => ({ from, to: [m.to], subject: m.subject, html: m.html, text: m.text, headers: m.headers }));
+    const chunk = msgs.slice(i, i + 100).map((m) => ({ ...who, to: [m.to], subject: m.subject, html: m.html, text: m.text, headers: m.headers }));
     const r = await fetch("https://api.resend.com/emails/batch", {
       method: "POST",
       headers: { authorization: "Bearer " + env("RESEND_API_KEY"), "content-type": "application/json" },

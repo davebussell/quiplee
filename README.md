@@ -273,7 +273,10 @@ add the domain `bethepuck.com` there and copy the DNS records it gives you
 (a DKIM TXT record, an SPF TXT and an MX record on the `send` subdomain) into
 Netlify DNS for bethepuck.com; once Resend shows the domain verified, create an
 API key with sending access and set `RESEND_API_KEY` in Netlify (Site configuration →
-Environment variables). Optional: `QM_FROM` (default `Be The Puck <alerts@bethepuck.com>`)
+Environment variables; a changed variable reaches the functions on the next deploy, so push
+or redeploy after setting it). Optional: `QM_FROM` (default `Be The Puck <alerts@bethepuck.com>`),
+`QM_REPLY_TO` (an address someone reads, so replies don't bounce off alerts@), `QM_OWNER_EMAIL`
+(gets a note for each new account, and the password member's alerts)
 and `QM_MAIL_ADDRESS` (the postal address Canada's anti-spam law asks for, shown in
 every email footer). Until the key is set, sign-ups work and confirm links queue;
 `alerts-nightly.mjs` (hourly) sends them on its first run after the key is in, then

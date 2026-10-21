@@ -1,18 +1,23 @@
 /* mail.mjs: sending email through Resend (https://resend.com).
- * Env: RESEND_API_KEY, QM_FROM (default "Be The Puck <alerts@bethepuck.com>"; the
- * domain has to be verified in Resend first).
+ * Env: RESEND_API_KEY; QM_FROM (default "Be The Puck <alerts@bethepuck.com>"; the domain has to be
+ * verified in Resend first); QM_REPLY_TO (optional: an address that is read, so a reader's reply
+ * doesn't bounce off alerts@).
  */
 import { env } from "./qm.mjs";
 
 export const configured = () => !!env("RESEND_API_KEY");
+export const FROM = () => env("QM_FROM") || "Be The Puck <alerts@bethepuck.com>";
+/** The fields every message shares: the sender and, when set, where replies go. */
+export const sender = () => (env("QM_REPLY_TO") ? { from: FROM(), reply_to: env("QM_REPLY_TO") } : { from: FROM() });
 
 export async function send(to, subject, html, text) {
   if (!configured() || !to) return { ok: false, skipped: true };
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { authorization: "Bearer " + env("RESEND_API_KEY"), "content-type": "application/json" },
-    body: JSON.stringify({ from: env("QM_FROM") || "Be The Puck <alerts@bethepuck.com>", to: [to], subject, html, text }),
+    body: JSON.stringify({ ...sender(), to: [to], subject, html, text }),
   });
+  if (!r.ok) console.error("mail: Resend refused the message", r.status, (await r.text()).slice(0, 300));
   return { ok: r.ok, status: r.status };
 }
 
