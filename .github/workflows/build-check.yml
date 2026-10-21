@@ -1,0 +1,27 @@
+# Runs the exact Netlify build command here, on demand, so a build that fails on Netlify can be
+# reproduced where the log is readable (GitHub Actions keeps it; Netlify's build log needs a login).
+# It deploys nothing. Start it from the Actions tab or with
+#   gh api repos/davebussell/quiplee/actions/workflows/build-check.yml/dispatches -f ref=main
+name: Build check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      CONTEXT: production           # as on Netlify, minus its secrets: the picks and top-10 histories stay local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the site as Netlify does
+        run: |
+          python -m pip install -q -r requirements.txt && python tools/build_strategies.py --out _site
+          echo "build exit code: $?"
+      - name: Size of the output
+        if: always()
+        run: du -sh _site 2>/dev/null || true
