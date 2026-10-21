@@ -179,6 +179,25 @@ def _week_close(site, weeks_back, mkt):
     return pd.Timestamp(ser.index[-1]).normalize() if len(ser) else None
 
 
+DROPPED = {"n": 0}      # picks in companies the site never names, left out of the record this build (scrub)
+
+
+def scrub(state):
+    """Picks in a company the site never names (content.EXCLUDED) leave every list, in memory and in the
+    next save; the page says how many were left out, never which."""
+    if not state or not isinstance(state.get("lists"), list):
+        return state
+    from .content import EXCLUDED
+    n = 0
+    for lst in state["lists"]:
+        picks = lst.get("picks") or []
+        kept = [p for p in picks if p.get("sym") not in EXCLUDED]
+        n += len(picks) - len(kept)
+        lst["picks"] = kept
+    DROPPED["n"] = n
+    return state
+
+
 def run(site):
     """Load the record, make whatever list is due, save it. Returns (state, info)."""
     state, status = load_state()
@@ -186,6 +205,7 @@ def run(site):
         # not a top-10 record (e.g. an older store answered with the top-picks tracker): never build on it
         print("top10: the store answered with something else; using an unsaved list this build")
         state, status = None, "error"
+    state = scrub(state)
     mkt = market_date(site)
     info = {"status": status, "saved": "no change"}
     if state is None or state.get("v") != VERSION:
@@ -353,5 +373,5 @@ def body(art, state, depth):
 </ul><p class="eyebrow">Read this before the reconstructed lists</p><ul>
 <li>They use only each play's calls and prices up to that week's close, so no later price leaks in.</li>
 <li>But they use today's list of covered stocks and today's {len(TIMED)} plays. Some names are covered because they did well, and the plays were collected knowing which rules held up, so reconstructed results flatter the rule. The live lists, from the launch on, are the honest record.</li>
-</ul><p class="small muted">This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Hypothetical results: no fees, taxes, slippage or dividends.</p></section>"""
+</ul><p class="small muted">{(f"{DROPPED['n']} pick{'s' if DROPPED['n'] != 1 else ''} in companies Be The Puck no longer covers {'are' if DROPPED['n'] != 1 else 'is'} left out of the lists above. ") if DROPPED["n"] else ""}This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision. Hypothetical results: no fees, taxes, slippage or dividends.</p></section>"""
     return this_week + board + lists_html + rule

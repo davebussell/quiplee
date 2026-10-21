@@ -200,12 +200,27 @@ def review(state, site, rk, mkt):
     return st
 
 
+def scrub(state):
+    """Positions in a company the site never names (content.EXCLUDED) leave the record, in memory and in
+    the next save: the page says how many were left out, never which. Returns (state, how many)."""
+    if not state:
+        return state, 0
+    from .content import EXCLUDED
+    before = len(state.get("positions") or [])
+    state["positions"] = [p for p in (state.get("positions") or []) if p["sym"] not in EXCLUDED]
+    for r in state.get("log") or []:
+        for k in ("in", "out", "kept"):
+            r[k] = [x for x in (r.get(k) or []) if x not in EXCLUDED]
+    return state, before - len(state["positions"])
+
+
 def run(site):
     """Load the history, apply a due review, save it (production only). Returns (state, info)."""
     state, status = load_state()
+    state, dropped = scrub(state)
     mkt = market_date(site)
     rk = ranked(site)
-    info = {"status": status, "reviewed": False, "saved": None, "mkt": mkt, "rk": rk}
+    info = {"status": status, "reviewed": False, "saved": None, "mkt": mkt, "rk": rk, "dropped": dropped}
     if status == "error":
         return None, info
     if review_due(state, mkt):
@@ -411,6 +426,9 @@ def picks_page(site, state, info):
                         f'<td class="r">{_ret(g)}</td><td class="r">{_ret(bg - 1 if bg else None)}</td><td class="small">{e(p["why_out"] or "")}</td></tr>')
     closed_html = (f'<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Held</th><th class="r">Return</th><th class="r">S&amp;P 500</th><th>Why it left</th></tr></thead>'
                    f'<tbody>{closed_rows}</tbody></table></div>') if closed_rows else '<p class="muted">None yet. The first review is after the next Friday close.</p>'
+    if info.get("dropped"):
+        n = info["dropped"]
+        closed_html += f'<p class="small muted">{n} position{"s" if n != 1 else ""} in {"a company" if n == 1 else "companies"} Be The Puck no longer covers {"is" if n == 1 else "are"} left out of this record and its chart.</p>'
 
     def names(syms):
         return ", ".join(e(TK[s]["short"]) if s in TK else e(s) for s in syms) or "none"

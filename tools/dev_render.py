@@ -112,6 +112,10 @@ def main():
     if "watchlist" in extra:
         from qstrat.watchlist import watchlist_page
         watchlist_page(site)
+    if "picks" in extra:
+        from qstrat import picks
+        state, info = picks.run(site)
+        picks.picks_page(site, state, info)
     if "me" in extra:
         from qstrat.me import me_page
         me_page(site)
