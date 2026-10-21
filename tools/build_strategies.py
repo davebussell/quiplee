@@ -268,11 +268,25 @@ def build_json(site):
                        "pages": sum(1 for _ in site.pages)}, separators=(",", ":"))
 
 
+def ping(what):
+    """On the build host (CONTEXT=production), one GET to the live site with a distinctive user agent per
+    stage, so the site's request logs show how far a build got when its own log can't be read."""
+    if os.environ.get("CONTEXT") != "production":
+        return
+    import urllib.request
+    try:
+        req = urllib.request.Request(f"https://bethepuck.com/data/build.json?stage={what}", headers={"User-Agent": f"bethepuck-build/{what}"})
+        urllib.request.urlopen(req, timeout=5).read(64)
+    except Exception:
+        pass
+
+
 def stage(name, code, fn):
     """Run one build stage; if it fails for any reason, print why and exit with its own code, so a build
     host that hides its log (Netlify's needs a login) still says which stage broke through the exit code:
     3 engine, 4 render, 5 pages, 6 data, 7 practice/sitemap/static/404, 8 disclaimer check, 9 excluded-company check."""
     t = time.time()
+    ping(name.replace(" ", "-"))
     try:
         out = fn()
     except SystemExit as ex:
@@ -353,6 +367,7 @@ def main():
     if not os.environ.get("QSTRAT_SPILL"):
         shutil.rmtree(spill, ignore_errors=True)
     print(f"wrote the site to {out} in {time.time() - t0:.0f}s", flush=True)
+    ping("done")
 
 
 if __name__ == "__main__":
