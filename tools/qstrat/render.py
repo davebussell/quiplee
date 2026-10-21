@@ -613,7 +613,7 @@ class Site:
 <a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
 <nav class="site-nav" id="site-nav" aria-label="Main">{nav}<a class="nav-me" href="{h('me/')}">Login</a></nav>
 <span class="head-meta" data-mkt data-asof="{self.asof.strftime('%Y-%m-%d')}"><i aria-hidden="true"></i><span data-mkt-txt>{dshort(self.asof)} close</span></span>
-<a class="acct-btn" href="{h('me/')}" data-acct-btn><span class="acct-ava" aria-hidden="true"></span><span data-acct-label>Sign in</span></a>
+<a class="acct-btn" href="{h('me/')}" data-acct-btn><span class="acct-ava" aria-hidden="true"></span><span data-acct-label>Login</span></a>
 <button type="button" class="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Menu"><span></span><span></span><span></span></button>
 </div><div class="scroll-bar" aria-hidden="true"></div></header>
 {banner}<main class="wrap" id="main">

@@ -71,6 +71,18 @@ for that isn't there, and move an issue to Done only once the change is live.
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.
 
+## When a Netlify build fails
+
+Netlify's build log needs a login, and its failure message says "exit code 2" whatever the cause
+(a `sys.exit` in the build script shows as 2 too). Two things make a failed build readable from here:
+the build pings the live site once per stage (`ping` in `tools/build_strategies.py`, user agent
+`bethepuck-build/<stage>`, then `bethepuck-build/done`), so the site's request logs (Netlify MCP,
+observability reader, top user agents in the build's time window) show how far it got; and
+`.github/workflows/build-check.yml` runs the exact build command on GitHub Actions with a readable
+log. Only the production build can read the picks and top-10 histories (`/api/picks-state`), so a
+build can fail on Netlify and pass everywhere else when those histories hold something the rules
+refuse; `picks.scrub` and `top10.scrub` keep excluded companies out of them.
+
 ## How it fits together
 
 - `tools/build_strategies.py` builds the whole site into `_site/` from `data/` (no network).
