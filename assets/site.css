@@ -1314,6 +1314,9 @@ body { font-size: 16px; }
 .me-sug button { all: unset; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
 .me-sug button:hover, .me-sug button:focus-visible { background: var(--panel-2); }
 .me-sug button span { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.me-sug .me-sug-all { border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; margin-bottom: 4px; color: var(--violet); }
+.me-sug .me-sug-all span { white-space: normal; }
+.me-add-msg { margin: 8px 0 0; }
 .me-list li { position: relative; }
 .me-row { padding-right: 40px; }
 .me-x { all: unset; position: absolute; right: 2px; top: 10px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--muted); cursor: pointer; font-size: 18px; }

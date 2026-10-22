@@ -216,17 +216,54 @@
       '<label>Password<input name="password" type="password" autocomplete="current-password" required></label>' +
       '<button class="btn" type="submit">Delete my account</button><p class="auth-msg" role="alert"></p></form></details></section>';
   }
-  function suggest(qs) {
-    qs = qs.trim().toUpperCase();
-    if (!qs) return [];
+  // ------------------------------------------------------------ following stocks: what people type
+  // One name or ticker ("NVDA", "Shopify"), or several split by commas, semicolons or new lines
+  // ("NVDA, AMD, Shopify"); plain tickers split by spaces work too ("NVDA AMD MU").
+  function norm(x) { return String(x || '').trim().toUpperCase().replace(/^\$/, '').replace(/^(TSX|TSE|TSXV|NASDAQ|NYSE|NYSEARCA|ARCA|AMEX|BATS)\s*:\s*/, ''); }
+  function exact(x) {                      // a ticker as typed -> the covered symbol, or null
+    var s = norm(x);
+    if (!s) return null;
+    if (R.t[s]) return s;
+    var hit = null;
+    Object.keys(R.t).forEach(function (k) { if (!hit && R.t[k].s.toUpperCase() === s) hit = k; });
+    if (hit) return hit;
+    var dash = s.replace(/\.([A-Z])$/, '-$1');            // BRK.B -> BRK-B
+    if (R.t[dash]) return dash;
+    if (R.t[s + '.TO']) return s + '.TO';                 // RY -> RY.TO
+    if (R.t[s + '-USD']) return s + '-USD';               // BTC -> BTC-USD
+    return null;
+  }
+  function pieces(text) {
     var out = [];
+    String(text || '').split(/[,;\n]+/).forEach(function (p) {
+      p = p.trim();
+      if (!p) return;
+      var words = p.split(/\s+/);
+      if (words.length > 1 && words.every(exact)) words.forEach(function (w) { out.push(w); });
+      else out.push(p);
+    });
+    return out;
+  }
+  function rank(qs, all) {                 // [[score, length, sym]], best first; all: keep stocks already followed
+    qs = norm(qs);
+    if (!qs) return [];
+    var out = [], ex = exact(qs);
     Object.keys(R.t).forEach(function (s) {
       var t = R.t[s], sh = t.s.toUpperCase(), nm = t.n.toUpperCase();
-      var score = sh === qs || s === qs ? 0 : sh.indexOf(qs) === 0 ? 1 : nm.indexOf(qs) === 0 ? 2 : nm.indexOf(' ' + qs) >= 0 ? 3 : -1;
-      if (score >= 0 && (A.follow || []).indexOf(s) < 0) out.push([score, sh.length, s]);
+      var score = s === ex || sh === qs || s === qs ? 0 : sh.indexOf(qs) === 0 ? 1 : nm.indexOf(qs) === 0 ? 2 : nm.indexOf(' ' + qs) >= 0 ? 3 : -1;
+      if (score >= 0 && (all || (A.follow || []).indexOf(s) < 0)) out.push([score, sh.length, s]);
     });
     out.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
-    return out.slice(0, 7).map(function (x) { return x[2]; });
+    return out;
+  }
+  function suggest(qs) { return rank(qs).slice(0, 7).map(function (x) { return x[2]; }); }
+  // one piece of a list -> {sym} when it's a ticker or names one stock clearly, else {bad, many}
+  function resolveOne(p) {
+    var s = exact(p);
+    if (s) return { sym: s };
+    var r = rank(p, true);
+    if (r.length === 1 || (r.length > 1 && r[0][0] < r[1][0])) return { sym: r[0][2] };
+    return { bad: p.trim(), many: r.length > 1 };
   }
   function draw() {
     var box = $('[data-me-in]');
@@ -239,7 +276,8 @@
       notice() + kpis() +
       '<div class="me-grid"><section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
       '<div class="ps-bar ps-bar-me">' + psChip() + '<p class="small muted">Plays in counts only the plays you pick, here and across the site.</p></div>' +
-      '<div class="me-add"><input type="search" data-add-q placeholder="Follow a stock: NVDA, Shopify, gold…" autocomplete="off" aria-label="Follow a stock"><div class="me-sug" data-sug hidden></div></div>' +
+      '<div class="me-add"><input type="search" data-add-q placeholder="Follow stocks: NVDA, Shopify, RY…" autocomplete="off" enterkeyhint="done" aria-label="Follow stocks: one name or ticker, or several separated by commas"><div class="me-sug" data-sug hidden></div></div>' +
+      '<p class="small muted me-add-msg" data-add-msg hidden></p>' +
       (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Follow the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
       '<div class="me-side">' + alertsCard() + theoryCard() + '</div></div>' +
@@ -248,30 +286,96 @@
     wire(box, local);
   }
   function setFollow(list) { A.follow = list; $('[data-rows]').innerHTML = followRows(); draw(); }
-  function wire(box, local) {
-    var input = $('[data-add-q]', box), sug = $('[data-sug]', box);
-    function add(sym) {
-      BP.follow(sym, true).then(function (j) {
-        if (!j.ok) return toast(j.error || "Couldn't add that.", 'warn');
-        setFollow(j.follow); toast('Following ' + R.t[sym].s + '.');
-        var i = $('[data-add-q]'); if (i) i.focus();
-      });
-    }
-    input.addEventListener('input', function () {
-      var list = suggest(input.value);
-      sug.hidden = !list.length;
-      sug.innerHTML = list.map(function (s) { var t = R.t[s]; return '<button type="button" data-add="' + esc(s) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></button>'; }).join('');
+  function names(syms) {
+    var n = syms.map(function (x) { return R.t[x] ? R.t[x].s : x; });
+    return n.length < 2 ? n.join('') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
+  }
+  var LOCAL = [], BUSY = false;
+  // follow every stock in what was typed; anything that couldn't be matched stays in the box, with a note under it
+  function addText(text) {
+    var ps = pieces(text), syms = [], bad = [], many = [], had = [];
+    ps.forEach(function (p) {
+      var r = resolveOne(p);
+      if (!r.sym) (r.many ? many : bad).push(r.bad);
+      else if ((A.follow || []).indexOf(r.sym) >= 0) had.push(r.sym);
+      else if (syms.indexOf(r.sym) < 0) syms.push(r.sym);
     });
-    input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { var l = suggest(input.value); if (l.length) add(l[0]); } });
+    var room = 100 - (A.follow || []).length, over = syms.length > room ? syms.slice(room) : [];
+    if (over.length) syms = syms.slice(0, room);
+    var keep = bad.concat(many).concat(over.map(function (x) { return R.t[x].s; }));
+    function report() {
+      var msg = [];
+      if (had.length) msg.push('Already following ' + names(had) + '.');
+      if (many.length) msg.push('"' + many.join('", "') + '" matches more than one stock: pick one from the list.');
+      if (over.length) msg.push('Your list holds 100 stocks; ' + names(over) + " didn't fit.");
+      var note = $('[data-add-msg]');
+      if (note) {
+        note.innerHTML = (bad.length ? 'Not covered yet: <b>' + esc(bad.join(', ')) + '</b>. <a href="/watchlist/?t=' + encodeURIComponent(bad.map(norm).join(',')) +
+          '">Request ' + (bad.length === 1 ? 'it' : 'them') + ' on the watchlist</a>; new names are analysed overnight. ' : '') + esc(msg.join(' '));
+        note.hidden = !note.innerHTML;
+      }
+      var i = $('[data-add-q]');
+      if (i) { i.value = keep.join(', '); i.focus(); }
+    }
+    if (!syms.length) { report(); return; }
+    if (BUSY) return;
+    BUSY = true;
+    BP.post('follow', { add: syms }).then(function (j) {
+      BUSY = false;
+      if (!j.ok) return toast(j.error || "Couldn't add that.", 'warn');
+      var added = syms.filter(function (x) { return (j.follow || []).indexOf(x) >= 0; });
+      setFollow(j.follow);
+      if (added.length) toast('Following ' + names(added) + '.');
+      report();
+    }, function () { BUSY = false; toast("Couldn't reach your account. Try again in a moment.", 'warn'); });
+  }
+  function wire(box, local) {
+    LOCAL = local;
+    var input = $('[data-add-q]', box), sug = $('[data-sug]', box);
+    input.addEventListener('input', function () {
+      var ps = pieces(input.value), multi = ps.length > 1 || /[,;]\s*$/.test(input.value);
+      var last = /[,;]\s*$/.test(input.value) ? '' : (ps[ps.length - 1] || '');
+      var list = suggest(last), html = '';
+      if (multi) {
+        var ok = ps.map(resolveOne).filter(function (r) { return r.sym && (A.follow || []).indexOf(r.sym) < 0; }).map(function (r) { return r.sym; });
+        ok = ok.filter(function (x, i) { return ok.indexOf(x) === i; });
+        if (ok.length) html += '<button type="button" class="me-sug-all" data-add-all><b>Follow ' + (ok.length === 1 ? 'it' : ok.length === 2 ? 'both' : 'all ' + ok.length) + ':</b><span>' + esc(names(ok)) + '</span></button>';
+      }
+      // with a list, picking a suggestion fills in the name being typed; with one name it follows it
+      html += list.map(function (s) { var t = R.t[s]; return '<button type="button" ' + (multi ? 'data-pick' : 'data-add') + '="' + esc(s) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></button>'; }).join('');
+      sug.innerHTML = html;
+      sug.hidden = !html;
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var ps = pieces(input.value);
+      if (ps.length > 1) return addText(input.value);
+      var l = suggest(input.value);
+      if (l.length) addText(R.t[l[0]].s);
+      else addText(input.value);
+    });
+    if (box.getAttribute('data-wired')) return;   // the page's buttons are wired once; the box is redrawn often
+    box.setAttribute('data-wired', '1');
     box.addEventListener('click', function (e) {
-      var t = e.target.closest ? e.target.closest('[data-add],[data-remove],[data-import],[data-resend],[data-signout],[data-stop]') : null;
+      var t = e.target.closest ? e.target.closest('[data-add],[data-add-all],[data-pick],[data-remove],[data-import],[data-resend],[data-signout],[data-stop]') : null;
       if (!t) return;
-      if (t.hasAttribute('data-add')) add(t.getAttribute('data-add'));
+      var inp = $('[data-add-q]');
+      if (t.hasAttribute('data-add')) addText(R.t[t.getAttribute('data-add')].s);
+      else if (t.hasAttribute('data-add-all')) addText(inp ? inp.value : '');
+      else if (t.hasAttribute('data-pick')) {
+        if (!inp) return;
+        var parts = inp.value.split(/[,;]/);
+        parts[parts.length - 1] = ' ' + R.t[t.getAttribute('data-pick')].s;
+        inp.value = parts.join(',').replace(/^\s+/, '') + ', ';
+        inp.focus();
+        inp.dispatchEvent(new Event('input'));
+      }
       else if (t.hasAttribute('data-remove')) {
         e.preventDefault();
         BP.follow(t.getAttribute('data-remove'), false).then(function (j) { if (j.ok) setFollow(j.follow); });
       } else if (t.hasAttribute('data-import')) {
-        BP.post('follow', { tickers: (A.follow || []).concat(local) }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is on your account now.'); } });
+        BP.post('follow', { tickers: (A.follow || []).concat(LOCAL) }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is on your account now.'); } });
       } else if (t.hasAttribute('data-resend')) {
         BP.post('resend', {}).then(function (j) { toast(j.ok ? 'Sent. Check your inbox (and spam folder).' : (j.error || "That didn't send."), j.ok ? '' : 'warn'); });
       } else if (t.hasAttribute('data-signout')) {

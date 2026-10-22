@@ -28,6 +28,14 @@ http.createServer((req, res) => {
       const b = body ? JSON.parse(body) : {};
       if (route === "plays") { if ("plays" in b) ACCT.plays = b.plays; if ("signal" in b) ACCT.signal = b.signal; }
       if (route === "alerts") ACCT.alerts = { ...ACCT.alerts, ...b };
+      if (route === "follow") {             // as netlify/functions/account.mjs follow(), without the covered-name check
+        const up = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v).trim().toUpperCase()).filter(Boolean);
+        let list = ACCT.follow || [];
+        if (b.tickers !== undefined) list = up(b.tickers);
+        if (b.add) list = list.concat(up(b.add));
+        if (b.remove) { const rm = new Set(up(b.remove)); list = list.filter((x) => !rm.has(x)); }
+        ACCT.follow = [...new Set(list)].slice(0, 100);
+      }
       fs.appendFileSync(LOG, route + " " + body + "\n");
       json(res, 200, { ok: true, plays: ACCT.plays, signal: ACCT.signal, follow: ACCT.follow, alerts: ACCT.alerts });
     });
