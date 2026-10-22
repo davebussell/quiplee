@@ -1,991 +1,991 @@
 {
- "ciks": {
-  "AAPL": [
-   320193,
-   "Apple Inc."
-  ],
-  "AAUC.TO": [
-   1993344,
-   "Allied Gold Corp"
-  ],
-  "ABNB": [
-   1559720,
-   "Airbnb, Inc."
-  ],
-  "ADBE": [
-   796343,
-   "ADOBE INC."
-  ],
-  "ADI": [
-   6281,
-   "ANALOG DEVICES INC"
-  ],
-  "ADSK": [
-   769397,
-   "Autodesk, Inc."
-  ],
-  "AEM.TO": [
-   2809,
-   "AGNICO EAGLE MINES LTD"
-  ],
-  "AEP": [
-   4904,
-   "AMERICAN ELECTRIC POWER CO INC"
-  ],
-  "AG.TO": [
-   1308648,
-   "FIRST MAJESTIC SILVER CORP"
-  ],
-  "AGI.TO": [
-   1178819,
-   "ALAMOS GOLD INC"
-  ],
-  "ALAB": [
-   1736297,
-   "Astera Labs, Inc."
-  ],
-  "ALNY": [
-   1178670,
-   "ALNYLAM PHARMACEUTICALS, INC."
-  ],
-  "AMAT": [
-   6951,
-   "APPLIED MATERIALS INC /DE"
-  ],
-  "AMGN": [
-   318154,
-   "AMGEN INC"
-  ],
-  "AMZN": [
-   1018724,
-   "AMAZON COM INC"
-  ],
-  "APA": [
-   1841666,
-   "APA Corp"
-  ],
-  "APP": [
-   1751008,
-   "AppLovin Corp"
-  ],
-  "AQN.TO": [
-   1174169,
-   "ALGONQUIN POWER & UTILITIES CORP."
-  ],
-  "ARIS.TO": [
-   1964504,
-   "Aris Mining Corp"
-  ],
-  "ARM": [
-   1973239,
-   "ARM HOLDINGS PLC /UK"
-  ],
-  "ASM.TO": [
-   316888,
-   "AVINO SILVER & GOLD MINES LTD"
-  ],
-  "ASML": [
-   937966,
-   "ASML HOLDING NV"
-  ],
-  "AVGO": [
-   1730168,
-   "Broadcom Inc."
-  ],
-  "AXON": [
-   1069183,
-   "AXON ENTERPRISE, INC."
-  ],
-  "AYA.TO": [
-   1826836,
-   "Aya Gold & Silver Inc."
-  ],
-  "BAM.TO": [
-   1937926,
-   "Brookfield Asset Management Ltd."
-  ],
-  "BB.TO": [
-   1070235,
-   "BLACKBERRY Ltd"
-  ],
-  "BBUC.TO": [
-   1654795,
-   "Brookfield Business Corp"
-  ],
-  "BCE.TO": [
-   718940,
-   "BCE INC"
-  ],
-  "BKNG": [
-   1075531,
-   "Booking Holdings Inc."
-  ],
-  "BKR": [
-   1701605,
-   "Baker Hughes Co"
-  ],
-  "BNS.TO": [
-   9631,
-   "BANK OF NOVA SCOTIA"
-  ],
-  "BSX": [
-   885725,
-   "BOSTON SCIENTIFIC CORP"
-  ],
-  "BTDR": [
-   1899123,
-   "Bitdeer Technologies Group"
-  ],
-  "BTE.TO": [
-   1279495,
-   "BAYTEX ENERGY CORP."
-  ],
-  "BTO.TO": [
-   1429937,
-   "B2GOLD CORP"
-  ],
-  "CAE.TO": [
-   1173382,
-   "CAE INC"
-  ],
-  "CAR": [
-   723612,
-   "AVIS BUDGET GROUP, INC."
-  ],
-  "CARR": [
-   1783180,
-   "CARRIER GLOBAL Corp"
-  ],
-  "CCEP": [
-   1650107,
-   "COCA-COLA EUROPACIFIC PARTNERS plc"
-  ],
-  "CCO.TO": [
-   1009001,
-   "CAMECO CORP"
-  ],
-  "CDNS": [
-   813672,
-   "CADENCE DESIGN SYSTEMS INC"
-  ],
-  "CEG": [
-   1868275,
-   "Constellation Energy Corp"
-  ],
-  "CG.TO": [
-   1854640,
-   "Centerra Gold Inc."
-  ],
-  "CIGI.TO": [
-   913353,
-   "Colliers International Group Inc."
-  ],
-  "CLS.TO": [
-   1030894,
-   "CELESTICA INC"
-  ],
-  "CMCSA": [
-   1166691,
-   "COMCAST CORP"
-  ],
-  "CNQ.TO": [
-   1017413,
-   "CANADIAN NATURAL RESOURCES Ltd"
-  ],
-  "CNR.TO": [
-   16868,
-   "CANADIAN NATIONAL RAILWAY CO"
-  ],
-  "COST": [
-   909832,
-   "COSTCO WHOLESALE CORP /NEW"
-  ],
-  "CPRT": [
-   900075,
-   "COPART INC"
-  ],
-  "CRWD": [
-   1535527,
-   "CrowdStrike Holdings, Inc."
-  ],
-  "CRWV": [
-   1769628,
-   "CoreWeave, Inc."
-  ],
-  "CSCO": [
-   858877,
-   "CISCO SYSTEMS, INC."
-  ],
-  "CSX": [
-   277948,
-   "CSX CORP"
-  ],
-  "CTAS": [
-   723254,
-   "CINTAS CORP"
-  ],
-  "CVE.TO": [
-   1475260,
-   "CENOVUS ENERGY INC."
-  ],
-  "DASH": [
-   1792789,
-   "DoorDash, Inc."
-  ],
-  "DCBO.TO": [
-   1829959,
-   "Docebo Inc."
-  ],
-  "DDOG": [
-   1561550,
-   "Datadog, Inc."
-  ],
-  "DML.TO": [
-   1063259,
-   "DENISON MINES CORP."
-  ],
-  "DOO.TO": [
-   1748797,
-   "BRP Inc."
-  ],
-  "DSG.TO": [
-   1050140,
-   "DESCARTES SYSTEMS GROUP INC"
-  ],
-  "DXCM": [
-   1093557,
-   "DEXCOM INC"
-  ],
-  "EDR.TO": [
-   1277866,
-   "ENDEAVOUR SILVER CORP"
-  ],
-  "EFR.TO": [
-   1385849,
-   "ENERGY FUELS INC"
-  ],
-  "EFX.TO": [
-   1904856,
-   "Enerflex Ltd."
-  ],
-  "EIX": [
-   827052,
-   "EDISON INTERNATIONAL"
-  ],
-  "EMA.TO": [
-   1127248,
-   "EMERA INC"
-  ],
-  "ENB.TO": [
-   895728,
-   "ENBRIDGE INC"
-  ],
-  "EOSE": [
-   1805077,
-   "Eos Energy Enterprises, Inc."
-  ],
-  "EQX.TO": [
-   1756607,
-   "Equinox Gold Corp."
-  ],
-  "ERO.TO": [
-   1853860,
-   "Ero Copper Corp."
-  ],
-  "EXC": [
-   1109357,
-   "EXELON CORP"
-  ],
-  "FANG": [
-   1539838,
-   "Diamondback Energy, Inc."
-  ],
-  "FAST": [
-   815556,
-   "FASTENAL CO"
-  ],
-  "FC": [
-   886206,
-   "FRANKLIN COVEY CO"
-  ],
-  "FER": [
-   1468522,
-   "Ferrovial N.V."
-  ],
-  "FLNC": [
-   1868941,
-   "Fluence Energy, Inc."
-  ],
-  "FLXS": [
-   37472,
-   "FLEXSTEEL INDUSTRIES INC"
-  ],
-  "FNV.TO": [
-   1456346,
-   "FRANCO NEVADA Corp"
-  ],
-  "FSV.TO": [
-   1637810,
-   "FirstService Corp"
-  ],
-  "FTNT": [
-   1262039,
-   "Fortinet, Inc."
-  ],
-  "FTS.TO": [
-   1666175,
-   "Fortis Inc."
-  ],
-  "FVI.TO": [
-   1341335,
-   "FORTUNA MINING CORP."
-  ],
-  "GEHC": [
-   1932393,
-   "GE HealthCare Technologies Inc."
-  ],
-  "GFL.TO": [
-   1780232,
-   "GFL Environmental Inc."
-  ],
-  "GIB-A.TO": [
-   1061574,
-   "CGI INC"
-  ],
-  "GIL.TO": [
-   1061894,
-   "Gildan Activewear Inc."
-  ],
-  "GILD": [
-   882095,
-   "GILEAD SCIENCES, INC."
-  ],
-  "GOOGL": [
-   1652044,
-   "Alphabet Inc."
-  ],
-  "GPRO": [
-   1500435,
-   "GoPro, Inc."
-  ],
-  "HBM.TO": [
-   1322422,
-   "Hudbay Minerals Inc."
-  ],
-  "HOLO": [
-   1841209,
-   "MicroCloud Hologram Inc."
-  ],
-  "HON": [
-   773840,
-   "HONEYWELL INTERNATIONAL INC"
-  ],
-  "HONA": [
-   2089271,
-   "Honeywell Aerospace Inc."
-  ],
-  "HTZ": [
-   1657853,
-   "HERTZ GLOBAL HOLDINGS, INC"
-  ],
-  "IAU.TO": [
-   1853962,
-   "i-80 Gold Corp."
-  ],
-  "IDXX": [
-   874716,
-   "IDEXX LABORATORIES INC /DE"
-  ],
-  "IMG.TO": [
-   1203464,
-   "IAMGOLD CORP"
-  ],
-  "IMO.TO": [
-   49938,
-   "IMPERIAL OIL LTD"
-  ],
-  "INTC": [
-   50863,
-   "INTEL CORP"
-  ],
-  "INTU": [
-   896878,
-   "INTUIT INC."
-  ],
-  "ISRG": [
-   1035267,
-   "INTUITIVE SURGICAL INC"
-  ],
-  "JPM": [
-   19617,
-   "JPMORGAN CHASE & CO"
-  ],
-  "K.TO": [
-   701818,
-   "KINROSS GOLD CORP"
-  ],
-  "KDP": [
-   1418135,
-   "Keurig Dr Pepper Inc."
-  ],
-  "KLAC": [
-   319201,
-   "KLA CORP"
-  ],
-  "LAC.TO": [
-   1966983,
-   "LITHIUM AMERICAS CORP."
-  ],
-  "LIN": [
-   1707925,
-   "LINDE PLC"
-  ],
-  "LITE": [
-   1633978,
-   "Lumentum Holdings Inc."
-  ],
-  "LLY": [
-   59478,
-   "ELI LILLY & Co"
-  ],
-  "LRCX": [
-   707549,
-   "LAM RESEARCH CORP"
-  ],
-  "LSCC": [
-   855658,
-   "LATTICE SEMICONDUCTOR CORP"
-  ],
-  "LSPD.TO": [
-   1823306,
-   "Lightspeed Commerce Inc."
-  ],
-  "MAR": [
-   1048286,
-   "MARRIOTT INTERNATIONAL INC /MD/"
-  ],
-  "MARA": [
-   1507605,
-   "MARA Holdings, Inc."
-  ],
-  "MCHP": [
-   827054,
-   "MICROCHIP TECHNOLOGY INC"
-  ],
-  "MDA.TO": [
-   1857047,
-   "MDA Space Ltd."
-  ],
-  "MDLZ": [
-   1103982,
-   "Mondelez International, Inc."
-  ],
-  "MDT": [
-   1613103,
-   "Medtronic plc"
-  ],
-  "MELI": [
-   1099590,
-   "MERCADOLIBRE INC"
-  ],
-  "META": [
-   1326801,
-   "Meta Platforms, Inc."
-  ],
-  "MFC.TO": [
-   1086888,
-   "MANULIFE FINANCIAL CORP"
-  ],
-  "MG.TO": [
-   749098,
-   "MAGNA INTERNATIONAL INC"
-  ],
-  "MNST": [
-   865752,
-   "Monster Beverage Corp"
-  ],
-  "MPWR": [
-   1280452,
-   "MONOLITHIC POWER SYSTEMS, INC."
-  ],
-  "MRVL": [
-   1835632,
-   "Marvell Technology, Inc."
-  ],
-  "MSFT": [
-   789019,
-   "MICROSOFT CORP"
-  ],
-  "MSTR": [
-   1050446,
-   "Strategy Inc"
-  ],
-  "MU": [
-   723125,
-   "MICRON TECHNOLOGY INC"
-  ],
-  "MX.TO": [
-   886977,
-   "METHANEX CORP"
-  ],
-  "NAMM": [
-   2026514,
-   "Namib Minerals"
-  ],
-  "NBIS": [
-   1513845,
-   "Nebius Group N.V."
-  ],
-  "NFLX": [
-   1065280,
-   "NETFLIX INC"
-  ],
-  "NG.TO": [
-   1173420,
-   "NOVAGOLD RESOURCES INC"
-  ],
-  "NPCE": [
-   1528287,
-   "NeuroPace Inc"
-  ],
-  "NTR.TO": [
-   1725964,
-   "Nutrien Ltd."
-  ],
-  "NVDA": [
-   1045810,
-   "NVIDIA CORP"
-  ],
-  "NVO": [
-   353278,
-   "NOVO NORDISK A S"
-  ],
-  "NXE.TO": [
-   1698535,
-   "NexGen Energy Ltd."
-  ],
-  "NXPI": [
-   1413447,
-   "NXP Semiconductors N.V."
-  ],
-  "ODFL": [
-   878927,
-   "OLD DOMINION FREIGHT LINE, INC."
-  ],
-  "OGC.TO": [
-   1487326,
-   "OceanaGold Corp"
-  ],
-  "OPTT": [
-   1378140,
-   "Ocean Power Technologies, Inc."
-  ],
-  "ORLY": [
-   898173,
-   "O REILLY AUTOMOTIVE INC"
-  ],
-  "PAAS.TO": [
-   771992,
-   "PAN AMERICAN SILVER CORP"
-  ],
-  "PANW": [
-   1327567,
-   "Palo Alto Networks Inc"
-  ],
-  "PAYX": [
-   723531,
-   "PAYCHEX INC"
-  ],
-  "PCAR": [
-   75362,
-   "PACCAR INC"
-  ],
-  "PDD": [
-   1737806,
-   "PDD Holdings Inc."
-  ],
-  "PEP": [
-   77476,
-   "PEPSICO INC"
-  ],
-  "PFE": [
-   78003,
-   "PFIZER INC"
-  ],
-  "PLTR": [
-   1321655,
-   "Palantir Technologies Inc."
-  ],
-  "PPL.TO": [
-   1546066,
-   "PEMBINA PIPELINE CORP"
-  ],
-  "PPTA.TO": [
-   1526243,
-   "PERPETUA RESOURCES CORP."
-  ],
-  "PRSO": [
-   890394,
-   "Peraso Inc."
-  ],
-  "PYPL": [
-   1633917,
-   "PayPal Holdings, Inc."
-  ],
-  "QCOM": [
-   804328,
-   "QUALCOMM INC/DE"
-  ],
-  "QSR.TO": [
-   1618756,
-   "Restaurant Brands International Inc."
-  ],
-  "QUTX": [
-   1494413,
-   "Quantum X Inc."
-  ],
-  "R": [
-   85961,
-   "RYDER SYSTEM INC"
-  ],
-  "RBA.TO": [
-   1046102,
-   "RB GLOBAL INC."
-  ],
-  "RCI-B.TO": [
-   733099,
-   "ROGERS COMMUNICATIONS INC"
-  ],
-  "REGN": [
-   872589,
-   "REGENERON PHARMACEUTICALS, INC."
-  ],
-  "RIOT": [
-   1167419,
-   "Riot Platforms, Inc."
-  ],
-  "RKLB": [
-   1819994,
-   "Rocket Lab Corp"
-  ],
-  "ROP": [
-   882835,
-   "ROPER TECHNOLOGIES INC"
-  ],
-  "ROST": [
-   745732,
-   "ROSS STORES, INC."
-  ],
-  "RY.TO": [
-   1000275,
-   "ROYAL BANK OF CANADA"
-  ],
-  "SBUX": [
-   829224,
-   "STARBUCKS CORP"
-  ],
-  "SEA.TO": [
-   1231346,
-   "SEABRIDGE GOLD INC"
-  ],
-  "SHOP.TO": [
-   1594805,
-   "SHOPIFY INC."
-  ],
-  "SII.TO": [
-   1512920,
-   "SPROTT INC."
-  ],
-  "SKE.TO": [
-   1713748,
-   "Skeena Resources Ltd"
-  ],
-  "SLF.TO": [
-   1097362,
-   "SUN LIFE FINANCIAL INC"
-  ],
-  "SNDK": [
-   2023554,
-   "Sandisk Corp"
-  ],
-  "SNPS": [
-   883241,
-   "SYNOPSYS INC"
-  ],
-  "SOBO.TO": [
-   2019061,
-   "South Bow Corp"
-  ],
-  "SSRM.TO": [
-   921638,
-   "SSR MINING INC."
-  ],
-  "STM": [
-   932787,
-   "STMicroelectronics N.V."
-  ],
-  "STN.TO": [
-   1131383,
-   "STANTEC INC"
-  ],
-  "STX": [
-   1137789,
-   "Seagate Technology Holdings plc"
-  ],
-  "SU.TO": [
-   311337,
-   "SUNCOR ENERGY INC"
-  ],
-  "SUPX": [
-   1897087,
-   "SuperX AI Technology Ltd"
-  ],
-  "SVM.TO": [
-   1340677,
-   "SILVERCORP METALS INC"
-  ],
-  "T.TO": [
-   868675,
-   "TELUS CORP"
-  ],
-  "TA.TO": [
-   1144800,
-   "TRANSALTA CORP"
-  ],
-  "TECK-B.TO": [
-   886986,
-   "TECK RESOURCES LTD"
-  ],
-  "TER": [
-   97210,
-   "TERADYNE, INC"
-  ],
-  "TFII.TO": [
-   1588823,
-   "TFI International Inc."
-  ],
-  "TFPM.TO": [
-   1829726,
-   "Triple Flag Precious Metals Corp."
-  ],
-  "TMUS": [
-   1283699,
-   "T-Mobile US, Inc."
-  ],
-  "TRI": [
-   1075124,
-   "THOMSON REUTERS CORP /CAN/"
-  ],
-  "TRP.TO": [
-   1232384,
-   "TC ENERGY CORP"
-  ],
-  "TSAT.TO": [
-   1845840,
-   "Telesat Corp"
-  ],
-  "TSLA": [
-   1318605,
-   "Tesla, Inc."
-  ],
-  "TTWO": [
-   946581,
-   "TAKE TWO INTERACTIVE SOFTWARE INC"
-  ],
-  "TXN": [
-   97476,
-   "TEXAS INSTRUMENTS INC"
-  ],
-  "URI": [
-   1067701,
-   "UNITED RENTALS, INC."
-  ],
-  "VET.TO": [
-   1293135,
-   "VERMILION ENERGY INC."
-  ],
-  "VRTX": [
-   875320,
-   "VERTEX PHARMACEUTICALS INC / MA"
-  ],
-  "VZLA.TO": [
-   1796073,
-   "Vizsla Silver Corp."
-  ],
-  "WBD": [
-   1437107,
-   "Warner Bros. Discovery, Inc."
-  ],
-  "WCN.TO": [
-   1318220,
-   "Waste Connections, Inc."
-  ],
-  "WDAY": [
-   1327811,
-   "Workday, Inc."
-  ],
-  "WDC": [
-   106040,
-   "WESTERN DIGITAL CORP"
-  ],
-  "WFG.TO": [
-   1402388,
-   "WEST FRASER TIMBER CO., LTD"
-  ],
-  "WMT": [
-   104169,
-   "Walmart Inc."
-  ],
-  "WPM.TO": [
-   1323404,
-   "Wheaton Precious Metals Corp."
-  ],
-  "XEL": [
-   72903,
-   "XCEL ENERGY INC"
-  ]
- },
- "map_date": "2026-10-20",
- "no_cik": [
-  "AAV.TO",
-  "ABRA.TO",
-  "ABX.TO",
-  "AC.TO",
-  "ACO-X.TO",
-  "ADP",
-  "AIF.TO",
-  "ALA.TO",
-  "AMD",
-  "AP-UN.TO",
-  "ARE.TO",
-  "ATD.TO",
-  "ATH.TO",
-  "ATRL.TO",
-  "ATS.TO",
-  "ATZ.TO",
-  "BBD-B.TO",
-  "BDGI.TO",
-  "BDT.TO",
-  "BEI-UN.TO",
-  "BEP-UN.TO",
-  "BHC.TO",
-  "BIP-UN.TO",
-  "BIR.TO",
-  "BMO.TO",
-  "BN.TO",
-  "BYD.TO",
-  "CAR-UN.TO",
-  "CCA.TO",
-  "CCL-B.TO",
-  "CEU.TO",
-  "CGY.TO",
-  "CHP-UN.TO",
-  "CJT.TO",
-  "CM.TO",
-  "CP.TO",
-  "CPX.TO",
-  "CRR-UN.TO",
-  "CRT-UN.TO",
-  "CS.TO",
-  "CSH-UN.TO",
-  "CSU.TO",
-  "CTC-A.TO",
-  "CU.TO",
-  "CURA.TO",
-  "DFY.TO",
-  "DIR-UN.TO",
-  "DOL.TO",
-  "DPM.TO",
-  "DSV.TO",
-  "EFN.TO",
-  "EIF.TO",
-  "ELD.TO",
-  "EMP-A.TO",
-  "EQB.TO",
-  "FCR-UN.TO",
-  "FFH.TO",
-  "FM.TO",
-  "FRU.TO",
-  "FTT.TO",
-  "GEI.TO",
-  "GMIN.TO",
-  "GRT-UN.TO",
-  "GSY.TO",
-  "GWO.TO",
-  "H.TO",
-  "HR-UN.TO",
-  "HWX.TO",
-  "IAG.TO",
-  "IFC.TO",
-  "IGM.TO",
-  "IPCO.TO",
-  "IVN.TO",
-  "JWEL.TO",
-  "KEL.TO",
-  "KEY.TO",
-  "KMP-UN.TO",
-  "KNT.TO",
-  "KXS.TO",
-  "L.TO",
-  "LB.TO",
-  "LEAP.V",
-  "LIF.TO",
-  "LNR.TO",
-  "LUG.TO",
-  "LUN.TO",
-  "MAU.TO",
-  "MFI.TO",
-  "MRU.TO",
-  "MTL.TO",
-  "NA.TO",
-  "NFI.TO",
-  "NGEX.TO",
-  "NPI.TO",
-  "NWC.TO",
-  "ONEX.TO",
-  "OR.TO",
-  "OTEX.TO",
-  "PBH.TO",
-  "PET.TO",
-  "PEY.TO",
-  "PMZ-UN.TO",
-  "POU.TO",
-  "POW.TO",
-  "PSK.TO",
-  "PXT.TO",
-  "QBR-B.TO",
-  "RCH.TO",
-  "REI-UN.TO",
-  "RUS.TO",
-  "SAP.TO",
-  "SCR.TO",
-  "SIA.TO",
-  "SJ.TO",
-  "SPB.TO",
-  "SPCX",
-  "SRU-UN.TO",
-  "STHH",
-  "TCL-A.TO",
-  "TD.TO",
-  "TIH.TO",
-  "TKO.TO",
-  "TOU.TO",
-  "TPZ.TO",
-  "TRI.TO",
-  "TSU.TO",
-  "TVE.TO",
-  "TVK.TO",
-  "TXG.TO",
-  "USA.TO",
-  "VITL-UN.TO",
-  "VNP.TO",
-  "WCP.TO",
-  "WDO.TO",
-  "WN.TO",
-  "WPK.TO",
-  "WSP.TO",
-  "X.TO",
-  "XOM"
- ],
- "run": "2026-10-21T15:20Z"
+"ciks": {
+"AAPL": [
+320193,
+"Apple Inc."
+],
+"AAUC.TO": [
+1993344,
+"Allied Gold Corp"
+],
+"ABNB": [
+1559720,
+"Airbnb, Inc."
+],
+"ADBE": [
+796343,
+"ADOBE INC."
+],
+"ADI": [
+6281,
+"ANALOG DEVICES INC"
+],
+"ADSK": [
+769397,
+"Autodesk, Inc."
+],
+"AEM.TO": [
+2809,
+"AGNICO EAGLE MINES LTD"
+],
+"AEP": [
+4904,
+"AMERICAN ELECTRIC POWER CO INC"
+],
+"AG.TO": [
+1308648,
+"FIRST MAJESTIC SILVER CORP"
+],
+"AGI.TO": [
+1178819,
+"ALAMOS GOLD INC"
+],
+"ALAB": [
+1736297,
+"Astera Labs, Inc."
+],
+"ALNY": [
+1178670,
+"ALNYLAM PHARMACEUTICALS, INC."
+],
+"AMAT": [
+6951,
+"APPLIED MATERIALS INC /DE"
+],
+"AMGN": [
+318154,
+"AMGEN INC"
+],
+"AMZN": [
+1018724,
+"AMAZON COM INC"
+],
+"APA": [
+1841666,
+"APA Corp"
+],
+"APP": [
+1751008,
+"AppLovin Corp"
+],
+"AQN.TO": [
+1174169,
+"ALGONQUIN POWER & UTILITIES CORP."
+],
+"ARIS.TO": [
+1964504,
+"Aris Mining Corp"
+],
+"ARM": [
+1973239,
+"ARM HOLDINGS PLC /UK"
+],
+"ASM.TO": [
+316888,
+"AVINO SILVER & GOLD MINES LTD"
+],
+"ASML": [
+937966,
+"ASML HOLDING NV"
+],
+"AVGO": [
+1730168,
+"Broadcom Inc."
+],
+"AXON": [
+1069183,
+"AXON ENTERPRISE, INC."
+],
+"AYA.TO": [
+1826836,
+"Aya Gold & Silver Inc."
+],
+"BAM.TO": [
+1937926,
+"Brookfield Asset Management Ltd."
+],
+"BB.TO": [
+1070235,
+"BLACKBERRY Ltd"
+],
+"BBUC.TO": [
+1654795,
+"Brookfield Business Corp"
+],
+"BCE.TO": [
+718940,
+"BCE INC"
+],
+"BKNG": [
+1075531,
+"Booking Holdings Inc."
+],
+"BKR": [
+1701605,
+"Baker Hughes Co"
+],
+"BNS.TO": [
+9631,
+"BANK OF NOVA SCOTIA"
+],
+"BSX": [
+885725,
+"BOSTON SCIENTIFIC CORP"
+],
+"BTDR": [
+1899123,
+"Bitdeer Technologies Group"
+],
+"BTE.TO": [
+1279495,
+"BAYTEX ENERGY CORP."
+],
+"BTO.TO": [
+1429937,
+"B2GOLD CORP"
+],
+"CAE.TO": [
+1173382,
+"CAE INC"
+],
+"CAR": [
+723612,
+"AVIS BUDGET GROUP, INC."
+],
+"CARR": [
+1783180,
+"CARRIER GLOBAL Corp"
+],
+"CCEP": [
+1650107,
+"COCA-COLA EUROPACIFIC PARTNERS plc"
+],
+"CCO.TO": [
+1009001,
+"CAMECO CORP"
+],
+"CDNS": [
+813672,
+"CADENCE DESIGN SYSTEMS INC"
+],
+"CEG": [
+1868275,
+"Constellation Energy Corp"
+],
+"CG.TO": [
+1854640,
+"Centerra Gold Inc."
+],
+"CIGI.TO": [
+913353,
+"Colliers International Group Inc."
+],
+"CLS.TO": [
+1030894,
+"CELESTICA INC"
+],
+"CMCSA": [
+1166691,
+"COMCAST CORP"
+],
+"CNQ.TO": [
+1017413,
+"CANADIAN NATURAL RESOURCES Ltd"
+],
+"CNR.TO": [
+16868,
+"CANADIAN NATIONAL RAILWAY CO"
+],
+"COST": [
+909832,
+"COSTCO WHOLESALE CORP /NEW"
+],
+"CPRT": [
+900075,
+"COPART INC"
+],
+"CRWD": [
+1535527,
+"CrowdStrike Holdings, Inc."
+],
+"CRWV": [
+1769628,
+"CoreWeave, Inc."
+],
+"CSCO": [
+858877,
+"CISCO SYSTEMS, INC."
+],
+"CSX": [
+277948,
+"CSX CORP"
+],
+"CTAS": [
+723254,
+"CINTAS CORP"
+],
+"CVE.TO": [
+1475260,
+"CENOVUS ENERGY INC."
+],
+"DASH": [
+1792789,
+"DoorDash, Inc."
+],
+"DCBO.TO": [
+1829959,
+"Docebo Inc."
+],
+"DDOG": [
+1561550,
+"Datadog, Inc."
+],
+"DML.TO": [
+1063259,
+"DENISON MINES CORP."
+],
+"DOO.TO": [
+1748797,
+"BRP Inc."
+],
+"DSG.TO": [
+1050140,
+"DESCARTES SYSTEMS GROUP INC"
+],
+"DXCM": [
+1093557,
+"DEXCOM INC"
+],
+"EDR.TO": [
+1277866,
+"ENDEAVOUR SILVER CORP"
+],
+"EFR.TO": [
+1385849,
+"ENERGY FUELS INC"
+],
+"EFX.TO": [
+1904856,
+"Enerflex Ltd."
+],
+"EIX": [
+827052,
+"EDISON INTERNATIONAL"
+],
+"EMA.TO": [
+1127248,
+"EMERA INC"
+],
+"ENB.TO": [
+895728,
+"ENBRIDGE INC"
+],
+"EOSE": [
+1805077,
+"Eos Energy Enterprises, Inc."
+],
+"EQX.TO": [
+1756607,
+"Equinox Gold Corp."
+],
+"ERO.TO": [
+1853860,
+"Ero Copper Corp."
+],
+"EXC": [
+1109357,
+"EXELON CORP"
+],
+"FANG": [
+1539838,
+"Diamondback Energy, Inc."
+],
+"FAST": [
+815556,
+"FASTENAL CO"
+],
+"FC": [
+886206,
+"FRANKLIN COVEY CO"
+],
+"FER": [
+1468522,
+"Ferrovial N.V."
+],
+"FLNC": [
+1868941,
+"Fluence Energy, Inc."
+],
+"FLXS": [
+37472,
+"FLEXSTEEL INDUSTRIES INC"
+],
+"FNV.TO": [
+1456346,
+"FRANCO NEVADA Corp"
+],
+"FSV.TO": [
+1637810,
+"FirstService Corp"
+],
+"FTNT": [
+1262039,
+"Fortinet, Inc."
+],
+"FTS.TO": [
+1666175,
+"Fortis Inc."
+],
+"FVI.TO": [
+1341335,
+"FORTUNA MINING CORP."
+],
+"GEHC": [
+1932393,
+"GE HealthCare Technologies Inc."
+],
+"GFL.TO": [
+1780232,
+"GFL Environmental Inc."
+],
+"GIB-A.TO": [
+1061574,
+"CGI INC"
+],
+"GIL.TO": [
+1061894,
+"Gildan Activewear Inc."
+],
+"GILD": [
+882095,
+"GILEAD SCIENCES, INC."
+],
+"GOOGL": [
+1652044,
+"Alphabet Inc."
+],
+"GPRO": [
+1500435,
+"GoPro, Inc."
+],
+"HBM.TO": [
+1322422,
+"Hudbay Minerals Inc."
+],
+"HOLO": [
+1841209,
+"MicroCloud Hologram Inc."
+],
+"HON": [
+773840,
+"HONEYWELL INTERNATIONAL INC"
+],
+"HONA": [
+2089271,
+"Honeywell Aerospace Inc."
+],
+"HTZ": [
+1657853,
+"HERTZ GLOBAL HOLDINGS, INC"
+],
+"IAU.TO": [
+1853962,
+"i-80 Gold Corp."
+],
+"IDXX": [
+874716,
+"IDEXX LABORATORIES INC /DE"
+],
+"IMG.TO": [
+1203464,
+"IAMGOLD CORP"
+],
+"IMO.TO": [
+49938,
+"IMPERIAL OIL LTD"
+],
+"INTC": [
+50863,
+"INTEL CORP"
+],
+"INTU": [
+896878,
+"INTUIT INC."
+],
+"ISRG": [
+1035267,
+"INTUITIVE SURGICAL INC"
+],
+"JPM": [
+19617,
+"JPMORGAN CHASE & CO"
+],
+"K.TO": [
+701818,
+"KINROSS GOLD CORP"
+],
+"KDP": [
+1418135,
+"Keurig Dr Pepper Inc."
+],
+"KLAC": [
+319201,
+"KLA CORP"
+],
+"LAC.TO": [
+1966983,
+"LITHIUM AMERICAS CORP."
+],
+"LIN": [
+1707925,
+"LINDE PLC"
+],
+"LITE": [
+1633978,
+"Lumentum Holdings Inc."
+],
+"LLY": [
+59478,
+"ELI LILLY & Co"
+],
+"LRCX": [
+707549,
+"LAM RESEARCH CORP"
+],
+"LSCC": [
+855658,
+"LATTICE SEMICONDUCTOR CORP"
+],
+"LSPD.TO": [
+1823306,
+"Lightspeed Commerce Inc."
+],
+"MAR": [
+1048286,
+"MARRIOTT INTERNATIONAL INC /MD/"
+],
+"MARA": [
+1507605,
+"MARA Holdings, Inc."
+],
+"MCHP": [
+827054,
+"MICROCHIP TECHNOLOGY INC"
+],
+"MDA.TO": [
+1857047,
+"MDA Space Ltd."
+],
+"MDLZ": [
+1103982,
+"Mondelez International, Inc."
+],
+"MDT": [
+1613103,
+"Medtronic plc"
+],
+"MELI": [
+1099590,
+"MERCADOLIBRE INC"
+],
+"META": [
+1326801,
+"Meta Platforms, Inc."
+],
+"MFC.TO": [
+1086888,
+"MANULIFE FINANCIAL CORP"
+],
+"MG.TO": [
+749098,
+"MAGNA INTERNATIONAL INC"
+],
+"MNST": [
+865752,
+"Monster Beverage Corp"
+],
+"MPWR": [
+1280452,
+"MONOLITHIC POWER SYSTEMS, INC."
+],
+"MRVL": [
+1835632,
+"Marvell Technology, Inc."
+],
+"MSFT": [
+789019,
+"MICROSOFT CORP"
+],
+"MSTR": [
+1050446,
+"Strategy Inc"
+],
+"MU": [
+723125,
+"MICRON TECHNOLOGY INC"
+],
+"MX.TO": [
+886977,
+"METHANEX CORP"
+],
+"NAMM": [
+2026514,
+"Namib Minerals"
+],
+"NBIS": [
+1513845,
+"Nebius Group N.V."
+],
+"NFLX": [
+1065280,
+"NETFLIX INC"
+],
+"NG.TO": [
+1173420,
+"NOVAGOLD RESOURCES INC"
+],
+"NPCE": [
+1528287,
+"NeuroPace Inc"
+],
+"NTR.TO": [
+1725964,
+"Nutrien Ltd."
+],
+"NVDA": [
+1045810,
+"NVIDIA CORP"
+],
+"NVO": [
+353278,
+"NOVO NORDISK A S"
+],
+"NXE.TO": [
+1698535,
+"NexGen Energy Ltd."
+],
+"NXPI": [
+1413447,
+"NXP Semiconductors N.V."
+],
+"ODFL": [
+878927,
+"OLD DOMINION FREIGHT LINE, INC."
+],
+"OGC.TO": [
+1487326,
+"OceanaGold Corp"
+],
+"OPTT": [
+1378140,
+"Ocean Power Technologies, Inc."
+],
+"ORLY": [
+898173,
+"O REILLY AUTOMOTIVE INC"
+],
+"PAAS.TO": [
+771992,
+"PAN AMERICAN SILVER CORP"
+],
+"PANW": [
+1327567,
+"Palo Alto Networks Inc"
+],
+"PAYX": [
+723531,
+"PAYCHEX INC"
+],
+"PCAR": [
+75362,
+"PACCAR INC"
+],
+"PDD": [
+1737806,
+"PDD Holdings Inc."
+],
+"PEP": [
+77476,
+"PEPSICO INC"
+],
+"PFE": [
+78003,
+"PFIZER INC"
+],
+"PLTR": [
+1321655,
+"Palantir Technologies Inc."
+],
+"PPL.TO": [
+1546066,
+"PEMBINA PIPELINE CORP"
+],
+"PPTA.TO": [
+1526243,
+"PERPETUA RESOURCES CORP."
+],
+"PRSO": [
+890394,
+"Peraso Inc."
+],
+"PYPL": [
+1633917,
+"PayPal Holdings, Inc."
+],
+"QCOM": [
+804328,
+"QUALCOMM INC/DE"
+],
+"QSR.TO": [
+1618756,
+"Restaurant Brands International Inc."
+],
+"QUTX": [
+1494413,
+"Quantum X Inc."
+],
+"R": [
+85961,
+"RYDER SYSTEM INC"
+],
+"RBA.TO": [
+1046102,
+"RB GLOBAL INC."
+],
+"RCI-B.TO": [
+733099,
+"ROGERS COMMUNICATIONS INC"
+],
+"REGN": [
+872589,
+"REGENERON PHARMACEUTICALS, INC."
+],
+"RIOT": [
+1167419,
+"Riot Platforms, Inc."
+],
+"RKLB": [
+1819994,
+"Rocket Lab Corp"
+],
+"ROP": [
+882835,
+"ROPER TECHNOLOGIES INC"
+],
+"ROST": [
+745732,
+"ROSS STORES, INC."
+],
+"RY.TO": [
+1000275,
+"ROYAL BANK OF CANADA"
+],
+"SBUX": [
+829224,
+"STARBUCKS CORP"
+],
+"SEA.TO": [
+1231346,
+"SEABRIDGE GOLD INC"
+],
+"SHOP.TO": [
+1594805,
+"SHOPIFY INC."
+],
+"SII.TO": [
+1512920,
+"SPROTT INC."
+],
+"SKE.TO": [
+1713748,
+"Skeena Resources Ltd"
+],
+"SLF.TO": [
+1097362,
+"SUN LIFE FINANCIAL INC"
+],
+"SNDK": [
+2023554,
+"Sandisk Corp"
+],
+"SNPS": [
+883241,
+"SYNOPSYS INC"
+],
+"SOBO.TO": [
+2019061,
+"South Bow Corp"
+],
+"SSRM.TO": [
+921638,
+"SSR MINING INC."
+],
+"STM": [
+932787,
+"STMicroelectronics N.V."
+],
+"STN.TO": [
+1131383,
+"STANTEC INC"
+],
+"STX": [
+1137789,
+"Seagate Technology Holdings plc"
+],
+"SU.TO": [
+311337,
+"SUNCOR ENERGY INC"
+],
+"SUPX": [
+1897087,
+"SuperX AI Technology Ltd"
+],
+"SVM.TO": [
+1340677,
+"SILVERCORP METALS INC"
+],
+"T.TO": [
+868675,
+"TELUS CORP"
+],
+"TA.TO": [
+1144800,
+"TRANSALTA CORP"
+],
+"TECK-B.TO": [
+886986,
+"TECK RESOURCES LTD"
+],
+"TER": [
+97210,
+"TERADYNE, INC"
+],
+"TFII.TO": [
+1588823,
+"TFI International Inc."
+],
+"TFPM.TO": [
+1829726,
+"Triple Flag Precious Metals Corp."
+],
+"TMUS": [
+1283699,
+"T-Mobile US, Inc."
+],
+"TRI": [
+1075124,
+"THOMSON REUTERS CORP /CAN/"
+],
+"TRP.TO": [
+1232384,
+"TC ENERGY CORP"
+],
+"TSAT.TO": [
+1845840,
+"Telesat Corp"
+],
+"TSLA": [
+1318605,
+"Tesla, Inc."
+],
+"TTWO": [
+946581,
+"TAKE TWO INTERACTIVE SOFTWARE INC"
+],
+"TXN": [
+97476,
+"TEXAS INSTRUMENTS INC"
+],
+"URI": [
+1067701,
+"UNITED RENTALS, INC."
+],
+"VET.TO": [
+1293135,
+"VERMILION ENERGY INC."
+],
+"VRTX": [
+875320,
+"VERTEX PHARMACEUTICALS INC / MA"
+],
+"VZLA.TO": [
+1796073,
+"Vizsla Silver Corp."
+],
+"WBD": [
+1437107,
+"Warner Bros. Discovery, Inc."
+],
+"WCN.TO": [
+1318220,
+"Waste Connections, Inc."
+],
+"WDAY": [
+1327811,
+"Workday, Inc."
+],
+"WDC": [
+106040,
+"WESTERN DIGITAL CORP"
+],
+"WFG.TO": [
+1402388,
+"WEST FRASER TIMBER CO., LTD"
+],
+"WMT": [
+104169,
+"Walmart Inc."
+],
+"WPM.TO": [
+1323404,
+"Wheaton Precious Metals Corp."
+],
+"XEL": [
+72903,
+"XCEL ENERGY INC"
+]
+},
+"map_date": "2026-10-20",
+"no_cik": [
+"AAV.TO",
+"ABRA.TO",
+"ABX.TO",
+"AC.TO",
+"ACO-X.TO",
+"ADP",
+"AIF.TO",
+"ALA.TO",
+"AMD",
+"AP-UN.TO",
+"ARE.TO",
+"ATD.TO",
+"ATH.TO",
+"ATRL.TO",
+"ATS.TO",
+"ATZ.TO",
+"BBD-B.TO",
+"BDGI.TO",
+"BDT.TO",
+"BEI-UN.TO",
+"BEP-UN.TO",
+"BHC.TO",
+"BIP-UN.TO",
+"BIR.TO",
+"BMO.TO",
+"BN.TO",
+"BYD.TO",
+"CAR-UN.TO",
+"CCA.TO",
+"CCL-B.TO",
+"CEU.TO",
+"CGY.TO",
+"CHP-UN.TO",
+"CJT.TO",
+"CM.TO",
+"CP.TO",
+"CPX.TO",
+"CRR-UN.TO",
+"CRT-UN.TO",
+"CS.TO",
+"CSH-UN.TO",
+"CSU.TO",
+"CTC-A.TO",
+"CU.TO",
+"CURA.TO",
+"DFY.TO",
+"DIR-UN.TO",
+"DOL.TO",
+"DPM.TO",
+"DSV.TO",
+"EFN.TO",
+"EIF.TO",
+"ELD.TO",
+"EMP-A.TO",
+"EQB.TO",
+"FCR-UN.TO",
+"FFH.TO",
+"FM.TO",
+"FRU.TO",
+"FTT.TO",
+"GEI.TO",
+"GMIN.TO",
+"GRT-UN.TO",
+"GSY.TO",
+"GWO.TO",
+"H.TO",
+"HR-UN.TO",
+"HWX.TO",
+"IAG.TO",
+"IFC.TO",
+"IGM.TO",
+"IPCO.TO",
+"IVN.TO",
+"JWEL.TO",
+"KEL.TO",
+"KEY.TO",
+"KMP-UN.TO",
+"KNT.TO",
+"KXS.TO",
+"L.TO",
+"LB.TO",
+"LEAP.V",
+"LIF.TO",
+"LNR.TO",
+"LUG.TO",
+"LUN.TO",
+"MAU.TO",
+"MFI.TO",
+"MRU.TO",
+"MTL.TO",
+"NA.TO",
+"NFI.TO",
+"NGEX.TO",
+"NPI.TO",
+"NWC.TO",
+"ONEX.TO",
+"OR.TO",
+"OTEX.TO",
+"PBH.TO",
+"PET.TO",
+"PEY.TO",
+"PMZ-UN.TO",
+"POU.TO",
+"POW.TO",
+"PSK.TO",
+"PXT.TO",
+"QBR-B.TO",
+"RCH.TO",
+"REI-UN.TO",
+"RUS.TO",
+"SAP.TO",
+"SCR.TO",
+"SIA.TO",
+"SJ.TO",
+"SPB.TO",
+"SPCX",
+"SRU-UN.TO",
+"STHH",
+"TCL-A.TO",
+"TD.TO",
+"TIH.TO",
+"TKO.TO",
+"TOU.TO",
+"TPZ.TO",
+"TRI.TO",
+"TSU.TO",
+"TVE.TO",
+"TVK.TO",
+"TXG.TO",
+"USA.TO",
+"VITL-UN.TO",
+"VNP.TO",
+"WCP.TO",
+"WDO.TO",
+"WN.TO",
+"WPK.TO",
+"WSP.TO",
+"X.TO",
+"XOM"
+],
+"run": "2026-10-22T00:19Z"
 }
