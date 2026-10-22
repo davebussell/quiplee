@@ -257,7 +257,10 @@ their emails and the member tools. Accounts live in the Blobs store `paper`
 `netlify/lib/account.mjs` and the routes in `netlify/functions/account.mjs`
 (`/api/account/*`: sign-up, sign-in, follow, alerts, email, confirm, forgot/reset
 password, unsubscribe, delete). Old username-only accounts from the retired game keep working and
-can add an email on the account page. Signing in sets the HttpOnly `pt` session, a readable
+can add an email on the account page. Its "Your stocks" table (`assets/me.js` tableHtml) shows your signal, plays in, price, 1-year change and any
+of the 17 factors as columns (Columns picker with quick picks; values from data/playset.json, green at 60+ points, red at
+40 or less), filters by signal, group, name and "favours buying"/"counts against" on any factor, sorts by any header
+(sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`). Signing in sets the HttpOnly `pt` session, a readable
 `bp_name` cookie for the header, and, for accounts with an email, a `qm` cookie of
 kind `acct` that opens the member pages. **Member tools are free for every account
 until midnight on January 1, 2027 (Toronto)**: `FREE_UNTIL` in `netlify/lib/account.mjs`,

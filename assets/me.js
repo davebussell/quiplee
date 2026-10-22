@@ -108,15 +108,143 @@
       return '<div class="me-empty"><p><b>Follow a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div></div>';
     }
-    return changesHtml(list) + '<ul class="me-list">' + list.map(function (s) {
-      var t = R.t[s], c = kn(s);
-      return '<li><a class="me-row" href="' + esc(STOCK.replace('{u}', t.u)) + '">' +
-        '<span class="mp-sym"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></span>' + '<span class="mp-sig">' + sgPill(sg(s)) + '</span>' +
-        '<span class="mp-bar">' + bar(c[0], c[1]) + '<span>' + c[0] + '/' + c[1] + ' plays</span></span>' +
-        '<span class="mp-px mono">' + money(t.p, t.cur) + (t.d1 != null ? ' <small class="' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</span>' +
-        '<span class="mp-since">' + (t.y1 != null ? '<span class="' + cls(t.y1) + '">' + pct(t.y1, 0) + '</span> in a year' : '') + '</span></a>' +
-        '<button type="button" class="me-x" data-remove="' + esc(s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></li>';
-    }).join('') + '</ul>';
+    var D = fxD(), all = rowsData();
+    return changesHtml(list) + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
+  }
+
+  // ------------------------------------------------------------ your stocks: a table you can widen and filter
+  // Any of the factors your signal can weight, as columns you choose (plays.js data: each name's points 0-100 and
+  // the value shown); filters by your signal, group, name, and "favours buying" (60+ points) or "counts against"
+  // (40 or fewer) on any factor. The headers sort (sortable.js). The view is kept per browser.
+  var VKEY = 'bp.me.view.v1', FF_OPEN = false, PICK_OPEN = false;
+  var V = (function () { try { var v = JSON.parse(localStorage.getItem(VKEY) || 'null'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } })();
+  function vsave() { try { localStorage.setItem(VKEY, JSON.stringify(V)); } catch (e) { /* storage off: the view lasts until reload */ } }
+  var SHORT = { upside: 'Upside', rating: 'Analysts', pe: 'P/E', fpe: 'Fwd P/E', peg: 'PEG', ps: 'P/S', pb: 'P/B', dy: 'Yield', eg: 'EPS growth',
+    rg: 'Sales growth', pm: 'Margin', roe: 'ROE', de: 'Debt/equity', offhigh: 'Off high', trend: 'vs 200\u2011day', mom: '1-yr move', calm: 'Crash exposure' };
+  var DEF_COLS = ['pe', 'rg', 'dy', 'calm'];
+  var CONDS = { hi: 'favours buying (60+ points)', lo: 'counts against (40 or fewer)' };
+  function fxD() { return PS && PS.loaded() ? PS.data() : null; }
+  function fxAt(D, k) { for (var i = 0; i < D.fx.length; i++) if (D.fx[i].k === k) return i; return -1; }
+  function myFactors() {
+    var W = PS && PS.loaded() ? PS.weights() : null;
+    return W ? Object.keys(W.w).filter(function (k) { return W.w[k] > 0 && k !== 'plays'; }) : [];
+  }
+  function viewCols(D) {
+    if (!D) return [];
+    var c = V.cols && V.cols.length ? V.cols : myFactors().concat(DEF_COLS), out = [];
+    c.forEach(function (k) { if (k !== 'plays' && fxAt(D, k) >= 0 && out.indexOf(k) < 0) out.push(k); });
+    return out;
+  }
+  function vshort(k, v) {                 // "−7% from its 1-year high" -> "−7%"; "1.3 · strong buy" -> "strong buy"
+    if (v == null || v === '') return '–';
+    var p = String(v).split(' · ');
+    if (/^at its /.test(p[0])) return 'at high';
+    return k === 'rating' ? (p[1] || p[0]) : p[0].split(/ from | vs /)[0];
+  }
+  function ptsCls(p) { return p == null ? '' : p >= 60 ? ' fx-good' : p <= 40 ? ' fx-bad' : ''; }
+  function rowsData() {
+    var D = fxD();
+    return (A.follow || []).filter(function (s) { return R.t[s]; }).map(function (s) {
+      return { s: s, t: R.t[s], r: sg(s), c: kn(s), x: D && D.x[s], v: D && D.v[s] };
+    });
+  }
+  function passes(o, D) {
+    if (V.sig != null && (o.r.sig == null || String(o.r.sig) !== String(V.sig))) return false;
+    if (V.g && o.t.g !== V.g) return false;
+    if (V.q) { var q = String(V.q).trim().toUpperCase(); if (q && o.t.s.toUpperCase().indexOf(q) < 0 && o.t.n.toUpperCase().indexOf(q) < 0) return false; }
+    if (D) {
+      for (var i = 0; i < (V.ff || []).length; i++) {
+        var j = fxAt(D, V.ff[i][0]);
+        if (j < 0) continue;
+        var p = o.x ? o.x[j] : null;
+        if (V.ff[i][1] === 'hi' && !(p != null && p >= 60)) return false;
+        if (V.ff[i][1] === 'lo' && !(p != null && p <= 40)) return false;
+      }
+    }
+    return true;
+  }
+  function filtered() { return V.sig != null || !!V.g || !!(V.q && String(V.q).trim()) || !!(V.ff && V.ff.length); }
+  function fxOptions(D) {
+    return D.fg.map(function (g) {
+      var o = D.fx.filter(function (f) { return f.g === g[0] && f.k !== 'plays'; }).map(function (f) { return '<option value="' + esc(f.k) + '">' + esc(f.n) + '</option>'; }).join('');
+      return o ? '<optgroup label="' + esc(g[1]) + '">' + o + '</optgroup>' : '';
+    }).join('');
+  }
+  function toolsHtml(all, D) {
+    var n = { '': all.length, '1': 0, '0': 0, '-1': 0 }, cur = V.sig == null ? '' : String(V.sig);
+    all.forEach(function (o) { if (o.r.sig != null) n[String(o.r.sig)]++; });
+    var segs = [['', 'All'], ['1', 'Buy'], ['0', 'Hold'], ['-1', 'Sell']].map(function (x) {
+      return '<button type="button" class="chip-btn" data-vsig="' + x[0] + '" aria-pressed="' + (cur === x[0]) + '">' + x[1] + ' <span class="muted">' + n[x[0]] + '</span></button>';
+    }).join('');
+    var groups = [];
+    all.forEach(function (o) { if (o.t.g && groups.indexOf(o.t.g) < 0) groups.push(o.t.g); });
+    groups.sort();
+    if (V.g && groups.indexOf(V.g) < 0) V.g = '';
+    var gsel = groups.length > 1 ? '<select class="me-vsel" data-vg aria-label="Group"><option value="">All groups</option>' +
+      groups.map(function (g) { return '<option' + (g === V.g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' : '';
+    var find = '<input type="search" class="me-vq" data-vq placeholder="Find in your list" value="' + esc(V.q || '') + '" aria-label="Find in your stocks" autocomplete="off">';
+    var more = D ? '<button type="button" class="chip-btn" data-vff-open aria-expanded="' + FF_OPEN + '">+ Factor filter</button>' +
+      '<button type="button" class="chip-btn" data-vcols aria-expanded="' + PICK_OPEN + '">Columns ▾</button>' : '';
+    var chips = D ? (V.ff || []).map(function (f, i) {
+      var j = fxAt(D, f[0]);
+      return j < 0 ? '' : '<span class="me-ffchip">' + esc(D.fx[j].n) + ' ' + esc(CONDS[f[1]] || '') + '<button type="button" data-vff-del="' + i + '" aria-label="Remove this filter">×</button></span>';
+    }).join('') : '';
+    var add = D && FF_OPEN ? '<div class="me-ffadd"><select class="me-vsel" data-vff-k aria-label="Factor">' + fxOptions(D) + '</select>' +
+      '<select class="me-vsel" data-vff-c aria-label="Condition"><option value="hi">' + CONDS.hi + '</option><option value="lo">' + CONDS.lo + '</option></select>' +
+      '<button type="button" class="btn sm" data-vff-add>Add filter</button></div>' : '';
+    return '<div class="me-tools"><div class="me-seg" role="group" aria-label="Your signal">' + segs + '</div>' + gsel + find + more + '</div>' +
+      (chips || add ? '<div class="me-ff">' + chips + add + '</div>' : '') + pickHtml(D);
+  }
+  function pickHtml(D) {
+    if (!D || !PICK_OPEN) return '';
+    var on = viewCols(D);
+    var presets = [['mine', 'Your weights'], ['value', 'Value'], ['quality', 'Growth and quality'], ['price', 'Price and risk'], ['signals', 'Analysts'], ['all', 'All'], ['default', 'Default']]
+      .map(function (x) { return '<button type="button" class="chip-btn" data-vpreset="' + x[0] + '">' + x[1] + '</button>'; }).join('');
+    var groups = D.fg.map(function (g) {
+      var boxes = D.fx.filter(function (f) { return f.g === g[0] && f.k !== 'plays'; }).map(function (f) {
+        return '<label class="me-colbox" title="' + esc(f.d) + '"><input type="checkbox" data-vcol="' + esc(f.k) + '"' + (on.indexOf(f.k) >= 0 ? ' checked' : '') + '> ' + esc(f.n) + '</label>';
+      }).join('');
+      return boxes ? '<fieldset><legend>' + esc(g[1]) + '</legend>' + boxes + '</fieldset>' : '';
+    }).join('');
+    return '<div class="me-colpick"><div class="me-presets"><span class="small muted">Quick picks</span>' + presets + '</div><div class="me-colgrid">' + groups + '</div></div>';
+  }
+  function tableHtml(all, D) {
+    var rows = all.filter(function (o) { return passes(o, D); }), cs = viewCols(D);
+    var head = '<tr><th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th data-sort-first="desc">Plays in</th>' +
+      '<th class="r" data-sort-first="desc" title="The latest close, and the change on the day; sorts by the day">Price</th><th class="r" data-sort-first="desc">1 year</th>' +
+      cs.map(function (k) {
+        var f = D.fx[fxAt(D, k)];
+        return '<th class="r" data-sort-first="desc" title="' + esc(f.n + '. ' + f.d + ' Sorts by points: most in favour of buying first.') + '">' + esc(SHORT[k] || f.n) + '</th>';
+      }).join('') + '<th aria-label="Remove"></th></tr>';
+    var body = rows.map(function (o) {
+      var t = o.t, r = o.r;
+      return '<tr><td class="stick"><a class="me-sym" href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></a></td>' +
+        '<td class="nowrap" data-v="' + (r.s == null ? '' : r.s) + '">' + sgPill(r) + (r.held ? '<small class="me-held" title="A Buy holds until the score drops below 50, a Sell until it rises above 50">held</small>' : '') + '</td>' +
+        '<td class="nowrap" data-v="' + (o.c[1] ? (o.c[0] / o.c[1]).toFixed(4) : '') + '" title="' + o.c[0] + ' of ' + o.c[1] + ' plays hold it">' + bar(o.c[0], o.c[1]) + ' <span class="mono small">' + (o.c[1] ? Math.round(100 * o.c[0] / o.c[1]) + '%' : '–') + '</span></td>' +
+        '<td class="r nowrap" data-v="' + (t.d1 == null ? '' : t.d1) + '"><span class="mono">' + money(t.p, t.cur) + '</span>' + (t.d1 != null ? '<small class="me-d1 ' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</td>' +
+        '<td class="r nowrap ' + cls(t.y1) + '" data-v="' + (t.y1 == null ? '' : t.y1) + '">' + pct(t.y1, 0) + '</td>' +
+        cs.map(function (k) {
+          var j = fxAt(D, k), p = o.x ? o.x[j] : null, v = o.v ? o.v[j] : null;
+          return '<td class="r nowrap fx' + ptsCls(p) + '" data-v="' + (p == null ? '' : p) + '" title="' + esc(v ? v + ' · ' + p + ' points' : 'No number for this stock') + '">' + esc(vshort(k, v)) + '</td>';
+        }).join('') +
+        '<td class="c"><button type="button" class="me-x" data-remove="' + esc(o.s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></td></tr>';
+    }).join('');
+    var none = rows.length ? '' : '<p class="me-vnone">No stocks match these filters. <button type="button" class="linkish" data-vreset>Clear filters</button></p>';
+    var foot = '<p class="small muted me-vfoot">' + (filtered() ? 'Showing ' + rows.length + ' of ' + all.length + ' · <button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '') +
+      (D ? '<span class="fx-key fx-good">Green</span>: the factor favours buying (60+ points) · <span class="fx-key fx-bad">red</span>: it counts against (40 or fewer). ' : '') +
+      'Click a header to sort.</p>';
+    return (rows.length ? '<div class="tbl-wrap me-tblwrap"><table class="tbl me-tbl"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' : none) + foot;
+  }
+  function vRefresh(tools) {
+    var D = fxD(), all = rowsData();
+    if (tools) { var tb = $('[data-vtools]'); if (tb) tb.innerHTML = toolsHtml(all, D); }
+    var tt = $('[data-vtbl]');
+    if (tt) tt.innerHTML = tableHtml(all, D);
+  }
+  function vPreset(name, D) {
+    if (name === 'default') { delete V.cols; return; }
+    if (name === 'mine') { V.cols = myFactors().length ? myFactors() : DEF_COLS.slice(); return; }
+    V.cols = D.fx.filter(function (f) { return f.k !== 'plays' && (name === 'all' || f.g === name); }).map(function (f) { return f.k; });
   }
   function sigTile(list) {
     var n = { '1': 0, '0': 0, '-1': 0 };
@@ -274,13 +402,13 @@
       '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' stock' + ((A.follow || []).length === 1 ? '' : 's') + ' followed</p></div>' +
       '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
       notice() + kpis() +
-      '<div class="me-grid"><section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
+      '<section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
       '<div class="ps-bar ps-bar-me">' + psChip() + '<p class="small muted">Plays in counts only the plays you pick, here and across the site.</p></div>' +
       '<div class="me-add"><input type="search" data-add-q placeholder="Follow stocks: NVDA, Shopify, RY…" autocomplete="off" enterkeyhint="done" aria-label="Follow stocks: one name or ticker, or several separated by commas"><div class="me-sug" data-sug hidden></div></div>' +
       '<p class="small muted me-add-msg" data-add-msg hidden></p>' +
       (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Follow the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
-      '<div class="me-side">' + alertsCard() + theoryCard() + '</div></div>' +
+      '<div class="me-grid me-grid2">' + alertsCard() + theoryCard() + '</div>' +
       toolsCard() + accountCard();
     box.hidden = false;
     wire(box, local);
@@ -357,7 +485,45 @@
     });
     if (box.getAttribute('data-wired')) return;   // the page's buttons are wired once; the box is redrawn often
     box.setAttribute('data-wired', '1');
+    box.addEventListener('input', function (e) {
+      if (!e.target.hasAttribute || !e.target.hasAttribute('data-vq')) return;
+      V.q = e.target.value;
+      vsave();
+      vRefresh(false);                            // the table only, so the box keeps its focus
+    });
+    box.addEventListener('change', function (e) {
+      var el = e.target;
+      if (!el.hasAttribute) return;
+      if (el.hasAttribute('data-vg')) { V.g = el.value; vsave(); vRefresh(false); }
+      else if (el.hasAttribute('data-vcol')) {
+        var D = fxD(), on = viewCols(D), k = el.getAttribute('data-vcol');
+        on = el.checked ? (on.indexOf(k) < 0 ? on.concat([k]) : on) : on.filter(function (x) { return x !== k; });
+        V.cols = on.length ? on : ['pe'];
+        vsave();
+        vRefresh(false);
+      }
+    });
     box.addEventListener('click', function (e) {
+      var v = e.target.closest ? e.target.closest('[data-vsig],[data-vff-open],[data-vff-add],[data-vff-del],[data-vcols],[data-vpreset],[data-vreset]') : null;
+      if (v) {
+        var D = fxD();
+        if (v.hasAttribute('data-vsig')) { var x = v.getAttribute('data-vsig'); V.sig = x === '' ? null : +x; }
+        else if (v.hasAttribute('data-vff-open')) { FF_OPEN = !FF_OPEN; PICK_OPEN = false; }
+        else if (v.hasAttribute('data-vcols')) { PICK_OPEN = !PICK_OPEN; FF_OPEN = false; }
+        else if (v.hasAttribute('data-vff-add')) {
+          var fk = $('[data-vff-k]'), fc = $('[data-vff-c]');
+          if (fk && fc) {
+            V.ff = (V.ff || []).filter(function (f) { return f[0] !== fk.value; });
+            V.ff.push([fk.value, fc.value]);
+          }
+          FF_OPEN = false;
+        } else if (v.hasAttribute('data-vff-del')) { (V.ff || []).splice(+v.getAttribute('data-vff-del'), 1); }
+        else if (v.hasAttribute('data-vpreset') && D) vPreset(v.getAttribute('data-vpreset'), D);
+        else if (v.hasAttribute('data-vreset')) { V = { cols: V.cols }; FF_OPEN = false; }
+        vsave();
+        vRefresh(true);
+        return;
+      }
       var t = e.target.closest ? e.target.closest('[data-add],[data-add-all],[data-pick],[data-remove],[data-import],[data-resend],[data-signout],[data-stop]') : null;
       if (!t) return;
       var inp = $('[data-add-q]');
