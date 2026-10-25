@@ -14,7 +14,7 @@
  "equity": 8254108000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 50.17,
  "fiftyTwoWeekLow": 32.94,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 373951000.0,
  "trailingEps": 1.08,
  "trailingPE": 42.768517,
- "trailingPegRatio": null,
+ "trailingPegRatio": 2.5558,
  "website": "https://www.monsterbevcorp.com"
 }

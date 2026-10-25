@@ -14,7 +14,7 @@
  "equity": 15775000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 21.05,
  "fiftyTwoWeekLow": 10.89,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 31459000000.0,
  "trailingEps": -0.59,
  "trailingPE": null,
- "trailingPegRatio": 13.4527,
+ "trailingPegRatio": null,
  "website": "https://www.telus.com"
 }

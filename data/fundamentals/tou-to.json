@@ -14,7 +14,7 @@
  "equity": 15436278000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 70.57,
  "fiftyTwoWeekLow": 57.95,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 1891291000.0,
  "trailingEps": 0.93,
  "trailingPE": 71.50538,
- "trailingPegRatio": 0.32,
+ "trailingPegRatio": null,
  "website": "https://www.tourmalineoil.com"
 }

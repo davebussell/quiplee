@@ -14,7 +14,7 @@
  "equity": 1455888000.0,
  "equity_date": "2026-01-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 209.96,
  "fiftyTwoWeekLow": 163.25,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 5395594000.0,
  "trailingEps": 4.98,
  "trailingPE": 41.656624,
- "trailingPegRatio": 2.4074,
+ "trailingPegRatio": 2.1839,
  "website": "https://www.dollarama.com"
 }

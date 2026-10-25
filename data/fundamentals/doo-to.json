@@ -14,7 +14,7 @@
  "equity": 604100000.0,
  "equity_date": "2026-01-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 112.26,
  "fiftyTwoWeekLow": 67.11,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 2679700000.0,
  "trailingEps": 1.57,
  "trailingPE": 51.847134,
- "trailingPegRatio": 0.9404,
+ "trailingPegRatio": 1.0001,
  "website": "https://www.brp.com"
 }

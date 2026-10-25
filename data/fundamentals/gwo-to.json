@@ -14,7 +14,7 @@
  "equity": 29857000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 95.96,
  "fiftyTwoWeekLow": 58.5,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 13415000000.0,
  "trailingEps": 4.85,
  "trailingPE": 18.534021,
- "trailingPegRatio": 1.7699,
+ "trailingPegRatio": null,
  "website": "https://www.greatwestlifeco.com"
 }

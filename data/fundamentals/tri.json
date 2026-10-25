@@ -14,7 +14,7 @@
  "equity": 11914000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 163.66,
  "fiftyTwoWeekLow": 76.28,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 2372000000.0,
  "trailingEps": 3.81,
  "trailingPE": 32.328083,
- "trailingPegRatio": 1.2229,
+ "trailingPegRatio": null,
  "website": "https://www.thomsonreuters.com"
 }

@@ -14,7 +14,7 @@
  "equity": 27295000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 100.18,
  "fiftyTwoWeekLow": 69.41,
  "financialCurrency": "CAD",
@@ -41,7 +41,7 @@
  "quickRatio": 0.409,
  "quoteType": "EQUITY",
  "recommendationKey": "buy",
- "recommendationMean": 1.82609,
+ "recommendationMean": 1.875,
  "returnOnAssets": 0.03666,
  "returnOnEquity": 0.11826,
  "revenueGrowth": 0.057,
@@ -58,6 +58,6 @@
  "total_debt_bs": 60628000000.0,
  "trailingEps": 3.51,
  "trailingPE": 24.877493,
- "trailingPegRatio": 2.9725,
+ "trailingPegRatio": null,
  "website": "https://www.tcenergy.com"
 }

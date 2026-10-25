@@ -14,7 +14,7 @@
  "equity": 6748000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 2428.0,
  "fiftyTwoWeekLow": 1495.0,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 13207000064,
  "totalRevenue": 35181998080,
  "total_debt_bs": 11392000000.0,
- "trailingEps": 36.18,
- "trailingPE": 50.031784,
+ "trailingEps": 36.77,
+ "trailingPE": 49.228992,
  "trailingPegRatio": 1.001,
  "website": "https://www.mercadolibre.com"
 }

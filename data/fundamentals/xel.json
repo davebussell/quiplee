@@ -14,12 +14,12 @@
  "equity": 23609000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 84.23,
  "fiftyTwoWeekLow": 68.72,
  "financialCurrency": "USD",
- "forwardEps": 4.54198,
- "forwardPE": 17.184137,
+ "forwardEps": 4.54034,
+ "forwardPE": 17.190344,
  "freeCashflow": -7907999744,
  "fullTimeEmployees": 11534,
  "grossMargins": 0.46825,
@@ -56,8 +56,8 @@
  "totalDebt": 41650999296,
  "totalRevenue": 14616000512,
  "total_debt_bs": 34781000000.0,
- "trailingEps": 3.65,
- "trailingPE": 21.383562,
+ "trailingEps": 3.69,
+ "trailingPE": 21.151762,
  "trailingPegRatio": 1.8509,
- "website": "https://www.my.xcelenergy.com/s"
+ "website": "https://my.xcelenergy.com"
 }

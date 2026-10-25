@@ -14,7 +14,7 @@
  "equity": 50957000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 63.98,
  "fiftyTwoWeekLow": 44.23,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 14675000000.0,
  "trailingEps": 3.69,
  "trailingPE": 16.799458,
- "trailingPegRatio": 0.8769,
+ "trailingPegRatio": null,
  "website": "https://www.manulife.com"
 }

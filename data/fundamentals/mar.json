@@ -14,7 +14,7 @@
  "equity": -3771000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 410.98,
  "fiftyTwoWeekLow": 256.76,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 17083000000.0,
  "trailingEps": 9.66,
  "trailingPE": 40.44617,
- "trailingPegRatio": null,
+ "trailingPegRatio": 2.2916,
  "website": "https://www.marriott.com"
 }

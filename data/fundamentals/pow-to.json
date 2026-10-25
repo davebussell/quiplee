@@ -14,7 +14,7 @@
  "equity": 24432000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 97.66,
  "fiftyTwoWeekLow": 62.5,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 25876000000.0,
  "trailingEps": 4.06,
  "trailingPE": 22.763546,
- "trailingPegRatio": 0.9309,
+ "trailingPegRatio": null,
  "website": "https://www.powercorporation.com"
 }

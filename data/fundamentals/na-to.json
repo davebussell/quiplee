@@ -14,7 +14,7 @@
  "equity": 33769000000.0,
  "equity_date": "2025-10-31",
  "exchange": "TOR",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 237.13,
  "fiftyTwoWeekLow": 154.06,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 108489000000.0,
  "trailingEps": 11.96,
  "trailingPE": 17.137125,
- "trailingPegRatio": 1.3118,
+ "trailingPegRatio": 1.4404,
  "website": "https://www.nbc.ca"
 }

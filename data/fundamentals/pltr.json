@@ -14,7 +14,7 @@
  "equity": 7387268000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-24",
+ "fetched": "2026-10-25",
  "fiftyTwoWeekHigh": 212.94,
  "fiftyTwoWeekLow": 106.37,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 211400000,
  "totalRevenue": 6155940864,
  "total_debt_bs": 229338000.0,
- "trailingEps": 1.13,
- "trailingPE": 174.11505,
+ "trailingEps": 1.16,
+ "trailingPE": 169.61208,
  "trailingPegRatio": null,
  "website": "https://www.palantir.com"
 }
