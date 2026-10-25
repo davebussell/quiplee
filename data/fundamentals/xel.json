@@ -6,7 +6,7 @@
  "currency": "USD",
  "currentRatio": 0.701,
  "debtToEquity": 173.135,
- "dividendYield": 3.0,
+ "dividendYield": 3.04,
  "earningsGrowth": 0.24,
  "ebit": 3116000000.0,
  "ebitda": 6122999808,
@@ -34,7 +34,7 @@
  "operatingCashflow": 4770999808,
  "operatingMargins": 0.22700001,
  "payoutRatio": 0.637,
- "pegRatio": 1.98,
+ "pegRatio": 1.96,
  "priceToBook": 2.0257995,
  "priceToSalesTrailing12Months": 3.335571,
  "profitMargins": 0.15278,
@@ -56,8 +56,8 @@
  "totalDebt": 41650999296,
  "totalRevenue": 14616000512,
  "total_debt_bs": 34781000000.0,
- "trailingEps": 3.75,
- "trailingPE": 20.813334,
+ "trailingEps": 3.65,
+ "trailingPE": 21.383562,
  "trailingPegRatio": 1.8509,
  "website": "https://www.my.xcelenergy.com/s"
 }
