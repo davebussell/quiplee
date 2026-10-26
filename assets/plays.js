@@ -167,7 +167,8 @@
     return Math.round(100 * (r - 1) / (n - 1));
   }
   function upPtsAt(u) { return Math.round(100 * (Math.min(Math.max(u, -0.2), 0.5) + 0.2) / 0.7); }
-  function flips(sym, wIn) {
+  // within: look only this far from the close (0.05 = 5% either way), for lists that ask "close to a flip?" of many names
+  function flips(sym, wIn, within) {
     var W = (wIn || wts || D.wd), w = W.w, x = D.x[sym], pin = D.pi && D.pi[sym], guard = guardOn(sym);
     if (!x || !pin || !pin.p || !D.rk) return null;
     var c = count(sym), plays = c.n ? Math.round(100 * c.k / c.n) : null;
@@ -198,8 +199,9 @@
     if (now == null) return null;
     if (guard) return out;                              // nothing price-dependent counts while the guard is on
     // the price is kept to the cent, as factors.flip_lines keeps it, so the percentages round the same way
-    for (i = 1; i <= 80; i++) { px = p0 * (1 - i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.down = [Math.round(px * 100) / 100, sg]; break; } }
-    for (i = 1; i <= 160; i++) { px = p0 * (1 + i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.up = [Math.round(px * 100) / 100, sg]; break; } }
+    var nd = within ? Math.min(80, Math.round(within / 0.005)) : 80, nu = within ? Math.min(160, Math.round(within / 0.005)) : 160;
+    for (i = 1; i <= nd; i++) { px = p0 * (1 - i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.down = [Math.round(px * 100) / 100, sg]; break; } }
+    for (i = 1; i <= nu; i++) { px = p0 * (1 + i * 0.005); sg = sigAt(px); if (sg != null && sg !== now) { out.up = [Math.round(px * 100) / 100, sg]; break; } }
     return out;
   }
   function flipWords(fl, cur, p0) {

@@ -373,7 +373,8 @@
     var on = table.classList.contains('mcap'), k = 0;
     [].forEach.call(table.tBodies, function (tb) {
       [].forEach.call(tb.rows, function (tr) {
-        if (tr.hidden || tr.classList.contains('stack-grp')) { tr.classList.remove('mcap-x'); return; }
+        // hidden rows don't count: a filter's (hidden) and the My stocks switch's (mine.js, class mine-out)
+        if (tr.hidden || tr.classList.contains('mine-out') || tr.classList.contains('stack-grp')) { tr.classList.remove('mcap-x'); return; }
         k++;
         tr.classList.toggle('mcap-x', on && k > CAP);
       });
@@ -404,6 +405,9 @@
     }).observe(table, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden'] });
     markCap(table);
   }
+
+  // mine.js narrows a table with a class, which the cap's watcher doesn't see: it asks for a recount
+  window.BPStack = { recap: function (table) { if (table && table.dataset && table.dataset.capDone) markCap(table); } };
 
   var ro = window.ResizeObserver ? new ResizeObserver(function (ents) {
     ents.forEach(function (en) {

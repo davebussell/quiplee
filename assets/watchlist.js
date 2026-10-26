@@ -152,8 +152,9 @@
       if (!D.t[r.sym]) fresh.push(r.sym);
     });
     save();
+    if (ACCT) MINE.addMany(st.items.map(function (x) { return x.sym; }).filter(function (x) { return D.t[x] && !MINE.has(x); }), true);
     var parts = [];
-    parts.push(added ? 'Added ' + added + (added === 1 ? ' name' : ' names') + (source ? ' from ' + source : '') + '.' : 'Nothing new to add.');
+    parts.push(added ? 'Added ' + added + (added === 1 ? ' name' : ' names') + (source ? ' from ' + source : '') + (ACCT ? ' to My stocks' : '') + '.' : 'Nothing new to add.');
     if (bad.length) parts.push("Couldn't read: " + bad.slice(0, 6).join(', ') + (bad.length > 6 ? '…' : '') + '.');
     msg(parts.join(' '), bad.length ? 'warn-text' : 'muted');
     if (fresh.length) sendQueue(fresh);
@@ -361,7 +362,7 @@
     }
     rows.forEach(function (it) {
       var t = D.t[it.sym], s = status(it.sym);
-      var rm = el('button', { type: 'button', 'class': 'wl-x', 'aria-label': 'Remove ' + it.sym, text: '×', on: { click: function () { st.items = st.items.filter(function (x) { return x.sym !== it.sym; }); if (st.example) st.example = false; save(); render(); } } });
+      var rm = el('button', { type: 'button', 'class': 'wl-x', 'aria-label': 'Remove ' + it.sym, text: '×', on: { click: function () { st.items = st.items.filter(function (x) { return x.sym !== it.sym; }); if (st.example) st.example = false; save(); if (ACCT && MINE.has(it.sym)) MINE.toggle(it.sym, false, (D.t[it.sym] && D.t[it.sym].s) || it.sym); render(); } } });
       if (!t) {
         var txt = { queued: 'In the queue: analysis ' + whenText() + ', ready the next day.', sending: 'Sending to the queue…', new: 'Not covered yet.',
           rejected: 'No price history found for this symbol. Check the ticker (Canadian names need .TO or .V).', error: "Couldn't reach the queue. ",
@@ -508,6 +509,48 @@
     $('wl-al-on').addEventListener('change', function () { if (mem && mem.synced) putList({ alerts: this.checked }); });
   }
 
+  // ------------------------------------------------------------ signed in: this list is My stocks (mine.js)
+  // The account's followed stocks are the list; this browser keeps only what the account doesn't: quantities and
+  // values from a pasted list or broker file, and names Be The Puck doesn't cover yet (queued for tonight's run).
+  // Covered names only on this browser are offered once, to add to My stocks.
+  var MINE = window.BPMine, ACCT = false;
+  function mineInit(shared) {
+    if (!MINE || shared) return;
+    MINE.ready(function () {
+      if (!MINE.signedIn()) return;
+      ACCT = true;
+      var local = st.example ? [] : st.items, byLocal = {}, list = MINE.list().filter(function (x) { return D.t[x]; });
+      local.forEach(function (x) { byLocal[x.sym] = x; });
+      var extra = local.filter(function (x) { return D.t[x.sym] && list.indexOf(x.sym) < 0; }).map(function (x) { return x.sym; });
+      var pending = local.filter(function (x) { return !D.t[x.sym]; });
+      if (list.length || pending.length) {
+        st.items = list.map(function (x) { return byLocal[x] || { sym: x }; }).concat(pending);
+        st.example = false;
+        Q.watchSet({ items: st.items });
+      }
+      var clr = $('wl-clear');
+      if (clr) clr.hidden = true;           // signed in, clearing would empty the account's list: remove names one by one
+      render();
+      if (extra.length) {
+        var m = $('wl-msg');
+        m.className = 'small';
+        m.innerHTML = '';
+        m.appendChild(document.createTextNode('This is My stocks, from your account. ' + extra.length + ' more on this browser\u2019s old list: '));
+        m.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'add ' + (extra.length === 1 ? 'it' : 'them') + ' to My stocks', on: { click: function () {
+          MINE.addMany(extra).then(function () { mineSync(); render(); msg('Added. This list is My stocks, saved to your account.'); });
+        } } }));
+      } else msg('This is My stocks, saved to your account: adding or removing a name here changes it everywhere.');
+    });
+  }
+  // keep this browser's copy (with its quantities) in step with My stocks
+  function mineSync() {
+    if (!ACCT) return;
+    var have = {};
+    st.items.forEach(function (x) { have[x.sym] = x; });
+    MINE.list().forEach(function (x) { if (D.t[x] && !have[x]) st.items.push({ sym: x }); });
+    Q.watchSet({ items: st.items });
+  }
+
   function loadExample() { st.items = EXAMPLE.filter(function (s) { return D.t[s]; }).map(function (s) { return { sym: s }; }); st.example = true; render(); }
 
   function init() {
@@ -556,6 +599,7 @@
     $('wl-clear').addEventListener('click', function () { st.items = []; st.example = false; st.shared = false; Q.watchSet({ items: [] }); history.replaceState(null, '', location.pathname); render(); msg('List cleared.'); });
     setMode(st.mode);
     memberInit();
+    mineInit(!!shared);
     var add = params.get('add');
     if (add && !shared) { addEntries(parseText(add)); history.replaceState(null, '', location.pathname); }
     // queue state + names that failed checks

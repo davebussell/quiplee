@@ -2102,3 +2102,39 @@ tr.ps-focus { outline: 2px solid var(--violet); outline-offset: -2px; }
 .sig-flip { display: block; font: 12px var(--data); color: var(--muted); margin-top: 3px; white-space: nowrap; }
 p.sig-flip { display: block; font: 13px/1.5 var(--ui); white-space: normal; margin: 0; color: var(--ink-2); }
 p.sig-flip [data-sig-flip] { color: var(--ink); font-weight: 500; }
+
+/* My stocks on every list (mine.js): the star on each row and the All / My stocks switch */
+.mine-out { display: none !important; }
+.mine-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 10px; }
+.mine-bar [data-mine-only="1"][aria-pressed="true"] { border-color: var(--violet); }
+.mine-star { all: unset; cursor: pointer; display: inline-grid; place-items: center; width: 22px; height: 22px; margin: -2px 6px -2px -4px; border-radius: 6px;
+  font-size: 15px; line-height: 1; color: var(--muted); vertical-align: middle; }
+.mine-star:hover { color: var(--violet-ink); background: var(--panel-2); }
+.mine-star:focus-visible { outline: 2px solid var(--violet-ink); outline-offset: 1px; }
+.mine-star.on { color: var(--violet-ink); }
+.mine-empty { margin: 10px 0 0; color: var(--ink-2); }
+
+/* account page: My stocks, in two tabs (Monitor what you follow · Find stocks to add) */
+.me-tabs { display: flex; gap: 4px; margin: 4px 0 14px; border-bottom: 1px solid var(--line); }
+.me-tabs [role="tab"] { all: unset; cursor: pointer; padding: 9px 12px 10px; font: 600 14px var(--ui); color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; border-radius: 6px 6px 0 0; }
+.me-tabs [role="tab"]:hover { color: var(--ink); }
+.me-tabs [role="tab"]:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.me-tabs [role="tab"][aria-selected="true"] { color: var(--ink); border-bottom-color: var(--violet); }
+.me-tabs [role="tab"] .muted { font-weight: 500; margin-left: 2px; }
+.me-watch { display: grid; gap: 10px; margin: 0 0 12px; }
+@media (min-width: 860px) { .me-watch { grid-template-columns: 1fr 1fr; align-items: start; } }
+.me-watch .me-changes, .me-watch .me-ch-none { margin: 0; }
+.me-near { border: 1px solid rgba(242, 177, 60, .35); background: rgba(242, 177, 60, .06); border-radius: 12px; padding: 12px 14px; }
+.me-near .h3 { margin: 0 0 2px; }
+.me-near > p.small { margin: 0; }
+.me-near ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.me-near li { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.me-near p.small.muted + ul + p { margin-top: 6px; }
+.me-tbl .me-nearline { display: block; font-size: 11.5px; margin-top: 2px; color: var(--band); white-space: normal; }
+.me-find-intro { margin: 0 0 10px; }
+.me-plus { all: unset; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; cursor: pointer; font: 600 20px/1 var(--ui); color: var(--violet-ink); box-shadow: inset 0 0 0 1px rgba(124, 108, 245, .5); }
+.me-plus:hover { background: rgba(124, 108, 245, .14); }
+.me-plus:disabled { opacity: .4; cursor: default; }
+.me-tbl.stacked td:has(> .me-plus:only-child) { position: absolute; top: 8px; right: 10px; }
+.me-tbl.stacked td:has(> .me-plus:only-child)::before { content: none; }
+.me-tbl.stacked tr:has(.me-plus) > :first-child { padding-right: 44px; }

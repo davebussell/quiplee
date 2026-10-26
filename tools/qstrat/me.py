@@ -43,7 +43,7 @@ def _preview(site, depth):
 <div><span>Email alerts</span><b class="mp-on">On</b></div>
 <div><span>Member tools</span><b>Free <small>to 2027</small></b></div>
 </div>
-<p class="mp-h">Your stocks <span>· the {dlong(site.asof)} close</span></p>
+<p class="mp-h">My stocks <span>· the {dlong(site.asof)} close</span></p>
 <ul class="mp-list">{rows}</ul>
 <p class="mp-foot">You'd get an email the evening your signal flips on any of these, with the analysis.</p>
 </div></div>"""
@@ -65,7 +65,8 @@ def me_page(site):
 <h1 class="h1 me-h1">Your stocks and their alerts, <em>in one place</em>.</h1>
 <p class="lede">One free account follows your stocks with every play Be The Puck runs, emails you the evening your signal on one flips, and opens every member tool until {FREE_UNTIL}.</p>
 </div>
-<div class="me-out-copy me-out-rest"><ul class="check-list"><li>Follow up to 100 stocks, funds and coins</li><li>An email with the analysis when a light flips, the same evening</li>
+<div class="me-out-copy me-out-rest"><ul class="check-list"><li>My stocks: up to 100 stocks, funds and coins, added with the ☆ on any list on the site</li>
+<li>Find stocks to add: every stock scored with your weights, and the ones a move of 5% or less would turn Buy</li><li>An email with the analysis when your signal flips, the same evening</li>
 <li>Test any theory on the stocks you follow, from one play to all of them</li><li>Top picks, reports, your own rules and play-by-play emails, free until {FREE_UNTIL}</li></ul>
 <div class="me-preview">{_preview(site, depth)}</div>
 </div>

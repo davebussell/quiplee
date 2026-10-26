@@ -57,8 +57,13 @@
   }
   function counted() { return !PS || PS.isAll() ? 'the 100' : 'your ' + PS.size(); }
   function days(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 864e5); }
+  // My stocks (mine.js): the one list, on the account when signed in, else this browser's watchlist
+  var MINE = window.BPMine;
+  function has(sym) { return MINE ? MINE.has(sym) : !!following[sym]; }
+  function mineOnly() { return !!(MINE && MINE.only()); }
   function match(r) {
     if (!r.o) return false;
+    if (mineOnly() && !has(r.sym)) return false;
     if (100 * agree(r) / r.o < S.min - 1e-9) return false;
     if (S.mkt && r.m !== S.mkt) return false;
     if (S.sec && r.g !== S.sec) return false;
@@ -107,7 +112,7 @@
     }).join('');
     var risk = r.r != null ? '<span class="lvl lvl-' + RISK_CLS[r.r] + '">' + RISK[r.r] + '</span>' : '<span class="muted">–</span>';
     var up = r.up != null ? '<b class="' + dir(r.up) + '">' + pct(r.up, 0) + '</b>' : '<span class="muted">–</span>';
-    var on = !!following[r.sym];
+    var on = has(r.sym);
     return '<li class="scr-row" data-sym="' + esc(r.sym) + '"><a class="scr-main" href="' + esc(STOCK.replace('{u}', r.u)) + '">' +
       '<span class="scr-sym"><b>' + esc(r.s) + '</b><span>' + esc(r.n) + '</span></span>' +
       '<span class="scr-light">' + signal(r) + '</span>' +
@@ -120,7 +125,7 @@
       '<button type="button" class="scr-star' + (on ? ' on' : '') + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Stop following ' : 'Follow ') + esc(r.s) + '" title="' + (on ? 'Following' : 'Follow') + ' ' + esc(r.s) + '">' + (on ? '★' : '☆') + '</button></li>';
   }
   function summary(n) {
-    var bits = [MKT[S.mkt], S.sec, S.risk === 'low' ? 'low or moderate crash exposure' : S.risk === 'high' ? 'high crash exposure' : '', S.fresh ? 'plays turned this week' : '', S.q ? '“' + S.q + '”' : ''].filter(Boolean);
+    var bits = [mineOnly() ? 'in My stocks' : '', MKT[S.mkt], S.sec, S.risk === 'low' ? 'low or moderate crash exposure' : S.risk === 'high' ? 'high crash exposure' : '', S.fresh ? 'plays turned this week' : '', S.q ? '“' + S.q + '”' : ''].filter(Boolean);
     return '<b>' + n + ' name' + (n === 1 ? '' : 's') + '</b> where at least <b>' + S.min + '% of ' + counted() + '</b> plays agree with <b>' + (S.side === 'buy' ? 'buying' : 'selling') + '</b>' +
       (bits.length ? ' · ' + esc(bits.join(' · ')) : '');
   }
@@ -136,7 +141,28 @@
     more.hidden = got.length <= shown;
     more.textContent = 'Show ' + Math.min(PAGE, got.length - shown) + ' more';
     reset.hidden = JSON.stringify(S) === JSON.stringify(DEF);
+    paintMine();
     sync();
+  }
+  // the All / My stocks switch above the results (the clicks go to mine.js, which tells us through onChange)
+  var mineBar = null;
+  function paintMine() {
+    if (!MINE) return;
+    if (!mineBar) {
+      mineBar = document.createElement('div');
+      mineBar.className = 'mine-bar scr-mine';
+      mineBar.setAttribute('role', 'group');
+      mineBar.setAttribute('aria-label', 'Which stocks to show');
+      mineBar.innerHTML = '<button type="button" class="chip-btn" data-mine-only="0">All</button><button type="button" class="chip-btn" data-mine-only="1">★ My stocks <span class="muted" data-mine-n></span></button>';
+      var head = root.querySelector('.scr-head');
+      head.parentNode.insertBefore(mineBar, head);
+    }
+    var only = mineOnly();
+    [].forEach.call(mineBar.querySelectorAll('[data-mine-only]'), function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-mine-only') === '1') === only)); });
+    mineBar.querySelector('[data-mine-n]').textContent = String(MINE.list().filter(function (s) { return DATA && DATA.t.some(function (r) { return r.sym === s; }); }).length);
+    if (only) empty.innerHTML = MINE.list().length ? 'None of My stocks match all of that. Loosen the steps above, or <button type="button" class="linkish" data-mine-only="0">show every stock</button>.'
+      : 'My stocks is empty. Tap ☆ on any name below to add it. <button type="button" class="linkish" data-mine-only="0">Show every stock</button>';
+    else empty.textContent = 'No names match all of that. Try fewer plays in step 4, or a wider market in step 3.';
   }
   function paintControls() {
     [].forEach.call(root.querySelectorAll('[data-side]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-side') === S.side)); });
@@ -217,7 +243,13 @@
     clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 5200);
   }
   function star(b) {
-    var sym = b.closest('.scr-row').getAttribute('data-sym'), on = !following[sym];
+    var sym0 = b.closest('.scr-row').getAttribute('data-sym');
+    if (MINE) {                                     // the shared list: it saves, tells every page and shows the note
+      var r0 = DATA && DATA.t.find(function (x) { return x.sym === sym0; });
+      MINE.toggle(sym0, null, r0 ? r0.s : sym0);
+      return;
+    }
+    var sym = sym0, on = !following[sym];
     following[sym] = on;
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.textContent = on ? '★' : '☆';
     var r = DATA && DATA.t.find(function (x) { return x.sym === sym; }), short = r ? r.s : sym;
@@ -235,6 +267,7 @@
     toast(on ? 'Saved ' + esc(short) + ' to this browser. <a href="' + esc(ME) + '">Create a free account</a> to get an email when your signal on it flips.' : 'Removed ' + esc(short) + '.');
   }
   function loadFollowing() {
+    if (MINE) return new Promise(function (res) { MINE.ready(res); });
     localGet().items.forEach(function (x) { following[x.sym] = true; });
     if (acct) return window.BPAuth.me().then(function (a) { if (a && a.signed_in) { following = {}; (a.follow || []).forEach(function (s) { following[s] = true; }); } });
     return Promise.resolve();
@@ -254,6 +287,7 @@
   Promise.all([fetch(SRC).then(function (r) { return r.json(); }), loadFollowing()]).then(function (res) {
     DATA = res[0];
     FAMS = DATA.fam.map(function (f) { return f[1]; });
+    if (MINE) MINE.onChange(function () { shown = PAGE; draw(); });
     if (PS) {
       PS.ready(function () { recount(); paintControls(); draw(); });
       PS.onChange(function () { recount(); shown = PAGE; paintControls(); draw(); });

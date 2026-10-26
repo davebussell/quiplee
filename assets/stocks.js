@@ -13,17 +13,19 @@
   var params = new URLSearchParams(location.search);
 
   function apply() {
-    var shown = 0;
+    var shown = 0, M = window.BPMine, only = M && M.only();
     rows.forEach(function (r) {
       var grp = !st.group || (st.group === 'ndx' || st.group === 'tsx' ? r.getAttribute('data-' + st.group) === '1' : r.getAttribute('data-group') === st.group);
       var ok = grp && (!st.q || r.getAttribute('data-q').indexOf(st.q) >= 0)
         && (!st.buyOnly || r.getAttribute('data-sig') === '1');
       r.hidden = !ok;
-      if (ok) shown++;
+      if (ok && !(only && !M.has(r.getAttribute('data-sym')))) shown++;   // My stocks (mine.js) hides the rest
     });
     count.textContent = (shown === rows.length ? rows.length + ' names.' : shown + ' of ' + rows.length + ' names shown.')
+      + (only ? ' Only My stocks.' : '')
       + (st.buyOnly ? ' Showing only the stocks your signal rates Buy, highest score first.' : '');
   }
+  if (window.BPMine) window.BPMine.onChange(apply);
   function setPressed(sel, el) { [].forEach.call(document.querySelectorAll(sel), function (b) { b.setAttribute('aria-pressed', String(b === el)); }); }
 
   function sortBy(key) {

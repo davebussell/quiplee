@@ -59,7 +59,7 @@
     return true;
   }
   function notices() {
-    if (q.get('welcome')) { toast('Welcome to Be The Puck. Follow a few stocks to get started.'); clean(['welcome']); }
+    if (q.get('welcome')) { toast('Welcome to Be The Puck. Add a few stocks to My stocks to get started.'); clean(['welcome']); }
     if (q.get('confirmed')) { toast('Email confirmed. Alerts can reach you now.'); clean(['confirmed']); }
     if (q.get('confirm') === 'expired') { toast('That confirm link has expired or was replaced. Send a new one below.', 'warn'); clean(['confirm']); }
     if (q.get('pwreset')) { toast('New password saved. You are signed in.'); clean(['pwreset']); }
@@ -102,14 +102,81 @@
       return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b></a> ' + pillOnly(c.from) + ' → ' + sgPill({ sig: c.to, s: c.s }) + '</li>';
     }).join('') + '</ul></div>';
   }
+  // your stocks whose signal a move of 5% or less from the close would change (plays.js flips, the stock page's arithmetic)
+  var NEAR_PCT = 0.05;
+  function nearOf(s) {
+    if (!PS || !PS.loaded() || !PS.flips) return null;
+    if (NEAR[s] !== undefined) return NEAR[s];
+    var fl = null, out = null;
+    try { fl = PS.flips(s, null, NEAR_PCT); } catch (e) { fl = null; }
+    var p0 = R.t[s] && R.t[s].p, pin = PS.data().pi && PS.data().pi[s];
+    if (pin && pin.p) p0 = pin.p;
+    if (fl && p0) {
+      [['down', 'below'], ['up', 'above']].forEach(function (z) {
+        var x = fl[z[0]];
+        if (!x) return;
+        var m = x[0] / p0 - 1;
+        if (Math.abs(m) <= NEAR_PCT + 1e-9 && (!out || Math.abs(m) < Math.abs(out.m))) out = { from: fl.now, to: x[1], px: x[0], m: m, dir: z[1] };
+      });
+    }
+    NEAR[s] = out;
+    return out;
+  }
+  var NEAR = {};
+  function nearWords(n, cur) {
+    return (PS ? PS.sigWord(n.to) : '') + ' ' + n.dir + ' ' + money(n.px, cur) + ' (' + pct(n.m, 0) + ')';
+  }
+  function nearHtml(list) {
+    if (!PS || !PS.loaded()) return '';
+    var near = list.map(function (s) { var n = nearOf(s); return n ? { s: s, n: n } : null; }).filter(Boolean)
+      .sort(function (a, b) { return Math.abs(a.n.m) - Math.abs(b.n.m); });
+    if (!near.length) return '<div class="me-near"><p class="h3">Close to a flip</p><p class="small muted">None of your stocks is within ' + Math.round(NEAR_PCT * 100) + '% of a price that changes your signal.</p></div>';
+    var more = near.length > 6 ? near.length - 6 : 0;
+    return '<div class="me-near"><p class="h3">Close to a flip</p><p class="small muted">A move of ' + Math.round(NEAR_PCT * 100) + '% or less from the last close changes your signal on these.</p><ul>' +
+      near.slice(0, 6).map(function (x) {
+        var t = R.t[x.s];
+        return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b></a> ' + pillOnly(x.n.from) + ' → ' + pillOnly(x.n.to) + ' <span class="small">' + esc(nearWords(x.n, t.cur).replace(/^\S+ /, '')) + '</span></li>';
+      }).join('') + '</ul>' + (more ? '<p class="small muted">And ' + more + ' more: sort the table by your signal to see them.</p>' : '') + '</div>';
+  }
   function followRows() {
+    if (TAB === 'find') return findRows();
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     if (!list.length) {
-      return '<div class="me-empty"><p><b>Follow a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
-        '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div></div>';
+      return '<div class="me-empty"><p><b>Add a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
+        '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div>' +
+        '<p><button type="button" class="btn" data-tab="find">Find stocks to add</button></p></div>';
     }
+    var D = fxD(), all = rowsData(), w = changesHtml(list) + nearHtml(list);
+    return (w ? '<div class="me-watch">' + w + '</div>' : '') + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
+  }
+  // ------------------------------------------------------------ find stocks to add: every covered stock you don't follow
+  // The same table, over the rest of the list: your Buys first, or the names a small move would turn Buy, or the
+  // most plays in. A tap on + adds it to My stocks (and to its emails); it then moves to Monitor.
+  var FKEY = 'bp.me.find.v1', FSTEP = 25, FN = FSTEP;
+  var VF = (function () { try { var v = JSON.parse(localStorage.getItem(FKEY) || 'null'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } })();
+  if (!VF.lens) VF.lens = 'buy';
+  var TAB = location.hash === '#find' ? 'find' : 'mon';
+  var LENS = [['buy', 'Your Buys'], ['near', 'Close to a Buy'], ['plays', 'Most plays in'], ['all', 'All']];
+  function cv() { return TAB === 'find' ? VF : V; }
+  function csave() { try { localStorage.setItem(TAB === 'find' ? FKEY : VKEY, JSON.stringify(cv())); } catch (e) { /* storage off */ } }
+  function lensOk(o, lens) {
+    if (lens === 'buy') return o.r.sig === 1;
+    if (lens === 'near') { var n = nearOf(o.s); return o.r.sig !== 1 && !!n && n.to === 1; }
+    return true;
+  }
+  function lensSort(rows, lens) {
+    function sc(o) { return o.r.s == null ? -1 : o.r.s; }
+    function pl(o) { return o.c[1] ? o.c[0] / o.c[1] : -1; }
+    if (lens === 'near') return rows.sort(function (a, b) { return Math.abs(nearOf(a.s).m) - Math.abs(nearOf(b.s).m) || sc(b) - sc(a); });
+    if (lens === 'plays') return rows.sort(function (a, b) { return pl(b) - pl(a) || sc(b) - sc(a); });
+    return rows.sort(function (a, b) { return sc(b) - sc(a) || pl(b) - pl(a); });
+  }
+  function findRows() {
+    if (!R || !R.t) return '';
     var D = fxD(), all = rowsData();
-    return changesHtml(list) + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
+    var intro = '<p class="small muted me-find-intro">Every stock Be The Puck covers that isn\'t in My stocks yet, scored with your weights. Tap <b>+</b> to add one: it moves to Monitor and its signal emails start.' +
+      ' More filters in the <a href="/#screen">screener</a>.</p>';
+    return intro + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl id="me-find">' + tableHtml(all, D) + '</div>';
   }
 
   // ------------------------------------------------------------ your stocks: a table you can widen and filter
@@ -143,27 +210,30 @@
   }
   function ptsCls(p) { return p == null ? '' : p >= 60 ? ' fx-good' : p <= 40 ? ' fx-bad' : ''; }
   function rowsData() {
-    var D = fxD();
-    return (A.follow || []).filter(function (s) { return R.t[s]; }).map(function (s) {
+    var D = fxD(), f = A.follow || [];
+    var syms = TAB === 'find' ? Object.keys(R.t).filter(function (s) { return f.indexOf(s) < 0; }) : f.filter(function (s) { return R.t[s]; });
+    return syms.map(function (s) {
       return { s: s, t: R.t[s], r: sg(s), c: kn(s), x: D && D.x[s], v: D && D.v[s] };
     });
   }
   function passes(o, D) {
-    if (V.sig != null && (o.r.sig == null || String(o.r.sig) !== String(V.sig))) return false;
-    if (V.g && o.t.g !== V.g) return false;
-    if (V.q) { var q = String(V.q).trim().toUpperCase(); if (q && o.t.s.toUpperCase().indexOf(q) < 0 && o.t.n.toUpperCase().indexOf(q) < 0) return false; }
+    var C = cv();
+    if (TAB === 'find') { if (!lensOk(o, C.lens)) return false; }
+    else if (C.sig != null && (o.r.sig == null || String(o.r.sig) !== String(C.sig))) return false;
+    if (C.g && o.t.g !== C.g) return false;
+    if (C.q) { var q = String(C.q).trim().toUpperCase(); if (q && o.t.s.toUpperCase().indexOf(q) < 0 && o.t.n.toUpperCase().indexOf(q) < 0) return false; }
     if (D) {
-      for (var i = 0; i < (V.ff || []).length; i++) {
-        var j = fxAt(D, V.ff[i][0]);
+      for (var i = 0; i < (C.ff || []).length; i++) {
+        var j = fxAt(D, C.ff[i][0]);
         if (j < 0) continue;
         var p = o.x ? o.x[j] : null;
-        if (V.ff[i][1] === 'hi' && !(p != null && p >= 60)) return false;
-        if (V.ff[i][1] === 'lo' && !(p != null && p <= 40)) return false;
+        if (C.ff[i][1] === 'hi' && !(p != null && p >= 60)) return false;
+        if (C.ff[i][1] === 'lo' && !(p != null && p <= 40)) return false;
       }
     }
     return true;
   }
-  function filtered() { return V.sig != null || !!V.g || !!(V.q && String(V.q).trim()) || !!(V.ff && V.ff.length); }
+  function filtered() { var C = cv(); return (TAB !== 'find' && C.sig != null) || !!C.g || !!(C.q && String(C.q).trim()) || !!(C.ff && C.ff.length); }
   function fxOptions(D) {
     return D.fg.map(function (g) {
       var o = D.fx.filter(function (f) { return f.g === g[0] && f.k !== 'plays'; }).map(function (f) { return '<option value="' + esc(f.k) + '">' + esc(f.n) + '</option>'; }).join('');
@@ -171,28 +241,39 @@
     }).join('');
   }
   function toolsHtml(all, D) {
-    var n = { '': all.length, '1': 0, '0': 0, '-1': 0 }, cur = V.sig == null ? '' : String(V.sig);
-    all.forEach(function (o) { if (o.r.sig != null) n[String(o.r.sig)]++; });
-    var segs = [['', 'All'], ['1', 'Buy'], ['0', 'Hold'], ['-1', 'Sell']].map(function (x) {
-      return '<button type="button" class="chip-btn" data-vsig="' + x[0] + '" aria-pressed="' + (cur === x[0]) + '">' + x[1] + ' <span class="muted">' + n[x[0]] + '</span></button>';
-    }).join('');
+    var C = cv(), segs;
+    if (TAB === 'find') {
+      segs = LENS.map(function (x) {
+        if (x[0] === 'near' && !(PS && PS.loaded())) return '';
+        var k = x[0] === 'plays' ? '' : all.filter(function (o) { return lensOk(o, x[0]); }).length;
+        return '<button type="button" class="chip-btn" data-vlens="' + x[0] + '" aria-pressed="' + (C.lens === x[0]) + '">' + x[1] + (k === '' ? '' : ' <span class="muted">' + k + '</span>') + '</button>';
+      }).join('');
+    } else {
+      var n = { '': all.length, '1': 0, '0': 0, '-1': 0 }, cur = C.sig == null ? '' : String(C.sig);
+      all.forEach(function (o) { if (o.r.sig != null) n[String(o.r.sig)]++; });
+      segs = [['', 'All'], ['1', 'Buy'], ['0', 'Hold'], ['-1', 'Sell']].map(function (x) {
+        return '<button type="button" class="chip-btn" data-vsig="' + x[0] + '" aria-pressed="' + (cur === x[0]) + '">' + x[1] + ' <span class="muted">' + n[x[0]] + '</span></button>';
+      }).join('');
+    }
     var groups = [];
     all.forEach(function (o) { if (o.t.g && groups.indexOf(o.t.g) < 0) groups.push(o.t.g); });
     groups.sort();
-    if (V.g && groups.indexOf(V.g) < 0) V.g = '';
+    if (C.g && groups.indexOf(C.g) < 0) C.g = '';
     var gsel = groups.length > 1 ? '<select class="me-vsel" data-vg aria-label="Group"><option value="">All groups</option>' +
-      groups.map(function (g) { return '<option' + (g === V.g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' : '';
-    var find = '<input type="search" class="me-vq" data-vq placeholder="Find in your list" value="' + esc(V.q || '') + '" aria-label="Find in your stocks" autocomplete="off">';
+      groups.map(function (g) { return '<option' + (g === C.g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' : '';
+    var find = TAB === 'find'
+      ? '<input type="search" class="me-vq" data-vq placeholder="Name or ticker" value="' + esc(C.q || '') + '" aria-label="Find a stock to add" autocomplete="off">'
+      : '<input type="search" class="me-vq" data-vq placeholder="Find in your list" value="' + esc(C.q || '') + '" aria-label="Find in your stocks" autocomplete="off">';
     var more = D ? '<button type="button" class="chip-btn" data-vff-open aria-expanded="' + FF_OPEN + '">+ Factor filter</button>' +
       '<button type="button" class="chip-btn" data-vcols aria-expanded="' + PICK_OPEN + '">Columns ▾</button>' : '';
-    var chips = D ? (V.ff || []).map(function (f, i) {
+    var chips = D ? (C.ff || []).map(function (f, i) {
       var j = fxAt(D, f[0]);
       return j < 0 ? '' : '<span class="me-ffchip">' + esc(D.fx[j].n) + ' ' + esc(CONDS[f[1]] || '') + '<button type="button" data-vff-del="' + i + '" aria-label="Remove this filter">×</button></span>';
     }).join('') : '';
     var add = D && FF_OPEN ? '<div class="me-ffadd"><select class="me-vsel" data-vff-k aria-label="Factor">' + fxOptions(D) + '</select>' +
       '<select class="me-vsel" data-vff-c aria-label="Condition"><option value="hi">' + CONDS.hi + '</option><option value="lo">' + CONDS.lo + '</option></select>' +
       '<button type="button" class="btn sm" data-vff-add>Add filter</button></div>' : '';
-    return '<div class="me-tools"><div class="me-seg" role="group" aria-label="Your signal">' + segs + '</div>' + gsel + find + more + '</div>' +
+    return '<div class="me-tools"><div class="me-seg" role="group" aria-label="' + (TAB === 'find' ? 'Which stocks' : 'Your signal') + '">' + segs + '</div>' + gsel + find + more + '</div>' +
       (chips || add ? '<div class="me-ff">' + chips + add + '</div>' : '') + pickHtml(D);
   }
   function pickHtml(D) {
@@ -209,17 +290,19 @@
     return '<div class="me-colpick"><div class="me-presets"><span class="small muted">Quick picks</span>' + presets + '</div><div class="me-colgrid">' + groups + '</div></div>';
   }
   function tableHtml(all, D) {
-    var rows = all.filter(function (o) { return passes(o, D); }), cs = viewCols(D);
+    var rows = all.filter(function (o) { return passes(o, D); }), cs = viewCols(D), F = TAB === 'find';
+    if (F) lensSort(rows, VF.lens);
     var head = '<tr><th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th data-sort-first="desc">Plays in</th>' +
       '<th class="r" data-sort-first="desc" title="The latest close, and the change on the day; sorts by the day">Price</th><th class="r" data-sort-first="desc">1 year</th>' +
       cs.map(function (k) {
         var f = D.fx[fxAt(D, k)];
         return '<th class="r" data-sort-first="desc" title="' + esc(f.n + '. ' + f.d + ' Sorts by points: most in favour of buying first.') + '">' + esc(SHORT[k] || f.n) + '</th>';
-      }).join('') + '<th aria-label="Remove"></th></tr>';
+      }).join('') + (F ? '<th aria-label="Add to My stocks"></th></tr>' : '<th aria-label="Remove"></th></tr>');
     var body = rows.map(function (o) {
       var t = o.t, r = o.r;
       return '<tr><td class="stick"><a class="me-sym" href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></a></td>' +
-        '<td class="nowrap" data-v="' + (r.s == null ? '' : r.s) + '">' + sgPill(r) + (r.held ? '<small class="me-held" title="A Buy holds until the score drops below 50, a Sell until it rises above 50">held</small>' : '') + '</td>' +
+        '<td class="nowrap" data-v="' + (r.s == null ? '' : r.s) + '">' + sgPill(r) + (r.held ? '<small class="me-held" title="A Buy holds until the score drops below 50, a Sell until it rises above 50">held</small>' : '') +
+          (F && VF.lens === 'near' && nearOf(o.s) ? '<small class="me-nearline">' + esc(nearWords(nearOf(o.s), t.cur)) + '</small>' : '') + '</td>' +
         '<td class="nowrap" data-v="' + (o.c[1] ? (o.c[0] / o.c[1]).toFixed(4) : '') + '" title="' + o.c[0] + ' of ' + o.c[1] + ' plays hold it">' + bar(o.c[0], o.c[1]) + ' <span class="mono small">' + (o.c[1] ? Math.round(100 * o.c[0] / o.c[1]) + '%' : '–') + '</span></td>' +
         '<td class="r nowrap" data-v="' + (t.d1 == null ? '' : t.d1) + '"><span class="mono">' + money(t.p, t.cur) + '</span>' + (t.d1 != null ? '<small class="me-d1 ' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</td>' +
         '<td class="r nowrap ' + cls(t.y1) + '" data-v="' + (t.y1 == null ? '' : t.y1) + '">' + pct(t.y1, 0) + '</td>' +
@@ -227,13 +310,22 @@
           var j = fxAt(D, k), p = o.x ? o.x[j] : null, v = o.v ? o.v[j] : null;
           return '<td class="r nowrap fx' + ptsCls(p) + '" data-v="' + (p == null ? '' : p) + '" title="' + esc(v ? v + ' · ' + p + ' points' : 'No number for this stock') + '">' + esc(vshort(k, v)) + '</td>';
         }).join('') +
-        '<td class="c"><button type="button" class="me-x" data-remove="' + esc(o.s) + '" aria-label="Stop following ' + esc(t.s) + '">×</button></td></tr>';
+        (F ? '<td class="c"><button type="button" class="me-plus" data-fadd="' + esc(o.s) + '" aria-label="Add ' + esc(t.s) + ' to My stocks" title="Add to My stocks">+</button></td></tr>'
+          : '<td class="c"><button type="button" class="me-x" data-remove="' + esc(o.s) + '" aria-label="Remove ' + esc(t.s) + ' from My stocks">×</button></td></tr>');
     }).join('');
-    var none = rows.length ? '' : '<p class="me-vnone">No stocks match these filters. <button type="button" class="linkish" data-vreset>Clear filters</button></p>';
-    var foot = '<p class="small muted me-vfoot">' + (filtered() ? 'Showing ' + rows.length + ' of ' + all.length + ' · <button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '') +
+    var none = rows.length ? '' : F && VF.lens === 'near' && !(PS && PS.loaded()) ? '<p class="me-vnone">Working out which stocks are close to a Buy…</p>' : F
+      ? '<p class="me-vnone">' + (VF.lens === 'buy' ? 'None of the stocks you don\'t follow reads Buy with your weights right now.' : VF.lens === 'near' ? 'No stock you don\'t follow is within 5% of a Buy right now.' : 'No stocks match these filters.') +
+        (filtered() ? ' <button type="button" class="linkish" data-vreset>Clear filters</button>' : ' <button type="button" class="linkish" data-vlens="all">Show all</button>') + '</p>'
+      : '<p class="me-vnone">No stocks match these filters. <button type="button" class="linkish" data-vreset>Clear filters</button></p>';
+    // Find lists every match, sorted, and shows the first FN: the rest stay in the table so a header sort covers them all
+    var lim = F && rows.length > FN ? '<style>#me-find .me-tbl tbody tr:nth-child(n+' + (FN + 1) + '){display:none}</style>' : '';
+    var foot = '<p class="small muted me-vfoot">' + (F
+      ? (rows.length ? 'Showing ' + Math.min(FN, rows.length) + ' of ' + rows.length + (rows.length > FN ? ' · <button type="button" class="linkish" data-fmore>Show ' + Math.min(FSTEP, rows.length - FN) + ' more</button>' : '') + ' · ' : '') +
+        (filtered() ? '<button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '')
+      : (filtered() ? 'Showing ' + rows.length + ' of ' + all.length + ' · <button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '')) +
       (D ? '<span class="fx-key fx-good">Green</span>: the factor favours buying (60+ points) · <span class="fx-key fx-bad">red</span>: it counts against (40 or fewer). ' : '') +
       'Click a header to sort.</p>';
-    return (rows.length ? '<div class="tbl-wrap me-tblwrap"><table class="tbl me-tbl"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' : none) + foot;
+    return (rows.length ? lim + '<div class="tbl-wrap me-tblwrap"><table class="tbl me-tbl' + (F ? ' me-ftbl" data-nocap' : '"') + '><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' : none) + foot;
   }
   function vRefresh(tools) {
     var D = fxD(), all = rowsData();
@@ -251,10 +343,10 @@
     list.forEach(function (s) { var r = sg(s); if (r && r.sig != null) n[r.sig]++; });
     var wl = PS && PS.loaded() ? PS.wlabel() : 'Plays + exit rules';
     return '<div class="card tile"><span class="tile-label">Your signal on your stocks</span><span class="tile-value"><b class="sig-n buy" data-count="' + n['1'] + '">' + n['1'] + '</b><small> Buy of ' + list.length + '</small></span>' +
-      bar(n['1'], list.length || 1) + '<span class="tile-note">' + (list.length ? n['0'] + ' Hold · ' + n['-1'] + ' Sell · weights: ' + esc(wl) : 'Follow a few to begin') + '</span></div>';
+      bar(n['1'], list.length || 1) + '<span class="tile-note">' + (list.length ? n['0'] + ' Hold · ' + n['-1'] + ' Sell · weights: ' + esc(wl) : 'Add a few to begin') + '</span></div>';
   }
   function playsTile(avg) {
-    return '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Follow a few to see it' : 'On average across your list') + '</span></div>';
+    return '<div class="card tile"><span class="tile-label">Plays holding your stocks</span><span class="tile-value">' + (avg == null ? '–' : avg + '<small>%</small>') + '</span><span class="tile-note">' + (avg == null ? 'Add a few to see it' : 'On average across your list') + '</span></div>';
   }
   function kpis() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
@@ -394,26 +486,54 @@
     return { bad: p.trim(), many: r.length > 1 };
   }
   function draw() {
+    NEAR = {};                                     // weights or plays may have changed: work the flip prices out again
     var box = $('[data-me-in]');
     var local = [];
     try { var v = JSON.parse(localStorage.getItem('quiplee.watch.v1') || 'null'); local = ((v && v.items) || []).map(function (x) { return x.sym; }).filter(function (s) { return R.t[s] && (A.follow || []).indexOf(s) < 0; }); } catch (e) { /* storage off */ }
     box.innerHTML =
       '<div class="me-top"><div><p class="eyebrow">Your account</p><h1 class="h1 me-hi">' + greeting() + ', <em>' + esc(A.name) + '</em></h1>' +
-      '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' stock' + ((A.follow || []).length === 1 ? '' : 's') + ' followed</p></div>' +
+      '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' in My stocks</p></div>' +
       '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
       notice() + kpis() +
-      '<section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">Your stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
+      '<section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">My stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
+      '<div class="me-tabs" role="tablist" aria-label="My stocks">' +
+      '<button type="button" role="tab" data-tab="mon" aria-selected="' + (TAB !== 'find') + '">Monitor <span class="muted">' + (A.follow || []).filter(function (s) { return R.t[s]; }).length + '</span></button>' +
+      '<button type="button" role="tab" data-tab="find" aria-selected="' + (TAB === 'find') + '">Find stocks to add</button></div>' +
       '<div class="ps-bar ps-bar-me">' + psChip() + '<p class="small muted">Plays in counts only the plays you pick, here and across the site.</p></div>' +
-      '<div class="me-add"><input type="search" data-add-q placeholder="Follow stocks: NVDA, Shopify, RY…" autocomplete="off" enterkeyhint="done" aria-label="Follow stocks: one name or ticker, or several separated by commas"><div class="me-sug" data-sug hidden></div></div>' +
+      '<div class="me-add"><input type="search" data-add-q placeholder="Add stocks: NVDA, Shopify, RY…" autocomplete="off" enterkeyhint="done" aria-label="Add to My stocks: one name or ticker, or several separated by commas"><div class="me-sug" data-sug hidden></div></div>' +
       '<p class="small muted me-add-msg" data-add-msg hidden></p>' +
-      (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Follow the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist</button></p>' : '') +
+      (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Add the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist to My stocks</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
       '<div class="me-grid me-grid2">' + alertsCard() + theoryCard() + '</div>' +
       toolsCard() + accountCard();
     box.hidden = false;
     wire(box, local);
   }
-  function setFollow(list) { A.follow = list; $('[data-rows]').innerHTML = followRows(); draw(); }
+  function setFollow(list) { A.follow = list; draw(); }
+  function mailOn() { return !!(A.email && A.email_ok && A.alerts && A.alerts.on); }
+  function setTab(x) {
+    if (x === TAB) return;
+    TAB = x;
+    FN = FSTEP;
+    try { history.replaceState(null, '', location.pathname + location.search + (x === 'find' ? '#find' : '#stocks')); } catch (e) { /* old browser */ }
+    $$('[data-tab]').forEach(function (b) { if (b.getAttribute('role') === 'tab') b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === x)); });
+    FF_OPEN = false;
+    PICK_OPEN = false;
+    $('[data-rows]').innerHTML = followRows();
+  }
+  // add these covered stocks to the account's list, then redraw (Find keeps its place)
+  function followSyms(syms, then) {
+    if (BUSY) return;
+    BUSY = true;
+    BP.post('follow', { add: syms }).then(function (j) {
+      BUSY = false;
+      if (!j.ok) return toast(j.error || "Couldn't add that.", 'warn');
+      var added = syms.filter(function (x) { return (j.follow || []).indexOf(x) >= 0; });
+      added.forEach(function (x) { document.dispatchEvent(new CustomEvent('bp:follow', { detail: { sym: x, on: true } })); });
+      setFollow(j.follow);
+      if (then) then(added);
+    }, function () { BUSY = false; toast("Couldn't reach your account. Try again in a moment.", 'warn'); });
+  }
   function names(syms) {
     var n = syms.map(function (x) { return R.t[x] ? R.t[x].s : x; });
     return n.length < 2 ? n.join('') : n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1];
@@ -433,7 +553,7 @@
     var keep = bad.concat(many).concat(over.map(function (x) { return R.t[x].s; }));
     function report() {
       var msg = [];
-      if (had.length) msg.push('Already following ' + names(had) + '.');
+      if (had.length) msg.push(names(had) + (had.length === 1 ? ' is' : ' are') + ' already in My stocks.');
       if (many.length) msg.push('"' + many.join('", "') + '" matches more than one stock: pick one from the list.');
       if (over.length) msg.push('Your list holds 100 stocks; ' + names(over) + " didn't fit.");
       var note = $('[data-add-msg]');
@@ -446,16 +566,10 @@
       if (i) { i.value = keep.join(', '); i.focus(); }
     }
     if (!syms.length) { report(); return; }
-    if (BUSY) return;
-    BUSY = true;
-    BP.post('follow', { add: syms }).then(function (j) {
-      BUSY = false;
-      if (!j.ok) return toast(j.error || "Couldn't add that.", 'warn');
-      var added = syms.filter(function (x) { return (j.follow || []).indexOf(x) >= 0; });
-      setFollow(j.follow);
-      if (added.length) toast('Following ' + names(added) + '.');
+    followSyms(syms, function (added) {
+      if (added.length) toast('Added ' + names(added) + ' to My stocks.');
       report();
-    }, function () { BUSY = false; toast("Couldn't reach your account. Try again in a moment.", 'warn'); });
+    });
   }
   function wire(box, local) {
     LOCAL = local;
@@ -467,7 +581,7 @@
       if (multi) {
         var ok = ps.map(resolveOne).filter(function (r) { return r.sym && (A.follow || []).indexOf(r.sym) < 0; }).map(function (r) { return r.sym; });
         ok = ok.filter(function (x, i) { return ok.indexOf(x) === i; });
-        if (ok.length) html += '<button type="button" class="me-sug-all" data-add-all><b>Follow ' + (ok.length === 1 ? 'it' : ok.length === 2 ? 'both' : 'all ' + ok.length) + ':</b><span>' + esc(names(ok)) + '</span></button>';
+        if (ok.length) html += '<button type="button" class="me-sug-all" data-add-all><b>Add ' + (ok.length === 1 ? 'it' : ok.length === 2 ? 'both' : 'all ' + ok.length) + ':</b><span>' + esc(names(ok)) + '</span></button>';
       }
       // with a list, picking a suggestion fills in the name being typed; with one name it follows it
       html += list.map(function (s) { var t = R.t[s]; return '<button type="button" ' + (multi ? 'data-pick' : 'data-add') + '="' + esc(s) + '"><b>' + esc(t.s) + '</b><span>' + esc(t.n) + '</span></button>'; }).join('');
@@ -487,14 +601,15 @@
     box.setAttribute('data-wired', '1');
     box.addEventListener('input', function (e) {
       if (!e.target.hasAttribute || !e.target.hasAttribute('data-vq')) return;
-      V.q = e.target.value;
-      vsave();
+      cv().q = e.target.value;
+      FN = FSTEP;
+      csave();
       vRefresh(false);                            // the table only, so the box keeps its focus
     });
     box.addEventListener('change', function (e) {
       var el = e.target;
       if (!el.hasAttribute) return;
-      if (el.hasAttribute('data-vg')) { V.g = el.value; vsave(); vRefresh(false); }
+      if (el.hasAttribute('data-vg')) { cv().g = el.value; FN = FSTEP; csave(); vRefresh(false); }
       else if (el.hasAttribute('data-vcol')) {
         var D = fxD(), on = viewCols(D), k = el.getAttribute('data-vcol');
         on = el.checked ? (on.indexOf(k) < 0 ? on.concat([k]) : on) : on.filter(function (x) { return x !== k; });
@@ -504,22 +619,38 @@
       }
     });
     box.addEventListener('click', function (e) {
-      var v = e.target.closest ? e.target.closest('[data-vsig],[data-vff-open],[data-vff-add],[data-vff-del],[data-vcols],[data-vpreset],[data-vreset]') : null;
+      var tb = e.target.closest ? e.target.closest('[data-tab],[data-fadd],[data-fmore]') : null;
+      if (tb) {
+        if (tb.hasAttribute('data-tab')) { setTab(tb.getAttribute('data-tab')); if (tb.getAttribute('role') !== 'tab') { var st = document.getElementById('stocks'); if (st) st.scrollIntoView({ block: 'start' }); } }
+        else if (tb.hasAttribute('data-fmore')) { FN += FSTEP; vRefresh(false); }
+        else {
+          var sym = tb.getAttribute('data-fadd');
+          tb.disabled = true;
+          followSyms([sym], function (added) {
+            if (added.length) toast('Added ' + names(added) + ' to My stocks: ' + (added.length === 1 ? 'it\u2019s' : 'they\u2019re') + ' on Monitor now.' + (mailOn() ? ' You\u2019ll get an email the evening your signal flips.' : ''));
+          });
+        }
+        return;
+      }
+      var v = e.target.closest ? e.target.closest('[data-vsig],[data-vlens],[data-vff-open],[data-vff-add],[data-vff-del],[data-vcols],[data-vpreset],[data-vreset]') : null;
       if (v) {
-        var D = fxD();
-        if (v.hasAttribute('data-vsig')) { var x = v.getAttribute('data-vsig'); V.sig = x === '' ? null : +x; }
+        var D = fxD(), C = cv();
+        FN = FSTEP;
+        if (v.hasAttribute('data-vsig')) { var x = v.getAttribute('data-vsig'); C.sig = x === '' ? null : +x; }
+        else if (v.hasAttribute('data-vlens')) { VF.lens = v.getAttribute('data-vlens'); }
         else if (v.hasAttribute('data-vff-open')) { FF_OPEN = !FF_OPEN; PICK_OPEN = false; }
         else if (v.hasAttribute('data-vcols')) { PICK_OPEN = !PICK_OPEN; FF_OPEN = false; }
         else if (v.hasAttribute('data-vff-add')) {
           var fk = $('[data-vff-k]'), fc = $('[data-vff-c]');
           if (fk && fc) {
-            V.ff = (V.ff || []).filter(function (f) { return f[0] !== fk.value; });
-            V.ff.push([fk.value, fc.value]);
+            C.ff = (C.ff || []).filter(function (f) { return f[0] !== fk.value; });
+            C.ff.push([fk.value, fc.value]);
           }
           FF_OPEN = false;
-        } else if (v.hasAttribute('data-vff-del')) { (V.ff || []).splice(+v.getAttribute('data-vff-del'), 1); }
+        } else if (v.hasAttribute('data-vff-del')) { (C.ff || []).splice(+v.getAttribute('data-vff-del'), 1); }
         else if (v.hasAttribute('data-vpreset') && D) vPreset(v.getAttribute('data-vpreset'), D);
-        else if (v.hasAttribute('data-vreset')) { V = { cols: V.cols }; FF_OPEN = false; }
+        else if (v.hasAttribute('data-vreset')) { if (TAB === 'find') VF = { lens: VF.lens }; else V = { cols: V.cols }; FF_OPEN = false; }
+        csave();
         vsave();
         vRefresh(true);
         return;
@@ -541,7 +672,7 @@
         e.preventDefault();
         BP.follow(t.getAttribute('data-remove'), false).then(function (j) { if (j.ok) setFollow(j.follow); });
       } else if (t.hasAttribute('data-import')) {
-        BP.post('follow', { tickers: (A.follow || []).concat(LOCAL) }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is on your account now.'); } });
+        BP.post('follow', { tickers: (A.follow || []).concat(LOCAL) }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is in My stocks now.'); } });
       } else if (t.hasAttribute('data-resend')) {
         BP.post('resend', {}).then(function (j) { toast(j.ok ? 'Sent. Check your inbox (and spam folder).' : (j.error || "That didn't send."), j.ok ? '' : 'warn'); });
       } else if (t.hasAttribute('data-signout')) {
@@ -591,7 +722,7 @@
           PS.ready(function () { if (A.plays || A.signal) PS.adopt(A.plays, A.signal); draw(); });
           PS.onChange(function () { draw(); });
         }
-        if (location.hash) { var el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ block: 'start' }); }
+        if (location.hash) { var el = document.getElementById(location.hash === '#find' ? 'stocks' : location.hash.slice(1)); if (el) el.scrollIntoView({ block: 'start' }); }
       });
     });
   }

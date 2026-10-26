@@ -257,10 +257,23 @@ their emails and the member tools. Accounts live in the Blobs store `paper`
 `netlify/lib/account.mjs` and the routes in `netlify/functions/account.mjs`
 (`/api/account/*`: sign-up, sign-in, follow, alerts, email, confirm, forgot/reset
 password, unsubscribe, delete). Old username-only accounts from the retired game keep working and
-can add an email on the account page. Its "Your stocks" table (`assets/me.js` tableHtml) shows your signal, plays in, price, 1-year change and any
+can add an email on the account page. Its "My stocks" table (`assets/me.js` tableHtml) shows your signal, plays in, price, 1-year change and any
 of the 17 factors as columns (Columns picker with quick picks; values from data/playset.json, green at 60+ points, red at
 40 or less), filters by signal, group, name and "favours buying"/"counts against" on any factor, sorts by any header
-(sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`). Signing in sets the HttpOnly `pt` session, a readable
+(sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`).
+
+**My stocks: one list everywhere (`assets/mine.js`, `BPMine`).** Signed in, it's the stocks the account follows (the
+ones its signal emails are about); signed out, it's this browser's watchlist (`quiplee.watch.v1`). Any table or list
+marked `data-mine` whose rows carry `data-sym` (the stock list, the home board, the play pages' tables, the benchmark
+table) gets a ☆ on each row to add or remove the stock and an "All · ★ My stocks" switch; the screener draws its own
+star and switch through the same module. The switch is one setting for the whole site (`bp.mine.only`), so every list
+narrows together, and the phone's "Show all" cap (sortable.js, `BPStack.recap`) counts only the rows showing. Signed in,
+the watchlist page is My stocks too: the account's list, with this browser keeping only quantities, values and names not
+covered yet, and covered names only on the browser offered once to add. The account page has two tabs: **Monitor** (what
+changed since you last looked, the names a move of 5% or less would flip, from `BPPlays.flips(sym, w, 0.05)`, and the
+table) and **Find stocks to add** (the same table over every covered stock not in My stocks, as Your Buys, Close to a
+Buy, Most plays in or All, 25 at a time with every match kept in the table so a header sort covers them all; its view
+is kept in `bp.me.find.v1`; + adds the stock to the account). Signing in sets the HttpOnly `pt` session, a readable
 `bp_name` cookie for the header, and, for accounts with an email, a `qm` cookie of
 kind `acct` that opens the member pages. **Member tools are free for every account
 until midnight on January 1, 2027 (Toronto)**: `FREE_UNTIL` in `netlify/lib/account.mjs`,

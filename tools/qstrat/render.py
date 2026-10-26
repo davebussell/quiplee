@@ -636,6 +636,7 @@ class Site:
 <script src="{h('assets/sortable.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/glossary.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/account.js')}?v={self.ver}" defer></script>
+<script src="{h('assets/mine.js')}?v={self.ver}" defer></script>
 {more}</body>
 </html>
 """
@@ -975,9 +976,9 @@ class Site:
                     cells += (f'<td class="c fam-cell" data-v="{sortv(kk / nn if nn else None)}" data-ps-fam="{k}"><a href="{h("stocks/" + t["slug"] + "/")}#fam-{k}" title="{e(name)} on {e(t["short"])}: {kk} of {nn} in">'
                               f'{fill_bar(kk, nn)}<span>{kk}/{nn}</span></a></td>')
                 k_, n_ = self.consensus(t)
-                rows += (f'<tr data-ps-row="{e(t["sym"])}"><td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a>'
+                rows += (f'<tr data-ps-row="{e(t["sym"])}" data-sym="{e(t["sym"])}"><td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a>'
                          f'<span class="sym-sub">{e(t["name"])}</span></td>{cells}<td class="r" data-v="{sortv(k_ / n_ if n_ else None)}" data-ps-plays>{count_in(k_, n_)}</td></tr>')
-        return (f'<div class="tbl-wrap"><table class="tbl board"><thead><tr><th class="stick" scope="col">Stock</th>{head}<th class="r" scope="col">All plays</th></tr></thead>'
+        return (f'<div class="tbl-wrap"><table class="tbl board" data-mine><thead><tr><th class="stick" scope="col">Stock</th>{head}<th class="r" scope="col">All plays</th></tr></thead>'
                 f'<tbody>{rows}</tbody></table></div>')
 
     def thinker_card(self, th, depth):
@@ -1044,14 +1045,14 @@ class Site:
                 rows += f'<tr class="grp"><td colspan="5">{e(g)}</td></tr>'
                 for t in [x for x in universe() if x["group"] == g]:
                     b = self.r(t["sym"], s["slug"])["stats"]["full"]["bh"] or {}
-                    rows += (f'<tr><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
+                    rows += (f'<tr data-sym="{e(t["sym"])}"><td><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                              f'<td class="r {dir_cls(b.get("cagr"))}">{pct(b.get("cagr"))}</td><td class="r">{pct(b.get("maxdd"))}</td><td class="r">{ratio(b.get("sharpe"))}</td>'
                              f'<td class="r nowrap">{dlong(self.r(t["sym"], s["slug"])["stats"]["start"])}</td></tr>')
             body = f"""
 <nav class="crumbs"><a href="{h('strategies/')}">Plays</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">The benchmark</p><h1 class="h1">{e(s['long'])}</h1><div class="byline"><span>Championed by {by}</span></div><p class="lede">{e(s['short'])}</p></section>
 <section><h2 class="h2">Buy and hold, stock by stock</h2>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Since</th></tr></thead><tbody>{rows}</tbody></table></div></section>
+<div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Since</th></tr></thead><tbody>{rows}</tbody></table></div></section>
 """
             self.add(path, self.shell(path, s["long"], s["short"], body, active="strategies/"))
             return
@@ -1068,12 +1069,12 @@ class Site:
                 link = h(self.pair_or_stock(t, s))
                 dv = abs(nm["dist"]) if nm["dist"] is not None else (nm.get("dist_days", 0) / 365 if nm.get("dist_days") is not None else None)
                 lvl = nm["short"] + (f' <span class="muted">({pct(nm["dist"])})</span>' if nm["dist"] is not None else "")
-                now_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
+                now_rows += (f'<tr data-sym="{e(t["sym"])}"><td><a class="sym" href="{link}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                              f'<td>{pill(x["state"])}{band}</td><td class="nowrap">{dlong(x["since"])}</td>'
                              f'<td class="nowrap" data-v="{sortv(dv)}">{lvl}</td><td class="nowrap muted">{dlong(x["next_check"])}</td></tr>')
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 bat = x["batting"]
-                rec_rows += (f'<tr><td><a class="sym" href="{link}">{e(t["short"])}</a></td>'
+                rec_rows += (f'<tr data-sym="{e(t["sym"])}"><td><a class="sym" href="{link}">{e(t["short"])}</a></td>'
                              f'<td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
                              f'<td class="r nowrap" data-v="{sortv(a.get("maxdd"))}">{pct(a.get("maxdd"))} <span class="muted">/ {pct(b.get("maxdd"))}</span></td>'
                              f'<td class="r nowrap" data-v="{sortv(a.get("sharpe"))}">{ratio(a.get("sharpe"))} <span class="muted">/ {ratio(b.get("sharpe"))}</span></td>'
@@ -1097,9 +1098,9 @@ class Site:
 <section class="card practice-strip"><p><b>Practise this play.</b> See if you can read its call on real charts, or drill its rule on a flashcard.</p>
 <div class="chips"><a href="{h('learn/call-it/')}?play={s['slug']}">Call it: {e(s['name'])}</a><a href="{h('learn/flashcards/')}?deck=plays#{s['slug']}">Flashcard</a></div></section>
 <section><div class="sec-head"><h2 class="h2">What it says now</h2><p>The close that would flip each call on its next {BAR_WORD[s['bar']]} check.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
+<div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>Play / buy and hold over the same dates, since 2005 or the first date with enough history.</p></div>
-<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rec_rows}</tbody></table></div></section>
+<div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rec_rows}</tbody></table></div></section>
 """
         self.add(path, self.shell(path, s["long"], f"{s['long']} from {credit(s)}: {s['short']} Current calls and full record on {len(universe())} stocks.", body, active="strategies/"))
 
@@ -1264,7 +1265,7 @@ class Site:
 <div class="chips st-sorts"><span class="small muted">Sort:</span>{presets}</div>
 <div class="chips st-groups">{chips}</div>
 </div>
-<div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl"><thead><tr>
+<div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl" data-mine><thead><tr>
 <th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
 <th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
 <th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
