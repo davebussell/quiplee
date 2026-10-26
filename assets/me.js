@@ -372,6 +372,19 @@
     }
     return '';
   }
+  // a write that replaced the list and dropped three or more stocks kept the old list (follow_was, account.mjs keepWas)
+  function wasMissing() {
+    var w = A.follow_was, f = A.follow || [];
+    if (!w || !w.list || !w.at || Date.now() - Date.parse(w.at) > 30 * 864e5) return [];
+    return w.list.filter(function (s) { return R.t[s] && f.indexOf(s) < 0; });
+  }
+  function wasNote() {
+    var m = wasMissing();
+    if (m.length < 3) return '';
+    var when = new Date(A.follow_was.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return '<div class="me-note warn"><b>' + m.length + ' stocks left My stocks on ' + esc(when) + '</b> when the list was replaced: ' + esc(names(m)) + '. ' +
+      '<button type="button" class="btn sm" data-was-restore>Put them back</button> <button type="button" class="linkish" data-was-dismiss>Keep it as it is</button></div>';
+  }
   function alertsCard() {
     var al = A.alerts || {}, member = A.member && A.member.active;
     var stop = q.get('stop');
@@ -494,7 +507,7 @@
       '<div class="me-top"><div><p class="eyebrow">Your account</p><h1 class="h1 me-hi">' + greeting() + ', <em>' + esc(A.name) + '</em></h1>' +
       '<p class="muted">The ' + esc(day(R.asof)) + ' close · ' + (A.follow || []).length + ' in My stocks</p></div>' +
       '<div class="hero-links"><a class="btn primary glow" href="/theory/">Theory tester</a><a class="btn" href="/#screen">Screener</a></div></div>' +
-      notice() + kpis() +
+      notice() + wasNote() + kpis() +
       '<section class="card me-card me-stocks" id="stocks"><div class="me-card-h"><h2 class="h3">My stocks</h2><span class="small muted">' + (A.follow || []).length + ' of 100</span></div>' +
       '<div class="me-tabs" role="tablist" aria-label="My stocks">' +
       '<button type="button" role="tab" data-tab="mon" aria-selected="' + (TAB !== 'find') + '">Monitor <span class="muted">' + (A.follow || []).filter(function (s) { return R.t[s]; }).length + '</span></button>' +
@@ -655,6 +668,18 @@
         vRefresh(true);
         return;
       }
+      var wb = e.target.closest ? e.target.closest('[data-was-restore],[data-was-dismiss]') : null;
+      if (wb) {
+        var restore = wb.hasAttribute('data-was-restore');
+        BP.post('follow', restore ? { add: wasMissing(), clear_was: true } : { clear_was: true }).then(function (j) {
+          if (!j.ok) return toast(j.error || "That didn't save. Try again.", 'warn');
+          A.follow_was = null;
+          if (restore) (j.follow || []).forEach(function (x) { document.dispatchEvent(new CustomEvent('bp:follow', { detail: { sym: x, on: true } })); });
+          setFollow(j.follow);
+          if (restore) toast('Put back. My stocks has ' + j.follow.length + ' stocks.');
+        });
+        return;
+      }
       var t = e.target.closest ? e.target.closest('[data-add],[data-add-all],[data-pick],[data-remove],[data-import],[data-resend],[data-signout],[data-stop]') : null;
       if (!t) return;
       var inp = $('[data-add-q]');
@@ -670,9 +695,14 @@
       }
       else if (t.hasAttribute('data-remove')) {
         e.preventDefault();
-        BP.follow(t.getAttribute('data-remove'), false).then(function (j) { if (j.ok) setFollow(j.follow); });
+        var rs = t.getAttribute('data-remove');
+        BP.follow(rs, false).then(function (j) {
+          if (!j.ok) return toast(j.error || "That didn't save. Try again.", 'warn');
+          document.dispatchEvent(new CustomEvent('bp:follow', { detail: { sym: rs, on: false } }));
+          setFollow(j.follow);
+        });
       } else if (t.hasAttribute('data-import')) {
-        BP.post('follow', { tickers: (A.follow || []).concat(LOCAL) }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is in My stocks now.'); } });
+        BP.post('follow', { add: LOCAL }).then(function (j) { if (j.ok) { setFollow(j.follow); toast('Your watchlist is in My stocks now.'); } });
       } else if (t.hasAttribute('data-resend')) {
         BP.post('resend', {}).then(function (j) { toast(j.ok ? 'Sent. Check your inbox (and spam folder).' : (j.error || "That didn't send."), j.ok ? '' : 'warn'); });
       } else if (t.hasAttribute('data-signout')) {

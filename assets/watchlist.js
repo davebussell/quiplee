@@ -28,6 +28,8 @@
     'Weight': 'Its share of your list by value, from the quantities or values in your file.'
   };
   var st = { items: [], example: false, shared: false, mode: 'all', pick: [] };
+  // signed in (mine.js): this list is My stocks; EXTRA holds covered names saved on this browser that the account doesn't have
+  var MINE = window.BPMine, ACCT = false, EXTRA = [];
 
   function $(id) { return document.getElementById(id); }
   function msg(t, kind) { var m = $('wl-msg'); m.textContent = t; m.className = 'small ' + (kind || 'muted'); }
@@ -35,8 +37,11 @@
   var mem = null, syncTimer = null;   // the member's saved list, once signed in
   function save() {
     if (st.shared || st.example) return;
-    Q.watchSet({ items: st.items });
-    if (mem && mem.synced) { clearTimeout(syncTimer); syncTimer = setTimeout(function () { putList({}); }, 800); }
+    // signed in, names this browser has that My stocks doesn't (EXTRA) stay saved here: nothing is dropped quietly
+    var keep = EXTRA.filter(function (x) { return !st.items.some(function (y) { return y.sym === x.sym; }); });
+    Q.watchSet({ items: st.items.concat(keep) });
+    // an account's list is changed one name at a time (mine.js), never replaced from this page
+    if (mem && mem.synced && !mem.account) { clearTimeout(syncTimer); syncTimer = setTimeout(function () { putList({}); }, 800); }
   }
   function loadMode() {
     try { var m = JSON.parse(localStorage.getItem(MODE_KEY) || 'null'); if (m) { st.mode = m.mode === 'pick' ? 'pick' : 'all'; st.pick = m.pick || []; } } catch (e) {}
@@ -470,7 +475,7 @@
     else alMsg('Saved: ' + n + ' stock' + (n === 1 ? '' : 's') + '. ' + (mem.alerts ? 'Alerts are on: Be The Puck checks after each close and emails only when something changed.' : 'Alerts are off.'));
   }
   function putList(extra) {
-    var body = { tickers: st.items.map(function (x) { return x.sym; }) };
+    var body = mem && mem.account ? {} : { tickers: st.items.map(function (x) { return x.sym; }) };
     Object.keys(extra).forEach(function (k) { body[k] = extra[k]; });
     return fetch('/api/member/list', { method: 'PUT', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); return j; }); })
@@ -490,10 +495,10 @@
       })
       .then(function (L) {
         if (!L) return;
-        mem = { tickers: L.tickers || [], alerts: L.alerts !== false, email: !!L.email, synced: (L.tickers || []).length > 0 };
+        mem = { tickers: L.tickers || [], alerts: L.alerts !== false, email: !!L.email, synced: (L.tickers || []).length > 0, account: !!L.account };
         $('wl-al-on').checked = mem.alerts;
         // a list saved on another device fills an empty (or example) list here
-        if (mem.tickers.length && !st.shared && (st.example || !st.items.length)) {
+        if (!mem.account && mem.tickers.length && !st.shared && (st.example || !st.items.length)) {   // an account's list comes through mine.js
           st.items = mem.tickers.map(function (s) { return { sym: s }; });
           st.example = false; Q.watchSet({ items: st.items }); render();
           msg('Loaded your saved list.');
@@ -513,42 +518,46 @@
   // The account's followed stocks are the list; this browser keeps only what the account doesn't: quantities and
   // values from a pasted list or broker file, and names Be The Puck doesn't cover yet (queued for tonight's run).
   // Covered names only on this browser are offered once, to add to My stocks.
-  var MINE = window.BPMine, ACCT = false;
   function mineInit(shared) {
     if (!MINE || shared) return;
     MINE.ready(function () {
       if (!MINE.signedIn()) return;
       ACCT = true;
-      var local = st.example ? [] : st.items, byLocal = {}, list = MINE.list().filter(function (x) { return D.t[x]; });
+      // read this browser's list again: mine.js may have just added it to the account (and brought names back)
+      var local = (Q.watchGet().items || []), byLocal = {}, list = MINE.list().filter(function (x) { return D.t[x]; });
       local.forEach(function (x) { byLocal[x.sym] = x; });
-      var extra = local.filter(function (x) { return D.t[x.sym] && list.indexOf(x.sym) < 0; }).map(function (x) { return x.sym; });
       var pending = local.filter(function (x) { return !D.t[x.sym]; });
       if (list.length || pending.length) {
+        EXTRA = local.filter(function (x) { return D.t[x.sym] && list.indexOf(x.sym) < 0; });
         st.items = list.map(function (x) { return byLocal[x] || { sym: x }; }).concat(pending);
         st.example = false;
-        Q.watchSet({ items: st.items });
       }
       var clr = $('wl-clear');
       if (clr) clr.hidden = true;           // signed in, clearing would empty the account's list: remove names one by one
       render();
-      if (extra.length) {
-        var m = $('wl-msg');
-        m.className = 'small';
-        m.innerHTML = '';
-        m.appendChild(document.createTextNode('This is My stocks, from your account. ' + extra.length + ' more on this browser\u2019s old list: '));
-        m.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'add ' + (extra.length === 1 ? 'it' : 'them') + ' to My stocks', on: { click: function () {
-          MINE.addMany(extra).then(function () { mineSync(); render(); msg('Added. This list is My stocks, saved to your account.'); });
-        } } }));
-      } else msg('This is My stocks, saved to your account: adding or removing a name here changes it everywhere.');
+      extraNote();
     });
   }
-  // keep this browser's copy (with its quantities) in step with My stocks
-  function mineSync() {
-    if (!ACCT) return;
-    var have = {};
-    st.items.forEach(function (x) { have[x.sym] = x; });
-    MINE.list().forEach(function (x) { if (D.t[x] && !have[x]) st.items.push({ sym: x }); });
-    Q.watchSet({ items: st.items });
+  // covered names saved on this browser that aren't in My stocks (removed on another device, or the list was full):
+  // kept here and offered, never dropped without a tap
+  function extraNote() {
+    if (!EXTRA.length) { msg('This is My stocks, saved to your account: adding or removing a name here changes it everywhere.'); return; }
+    var m = $('wl-msg'), names = EXTRA.map(function (x) { return (D.t[x.sym] && D.t[x.sym].s) || x.sym; });
+    m.className = 'small';
+    m.innerHTML = '';
+    m.appendChild(document.createTextNode('This is My stocks, from your account. Also saved on this browser but not in My stocks: ' + names.join(', ') + '. '));
+    m.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'Add ' + (EXTRA.length === 1 ? 'it' : 'them') + ' to My stocks', on: { click: function () {
+      var syms = EXTRA.map(function (x) { return x.sym; });
+      MINE.addMany(syms).then(function (got) {
+        var by = {};
+        EXTRA.forEach(function (x) { by[x.sym] = x; });
+        got.forEach(function (x) { st.items.push(by[x] || { sym: x }); });
+        EXTRA = EXTRA.filter(function (x) { return got.indexOf(x.sym) < 0; });
+        save(); render(); extraNote();
+      });
+    } } }));
+    m.appendChild(document.createTextNode(' · '));
+    m.appendChild(el('button', { type: 'button', 'class': 'linkish', text: 'Remove from this browser', on: { click: function () { EXTRA = []; save(); extraNote(); } } }));
   }
 
   function loadExample() { st.items = EXAMPLE.filter(function (s) { return D.t[s]; }).map(function (s) { return { sym: s }; }); st.example = true; render(); }

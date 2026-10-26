@@ -20,7 +20,7 @@ import {
   setCookie, clearCookie, safeNext, member, redirect, json, readBody, activeRecord, linkFor,
 } from "../lib/qm.mjs";
 import * as paypal from "../lib/paypal.mjs";
-import { store as acctStore, updateAccount, cleanRules, MAX_FOLLOW } from "../lib/account.mjs";
+import { store as acctStore, updateAccount, cleanRules, MAX_FOLLOW, keepWas } from "../lib/account.mjs";
 import * as mail from "../lib/mail.mjs";
 
 const MAX_TRIES = 8;          // wrong passwords per connection per window
@@ -149,9 +149,11 @@ async function accountList(req, m) {
     return json({ tickers: acct.follow || [], alerts: (acct.alerts || {}).on === true, email: !!acct.email, updated: null, rules: acct.rules || null, account: true });
   }
   const body = await readBody(req);
+  const nextFollow = (a) => (body.tickers !== undefined ? cleanList(body.tickers).slice(0, MAX_FOLLOW) : a.follow || []);
   const out = await updateAccount(s, m.u, (a) => ({
     ...a,
-    follow: body.tickers !== undefined ? cleanList(body.tickers).slice(0, MAX_FOLLOW) : a.follow || [],
+    ...keepWas(a, nextFollow(a)),
+    follow: nextFollow(a),
     alerts: body.alerts !== undefined ? { ...(a.alerts || { level: "all" }), on: !!body.alerts } : a.alerts || { on: false, level: "all" },
     rules: body.rules !== undefined ? cleanRules(body.rules) : a.rules || null,
   }));

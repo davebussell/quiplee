@@ -118,6 +118,13 @@ export async function session(req, s) {
   return { u: p.u, acct };
 }
 
+/** A write that replaces the followed list and drops three or more stocks keeps the list as it was (follow_was),
+ *  so the account page can offer to put back a list lost by mistake. Removing names one by one never does. */
+export function keepWas(a, next) {
+  const old = a.follow || [], gone = old.filter((x) => !next.includes(x));
+  return gone.length >= 3 ? { follow_was: { at: new Date().toISOString(), list: old } } : {};
+}
+
 /** Read-modify-write an account with an ETag check. fn(acct) returns {error, status} or the new record. */
 export async function updateAccount(s, u, fn) {
   for (let i = 0; i < 4; i++) {

@@ -24,9 +24,9 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function localItems() { var v = lget(WKEY); return (v && v.items) || []; }
   function setLocal(sym, on) {
-    var v = lget(WKEY) || {};
-    v.items = (v.items || []).filter(function (x) { return x.sym !== sym; });
-    if (on) v.items.push({ sym: sym });
+    var v = lget(WKEY) || {}, items = v.items || [], had = items.some(function (x) { return x.sym === sym; });
+    if (on && had) return;                     // already saved here (maybe with a quantity from a broker file): keep it as it is
+    v.items = on ? items.concat([{ sym: sym }]) : items.filter(function (x) { return x.sym !== sym; });
     lset(WKEY, v);
   }
   function toast(html) {
@@ -47,10 +47,76 @@
     localItems().forEach(function (x) { mine[x.sym] = true; });
     if (!acct) return done();
     A.me().then(function (a) {
-      if (a && a.signed_in) { mail = !!(a.email && a.email_ok && a.alerts && a.alerts.on); mine = {}; (a.follow || []).forEach(function (s) { mine[s] = true; }); }
-      else acct = false;
+      if (a && a.signed_in) {
+        mail = !!(a.email && a.email_ok && a.alerts && a.alerts.on);
+        mine = {};
+        (a.follow || []).forEach(function (s) { mine[s] = true; });
+        return syncLocal(a).then(done, done);
+      }
+      acct = false;
       done();
     }, done);
+  }
+  // ------------------------------------------------------------ this browser's list joins the account's
+  // Stocks saved on this browser (the watchlist, a star tapped while signed out) are added to the account the next
+  // time it's signed in here, so nothing tracked on one device goes missing on another. Nothing on the browser is
+  // ever deleted by this: removing a stock is always a tap. bp.mine.sync keeps, per browser: whose account, its list
+  // at the last sync (a name in it that's gone from the account was removed on purpose, so it isn't added back),
+  // and the names the account refused today (not covered yet, or the list is full: tried again tomorrow).
+  var SKEY = 'bp.mine.sync';
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function remember(u, rej) {
+    var r = lget(SKEY) || {};
+    if (u) r.u = u;
+    r.syms = Object.keys(mine);
+    if (rej) { r.rej = rej; r.day = today(); }
+    lset(SKEY, r);
+  }
+  function syncLocal(a) {
+    var rec = lget(SKEY), first = !rec || rec.u !== a.name, known = {}, skip = {};
+    if (!first) {
+      (rec.syms || []).forEach(function (x) { known[x] = true; });
+      if (rec.day === today()) (rec.rej || []).forEach(function (x) { skip[x] = true; });
+    }
+    var add = [], back = [];
+    localItems().forEach(function (x) { if (x.sym && !mine[x.sym] && !known[x.sym] && !skip[x.sym] && add.indexOf(x.sym) < 0) add.push(x.sym); });
+    if (first) {
+      // the first time on this browser: also bring back names the watchlist page last showed here (bp.seen.watch,
+      // plays.js), in case an older version of that page dropped them from this browser's list
+      var seen = lget('bp.seen.watch');
+      Object.keys((seen && seen.sig) || {}).forEach(function (x) { if (!mine[x] && add.indexOf(x) < 0) { add.push(x); back.push(x); } });
+    }
+    if (!add.length) { remember(a.name, first ? [] : null); return Promise.resolve(); }
+    return A.post('follow', { add: add.slice(0, 100) }).then(function (j) {
+      if (!j || !j.ok) return;
+      mine = {};
+      (j.follow || []).forEach(function (x) { mine[x] = true; });
+      var got = add.filter(function (x) { return mine[x]; }), rej = add.filter(function (x) { return !mine[x]; });
+      got.forEach(function (x) { if (back.indexOf(x) >= 0) setLocal(x, true); });   // back on this browser's list too
+      remember(a.name, rej);
+      if (got.length) setTimeout(function () { mergedNote(got); }, 400);
+    }, function () { /* offline: try again next page */ });
+  }
+  function mergedNote(got) {
+    var names = got.slice(0, 6).join(', ') + (got.length > 6 ? ' and ' + (got.length - 6) + ' more' : '');
+    toast('Added ' + got.length + ' stock' + (got.length === 1 ? '' : 's') + ' saved on this browser to <a href="/me/#stocks">My stocks</a>: ' + esc(names) +
+      '. <button type="button" class="linkish" data-mine-undo>Undo</button>');
+    var t = document.querySelector('.scr-toast');
+    var u = t && t.querySelector('[data-mine-undo]');
+    if (u) u.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      A.post('follow', { remove: got }).then(function (j) {
+        if (!j || !j.ok) return toast("That didn't undo. Remove them on your account page.");
+        mine = {};
+        (j.follow || []).forEach(function (x) { mine[x] = true; });
+        var r = lget(SKEY) || {};
+        r.syms = Object.keys(mine).concat(got);              // known, so they aren't added again from this browser
+        lset(SKEY, r);
+        changed();
+        toast('Undone. Those stay on this browser\u2019s watchlist only.');
+      });
+    });
   }
   function done() {
     loaded = true;
@@ -84,6 +150,7 @@
         }
         mine = {};
         (j.follow || []).forEach(function (x) { mine[x] = true; });
+        remember();
         changed();
         var got = syms.filter(function (x) { return mine[x]; });
         if (!quiet && got.length) toast('Added ' + got.length + ' to <a href="/me/#stocks">My stocks</a>.');
@@ -112,6 +179,7 @@
           toast(esc((j && j.error) || "That didn't save. Try again."));
           return j || {};
         }
+        remember();
         toast(on ? 'Added ' + name + ' to <a href="/me/#stocks">My stocks</a>.' + (mail ? ' You’ll get an email the evening your signal on it flips.' : ' <a href="/me/#alerts">Switch on email alerts</a> to hear when your signal on it flips.') : 'Removed ' + name + ' from My stocks.');
         return j;
       });
@@ -122,6 +190,8 @@
     var d = ev.detail || {};
     if (!d.sym || d.from === 'mine') return;
     set(d.sym, !!d.on);
+    if (!d.on) setLocal(d.sym, false);         // removed on purpose: off this browser's list too, so it isn't added back
+    if (acct && loaded) remember();
     changed();
   });
 

@@ -28,16 +28,22 @@ http.createServer((req, res) => {
       const b = body ? JSON.parse(body) : {};
       if (route === "plays") { if ("plays" in b) ACCT.plays = b.plays; if ("signal" in b) ACCT.signal = b.signal; }
       if (route === "alerts") ACCT.alerts = { ...ACCT.alerts, ...b };
-      if (route === "follow") {             // as netlify/functions/account.mjs follow(), without the covered-name check
-        const up = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v).trim().toUpperCase()).filter(Boolean);
+      if (route === "follow") {             // as netlify/functions/account.mjs follow(): covered names only (data/reads.json), 100 at most
+        let cov = null;
+        try { cov = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "reads.json"), "utf8")).t; } catch (e) { /* no data: no check */ }
+        const up = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v).trim().toUpperCase()).filter((v) => v && (!cov || cov[v]));
         let list = ACCT.follow || [];
         if (b.tickers !== undefined) list = up(b.tickers);
         if (b.add) list = list.concat(up(b.add));
-        if (b.remove) { const rm = new Set(up(b.remove)); list = list.filter((x) => !rm.has(x)); }
-        ACCT.follow = [...new Set(list)].slice(0, 100);
+        if (b.remove) { const rm = new Set((Array.isArray(b.remove) ? b.remove : [b.remove]).map((v) => String(v).toUpperCase())); list = list.filter((x) => !rm.has(x)); }
+        list = [...new Set(list)].slice(0, 100);
+        const gone = (ACCT.follow || []).filter((x) => !list.includes(x));
+        if (b.tickers !== undefined && gone.length >= 3) ACCT.follow_was = { at: new Date().toISOString(), list: ACCT.follow };
+        if (b.clear_was) delete ACCT.follow_was;
+        ACCT.follow = list;
       }
       fs.appendFileSync(LOG, route + " " + body + "\n");
-      json(res, 200, { ok: true, plays: ACCT.plays, signal: ACCT.signal, follow: ACCT.follow, alerts: ACCT.alerts });
+      json(res, 200, { ok: true, plays: ACCT.plays, signal: ACCT.signal, follow: ACCT.follow, follow_was: ACCT.follow_was || null, alerts: ACCT.alerts });
     });
     return;
   }

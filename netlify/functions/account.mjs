@@ -28,7 +28,7 @@ import * as mail from "../lib/mail.mjs";
 import { sendOne } from "../lib/freealerts.mjs";
 import {
   store, lc, emailKey, emailTag, hashPassword, nameProblem, passwordProblem, signInCookies, signOutCookies, reply, redirectWith,
-  session, updateAccount, overLimit, ipKey, crossSite, membership, readLink, NAME_RX, EMAIL_RX, MAX_FOLLOW,
+  session, updateAccount, overLimit, ipKey, crossSite, membership, readLink, NAME_RX, EMAIL_RX, MAX_FOLLOW, keepWas,
   FREE_UNTIL_LABEL, ptCookie, cleanRules, memberCookie, hasPaidCookie,
 } from "../lib/account.mjs";
 import { checkPassword } from "../lib/qm.mjs";
@@ -57,7 +57,7 @@ function cleanTickers(list, R) {
 function view(acct) {
   return {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,
-    confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], alerts: acct.alerts || { on: false, level: "all" },
+    confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], follow_was: acct.follow_was || null, alerts: acct.alerts || { on: false, level: "all" },
     rules: acct.rules || null, plays: acct.plays || null, signal: acct.signal || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
     last_sent: acct.last_sent || null,
   };
@@ -162,7 +162,10 @@ async function follow(req, s, sess) {
     if (b.tickers !== undefined) list = cleanTickers(b.tickers, R);
     if (b.add) list = cleanTickers(list.concat(Array.isArray(b.add) ? b.add : [b.add]), R);
     if (b.remove) { const rm = new Set((Array.isArray(b.remove) ? b.remove : [b.remove]).map((x) => String(x).toUpperCase())); list = list.filter((x) => !rm.has(x)); }
-    return { ...a, follow: list.slice(0, MAX_FOLLOW) };
+    list = list.slice(0, MAX_FOLLOW);
+    const next = { ...a, ...(b.tickers !== undefined ? keepWas(a, list) : {}), follow: list };
+    if (b.clear_was) delete next.follow_was;            // the reader dismissed the "put them back" note
+    return next;
   });
   if (out.error) return reply({ error: out.error }, out.status || 400);
   return reply({ ok: true, follow: out.acct.follow });
