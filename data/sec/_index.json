@@ -576,6 +576,10 @@
 1487326,
 "OceanaGold Corp"
 ],
+"OKLO": [
+1849056,
+"Oklo Inc."
+],
 "OPTT": [
 1378140,
 "Ocean Power Technologies, Inc."
@@ -703,6 +707,10 @@
 "SLF.TO": [
 1097362,
 "SUN LIFE FINANCIAL INC"
+],
+"SMR": [
+1822966,
+"NUSCALE POWER Corp"
 ],
 "SNDK": [
 2023554,
@@ -845,7 +853,7 @@
 "XCEL ENERGY INC"
 ]
 },
-"map_date": "2026-10-20",
+"map_date": "2026-10-26",
 "no_cik": [
 "AAV.TO",
 "ABRA.TO",
@@ -979,6 +987,7 @@
 "USA.TO",
 "VITL-UN.TO",
 "VNP.TO",
+"WBD",
 "WCP.TO",
 "WDO.TO",
 "WN.TO",
@@ -987,5 +996,5 @@
 "X.TO",
 "XOM"
 ],
-"run": "2026-10-25T23:39Z"
+"run": "2026-10-26T16:51Z"
 }

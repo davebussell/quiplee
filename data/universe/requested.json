@@ -1,4 +1,29 @@
 {
- "tickers": [],
- "updated": "2026-10-25"
+ "tickers": [
+  {
+   "sym": "OKLO",
+   "name": "Oklo",
+   "cur": "$",
+   "currency": "USD",
+   "type": "EQUITY",
+   "exchange": "NYQ",
+   "status": "ok",
+   "added": "2026-10-26",
+   "requested": "2026-10-26",
+   "count": 1
+  },
+  {
+   "sym": "SMR",
+   "name": "NuScale Power",
+   "cur": "$",
+   "currency": "USD",
+   "type": "EQUITY",
+   "exchange": "NYQ",
+   "status": "ok",
+   "added": "2026-10-26",
+   "requested": "2026-10-26",
+   "count": 1
+  }
+ ],
+ "updated": "2026-10-26"
 }
