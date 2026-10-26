@@ -19,7 +19,7 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **Never label any ticker as Dave's own holding** on the site.
 - **WSC, Transcat (TRNS) and McGrath RentCorp (MGRC) are never on the site**, in any form: a conflict
   of interest for Dave. Not in the universe or the request queue (`content.EXCLUDED`, mirrored in
-  `netlify/functions/watch.mjs`), not in a news item (`newsevents._news` drops any that mention
+  `netlify/lib/watchq.mjs`), not in a news item (`newsevents._news` drops any that mention
   them), not in an article, a list or an email. `content.banned_hit` is the one
   test; the build refuses to publish a file that mentions them and smoke.py checks the live pages.
 - **The account page is "Login"** in the menu and header when signed out and "Account" when signed
@@ -67,6 +67,16 @@ for that isn't there, and move an issue to Done only once the change is live.
   path. Any page, email or tool that scores a stock must apply both the same way as `factors.score`
   (browser `BPPlays.score`, server `signal.mjs signalFor`), and say when a call is held or the guard
   is on.
+- **Reader-requested names are private (Oct 26, 2026).** A ticker a reader adds that Be The Puck doesn't cover
+  (account page, watchlist) is queued (`netlify/lib/watchq.mjs`; the account keeps it as `asked` and adds it to
+  their list once covered) and analysed nightly like any other, but shown only to the readers who follow it: never
+  in a public list, the screener, the sitemap or search engines (`render.PRIVATE_SLUGS`, noindex), never in the
+  account page's Find, and ranked against the public names without joining them (`factors._rank`, the trend rank
+  in `callpath.daily_path`), so adding one never moves a public score. A new public list must use
+  `render.universe()` or skip `t.get("requested")`.
+- **My stocks never loses a stock.** Signed in, a browser's saved stocks join the account (`assets/mine.js`); no
+  page deletes a browser's list or replaces an account's list without a tap, and a replace that drops 3+ stocks
+  keeps `follow_was` so the account page can put them back.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.

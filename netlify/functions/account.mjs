@@ -4,7 +4,8 @@
  *   POST /api/account/signup  {email, password, name?}   -> signs in; emails a confirm link
  *   POST /api/account/login   {id (email or username), password}
  *   POST /api/account/logout
- *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about)
+ *   POST /api/account/follow  {tickers} | {add} | {remove}       -> the stocks you follow (and get emails about); added names
+ *                              Be The Puck doesn't cover yet are queued for tonight's run and kept as `asked` until covered
  *   POST /api/account/alerts  {on, level: "light"|"all"}  ("light" = signal flips only; the name predates Your signal)
  *   POST /api/account/plays   {plays?: {p: "all"|"top1"|"top3"|"half"|"custom", s: [play slugs]},
  *                              signal?: {w: {factor: weight}, buy, sell}} -> the plays that count and the reader's signal (assets/plays.js)
@@ -33,8 +34,11 @@ import {
 } from "../lib/account.mjs";
 import { checkPassword } from "../lib/qm.mjs";
 import { confirmMsg, resetMsg, ownerMsg } from "../lib/accountmail.mjs";
+import { enqueue, VALID, EXCLUDED } from "../lib/watchq.mjs";
 
 let READS = { at: 0, data: null, origin: "" };
+const MAX_ASKED = 50;
+
 async function reads(req) {
   const origin = new URL(req.url).origin;
   if (READS.data && READS.origin === origin && Date.now() - READS.at < 10 * 60 * 1000) return READS.data;
@@ -57,7 +61,7 @@ function cleanTickers(list, R) {
 function view(acct) {
   return {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,
-    confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], follow_was: acct.follow_was || null, alerts: acct.alerts || { on: false, level: "all" },
+    confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], follow_was: acct.follow_was || null, asked: acct.asked || [], alerts: acct.alerts || { on: false, level: "all" },
     rules: acct.rules || null, plays: acct.plays || null, signal: acct.signal || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
     last_sent: acct.last_sent || null,
   };
@@ -153,22 +157,49 @@ async function login(req, context, s) {
   return reply({ ok: true, name: found.acct.name, email: !!found.acct.email }, 200, signInCookies(req, found.u, found.acct));
 }
 
+/** Names an account asked for that Be The Puck didn't cover ({s, at}): queued for tonight's run (watchq.mjs) and moved
+ *  into the followed list once covered (promote). Requested names are private on the site: only their followers see them. */
+function askedOf(want, R) {
+  if (!R) return [];
+  return want.filter((x) => !R.t[x] && VALID.test(x) && !EXCLUDED.has(x));
+}
+async function promote(req, s, sess) {
+  const asked = sess.acct.asked || [];
+  if (!asked.length) return sess.acct;
+  let R = null;
+  try { R = await reads(req); } catch (e) { return sess.acct; }
+  if (!asked.some((x) => R.t[x.s])) return sess.acct;
+  const out = await updateAccount(s, sess.u, (a) => {
+    const ready = (a.asked || []).filter((x) => R.t[x.s]).map((x) => x.s);
+    return { ...a, follow: cleanTickers((a.follow || []).concat(ready), R).slice(0, MAX_FOLLOW), asked: (a.asked || []).filter((x) => !R.t[x.s]) };
+  });
+  return out.acct || sess.acct;
+}
+
 async function follow(req, s, sess) {
   const b = await readBody(req);
   let R = null;
   try { R = await reads(req); } catch (e) { /* keep going without the check */ }
+  const up = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v || "").trim().toUpperCase().replace(/^\$/, "")).filter(Boolean);
+  const ask = b.add ? askedOf(up(b.add), R) : [];
   const out = await updateAccount(s, sess.u, (a) => {
     let list = a.follow || [];
     if (b.tickers !== undefined) list = cleanTickers(b.tickers, R);
-    if (b.add) list = cleanTickers(list.concat(Array.isArray(b.add) ? b.add : [b.add]), R);
-    if (b.remove) { const rm = new Set((Array.isArray(b.remove) ? b.remove : [b.remove]).map((x) => String(x).toUpperCase())); list = list.filter((x) => !rm.has(x)); }
+    if (b.add) list = cleanTickers(list.concat(up(b.add)), R);
+    const rm = b.remove ? new Set(up(b.remove)) : null;
+    if (rm) list = list.filter((x) => !rm.has(x));
     list = list.slice(0, MAX_FOLLOW);
-    const next = { ...a, ...(b.tickers !== undefined ? keepWas(a, list) : {}), follow: list };
+    const now = new Date().toISOString();
+    let asked = (a.asked || []).filter((x) => !(rm && rm.has(x.s)) && !list.includes(x.s));
+    for (const x of ask) if (!asked.some((y) => y.s === x)) asked.push({ s: x, at: now });
+    asked = asked.slice(-MAX_ASKED);
+    const next = { ...a, ...(b.tickers !== undefined ? keepWas(a, list) : {}), follow: list, asked };
     if (b.clear_was) delete next.follow_was;            // the reader dismissed the "put them back" note
     return next;
   });
   if (out.error) return reply({ error: out.error }, out.status || 400);
-  return reply({ ok: true, follow: out.acct.follow });
+  if (ask.length) { try { await enqueue(ask); } catch (e) { console.log("follow: queue unavailable", e.message); } }
+  return reply({ ok: true, follow: out.acct.follow, asked: out.acct.asked || [] });
 }
 
 async function alerts(req, s, sess) {
@@ -338,7 +369,7 @@ export default async (req, context) => {
         // a game account signed in before accounts existed gets its member cookie and display name here
         const cookies = req.headers.get("cookie") || "";
         const extra = /(?:^|;\s*)bp_name=/.test(cookies) && /(?:^|;\s*)qm=/.test(cookies) ? [] : signInCookies(req, sess.u, sess.acct).slice(1);
-        return reply(view(sess.acct), 200, extra);
+        return reply(view(await promote(req, s, sess)), 200, extra);
       }
       return reply({ error: "not found" }, 404);
     }

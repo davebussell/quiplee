@@ -124,18 +124,27 @@ def _p(v, sign=True, d=0):
     return ("−" + s) if v < 0 else (("+" if sign and v > 0 else "") + s)
 
 
-def _rank(vals, higher_better):
-    """{sym: points 0-100} by rank among the values given."""
-    if not vals:
-        return {}
-    s = pd.Series(vals, dtype=float)
-    if len(s) == 1:
-        return {s.index[0]: 50}
-    r = s.rank(method="average")
-    pts = (r - 1) / (len(s) - 1)
-    if not higher_better:
-        pts = 1 - pts
-    return {k: int(round(100 * v)) for k, v in pts.items()}
+def _rank(vals, higher_better, private=frozenset()):
+    """{sym: points 0-100} by rank among the values given. Private (reader-requested) names are ranked among the
+    public ones without joining them, so adding one never moves a public stock's points."""
+    pub = {k: v for k, v in vals.items() if k not in private}
+    out = {}
+    if pub:
+        s = pd.Series(pub, dtype=float)
+        if len(s) == 1:
+            out[s.index[0]] = 50
+        else:
+            r = s.rank(method="average")
+            pts = (r - 1) / (len(s) - 1)
+            if not higher_better:
+                pts = 1 - pts
+            out.update({k: int(round(100 * v)) for k, v in pts.items()})
+    srt = sorted(float(v) for v in pub.values())
+    for k, v in vals.items():
+        if k in private:
+            p = _rank_at(float(v), srt, len(srt) + 1) if srt else 50
+            out[k] = p if higher_better else 100 - p
+    return out
 
 
 def compute(site):
@@ -145,6 +154,7 @@ def compute(site):
         return cache
     from .content import TICKERS
     names = [t for t in TICKERS if (t["sym"], "buy-and-hold") in site.R]
+    private = frozenset(t["sym"] for t in names if t.get("requested"))
     out = {t["sym"]: {} for t in names}
     from . import secfund, quality
     from .engine import cad_per_usd
@@ -264,14 +274,15 @@ def compute(site):
     lower_better = {"pe", "fpe", "peg", "ps", "pb", "de"}
     for k in KEYS:
         pts = dict(fixed[k])
-        pts.update(_rank(raw[k], k not in lower_better))
+        pts.update(_rank(raw[k], k not in lower_better, private))
         for sym, p in pts.items():
             out[sym][k] = (p, shown[k].get(sym))
     site.__dict__["_factors"] = out
     # rounded to what data/playset.json carries, so the browser's flip lines match the page's
     r4 = lambda v: round(v, 4) if isinstance(v, float) else v
     site.__dict__["_price_inputs"] = {"pi": {k: {kk: r4(vv) for kk, vv in d.items() if vv is not None} for k, d in pins.items()},
-                                      "rk": {"trend": sorted(r4(v) for v in raw["trend"].values()), "mom": sorted(r4(v) for v in raw["mom"].values())}}
+                                      "rk": {"trend": sorted(r4(v) for s_, v in raw["trend"].items() if s_ not in private),
+                                             "mom": sorted(r4(v) for s_, v in raw["mom"].items() if s_ not in private)}}
     return out
 
 

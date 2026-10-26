@@ -199,8 +199,8 @@ class Articles:
             if key == "stocks":
                 cards += (f'<a class="card art-card" href="{h("stories/the-hertz-lesson.html")}"><span class="tag">Story</span><span class="name">The Hertz lesson: why a crash doesn\'t care about your revenue</span>'
                           f'<span class="muted small">How a car-rental giant fell 85% in a housing crash, and the five checks that sort survivors from casualties.</span></a>')
-                opts = "".join(f'<optgroup label="{e(g)}">' + "".join(f'<option value="{e(t["slug"])}">{e(t["short"])} · {e(t["name"])}</option>' for t in TICKERS if t["group"] == g and (t["sym"], "buy-and-hold") in self.s.R) + "</optgroup>"
-                               for g in GROUP_ORDER if any(t["group"] == g for t in TICKERS))
+                opts = "".join(f'<optgroup label="{e(g)}">' + "".join(f'<option value="{e(t["slug"])}">{e(t["short"])} · {e(t["name"])}</option>' for t in TICKERS if t["group"] == g and (t["sym"], "buy-and-hold") in self.s.R and not t.get("requested")) + "</optgroup>"
+                               for g in GROUP_ORDER if any(t["group"] == g and not t.get("requested") for t in TICKERS))
                 extra = (f'<div class="card art-lookup"><label for="brief-pick" class="h3">Look up a stock brief</label>'
                          f'<p class="muted small">Every covered name gets a plain-English brief each night: what the plays say, the levels where they would act, the business and the crash risk.</p>'
                          f'<select id="brief-pick" data-nav data-tmpl="{e(h("articles/stocks/{v}/"))}"><option value="">Choose a stock…</option>{opts}</select></div>')

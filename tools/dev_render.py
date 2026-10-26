@@ -22,6 +22,11 @@ sys.path.insert(0, HERE)
 
 from qstrat import engine  # noqa: E402
 from qstrat.content import TICKERS  # noqa: E402
+# PRIVATE=SYM1,SYM2 treats covered names as reader-requested (private) for this run, to test that they stay off
+# the public lists and out of the public ranks. Set before render.py is imported (it reads the flags once).
+for _t in TICKERS:
+    if _t["sym"] in set(filter(None, os.environ.get("PRIVATE", "").split(","))):
+        _t["requested"], _t["since"] = True, "2026-10-26"
 import build_strategies as B  # noqa: E402
 
 CACHE_DIR = os.environ.get("BTP_CACHE") or os.path.join(ROOT, ".cache")

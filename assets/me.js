@@ -138,16 +138,30 @@
         return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b></a> ' + pillOnly(x.n.from) + ' → ' + pillOnly(x.n.to) + ' <span class="small">' + esc(nearWords(x.n, t.cur).replace(/^\S+ /, '')) + '</span></li>';
       }).join('') + '</ul>' + (more ? '<p class="small muted">And ' + more + ' more: sort the table by your signal to see them.</p>' : '') + '</div>';
   }
+  // names asked for that aren't covered yet (account.mjs asked): analysed tonight, then they join My stocks
+  var REJ = {};
+  function askedHtml() {
+    var a = (A.asked || []).filter(function (x) { return !R.t[x.s]; });
+    if (!a.length) return '';
+    return '<div class="me-asked"><p class="small"><b>Being analysed for you</b> · not covered by Be The Puck yet. Each runs through every play tonight and then appears in this list, for you only: it stays off the site\'s lists.</p><ul>' +
+      a.map(function (x) {
+        var bad = REJ[x.s];
+        return '<li><b class="mono">' + esc(x.s) + '</b> <span class="small ' + (bad ? 'warn-ink' : 'muted') + '">' +
+          (bad ? 'not found on Yahoo Finance: check the ticker (Toronto listings end in .TO)' : 'asked ' + esc(day(String(x.at).slice(0, 10))) + ' · ready after the next nightly run') +
+          '</span> <button type="button" class="me-x me-x-in" data-unask="' + esc(x.s) + '" aria-label="Stop asking for ' + esc(x.s) + '">×</button></li>';
+      }).join('') + '</ul></div>';
+  }
   function followRows() {
     if (TAB === 'find') return findRows();
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
+    if (!list.length && (A.asked || []).length) return askedHtml();
     if (!list.length) {
       return '<div class="me-empty"><p><b>Add a few stocks to get started.</b> You\'ll see your signal on each one here, and get an email the evening it flips.</p>' +
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div>' +
         '<p><button type="button" class="btn" data-tab="find">Find stocks to add</button></p></div>';
     }
     var D = fxD(), all = rowsData(), w = changesHtml(list) + nearHtml(list);
-    return (w ? '<div class="me-watch">' + w + '</div>' : '') + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
+    return (w ? '<div class="me-watch">' + w + '</div>' : '') + askedHtml() + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
   }
   // ------------------------------------------------------------ find stocks to add: every covered stock you don't follow
   // The same table, over the rest of the list: your Buys first, or the names a small move would turn Buy, or the
@@ -211,7 +225,7 @@
   function ptsCls(p) { return p == null ? '' : p >= 60 ? ' fx-good' : p <= 40 ? ' fx-bad' : ''; }
   function rowsData() {
     var D = fxD(), f = A.follow || [];
-    var syms = TAB === 'find' ? Object.keys(R.t).filter(function (s) { return f.indexOf(s) < 0; }) : f.filter(function (s) { return R.t[s]; });
+    var syms = TAB === 'find' ? Object.keys(R.t).filter(function (s) { return f.indexOf(s) < 0 && !R.t[s].pv; }) : f.filter(function (s) { return R.t[s]; });
     return syms.map(function (s) {
       return { s: s, t: R.t[s], r: sg(s), c: kn(s), x: D && D.x[s], v: D && D.v[s] };
     });
@@ -543,6 +557,7 @@
       if (!j.ok) return toast(j.error || "Couldn't add that.", 'warn');
       var added = syms.filter(function (x) { return (j.follow || []).indexOf(x) >= 0; });
       added.forEach(function (x) { document.dispatchEvent(new CustomEvent('bp:follow', { detail: { sym: x, on: true } })); });
+      if (j.asked) A.asked = j.asked;
       setFollow(j.follow);
       if (then) then(added);
     }, function () { BUSY = false; toast("Couldn't reach your account. Try again in a moment.", 'warn'); });
@@ -553,11 +568,18 @@
   }
   var LOCAL = [], BUSY = false;
   // follow every stock in what was typed; anything that couldn't be matched stays in the box, with a note under it
+  // a ticker as Yahoo Finance writes it (netlify/lib/watchq.mjs VALID): AAPL, BRK-B, SHOP.TO, BTC-USD
+  var TICKER = /^\^?[A-Z0-9]{1,6}(?:-[A-Z0-9]{1,2})?(?:[.-][A-Z0-9]{1,4})?$/;
   function addText(text) {
-    var ps = pieces(text), syms = [], bad = [], many = [], had = [];
+    var ps = pieces(text), syms = [], bad = [], many = [], had = [], ask = [], asking = [];
     ps.forEach(function (p) {
       var r = resolveOne(p);
-      if (!r.sym) (r.many ? many : bad).push(r.bad);
+      if (!r.sym) {
+        var tk = norm(p);
+        // not covered yet but written as a ticker: queued for tonight's run, private to the readers who follow it
+        if (!r.many && TICKER.test(tk) && !/\s/.test(tk)) { if (askedHas(tk)) asking.push(tk); else if (ask.indexOf(tk) < 0) ask.push(tk); }
+        else (r.many ? many : bad).push(r.bad);
+      }
       else if ((A.follow || []).indexOf(r.sym) >= 0) had.push(r.sym);
       else if (syms.indexOf(r.sym) < 0) syms.push(r.sym);
     });
@@ -567,23 +589,28 @@
     function report() {
       var msg = [];
       if (had.length) msg.push(names(had) + (had.length === 1 ? ' is' : ' are') + ' already in My stocks.');
+      if (asking.length) msg.push(names(asking) + (asking.length === 1 ? ' is' : ' are') + ' already being analysed for you.');
       if (many.length) msg.push('"' + many.join('", "') + '" matches more than one stock: pick one from the list.');
       if (over.length) msg.push('Your list holds 100 stocks; ' + names(over) + " didn't fit.");
       var note = $('[data-add-msg]');
       if (note) {
-        note.innerHTML = (bad.length ? 'Not covered yet: <b>' + esc(bad.join(', ')) + '</b>. <a href="/watchlist/?t=' + encodeURIComponent(bad.map(norm).join(',')) +
-          '">Request ' + (bad.length === 1 ? 'it' : 'them') + ' on the watchlist</a>; new names are analysed overnight. ' : '') + esc(msg.join(' '));
+        note.innerHTML = (bad.length ? 'Couldn\'t find <b>' + esc(bad.join(', ')) + '</b>. Type the ticker as Yahoo Finance writes it (Toronto listings end in .TO, Venture in .V). ' : '') + esc(msg.join(' '));
         note.hidden = !note.innerHTML;
       }
       var i = $('[data-add-q]');
       if (i) { i.value = keep.join(', '); i.focus(); }
     }
-    if (!syms.length) { report(); return; }
-    followSyms(syms, function (added) {
-      if (added.length) toast('Added ' + names(added) + ' to My stocks.');
+    if (!syms.length && !ask.length) { report(); return; }
+    followSyms(syms.concat(ask), function (added) {
+      var queued = ask.filter(function (x) { return askedHas(x); });
+      var bits = [];
+      if (added.length) bits.push('Added ' + names(added) + ' to My stocks.');
+      if (queued.length) bits.push(names(queued) + (queued.length === 1 ? ' isn\u2019t' : ' aren\u2019t') + ' covered yet: analysed tonight, then ' + (queued.length === 1 ? 'it shows' : 'they show') + ' here for you, and nowhere else on the site.');
+      if (bits.length) toast(bits.join(' '));
       report();
     });
   }
+  function askedHas(sym) { return (A.asked || []).some(function (x) { return x.s === sym; }); }
   function wire(box, local) {
     LOCAL = local;
     var input = $('[data-add-q]', box), sug = $('[data-sug]', box);
@@ -668,6 +695,11 @@
         vRefresh(true);
         return;
       }
+      var ua = e.target.closest ? e.target.closest('[data-unask]') : null;
+      if (ua) {
+        BP.post('follow', { remove: ua.getAttribute('data-unask') }).then(function (j) { if (j.ok) { A.asked = j.asked || []; setFollow(j.follow); } });
+        return;
+      }
       var wb = e.target.closest ? e.target.closest('[data-was-restore],[data-was-dismiss]') : null;
       if (wb) {
         var restore = wb.hasAttribute('data-was-restore');
@@ -748,6 +780,7 @@
       return getJSON(app.getAttribute('data-reads')).catch(function () { return { asof: null, t: {} }; }).then(function (res) {
         R = res;
         draw();
+        if ((A.asked || []).length) getJSON('/data/universe/rejected.json').then(function (j) { (j.tickers || []).forEach(function (r) { REJ[r.sym] = 1; }); draw(); }).catch(function () {});
         if (PS) {
           PS.ready(function () { if (A.plays || A.signal) PS.adopt(A.plays, A.signal); draw(); });
           PS.onChange(function () { draw(); });

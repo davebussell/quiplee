@@ -46,7 +46,7 @@ def rows(site):
     out = []
     for t in TICKERS:
         sym = t["sym"]
-        if (sym, "buy-and-hold") not in site.R:
+        if (sym, "buy-and-hold") not in site.R or t.get("requested"):      # private (reader-requested) names stay out
             continue
         x = site.r(sym, "buy-and-hold")
         meta = site.meta.get(sym) or {}

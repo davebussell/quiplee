@@ -75,7 +75,18 @@ def daily_path(site, since=WARMUP):
     if not len(df):
         site.__dict__[key] = df
         return df
-    df["trend"] = df.groupby("d")["gap"].transform(lambda x: (100 * (x.rank(method="average") - 1) / (len(x) - 1)).round())
+    # trend points rank each day's gap among the public names; a private (reader-requested) name is placed among
+    # them without joining, as factors.compute does, so adding one never moves a public stock's path
+    private = {t["sym"] for t in _names(site) if t.get("requested")}
+    pv = df.sym.isin(private)
+    df["trend"] = np.nan
+    if (~pv).any():
+        df.loc[~pv, "trend"] = df[~pv].groupby("d")["gap"].transform(lambda x: (100 * (x.rank(method="average") - 1) / (len(x) - 1)).round())
+    if pv.any():
+        from .factors import _rank_at
+        pub = {d: sorted(g.dropna().tolist()) for d, g in df[~pv].groupby("d")["gap"]}
+        df.loc[pv, "trend"] = [(_rank_at(gp, pub.get(d, []), len(pub.get(d, [])) + 1) if pd.notna(gp) and pub.get(d) else np.nan)
+                               for d, gp in zip(df.loc[pv, "d"], df.loc[pv, "gap"])]
     pts = {"plays": df.plays.round(), "offhigh": df.offhigh, "trend": df.trend}
     missing = [k_ for k_ in DEFAULT if k_ not in pts]
     if missing:                 # a new standard factor needs its day-by-day points here before it can be graded or held

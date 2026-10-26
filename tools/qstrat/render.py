@@ -30,6 +30,20 @@ def universe():
     return [t for t in TICKERS if not t.get("requested")]
 
 
+# Reader-requested names are private: analysed every night like any other, but only for the readers who follow
+# them (their account page, their watchlist, their emails). They stay out of every list, the screener, the
+# sitemap and search engines (noindex), and out of the rankings the public scores use (factors.compute).
+PRIVATE_SLUGS = {t["slug"] for t in TICKERS if t.get("requested")}
+
+
+def private_path(path):
+    """True for any page of a private (reader-requested) name: its stock page, its play rows, its brief."""
+    parts = path.split("/")
+    if parts[0] == "stocks" and len(parts) > 1:
+        return parts[1] in PRIVATE_SLUGS
+    return path.startswith("articles/stocks/") and len(parts) > 2 and parts[2] in PRIVATE_SLUGS
+
+
 # "Real stocks" for ranking plays: no indexes, index or sector funds, or crypto.
 NON_STOCK_GROUPS = ("Sectors", "Indexes & ETFs", "Market indexes", "Crypto")
 GRADE_YEAR = GRADE_START.year   # calls are graded from here on
@@ -606,7 +620,7 @@ class Site:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{FONTS}">
 <link rel="stylesheet" href="{h('assets/site.css')}?v={self.ver}">
-{extra_head}</head>
+{extra_head}{'<meta name="robots" content="noindex">' + chr(10) if private_path(path) and 'name="robots"' not in extra_head else ""}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-head"><div class="wrap head-row">
@@ -1214,10 +1228,10 @@ class Site:
         from .factors import default_words
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
-        groups = [g for g in GROUP_ORDER if any(t["group"] == g for t in TICKERS)]
+        groups = [g for g in GROUP_ORDER if any(t["group"] == g and not t.get("requested") for t in TICKERS)]
         rows = ""
         for t in TICKERS:
-            if (t["sym"], "buy-and-hold") not in self.R:
+            if (t["sym"], "buy-and-hold") not in self.R or t.get("requested"):     # private names stay off the list
                 continue
             x = self.r(t["sym"], "buy-and-hold")
             meta = self.meta.get(t["sym"]) or {}
@@ -1252,7 +1266,7 @@ class Site:
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
                           for k, lab in [("signal", "Highest signal"), ("score", "Your Buys only"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
                                          ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
-        n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R])
+        n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R and not t.get("requested")])
         body = f"""
 <section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and what your signal says</h1>
 <p class="lede">All {n_names} stocks, ETFs, indexes and coins Be The Puck covers, in one list. Your signal is the one call: Buy, Hold or Sell from the factors you weight. The other columns are what goes into it: how many of the {len(TIMED)} plays hold each name, analysts' targets and crash exposure. Sort by any column, filter by group, or open a name for its chart and every play.</p>
@@ -1359,8 +1373,8 @@ class Site:
 </section>"""
         req_note = ""
         if t.get("requested"):
-            req_note = (f'<p class="note-line">Added by a reader{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night, '
-                        f'with a full page for each.</p>')
+            req_note = (f'<p class="note-line">Added at a reader\'s request{(" on " + dlong(t["since"])) if t.get("since") else ""}. Be The Puck runs every play on it each night '
+                        f'for the readers who follow it; it stays out of the site\'s lists and rankings.</p>')
         elif t.get("ndx"):
             req_note = '<p class="note-line">In the Nasdaq-100.</p>'
         elif t.get("tsx"):
@@ -1661,7 +1675,7 @@ class Site:
 <section class="card prose"><p class="eyebrow">Analysts' upside</p>
 <p>One of the factors in your signal (half of it under the standard weights until October 13, 2026; none of it since, because targets have no record that can be graded). It's the gap between the price and analysts' average 12-month target (Yahoo Finance), scored in a straight line from 20% below the price (0) to 50% above it (full marks). A stock needs at least three analysts, and a target more than double the price is ignored as stale. Targets are opinions that lean optimistic, which is why you can weight them down or out.</p></section>
 <section class="card prose"><p class="eyebrow">Reader-requested stocks</p>
-<p>Tickers added on the watchlist that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance, added to the universe, and analysed in the next build: all {len(TIMED)} plays, with a full page for each. Reader-requested names are kept out of the cross-stock scoreboards so those counts don't shift as names are added. Watchlists themselves stay in the reader's browser.</p></section>
+<p>Tickers added on the watchlist or the account page that Be The Puck doesn't cover go to a queue holding only the symbol and when it was asked for. Each night, after the U.S. close, up to 25 new symbols are checked for at least 60 sessions of price history on Yahoo Finance and analysed in the next build: all {len(TIMED)} plays and your signal, like any other stock. Reader-requested names stay private: they show for the readers who follow them (their account page, watchlist and emails) and nowhere else: not in the stock list, the screener, the scoreboards or search engines. They are ranked against the site's own list without joining it, so adding one never moves another stock's score.</p></section>
 <section class="card prose"><p class="eyebrow">Sources and attribution</p>
 <p>Every play's origin, parameters and the analyst's bio were checked against books, journal papers, the analyst's own site or reputable references such as StockCharts ChartSchool. Where a source was missing or two sources disagreed, the play or analyst page says so. Where a rule needed a choice its author never made, such as an exit for a buy-only signal, the choice is labelled as Be The Puck's.</p></section>
 <section class="card prose"><p class="eyebrow">What this is not</p>
@@ -1686,7 +1700,7 @@ class Site:
 
     def sitemap(self):
         urls = "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{self.asof.strftime('%Y-%m-%d')}</lastmod></url>\n"
-                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "rules/", "owner/"))] + ["desk/", "stories/the-hertz-lesson.html"]))
+                       for p in sorted([k for k in self.pages if not k.startswith(("locked/", "picks/", "rules/", "owner/")) and not private_path(k)] + ["desk/", "stories/the-hertz-lesson.html"]))
         return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 

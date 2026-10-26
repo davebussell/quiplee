@@ -170,10 +170,14 @@ and grades each kind by how reliably it moved stocks the expected way. Stock pag
 the stock lately and its next earnings date; `/guides/news-that-moves-stocks/` has the table.
 
 **Bring your own stocks.** The watchlist keeps each reader's list in their
-browser. Tickers Be The Puck doesn't cover are POSTed to `/api/watch` (symbols only).
-The nightly job validates up to 25 a night (300 in total), the build runs all
-plays on them, and a page for every play is published. Reader-requested names stay out
-of the cross-stock scoreboards.
+browser (and, signed in, in their account: `assets/mine.js`). Tickers Be The Puck doesn't cover are queued
+(`netlify/lib/watchq.mjs`, symbols only) from the watchlist (`/api/watch`) or the account page (`/api/account/follow`
+keeps them on the account as `asked` and moves each into the followed list once it's covered). The nightly job
+validates up to 25 a night (300 in total) and the build runs all plays on them. **Reader-requested names are
+private:** their pages are built but noindex and out of the sitemap, and they stay out of the stock list, the
+screener, the board, the scoreboards, names.json and the account page's Find (reads.json marks them `pv`). They are
+ranked against the public names without joining them (`factors._rank`, `callpath.daily_path`), so adding one never
+moves a public stock's score. `PRIVATE=SYM python tools/dev_render.py render …` treats covered names as private to test it.
 
 **Learn + glossary.** Terms live in `tools/qstrat/glossary.py`;
 `tools/qstrat/linker.py` links the first use of each term on every generated page

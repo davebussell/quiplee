@@ -8,14 +8,9 @@
  *   symbol has price history, adds it to the universe, and the next build
  *   publishes its analysis. The watchlist page also reads it to show what's queued.
  */
-import { getStore } from "@netlify/blobs";
+import { queueStore, enqueue } from "../lib/watchq.mjs";
 
-const MAX_PER_REQUEST = 25;
-// Tickers Be The Puck doesn't cover even on request (kept in step with EXCLUDED in tools/qstrat/content.py)
-const EXCLUDED = new Set(["MGRC", "WSC", "TRNS"]);
-const MAX_KEYS = 3000;
-// AAPL, BRK-B, SHOP.TO, LEAP.V, BTC-USD, ^GSPC, CTC-A.TO
-const VALID = /^\^?[A-Z0-9]{1,6}(?:-[A-Z0-9]{1,2})?(?:[.-][A-Z0-9]{1,4})?$/;
+const MAX_PER_REQUEST = 25;   // EXCLUDED, VALID and the queue itself live in netlify/lib/watchq.mjs
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -25,7 +20,7 @@ const json = (body, status = 200) =>
 export default async (req) => {
   let store;
   try {
-    store = getStore({ name: "watch-requests", consistency: "strong" });
+    store = queueStore();
   } catch (e) {
     return json({ error: "The request queue is unavailable right now." }, 503);
   }
@@ -45,21 +40,7 @@ export default async (req) => {
       try { body = await req.json(); } catch (e) { return json({ error: "Send JSON like {\"tickers\": [\"KO\"]}." }, 400); }
       const list = Array.isArray(body && body.tickers) ? body.tickers : [];
       const syms = [...new Set(list.map((s) => String(s).trim().toUpperCase()).filter(Boolean))].slice(0, MAX_PER_REQUEST);
-      const { blobs } = await store.list();
-      const known = new Set(blobs.map((b) => b.key));
-      const queued = [], rejected = [], unavailable = [];
-      const now = new Date().toISOString();
-      for (const s of syms) {
-        if (!VALID.test(s)) { rejected.push(s); continue; }
-        if (EXCLUDED.has(s)) { unavailable.push(s); continue; }
-        const key = encodeURIComponent(s);
-        if (!known.has(key) && known.size >= MAX_KEYS) { rejected.push(s); continue; }
-        const prev = known.has(key) ? await store.get(key, { type: "json" }) : null;
-        await store.setJSON(key, { first: (prev && prev.first) || now, last: now, count: ((prev && prev.count) || 0) + 1 });
-        known.add(key);
-        queued.push(s);
-      }
-      return json({ queued, rejected, unavailable });
+      return json(await enqueue(syms, store));
     }
     if (req.method === "OPTIONS") return json({}, 204);
     return json({ error: "Use GET or POST." }, 405);

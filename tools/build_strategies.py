@@ -129,6 +129,8 @@ def reads_json(site):
             out[sym]["hd"] = 1              # held by the sticky rule (the plain call on the score differs)
         if guard_on(site, sym):
             out[sym]["gd"] = 1              # the market guard is on for this name
+        if t.get("requested"):
+            out[sym]["pv"] = 1              # private: shown only to readers who follow it (the account page's Find skips it)
     from qstrat.factors import MODEL, default_words
     return json.dumps({"asof": site.asof.strftime("%Y-%m-%d"), "mv": MODEL, "wt": default_words(), "t": out}, ensure_ascii=False, separators=(",", ":"))
 

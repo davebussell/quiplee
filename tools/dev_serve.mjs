@@ -15,23 +15,34 @@ let ACCT = {
 };
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml",
   ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".woff2": "font/woff2", ".xml": "application/xml", ".txt": "text/plain" };
+const VALID = /^\^?[A-Z0-9]{1,6}(?:-[A-Z0-9]{1,2})?(?:[.-][A-Z0-9]{1,4})?$/;
+const covered = () => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, "data", "reads.json"), "utf8")).t; } catch (e) { return null; } };
 const json = (res, code, obj) => { res.writeHead(code, { "content-type": "application/json" }); res.end(JSON.stringify(obj)); };
 
 http.createServer((req, res) => {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname.startsWith("/api/account/")) {
     const route = url.pathname.slice(13);
-    if (route === "me") return json(res, 200, ACCT);
+    if (route === "me") {                   // names asked for that are covered now join the list (account.mjs promote)
+      const cov = covered();
+      if (cov && (ACCT.asked || []).some((x) => cov[x.s])) {
+        ACCT.follow = [...new Set((ACCT.follow || []).concat(ACCT.asked.filter((x) => cov[x.s]).map((x) => x.s)))].slice(0, 100);
+        ACCT.asked = ACCT.asked.filter((x) => !cov[x.s]);
+      }
+      return json(res, 200, ACCT);
+    }
     let body = "";
     req.on("data", (c) => (body += c));
     req.on("end", () => {
       const b = body ? JSON.parse(body) : {};
       if (route === "plays") { if ("plays" in b) ACCT.plays = b.plays; if ("signal" in b) ACCT.signal = b.signal; }
       if (route === "alerts") ACCT.alerts = { ...ACCT.alerts, ...b };
-      if (route === "follow") {             // as netlify/functions/account.mjs follow(): covered names only (data/reads.json), 100 at most
-        let cov = null;
-        try { cov = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "reads.json"), "utf8")).t; } catch (e) { /* no data: no check */ }
-        const up = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v).trim().toUpperCase()).filter((v) => v && (!cov || cov[v]));
+      if (route === "follow") {             // as netlify/functions/account.mjs follow(): covered names only (data/reads.json), 100 at most;
+        const cov = covered();              // a ticker that isn't covered is "asked" (queued for the nightly run)
+        const all = (x) => (Array.isArray(x) ? x : [x]).map((v) => String(v).trim().toUpperCase()).filter(Boolean);
+        const up = (x) => all(x).filter((v) => !cov || cov[v]);
+        if (b.add && cov) for (const v of all(b.add)) if (!cov[v] && VALID.test(v) && !(ACCT.asked || []).some((y) => y.s === v)) (ACCT.asked = ACCT.asked || []).push({ s: v, at: new Date().toISOString() });
+        if (b.remove) { const rm = new Set(all(b.remove)); ACCT.asked = (ACCT.asked || []).filter((y) => !rm.has(y.s)); }
         let list = ACCT.follow || [];
         if (b.tickers !== undefined) list = up(b.tickers);
         if (b.add) list = list.concat(up(b.add));
@@ -43,7 +54,7 @@ http.createServer((req, res) => {
         ACCT.follow = list;
       }
       fs.appendFileSync(LOG, route + " " + body + "\n");
-      json(res, 200, { ok: true, plays: ACCT.plays, signal: ACCT.signal, follow: ACCT.follow, follow_was: ACCT.follow_was || null, alerts: ACCT.alerts });
+      json(res, 200, { ok: true, plays: ACCT.plays, signal: ACCT.signal, follow: ACCT.follow, follow_was: ACCT.follow_was || null, asked: ACCT.asked || [], alerts: ACCT.alerts });
     });
     return;
   }
