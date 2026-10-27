@@ -405,6 +405,11 @@ def factors_json(site):
             return None
         out = {"bb": round(100 * y["buys_beat"]), "ab": round(100 * y["avoids_beat"]), "e": round(100 * y["edge"], 1),
                "e3": round(100 * q["edge"], 1) if q else None}
+        # the same edge for U.S. and TSX stocks apart (factorgrade.py, AUD-46)
+        for m, key in (("us", "eu"), ("tsx", "et")):
+            mr = ((r.get(m) or {}).get("12m") or {})
+            if mr.get("edge") is not None:
+                out[key] = round(100 * mr["edge"], 1)
         if "graded_weight" in r:
             out["gw"] = r["graded_weight"]
             out["lo"] = [next(n for k2, n, _, _ in FACTORS if k2 == k) for k in r.get("left_out", [])]

@@ -9,7 +9,7 @@ import html
 import json
 import os
 
-from .content import PLAY, THINKER, FAMILY
+from .content import PLAY, THINKER, FAMILY, TRIAL
 from .render import play_name_html, pct
 from .media import page_art, PAGE_ART
 
@@ -21,11 +21,14 @@ with open(os.path.join(os.path.dirname(__file__), "classics.json"), encoding="ut
 for _c in CLASSICS:
     _c["related_plays"] = [s for s in (_c.get("related_plays") or []) if s in PLAY]
     _c["related_thinkers"] = [s for s in (_c.get("related_thinkers") or []) if s in THINKER]
+    _c["trial_plays"] = [p["slug"] for p in TRIAL if p.get("classic") == _c["slug"]]     # coded from this classic, being graded
 
 def verdict(c):
     """(word, class): whether the classic's own rule runs on the site already, can be added, or can't be tested yet."""
     t = c.get("testability") or {}
     v, detail = t.get("verdict") or "", t.get("detail") or ""
+    if c.get("trial_plays"):
+        return "Being graded on the site", "in"
     if v.startswith("codable now") and detail.lower().startswith("already"):
         return "Tested on the site", "in"
     if v.startswith("codable now") and "already" in detail.lower():
@@ -48,7 +51,7 @@ def years(c):
 def see_also(kind, slug):
     """The classics that mention a play (kind "play") or a person (kind "thinker"), for links back from their pages."""
     key = "related_plays" if kind == "play" else "related_thinkers"
-    return [c for c in CLASSICS if slug in c.get(key, [])]
+    return [c for c in CLASSICS if slug in c.get(key, []) or (kind == "play" and slug in c.get("trial_plays", []))]
 
 
 def links_html(h, items, lead="In the Classics"):
@@ -91,17 +94,20 @@ def page(site, c):
     quote = (f'<blockquote class="classic-quote"><p>“{e(q["text"])}”</p><footer class="small muted">{e(q.get("by") or "")}</footer></blockquote>'
              if q and q.get("text") else "")
     plays = ""
-    for s in c["related_plays"]:
+    for s in c["trial_plays"] + c["related_plays"]:
         p = PLAY[s]
         sm = site.strat_summary(p) if not p.get("benchmark") else None
         rec = (f'<span class="classic-rec"><b>{pct(sm["bat"], sign=False, d=0)}</b> of {sm["calls"]:,} calls right · in on {sm["in_now"]} of {sm["n"]} stocks now</span>'
                if sm and sm.get("bat") is not None else "")
-        plays += (f'<a class="card classic-play" href="{h("strategies/" + s + "/")}"><span class="eyebrow">{e(FAMILY[p["family"]][0] if p["family"] in FAMILY else "The benchmark")}</span>'
+        plays += (f'<a class="card classic-play" href="{h("strategies/" + s + "/")}"><span class="eyebrow">{"Coded from it · being graded · " if p.get("trial") else ""}{e(FAMILY[p["family"]][0] if p["family"] in FAMILY else "The benchmark")}</span>'
                   f'<span class="play-nm">{play_name_html(p)}</span><span class="small">{e(p.get("oneline") or "")}</span>{rec}</a>')
     people_on = "".join(f'<a href="{h("thinkers/" + t + "/")}">{e(THINKER[t]["name"])}</a>' for t in c["related_thinkers"])
     unv = "".join(f"<li>{e(x)}</li>" for x in (c.get("unverified") or []))
     test = c.get("testability") or {}
     unlock = c.get("unlocked_by") or {}
+    trial_line = "".join(
+        f'<p class="small">Coded as <a href="{h("strategies/" + s + "/")}">{e(PLAY[s].get("plain") or PLAY[s]["name"])}</a> ({e(PLAY[s]["name"])}) and run on every stock each night. '
+        f'It stays out of Your signal until its record is in.</p>' for s in c["trial_plays"])
     body = f"""
 <nav class="crumbs"><a href="{h(PATH)}">Classics</a><span>/</span><span>{e(c["name"])}</span></nav>
 <section class="pair-head"><p class="eyebrow">Classics · {e(years(c))}</p>
@@ -111,6 +117,7 @@ def page(site, c):
 <section class="prose classic-story"><h2 class="h2">The story</h2><p>{e(c["story"])}</p>{quote}</section>
 <section class="split classic-rule-sec"><div class="card rule-card"><p class="eyebrow">The original rule</p><p>{e(c.get("original_rule") or "")}</p></div>
 <div class="card"><p class="eyebrow">Can it be tested here?</p><p><span class="classic-verdict {cls}">{e(word)}</span></p><p class="small">{e(test.get("detail") or "")}</p>
+{trial_line}{f'<p class="small">{e(c["status_note"])}</p>' if c.get("status_note") else ""}
 {f'<p class="small muted">What would unlock it: {e(unlock.get("missing") or "")}.</p>' if unlock.get("missing") else ""}</div></section>
 <section><div class="sec-head"><h2 class="h2">Where it lives on</h2><p>{e(c.get("lineage_note") or "")}</p></div>
 {f'<div class="grid grid-3">{plays}</div>' if plays else '<p class="muted">No play on the site descends from it yet.</p>'}
@@ -129,7 +136,7 @@ def hub(site):
     cards = ""
     for c in CLASSICS:
         word, cls = verdict(c)
-        n = len(c["related_plays"])
+        n = len(c["related_plays"]) + len(c["trial_plays"])
         cards += (f'<a class="card classic-card" href="{h(PATH + c["slug"] + "/")}"><span class="eyebrow">{e(years(c))}</span>'
                   f'<span class="name">{e(c["name"])}</span><span class="muted small">{e(c.get("hook") or "")}</span>'
                   f'<span class="classic-meta small"><span class="classic-verdict {cls}">{e(word)}</span>'

@@ -149,7 +149,7 @@ def _rate(a, b):
 class Guides:
     def __init__(self, site):
         self.s = site
-        self.univ = [t for t in universe() if (t["sym"], "buy-and-hold") in site.R]
+        self.univ = [t for t in universe() if (t["sym"], "buy-and-hold") in site.R and not t.get("unreliable")]
         self._m = {}
 
     def h(self, depth):

@@ -746,7 +746,8 @@
   "unlocked_by": {
    "missing": "XBRL current assets / liabilities",
    "note": "Completes the net-net and current-ratio tests."
-  }
+  },
+  "status_note": "Next in line, not added yet: it needs a new kind of play (a value family, read from company filings once a month), it runs only on U.S. companies that file with the SEC, and its 10-year earnings and 20-year dividend tests would be cut short by the filings on file, which start around 2009. The net-net test also needs current-asset figures the site doesn't collect yet."
  },
  {
   "slug": "dogs-of-the-dow",

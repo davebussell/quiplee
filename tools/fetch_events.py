@@ -9,8 +9,13 @@ Two lists per company, both from Yahoo Finance via yfinance:
   - ratings: Wall Street rating changes and price-target moves over the last three
     years (upgrades, downgrades, new coverage, targets raised or cut).
 
+A third list, splits, is the company's stock splits since 2004 ([[day, new shares per old share], ...],
+oldest first: 4 for a 4-for-1, 0.1 for a 1-for-10), refetched weekly (splits_at). secfund.py uses it to put
+the per-share numbers in SEC filings on the same share basis as the split-adjusted prices.
+
 Each file is {"fetched": iso, "earn": [[t, eps_est, eps_actual, surprise_pct], ...],
-"ratings": [[t, firm, action, from_grade, to_grade, pt_action, current_pt, prior_pt], ...]}
+"ratings": [[t, firm, action, from_grade, to_grade, pt_action, current_pt, prior_pt], ...],
+"splits": [[day, ratio], ...], "splits_at": iso}
 with t in ISO UTC, newest first. action is Yahoo's code: up, down, init, main
 (maintained) or reit (reiterated). Only companies with a fundamentals file are
 fetched (no funds, indexes or coins). A file is rewritten only when its lists
@@ -37,6 +42,7 @@ OUT = os.path.join(ROOT, "data", "events")
 FUND = os.path.join(ROOT, "data", "fundamentals")
 EARN_LIMIT = 40           # quarters asked for; Yahoo's earnings calendar often returns a few more
 RATING_DAYS = 3 * 365
+SPLIT_DAYS = 7            # splits are refetched once a week
 FRESH_HOURS = 20
 PAUSE = 0.8               # seconds between companies
 BACKOFF = (60, 180, 600)  # waits after Yahoo throttles us, in turn; then the run stops
@@ -122,6 +128,30 @@ def ratings(tk, now):
     return sorted(out, key=lambda r: r[0], reverse=True)
 
 
+def splits(tk, now):
+    """[[day, ratio], ...] oldest first, since 2004."""
+    sp = tk.splits
+    if sp is None:
+        return []
+    out = []
+    for ts, r in sp.items():
+        r = num(r, 6)
+        if r and r > 0 and r != 1 and str(ts)[:4] >= "2004":
+            out.append([iso(ts)[:10], r])
+    return sorted(out)
+
+
+def splits_due(old, now):
+    got = old.get("splits_at")
+    if not got or "splits" not in old:
+        return True
+    try:
+        age = dt.datetime.fromisoformat(now.replace("Z", "+00:00")) - dt.datetime.fromisoformat(got.replace("Z", "+00:00"))
+    except ValueError:
+        return True
+    return age.days >= SPLIT_DAYS
+
+
 def attempt(fn, *args):
     """One try and one retry; a throttle is passed up so the run can back off."""
     for k in range(2):
@@ -169,11 +199,16 @@ def main():
         now = iso(dt.datetime.now(dt.timezone.utc))
         tk = yf.Ticker(t["sym"])
         new = {"fetched": now, "earn": old.get("earn") or [], "ratings": old.get("ratings") or []}
+        if "splits" in old:
+            new["splits"], new["splits_at"] = old["splits"], old.get("splits_at")
+        jobs = [("earn", earnings), ("ratings", ratings)] + ([("splits", splits)] if splits_due(old, now) else [])
         ok = 0
         try:
-            for key, fn in (("earn", earnings), ("ratings", ratings)):
+            for key, fn in jobs:
                 try:
                     new[key] = attempt(fn, tk, now)
+                    if key == "splits":
+                        new["splits_at"] = now
                     ok += 1
                 except Throttled:
                     raise
@@ -193,7 +228,7 @@ def main():
         strikes = 0
         if ok:
             # rewrite only when something changed, so the nightly commit stays small
-            if new["earn"] != old.get("earn") or new["ratings"] != old.get("ratings") or not old:
+            if new["earn"] != old.get("earn") or new["ratings"] != old.get("ratings") or new.get("splits") != old.get("splits") or new.get("splits_at") != old.get("splits_at") or not old:
                 with open(path, "w") as f:
                     json.dump(new, f, separators=(",", ":"), ensure_ascii=False)
                 changed += 1

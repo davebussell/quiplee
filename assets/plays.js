@@ -513,6 +513,8 @@
     if (r.why) return 'Not graded: ' + r.why + '.';
     var e = (r.e > 0 ? '+' : '') + Number(r.e).toFixed(1);
     var t = 'Since ' + D.gs + ', its Buys beat the market over the next year ' + r.bb + '% of the time and its Avoids ' + r.ab + '%: edge ' + e + ' pts.';
+    var sg = function (v) { return (v > 0 ? '+' : '') + Number(v).toFixed(1); };
+    if (r.eu != null && r.et != null) t += ' U.S. stocks ' + sg(r.eu) + ', TSX stocks ' + sg(r.et) + '.';
     if (preset && r.gw != null && r.gw < 100) t += ' Graded on ' + r.gw + '% of its weight (' + r.lo.join(', ') + (r.lo.length > 1 ? ' have' : ' has') + ' no history).';
     return t;
   }

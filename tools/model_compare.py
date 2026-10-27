@@ -28,6 +28,21 @@ def main():
     meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
     site = Site(results, preview=True, prices=prices, irx=irx, meta=meta)
     out = modelcompare.study(site)
+    # the published numbers from before the measuring stick was fixed (AUD-46, Oct 27, 2026: total-return markets,
+    # bad price files gated, split-adjusted SEC numbers), kept so the article can show what moved
+    old = modelcompare.load()
+    if old.get("before_aud46"):
+        out["before_aud46"] = old["before_aud46"]
+    elif old.get("models") and not old.get("bench"):
+        keep = {}
+        for k, m in old["models"].items():
+            a = m.get("all") or {}
+            if a:
+                keep[k] = {"edge12": a.get("edge12"), "flips": m.get("flips"), "buy_fell30": (a.get("buy") or {}).get("fell30"),
+                           "sell_fell30": (a.get("sell") or {}).get("fell30"), "buy_beat12": (a.get("buy") or {}).get("beat12"),
+                           "sell_beat12": (a.get("sell") or {}).get("beat12"), "e1": (m.get("e1") or {}).get("edge12"),
+                           "e2": (m.get("e2") or {}).get("edge12"), "e3": (m.get("e3") or {}).get("edge12")}
+        out["before_aud46"] = {"built": old.get("built"), "models": keep}
     with open(modelcompare.OUT, "w") as f:
         json.dump(out, f, indent=1)
     print(f"wrote {modelcompare.OUT} in {time.time() - t0:.0f}s")
@@ -35,6 +50,9 @@ def main():
         a, an = m.get("all") or {}, m.get("an") or {}
         print(f"{k:9s} edge12 {a.get('edge12')}  e1 {(m.get('e1') or {}).get('edge12')}  e2 {(m.get('e2') or {}).get('edge12')}  e3 {(m.get('e3') or {}).get('edge12')}  "
               f"flips {m.get('flips')}  | an edge3 {an.get('edge3')} edge12 {an.get('edge12')}  buy {an.get('buy', {}).get('n')}")
+        if m.get("us"):
+            yr = lambda r: f"{r['mean']:+.3f} ±{r['pm']:.3f} ({r['pos']}/{r['n']} yrs up)" if r else "-"
+            print(f"{'':9s} US {m['us'].get('edge12')} yearly {yr(m.get('us_yr'))}  TSX {m['tsx'].get('edge12')} yearly {yr(m.get('tsx_yr'))}  all yearly {yr(m.get('yr'))}")
 
 
 if __name__ == "__main__":

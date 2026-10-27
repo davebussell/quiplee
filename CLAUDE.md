@@ -98,6 +98,17 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.
+- **The measuring stick (Oct 27, 2026, AUD-46).** Every test (factorgrade, modelcompare, the scorecard) measures a stock
+  against its market *with dividends* (`content.TR_BENCH`: SPY, XIU.TO), because the stocks' own closes include them; the
+  market guard still reads the index (`t["bench"]`), as Your signal does. `quality.price_check` cleans every price file in
+  `engine.load_all` (bad ticks, unadjusted reverse splits) and marks names too thin to test (`t["unreliable"]`), which stay
+  out of every graded record. `secfund.norm` puts per-share SEC numbers on today's share basis (Yahoo splits from
+  `fetch_events.py`, else read from the filings). Records are kept for U.S. and TSX names apart, with year-by-year ranges;
+  say which market a result comes from.
+- **Plays being graded (Oct 27, 2026, AUD-49).** `plays.TRIAL` holds rules coded from the Classics: the engine runs them
+  (`ENGINE_PLAYS`) and they get pages and records, but they are not in `PLAYS`/`TIMED`, so not in the plays factor, the play
+  counts, the stock pages, the screener, the guides or the API. One joins `PLAYS` only when Dave says, once its record is
+  in (then it needs a guide, flashcard and Learn entries like any play).
 
 ## When a Netlify build fails
 

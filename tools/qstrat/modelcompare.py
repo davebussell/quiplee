@@ -6,11 +6,13 @@ next refinements we tried (articles/old-vs-new-signal/, riskpieces.py).
 The study is a snapshot: it is rerun by hand when the model changes, and the article reads the
 JSON, so the nightly build doesn't redo it.
 
-At every month-end since 2011, each covered stock gets its points on every factor exactly as Your
+At every month-end since 2006, each covered stock gets its points on every factor exactly as Your
 signal would have scored it then, from numbers public at the time (as in factorgrade.py), and each
 model's Buy (60+), Hold or Sell (40 or less) is checked against what the stock did next against its
-market (the S&P 500, or the TSX): over a month, three months and a year, and how far it fell in the
-following year.
+market with dividends (SPY for U.S. names, XIU.TO for Canadian ones, as in factorgrade.py; the market
+guard still reads the index itself, as Your signal does): over a month, three months and a year, and how
+far it fell in the following year. Every model is also scored for U.S. and TSX names apart, with a range
+from its year-by-year edges (year_range()).
 
 The old standard was half analysts' upside, which has no stored history. Rating changes with price
 targets are on file from late 2023 (data/events/, tools/fetch_events.py), so from July 2024 the old
@@ -28,6 +30,7 @@ import pandas as pd
 
 from .content import TIMED
 from . import secfund
+from .factorgrade import MARKETS
 from .quality import BOUNDS
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -87,7 +90,7 @@ def _consensus(tg, d):
 
 def panel(site):
     """One row per stock and month-end: each factor's raw value or points, and what came next."""
-    from .factorgrade import _stocks, _plays_share
+    from .factorgrade import _stocks, _plays_share, bench_of, market
     from .factors import offhigh_points
     from .engine import _read, PRICE_DIR
     stocks = _stocks(site)
@@ -105,9 +108,13 @@ def panel(site):
     rows = []
     for t in stocks:
         c = site.prices[t["sym"]]["close"]
-        b = site.prices[t["bench"]]["close"]
+        b = site.prices[bench_of(t)]["close"]          # what the stock is graded against: the market with dividends
+        ix = site.prices[t["bench"]]["close"]           # what the market guard reads: the index, as Your signal does
         cv, bv = c.values.astype(float), b.values.astype(float)
-        bhi = b.rolling(252, min_periods=120).max().values
+        ixv = ix.values.astype(float)
+        ixhi = ix.rolling(252, min_periods=120).max().values
+        ixpos = ix.index.searchsorted(dates, side="right") - 1
+        mk = market(t)
         ma = c.rolling(200).mean().values
         ma50 = c.rolling(50).mean().values
         hi = c.rolling(252, min_periods=120).max().values
@@ -122,14 +129,15 @@ def panel(site):
             if i < 252 or j < 0 or cv[i] <= 0 or bv[j] <= 0 or i + H1 >= len(cv) or j + H1 >= len(bv):
                 continue
             p0 = cv[i]
-            r = {"d": d, "sym": t["sym"], "plays": (100 * k[di] / n[di]) if n[di] >= 20 else np.nan,
+            q = ixpos[di]
+            r = {"d": d, "sym": t["sym"], "mkt": mk, "plays": (100 * k[di] / n[di]) if n[di] >= 20 else np.nan,
                  "dd": p0 / hi[i] - 1 if hi[i] > 0 else np.nan, "vol": vol[i],
                  "gap": p0 / ma[i] - 1 if ma[i] > 0 else np.nan,
                  "gap50": p0 / ma50[i] - 1 if ma50[i] > 0 else np.nan,
                  "dd63": p0 / hi63[i] - 1 if hi63[i] > 0 else np.nan,
                  "mom": p0 / cv[i - 252] - 1 if cv[i - 252] > 0 else np.nan,
                  "mom121": cv[i - 21] / cv[i - 252] - 1 if cv[i - 252] > 0 else np.nan,
-                 "spx_up": spx_up[d], "bdd": bv[j] / bhi[j] - 1 if bhi[j] > 0 else np.nan}
+                 "spx_up": spx_up[d], "bdd": ixv[q] / ixhi[q] - 1 if q >= 0 and ixhi[q] > 0 else np.nan}
             for h, key in ((H1, "1"), (H3, "3"), (H12, "12")):
                 if i + h < len(cv) and j + h < len(bv):
                     r["ex" + key] = (cv[i + h] / p0 - 1) - (bv[j + h] / bv[j] - 1)
@@ -268,6 +276,17 @@ def record(df, g, mask=None):
     return out
 
 
+def year_range(years):
+    """{year: 12-month edge} -> the mean yearly edge with a rough 95% range (two standard errors) and
+    how many years were positive. Calls a year apart overlap, so the range is a floor on the real
+    uncertainty, not a promise."""
+    v = np.array([x for x in years.values() if x is not None], dtype=float)
+    if len(v) < 3:
+        return None
+    se = float(v.std(ddof=1) / np.sqrt(len(v)))
+    return {"n": len(v), "mean": round(float(v.mean()), 4), "pm": round(2 * se, 4), "pos": int((v > 0).sum())}
+
+
 def flips(df, g):
     """Signal changes per stock per year, month-end to month-end."""
     x = pd.DataFrame({"sym": df.sym, "d": df.d, "g": g}).dropna().sort_values(["sym", "d"])
@@ -283,6 +302,7 @@ def study(site):
     an = df.d >= AN_START
     out = {"built": dt.date.today().isoformat(), "since": df.d.min().strftime("%Y-%m-%d"), "to": df.d.max().strftime("%Y-%m-%d"),
            "to12": df[df.ex12.notna()].d.max().strftime("%Y-%m-%d"), "stocks": int(df.sym.nunique()),
+           "bench": {"us": "SPY", "tsx": "XIU.TO"}, "markets": {mk: int(df[df.mkt == mk].sym.nunique()) for mk in MARKETS},
            "an_since": AN_START.strftime("%Y-%m-%d"), "an_stocks": int(df[an & df.get("up", pd.Series(np.nan, index=df.index)).notna()].sym.nunique()),
            "models": {}}
     S = {k: score(df, w) for k, (_, w, _) in MODELS.items()}
@@ -314,6 +334,15 @@ def study(site):
             rec["fall"] = record(df, g, fall)
             rec["flips"] = flips(df, g)
             rec["years"] = {str(y): record(df, g, df.d.dt.year == y)["edge12"] for y in sorted(df.d.dt.year.unique())}
+            rec["yr"] = year_range(rec["years"])
+            for mk in MARKETS:
+                mm = df.mkt == mk
+                rec[mk] = record(df, g, mm)
+                rec[mk + "_flips"] = flips(df[mm], g[mm])
+                for ek, em in era.items():
+                    rec[mk + "_" + ek] = record(df, g, mm & em)
+                rec[mk + "_years"] = {str(y): record(df, g, mm & (df.d.dt.year == y))["edge12"] for y in sorted(df.d.dt.year.unique())}
+                rec[mk + "_yr"] = year_range(rec[mk + "_years"])
         rec["an"] = record(df, g, an)
         rec["an_fall"] = record(df, g, an & fall)
         rec["an_flips"] = flips(df[an], g[an])

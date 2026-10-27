@@ -14,8 +14,8 @@ import numpy as np
 import pandas as pd
 
 from .cal import future_sessions
-from .content import TICKERS, PLAYS
-from . import risk
+from .content import TICKERS, ENGINE_PLAYS
+from . import quality, risk
 
 ET = ZoneInfo("America/New_York")
 GRADE_START = pd.Timestamp("2005-01-01")
@@ -96,6 +96,13 @@ def load_all(now=None, base=PRICE_DIR):
         except (OSError, ValueError, KeyError) as ex:
             print(f"skipping {t['sym']}: no usable price file ({ex.__class__.__name__})")
             continue
+        d, notes, why = quality.price_check(t["sym"], d, crypto=t.get("crypto"), index=t.get("index") or t["sym"].startswith("^"))
+        t["price_notes"] = notes
+        t["unreliable"] = why
+        for n in notes:
+            print(f"price check {t['sym']}: {n}")
+        if why:
+            print(f"price check {t['sym']}: left out of every graded record ({why})")
         if len(d) < 60:
             print(f"skipping {t['sym']}: only {len(d)} sessions of history")
             continue
@@ -493,7 +500,7 @@ def run(prices, irx, now, plays=None, tickers=None, workers=None, spill=None):
     (see Result), which keeps the build's memory flat as the universe grows."""
     if spill:
         os.makedirs(spill, exist_ok=True)
-    _G.update(prices=prices, irx=irx, now=now, plays=plays or PLAYS, fund=risk.load_fundamentals(TICKERS), spill=spill)
+    _G.update(prices=prices, irx=irx, now=now, plays=plays or ENGINE_PLAYS, fund=risk.load_fundamentals(TICKERS), spill=spill)
     syms = [t["sym"] for t in (tickers or TICKERS)]
     workers = workers or max(1, min(len(syms), os.cpu_count() or 1))
     results = {}

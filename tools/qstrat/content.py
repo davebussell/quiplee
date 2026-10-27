@@ -423,6 +423,7 @@ def _short(sym):
     return sym.replace("-USD", "").replace(".TO", "").replace(".V", "").replace(".NE", "").replace("^", "")
 
 
+TR_BENCH = {"^GSPC": "SPY", "^GSPTSE": "XIU.TO"}   # AUD-46: total-return stand-ins for the price indexes
 for t in TICKERS:
     t.setdefault("slug", t["sym"].lower().replace(".", "-").replace("^", ""))
     t["crypto"] = t["sym"].endswith("-USD")
@@ -435,6 +436,8 @@ for t in TICKERS:
         t["bench"] = "^GSPTSE" if t["sym"] != "^GSPTSE" else "^GSPC"
     else:
         t["bench"] = "^GSPC"
+    # the market a stock is graded against: the index's fund, whose closes (like every stock's) include dividends
+    t["tr_bench"] = TR_BENCH.get(t["bench"])
 TK_BY_SYM = {t["sym"]: t for t in TICKERS}
 INDEXES = [t for t in TICKERS if t.get("index")]
 
@@ -445,20 +448,21 @@ INDEXES = [t for t in TICKERS if t.get("index")]
 import json as _json
 import os as _os
 
-from .plays import PLAYS, PLAY, TIMED, STARTER, STARTER_SLUGS, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
+from .plays import PLAYS, PLAY, TIMED, TRIAL, ENGINE_PLAYS, STARTER, STARTER_SLUGS, BAR_WORD, FAMILIES, FAMILY, FAMILY_ORDER, by_family  # noqa: E402,F401
 
 with open(_os.path.join(_os.path.dirname(__file__), "analysts.json"), encoding="utf-8") as _f:
     THINKERS = _json.load(_f)
 for _a in THINKERS:
     _a["sources"] = [tuple(x) for x in _a["sources"]]
     _a["strategies"] = [p["slug"] for p in PLAYS if _a["slug"] in p["analysts"]]
+    _a["trials"] = [p["slug"] for p in TRIAL if _a["slug"] in p["analysts"]]      # plays being graded (plays.TRIAL)
 from .plain import PLAIN as _PLAIN  # noqa: E402
-for _p in PLAYS:
+for _p in PLAYS + TRIAL:
     _p["thinker"] = _p["analysts"][0]
     # the everyday name and one-line explanation (plain.py); the technical name stays as p["name"]
     _p["plain"], _p["oneline"] = _PLAIN.get(_p["slug"], (_p["name"], _p.get("short", "")))
 THINKER = {t["slug"]: t for t in THINKERS}
-_missing = {a for p in PLAYS for a in p["analysts"]} - set(THINKER)
+_missing = {a for p in PLAYS + TRIAL for a in p["analysts"]} - set(THINKER)
 assert not _missing, f"plays credit unknown analysts: {_missing}"
 
 STRATEGIES = PLAYS

@@ -18,7 +18,7 @@ from .media import pic, page_art, PAGE_ART
 from .linker import link_terms
 from . import stockview as sv
 from .engine import GRADE_START
-from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, GROUP_ORDER, BAR_WORD,
+from .content import (TICKERS, THINKERS, THINKER, PLAYS, PLAY, TIMED, TRIAL, GROUP_ORDER, BAR_WORD,
                       FAMILIES, FAMILY, FAMILY_ORDER, credit)
 
 e = html.escape
@@ -306,7 +306,7 @@ sig5 = sig
 
 def n_people():
     """Analysts behind at least one play (not the benchmark, not 'market tradition')."""
-    return len([a for a in THINKERS if a["strategies"] and not a.get("benchmark") and a["slug"] != "market-tradition"])
+    return len([a for a in THINKERS if (a["strategies"] or a.get("trials")) and not a.get("benchmark") and a["slug"] != "market-tradition"])
 
 
 def n_tsx():
@@ -612,7 +612,10 @@ class Site:
         return {p["slug"] for p in self.headline_plays()}
 
     def pair_link(self, t, s):
-        """Where a link to play s on stock t goes: its own page for a headline play, else the play's row on the stock page."""
+        """Where a link to play s on stock t goes: its own page for a headline play, else the play's row on the stock page
+        (a play still being graded, plays.TRIAL, has no row there yet: the stock page itself)."""
+        if s.get("trial"):
+            return f"stocks/{t['slug']}/"
         if s["slug"] in self.headline_slugs() or (t["sym"], s["slug"]) in EXTRA_PAIRS:
             return self.pair_path(t, s)
         return f"stocks/{t['slug']}/#play-{s['slug']}"
@@ -741,7 +744,7 @@ class Site:
     def strat_summary(self, s):
         if s["slug"] in self._sum:
             return self._sum[s["slug"]]
-        rows = [self.r(t["sym"], s["slug"]) for t in universe()]
+        rows = [self.r(t["sym"], s["slug"]) for t in universe() if not t.get("unreliable")]     # too-thin prices stay out of every record
         n = len(rows)
         full = [(x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}) for x in rows]
         ok = [(a, b) for a, b in full if a and b]
@@ -769,7 +772,7 @@ class Site:
         if hit is None:
             right = calls = stocks = 0
             for t in universe():
-                if not is_stock(t):
+                if not is_stock(t) or t.get("unreliable"):
                     continue
                 b = self.r(t["sym"], s["slug"])["batting"]
                 right, calls, stocks = right + b["right"], calls + b["n"], stocks + (1 if b["n"] else 0)
@@ -942,7 +945,7 @@ class Site:
         picks.picks_page(self, state, info)
         self.home()
         self.strategies_index()
-        for s in PLAYS:
+        for s in PLAYS + TRIAL:
             self.strategy_page(s)
         self.thinkers_index()
         for th in THINKERS:
@@ -1063,8 +1066,8 @@ class Site:
             rec = '<div class="rec"><span><b>Benchmark</b>every play is graded against this</span></div>'
             strat = "Buy & Hold"
         else:
-            ss = [PLAY[x] for x in th["strategies"]]
-            strat = " · ".join(p["name"] for p in ss)
+            ss = [PLAY[x] for x in th["strategies"] + th.get("trials", [])]
+            strat = " · ".join(p["name"] for p in ss) + (" (being graded)" if not th["strategies"] else "")
             sms = [self.strat_summary(p) for p in ss]
             calls = sum(m["calls"] for m in sms)
             right = sum((m["bat"] or 0) * m["calls"] for m in sms)
@@ -1096,16 +1099,35 @@ class Site:
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Checks</th><th class="r">In now</th><th class="r">Calls right</th><th class="r">Beat B&amp;H Sharpe</th><th class="r">Cut drawdown</th><th class="r">Switches / yr</th></tr></thead>
 <tbody>{rows}</tbody></table></div></section>"""
         bh = PLAY["buy-and-hold"]
+        trial = self.trial_section(h) if TRIAL else ""
         body = f"""
 <section class="pair-head has-art">{page_art(h, PAGE_ART["strategies/"], "60% 60%")}<p class="eyebrow">Plays</p><h1 class="h1">{len(TIMED)} plays, one scorecard</h1>
 <p class="lede">Each play is written down exactly as Be The Puck tests it, run on every stock in the universe, and graded against buying and holding the same stock over the same dates. They fall into seven families.</p>
-<div class="chips fam-chips">{chips}</div></section>
+<div class="chips fam-chips">{chips}{'<a href="#being-graded">Being graded <span class="muted">' + str(len(TRIAL)) + '</span></a>' if TRIAL else ''}</div></section>
 {secs}
+{trial}
 <section class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h3" style="color:var(--ink)">{e(bh['long'])}</p><p>{e(bh['short'])}</p></div>
 <a class="btn" href="{h('strategies/buy-and-hold/')}">Buy and hold by stock</a></section>
 <p class="muted small">Calls right: the share of closed calls where an in call was followed by a higher price, or an out call by a lower one. Trend plays often win well under half their calls and make it back on a few long trends. Switches per year is the median across stocks.</p>
 """
         self.add(path, self.shell(path, "Plays", f"All {len(TIMED)} trading plays Be The Puck tests, grouped into seven families, with who they come from and how they have scored.", body, active="strategies/"))
+
+    def trial_section(self, h, head="Being graded"):
+        """The plays from the Classics that run on every stock but stay out of Your signal and the counts until graded."""
+        rows = ""
+        for s in TRIAL:
+            sm = self.strat_summary(s)
+            rows += (f'<tr><td><a class="play-nm" href="{h("strategies/" + s["slug"] + "/")}">{play_name_html(s)}</a>'
+                     f'<span class="play-line">{e(s.get("oneline") or "")}</span><span class="sym-sub">{e(credit(s))}</span></td>'
+                     f'<td>{e(FAMILY[s["family"]][0])}</td>'
+                     f'<td class="r" data-v="{sm["in_now"]}">{sm["in_now"]} of {sm["n"]}</td><td class="r">{pct(sm["bat"], sign=False, d=0)}</td>'
+                     f'<td class="r" data-v="{sm["beat_sharpe"] / sm["graded"] if sm["graded"] else ""}">{sm["beat_sharpe"]} of {sm["graded"]}</td>'
+                     f'<td class="r" data-v="{sm["cut_dd"] / sm["graded"] if sm["graded"] else ""}">{sm["cut_dd"]} of {sm["graded"]}</td>'
+                     f'<td class="r">{sm["switches"]:.1f}</td></tr>')
+        return f"""<section id="being-graded" class="fam-sec"><div class="sec-head"><h2 class="h2">{e(head)}</h2>
+<p>Forgotten rules from <a href="{h('classics/')}">the Classics</a>, coded and run on every stock each night like the others. They aren't in Your signal, the play counts or the stock pages until their records are in.</p></div>
+<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Family</th><th class="r">In now</th><th class="r">Calls right</th><th class="r">Beat B&amp;H Sharpe</th><th class="r">Cut drawdown</th><th class="r">Switches / yr</th></tr></thead>
+<tbody>{rows}</tbody></table></div></section>"""
 
     def strategy_page(self, s):
         path, depth = f"strategies/{s['slug']}/", 2
@@ -1154,13 +1176,20 @@ class Site:
                              f'<td class="r nowrap" data-v="{sortv(bat["avg"])}">{pct(bat["avg"], sign=False, d=0)} <span class="muted">of {bat["n"]}</span></td>'
                              f'<td class="r">{x["stats"]["switches_per_year"]:.1f}</td></tr>')
         fam = FAMILY[s["family"]][0]
+        practice = "" if s.get("trial") else f"""<section class="card practice-strip"><p><b>Practise this play.</b> See if you can read its call on real charts, or drill its rule on a flashcard.</p>
+<div class="chips"><a href="{h('learn/call-it/')}?play={s['slug']}">Call it: {e(s['name'])}</a><a href="{h('learn/flashcards/')}?deck=plays#{s['slug']}">Flashcard</a></div></section>"""
+        trial_note = ""
+        if s.get("trial"):
+            trial_note = (f'<section class="card prose trial-note"><p class="eyebrow">Being graded</p><p>A forgotten rule from <a href="{h("classics/" + s["classic"] + "/")}">the Classics</a>, '
+                          f'coded from the research there and run on every stock each night, like the {len(TIMED)} plays. Until its record is in, it stays out of Your signal, '
+                          f'the play counts and the stock pages; the record below is the test. Where the rule needed a choice its author never made, the choice is listed with the rule.</p></section>')
         body = f"""
-<nav class="crumbs"><a href="{h('strategies/')}">Plays</a><span>/</span><a href="{h('strategies/')}#fam-{s['family']}">{e(fam)}</a><span>/</span><span>{e(s['name'])}</span></nav>
+<nav class="crumbs"><a href="{h('strategies/')}">Plays</a><span>/</span><a href="{h('strategies/')}#{"being-graded" if s.get("trial") else "fam-" + s["family"]}">{"Being graded" if s.get("trial") else e(fam)}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head">
-  <p class="eyebrow">{e(fam)} · {e(BAR_WORD[s['bar']])} rule{" · " + e(s['flag']) if s.get('flag') else ""}</p>
+  <p class="eyebrow">{"Being graded · " if s.get("trial") else ""}{e(fam)} · {e(BAR_WORD[s['bar']])} rule{" · " + e(s['flag']) if s.get('flag') else ""}</p>
   <h1 class="h1">{e(s.get('plain') or s['long'])}</h1>
   {"" if (s.get('plain') or s['long']).lower() == s['long'].lower() else f'<p class="h1-tech">Known as {e(s["long"])}</p>'}
-  <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}<span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Guide: does it work?</a></div>
+  <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}{"" if s.get("trial") else f'<span>·</span><a href="{h("guides/" + s["slug"] + "/")}">Guide: does it work?</a>'}</div>
   <p class="lede">{e(s.get('oneline') or s['short'])}</p>
   {"" if not s.get('oneline') else f'<p class="muted">{e(s["short"])}</p>'}
   {classic_links(h, "play", s["slug"], "The history behind it")}
@@ -1170,9 +1199,8 @@ class Site:
   <div class="card tile"><span class="tile-label">Calls right</span><span class="tile-value">{pct(sm['bat'], sign=False, d=0)}</span><span class="tile-note">Across {sm['calls']:,} closed calls.</span></div>
   <div class="card tile"><span class="tile-label">Beat buy and hold (Sharpe)</span><span class="tile-value">{sm['beat_sharpe']} of {sm['graded']}</span><span class="tile-note">Cut the worst drawdown on {sm['cut_dd']} of {sm['graded']}.</span></div>
 </div></section>
-<section class="split">{rule_card}{self.against_card(depth)}</section>
-<section class="card practice-strip"><p><b>Practise this play.</b> See if you can read its call on real charts, or drill its rule on a flashcard.</p>
-<div class="chips"><a href="{h('learn/call-it/')}?play={s['slug']}">Call it: {e(s['name'])}</a><a href="{h('learn/flashcards/')}?deck=plays#{s['slug']}">Flashcard</a></div></section>
+{trial_note}<section class="split">{rule_card}{self.against_card(depth)}</section>
+{practice}
 <section data-adv="What it says on every stock now, and the price that would flip each call"><div class="sec-head"><h2 class="h2">What it says now</h2><p>The close that would flip each call on its next {BAR_WORD[s['bar']]} check.</p></div>
 <div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>Play / buy and hold over the same dates, since 2005 or the first date with enough history.</p></div>
@@ -1196,9 +1224,10 @@ class Site:
 
     # ---------------------------------------------------------- analysts
     def analyst_family(self, th):
-        if not th["strategies"]:
+        got = th["strategies"] or th.get("trials")
+        if not got:
             return None
-        return PLAY[th["strategies"][0]]["family"]
+        return PLAY[got[0]]["family"]
 
     def thinkers_index(self):
         path, depth = "thinkers/", 1
@@ -1245,7 +1274,7 @@ class Site:
 <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Play</th><th>Family</th><th class="r">Beat on return</th><th class="r">Beat on Sharpe</th><th class="r">Cut drawdown</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="muted small">A play that cuts drawdowns but loses on return is doing what Zakamulin's research predicts: paying for crash protection with years of lag.</p></section>"""
         else:
-            for slug in th["strategies"]:
+            for slug in th["strategies"] + th.get("trials", []):
                 s = PLAY[slug]
                 if s.get("benchmark"):
                     extra += f"""<section><div class="card teaser"><div class="prose"><p class="eyebrow">The benchmark</p><p class="h2" style="color:var(--ink)">Every play on Be The Puck is graded against buy and hold.</p></div>
@@ -1258,7 +1287,7 @@ class Site:
                 co = [a for a in s["analysts"] if a != th["slug"]]
                 with_ = (" · with " + ", ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in co)) if co else ""
                 extra += f"""<section><div class="sec-head"><h2 class="h2">{e(s.get('plain') or s['long'])}</h2><a class="btn" href="{h('strategies/' + slug + '/')}">Rule and full record</a></div>
-<p class="muted small">{"" if (s.get('plain') or s['long']).lower() == s['long'].lower() else e(s['long']) + " · "}{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])}{with_}</p>
+<p class="muted small">{"Being graded: not in Your signal yet · " if s.get("trial") else ""}{"" if (s.get('plain') or s['long']).lower() == s['long'].lower() else e(s['long']) + " · "}{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])}{with_}</p>
 <p><b>{e(s.get('oneline') or '')}</b> {e(s['short'])}</p>
 <div class="tiles">
 <div class="card tile"><span class="tile-label">Calls right</span><span class="tile-value">{pct(sm['bat'], sign=False, d=0)}</span><span class="tile-note">{sm['calls']:,} closed calls on {sm['n']} stocks.</span></div>
@@ -1275,7 +1304,7 @@ class Site:
 {f'<section class="split">{books_card}</section>' if books_card else ''}
 {extra}
 """
-        n_plays = len([x for x in th["strategies"] if not PLAY[x].get("benchmark")])
+        n_plays = len([x for x in th["strategies"] + th.get("trials", []) if not PLAY[x].get("benchmark")])
         desc = f"{th['name']}, {th['role']}: " + (f"{n_plays} play{'s' if n_plays != 1 else ''} tested on {len(universe())} stocks, and what they say now." if n_plays else "background, sources and books.")
         self.add(path, self.shell(path, th["name"], desc, body, active="thinkers/"))
 
@@ -1449,6 +1478,12 @@ class Site:
         elif t.get("tsx"):
             req_note = ('<p class="note-line">Listed on the Toronto Stock Exchange; prices in Canadian dollars. '
                         f'<a href="{h("stocks/?group=tsx")}">All {n_tsx()} TSX stocks</a>.</p>')
+        if t.get("unreliable"):
+            req_note += (f'<p class="note-line">Prices for {e(t["short"])} are too thin to test ({e(t["unreliable"])}), so it is left out of the site\'s graded records '
+                         f'(how often each play and factor has been right). Its plays still run; read them with that in mind.</p>')
+        elif t.get("price_notes"):
+            req_note += (f'<p class="note-line" data-adv="Price history cleaned">Price history cleaned before testing: {e("; ".join(t["price_notes"]))}. '
+                         f'<a href="{h("method/")}#prices">How prices are checked</a>.</p>')
         idx_note = ""
         if t.get("index"):
             idx_note = ('<p class="note-line">An index is a scoreboard, not something you can buy directly. Investors hold it through an index fund or ETF, '
@@ -1705,11 +1740,12 @@ class Site:
 <p>Every stock gets one call, <b>Buy</b>, <b>Hold</b> or <b>Sell</b>, and the reader sets it. Each of {len(SIG_FACTORS)} factors turns into points from 0 to 100: the share of the plays you count that hold the stock, analysts' upside and rating, P/E and the other value measures, growth, margins, debt, trend, momentum and crash exposure. Company numbers score by rank among every covered company, so a P/E lower than 80% of them scores 80. Your score is the weighted average of the factors you weight, over the ones the stock has; with less than half your weight available (a fund has no P/E) there's no score. Buy at {SIG_BUY} or more, Sell at {SIG_SELL} or less, unless you move the lines.</p>
 <p>The standard weights are {e(default_words())}, chosen in October 2026 because every factor in them has a tested record (below) and the last two are exit rules: a stock that keeps falling, or breaks below its 200-day average, loses its Buy. Before that they were half plays, half analysts' upside, and the targets behind upside can't be tested and look better the further a stock falls. Two rules were added on October 21, 2026 (model version 3), each graded month by month since 2006 first (<a href="{h('articles/old-vs-new-signal/')}">the tests</a>): the <b>market guard</b>, under which Off the high, Trend and 1-year momentum stand down while the stock's own market (the S&amp;P 500, or the TSX) is 15% or more below its 1-year high, so an exit rule doesn't sell a whole market at its bottom; and <b>sticky calls</b> on the standard weights with every play counted, under which a Buy holds until the score drops below 50 and a Sell until it rises above 50, which cuts the flips by about a third. The guard applies to every set of weights; the sticky rule needs the score's day-by-day history, which only the standard setup has. Change the weights, or the plays you count, from any stock page, the stock list, the screener or the watchlist, and every page follows (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Until October 2026 the site also showed a Start/Stop light, which read only the plays; the same reading is your signal with every weight on the plays. Each stock page also shows the closes at which its signal would turn, with the plays and company numbers held where they are. How the calls are doing: <a href="{h('articles/calls-graded/')}">this week's calls, graded</a>, rebuilt nightly. {DISCLAIMER}</p></section>
 <section class="card prose" id="factor-grades"><p class="eyebrow">How the factors are graded</p>
-<p>Every factor gets a record, like every play. Each month since {fg_since}, every stock got its points on each factor from numbers public at the time: prices to that close, the plays' calls to that close, and company figures from the SEC filings filed by that date (each value dated by the filing that first reported it). A factor's <b>Buys</b> are stocks it scored 60 or more; its <b>Avoids</b>, 40 or less. Each is checked against its market (the S&amp;P 500, or the TSX) over the next three months and the next year. The <b>edge</b> is how much more often the Buys beat the market than the Avoids did; it's shown beside every slider and in <a href="{h('guides/your-plays/')}#your-signal">the guide</a>. Analysts' targets and ratings, forward P/E, PEG and crash exposure have no record of past values and aren't graded. The test uses today's list of covered stocks, which flatters every factor alike.</p></section>
+<p>Every factor gets a record, like every play. Each month since {fg_since}, every stock got its points on each factor from numbers public at the time: prices to that close, the plays' calls to that close, and company figures from the SEC filings filed by that date (each value dated by the filing that first reported it). A factor's <b>Buys</b> are stocks it scored 60 or more; its <b>Avoids</b>, 40 or less. Each is checked against its market with dividends, over the next three months and the next year: SPY for U.S. stocks and the iShares S&amp;P/TSX 60 fund (XIU) for Canadian ones. The stocks' own prices include dividends, so measuring them against the S&amp;P 500 or TSX index, which leave dividends out, would flatter every call by two or three points a year; until October 27, 2026 the tests did that. The <b>edge</b> is how much more often the Buys beat the market than the Avoids did; it's shown beside every slider and in <a href="{h('guides/your-plays/')}#your-signal">the guide</a>, for all stocks and for U.S. and TSX stocks apart, with a range from the year-by-year results. Analysts' targets and ratings, forward P/E, PEG and crash exposure have no record of past values and aren't graded. Stocks whose prices are too thin to test are left out (<a href="#prices">below</a>). The test uses today's list of covered stocks, which flatters every factor alike.</p></section>
 <section class="split">
 <div class="card prose"><p class="eyebrow">Data</p><ul>
 <li>Daily open, high, low, close and volume, adjusted for splits and dividends, from Yahoo Finance since January 2004. Grading starts in January 2005, or once a stock has enough history for the play.</li>
-<li>Company numbers come from SEC filings (XBRL) for companies that file 10-Qs, dated by filing, and from Yahoo Finance for the rest; every one passes a quality check that holds back impossible values and corrects currency mix-ups (data/quality.json).</li>
+<li id="prices">Every price file is checked before it's used. A one-day spike that reverses the next day (a bad tick) is replaced with the previous close; a jump of five times or more overnight that holds, without a rush of trading, is a reverse split the price feed didn't adjust, so the history before it is left out; and a stock that last closed under a cent, or didn't trade on more than a quarter of the last two years' sessions, is too thin to test and stays out of every graded record (its page says so).</li>
+<li>Company numbers come from SEC filings (XBRL) for companies that file 10-Qs, dated by filing, and from Yahoo Finance for the rest; every one passes a quality check that holds back impossible values and corrects currency mix-ups (data/quality.json). Per-share numbers in old filings (earnings, dividends, share counts) are put on today's share basis, so a P/E from before a split compares the same shares as the split-adjusted price.</li>
 <li>Cash earns the 13-week U.S. Treasury bill yield (^IRX). Canadian names use the same rate, which slightly flatters or penalises them.</li>
 <li>Every signal uses finished bars only. Today's price is ignored until the market has closed, and weekly or monthly plays wait for the week or month to end.</li>
 </ul></div>

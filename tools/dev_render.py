@@ -109,10 +109,15 @@ def main():
     if "stocks" in extra:
         site.stocks_index()
     if "strategies" in extra:
-        from qstrat.content import PLAYS
+        from qstrat.content import PLAYS, TRIAL
         site.strategies_index()
-        for s in PLAYS:
+        for s in PLAYS + TRIAL:
             site.strategy_page(s)
+    if "thinkers" in extra:
+        from qstrat.content import THINKERS
+        site.thinkers_index()
+        for th in THINKERS:
+            site.thinker_page(th)
     if "classics" in extra:
         from qstrat import classics
         classics.build(site)

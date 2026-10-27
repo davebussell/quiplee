@@ -12,7 +12,7 @@ import html
 import numpy as np
 import pandas as pd
 
-from .content import TICKERS
+from .content import TICKERS, TR_BENCH
 from .factors import DEFAULT, BUY, SELL, MODEL, MODEL3_SINCE, SIG_WORD
 
 e = html.escape
@@ -36,7 +36,7 @@ def daily_calls(site):
     df = daily_path(site)                       # from the warm-up start, so the sticky state is settled by SINCE
     if len(df):
         df = df[df.d >= SINCE]
-        stocks = {t["sym"] for t in TICKERS if is_stock(t) and not t.get("requested")}
+        stocks = {t["sym"] for t in TICKERS if is_stock(t) and not t.get("requested") and not t.get("unreliable")}
         df = df[df.sym.isin(stocks)].copy()
         m3 = df.d >= pd.Timestamp(MODEL3_SINCE)
         df["sig"] = np.where(m3, df.call, df.call_plain)
@@ -81,8 +81,9 @@ def piece(A):
     wk = df[df.d == d0].copy()
     wk["r"] = wk.sym.map(last) / wk.p - 1
     wk = wk.dropna(subset=["r", "sig"])
-    spy_r, tsx_r = _bench_ret(site, "SPY", d0, T), _bench_ret(site, "^GSPTSE", d0, T)
-    wk["bench_r"] = wk.b.map(lambda b: _bench_ret(site, b, d0, T) if b else None)
+    spy_r, tsx_r = _bench_ret(site, "SPY", d0, T), _bench_ret(site, "XIU.TO", d0, T)
+    # each stock against its market with dividends, as every other test grades it (factorgrade.bench_of)
+    wk["bench_r"] = wk.b.map(lambda b: _bench_ret(site, TR_BENCH.get(b, b), d0, T) if b else None)
     wk["ex"] = wk.r - wk.bench_r.astype(float)
 
     def grp(g):
@@ -148,11 +149,17 @@ def piece(A):
     else:
         agg, run_tbl = "The running record starts once a week of calls has a week of results behind it.", ""
     counts = df[df.d == T].sig.value_counts()
+    from .modelcompare import load as _mc
+    gs = ((_mc().get("models") or {}).get("guardsticky") or {}).get("all") or {}
+    bf, sf = (gs.get("buy") or {}).get("fell30"), (gs.get("sell") or {}).get("fell30")
+    fell_line = (f"What the record does show over long stretches is which stocks fell hardest: since 2006 the standard's Sells were "
+                 f"{sf / bf:.1f} times as likely as its Buys to fall 30% or more within a year ({_pct(sf, 0, False)} against {_pct(bf, 0, False)})."
+                 if bf and sf else "")
     body = f"""<div class="prose">
 <p>Every evening the standard signal makes one call on each covered stock: Buy, Hold or Sell. This page grades those calls, the latest week first, so the question "did the signal work?" has a running answer. Each past day's calls are rebuilt from the data as it stood at that close, not from a stored list, so the record can't be tidied up afterwards.</p>
 <h2 class="h2">The latest week: calls at the {d0.strftime("%B %-d")} close, measured at the {T.strftime("%B %-d")} close</h2>
 <div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th>Call</th><th class="r">Stocks</th><th class="r">Median move</th><th class="r">Average move</th><th class="r">Rose</th><th class="r">Beat their market</th></tr></thead><tbody>{rows}</tbody></table></div>
-<p><b>{verdict}</b> Over the same sessions the S&amp;P 500 (SPY) moved {_pct(spy_r)} and the TSX {_pct(tsx_r)}. "Beat their market" compares each stock with the S&amp;P 500, or the TSX for Canadian names.</p>
+<p><b>{verdict}</b> Over the same sessions the S&amp;P 500 (SPY) moved {_pct(spy_r)} and the TSX 60 (XIU) {_pct(tsx_r)}. "Beat their market" compares each stock with SPY, or XIU for Canadian names, dividends included on both sides.</p>
 <ul>{"".join(hits)}</ul>
 <h2 class="h2">Since the standard weights changed ({SINCE.strftime("%B %-d, %Y")})</h2>
 <p class="small muted">Each day is graded by the rules in force that day: the plain Buy and Sell lines until {pd.Timestamp(MODEL3_SINCE).strftime("%B %-d")}, and from then the market guard and sticky calls of model version {MODEL} (<a href="{h('articles/old-vs-new-signal/')}">why</a>).</p>
@@ -160,7 +167,7 @@ def piece(A):
 {run_tbl}
 <p>Put another way: $1 split equally across each day's Buys, reset every close, is worth {_pct(end[1])} more or less now than on {SINCE.strftime("%b %-d")}; the same for the Holds {_pct(end[0])}, for the Sells {_pct(end[-1])}, and for the S&amp;P 500 {_pct(spy_end)}. Tonight the signal reads Buy on {int(counts.get(1, 0))} names, Hold on {int(counts.get(0, 0))} and Sell on {int(counts.get(-1, 0))}.</p>
 <h2 class="h2">What a week can and can't tell you</h2>
-<p>A week is noise. The signal's tested edge, how much more often its Buys beat the market than its Sells, is a few points over a year (<a href="{h('articles/old-vs-new-signal/')}">the 20-year record, with the refinements tried</a>), and in any one week it can run the wrong way round. What the record does show over long stretches is which stocks fell hardest: since 2006 the signal's Sells were about twice as likely as its Buys to fall 30% or more within a year. This page is here so the recent record is visible, good weeks and bad.</p>
+<p>A week is noise. The signal's tested edge, how much more often its Buys beat the market than its Sells, is a few points over a year (<a href="{h('articles/old-vs-new-signal/')}">the 20-year record, with the refinements tried</a>), and in any one week it can run the wrong way round. {fell_line} This page is here so the recent record is visible, good weeks and bad.</p>
 <p class="small muted">Standard weights only ({", ".join(f"{k} {w}" for k, w in DEFAULT.items())}; model version {MODEL}); your own weights may call a stock differently, and the plays you count change the plays factor. Prices adjusted for splits and dividends; no costs. {DISCLAIMER}</p>
 </div>"""
     A.shell(PATH, "risk", TITLE, DEK, body, live=True, free=True,

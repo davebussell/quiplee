@@ -98,8 +98,8 @@ momentum and crash exposure. Each scores a stock 0-100 (company numbers by rank 
 is the weighted average over the factors the stock has, and the reader's Buy and Sell lines (60/40
 to start) make it Buy, Hold or Sell on the stock page (with a factor-by-factor breakdown), the
 stock list, the screener, the watchlist and the account page. The standard weights (`DEFAULT`: plays 40, off the high 30, trend 30, since October 13, 2026) use
-only factors with a tested record (`factorgrade.py`: +6.0 points of 12-month edge, against +4.4 for
-the old plays 50 / analysts' upside 50). **Off the high** is the exit rule: 100 points at the 1-year
+only factors with a tested record (`factorgrade.py`; the records, and how they split between U.S. and TSX
+names, are in the guide and on `/articles/old-vs-new-signal/`). **Off the high** is the exit rule: 100 points at the 1-year
 high, none at 30% or more below. Analysts' upside is capped at 50 points while the price is under
 its 200-day average, so a falling stock can't score better because its target now looks further
 away. **Model version 3** (October 21, 2026, `MODEL = 3`) adds two rules on top of the weights, both
@@ -126,6 +126,20 @@ more of the list by value.
 a dozen candidate refinements scored point-in-time, with how often Buys and Sells beat the market,
 how often they fell 30%+ within a year, and how often calls flip; plus the old standard rebuilt from
 the price targets in `data/events/` (July 2024 on). Rerun it whenever the model changes.
+
+**The measuring stick (AUD-46, Oct 27, 2026).** Every test measures a stock against its market with dividends
+(`content.TR_BENCH`: SPY for U.S. names, XIU.TO for Canadian ones, `t["tr_bench"]`), since the stocks' own closes
+include dividends; the market guard still reads the index (`t["bench"]`). `quality.price_check` runs on every price file
+in `engine.load_all`: a one-day bad tick that reverses is replaced with the previous close, history before an
+unadjusted reverse split (a 5x+ overnight jump that holds without a burst of volume) is dropped, and a name whose last
+close is under a cent or that didn't trade on a quarter of the last two years' sessions is marked `t["unreliable"]` and
+left out of every graded record (play records, factor grades, the model study, the scorecard), with a note on its page.
+`secfund.norm` puts SEC per-share numbers (EPS, dividends, share counts) on today's share basis, using the split list
+`tools/fetch_events.py` keeps in `data/events/<slug>.json` (refetched weekly) or, until a company has one, splits read
+from the filings (share count and weighted shares jump by a split ratio while equity doesn't), and repairs Q4 EPS that
+`fetch_sec` derived across a split. `factorgrade` (from 2006) and `modelcompare` keep every record for U.S. and TSX
+names apart, with a year-by-year range (mean ± two standard errors of the yearly edges); `model_compare.py` keeps the
+figures as first published in `before_aud46` so the article can show what moved.
 
 **The price that would change the signal's mind.** `factors.flip_lines` (and `BPPlays.flips` in the
 browser, the same arithmetic) rescans prices from 40% below to 80% above the close, moving off the
@@ -271,9 +285,13 @@ talking about (Dow Theory, Livermore's Market Key, Gann, Gould's three steps and
 Donchian and the Turtles, Coppock, Graham, Dogs of the Dow, the Hindenburg Omen, the odd-lot theory, Arms, Dysart),
 researched and sourced Oct 27, 2026: the story, the original rule, whether it can be tested on the site's data (and
 what's missing if not), the plays and people it leads to with their records, what couldn't be confirmed, and sources.
-Play pages and analyst pages link back ("The history behind it", "Their story in the Classics"). Codable classics
-not yet on the site (Livermore's Market Key, Graham's defensive test, the Positive Volume Index, Gann's swing trend,
-Ease of Movement) are the next plays to test, kept out of the signal until graded.
+Play pages and analyst pages link back ("The history behind it", "Their story in the Classics"). Four codable classics
+are now **plays being graded** (`plays.TRIAL`, code in `plays_fn_classic.py`): Livermore's Market Key, Gann's swing
+trend, the Positive Volume Index and Ease of Movement. The engine runs them on every stock (`ENGINE_PLAYS`) and they get
+their own pages, records, analysts (Livermore, Gann, Arms) and a "Being graded" section on `/strategies/`, but they
+stay out of `PLAYS`/`TIMED`: not in Your signal's plays factor, the play counts, the stock pages, the screener, the
+guides or the API, until Dave adds them. Graham's defensive test is next (it needs a value family and current-asset
+data; its classic page says so).
 
 **Friendly by default.** Every play has an everyday name and a one-line explanation (`tools/qstrat/plain.py`,
 copied onto each play as `plain` / `oneline`; `render.play_label` and `play_name_html` show the technical name with

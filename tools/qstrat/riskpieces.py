@@ -38,7 +38,7 @@ FREE = {p for p, _, _ in PIECES}
 def _stocks(site):
     from .render import is_stock
     return [t for t in TICKERS if is_stock(t) and t["sym"] in (site.prices or {}) and not t.get("requested")
-            and (t["sym"], "buy-and-hold") in site.R]
+            and not t.get("unreliable") and (t["sym"], "buy-and-hold") in site.R]
 
 
 def pct(v, d=0, sign=False):
@@ -100,7 +100,7 @@ def drop_study(site):
         out = []
         for t in _stocks(site):
             c = site.prices[t["sym"]]["close"]
-            b = site.prices.get(t["bench"], {})
+            b = site.prices.get(t.get("tr_bench") or t["bench"], {})      # the market with dividends, as every test measures it
             if not len(c) or "close" not in b:
                 continue
             b = b["close"]
@@ -223,6 +223,9 @@ def why_changed(A):
     from .modelcompare import load as _mc_load
     MC = (_mc_load() or {}).get("models") or {}
     mc_edge = lambda k: ((MC.get(k) or {}).get("all") or {}).get("edge12") or 0
+    fedges = {k: ((gf.get(k) or {}).get("12m") or {}).get("edge") for k in gf}
+    fedges = {k: v for k, v in fedges.items() if v is not None}
+    off_best = bool(fedges) and max(fedges, key=fedges.get) == "offhigh"
     mc_flips = lambda k: (MC.get(k) or {}).get("flips") or 0
     # a worked example of the old upside problem: a stock falls while its target stays put
     ex_up0 = sv.upside_points(0.20)
@@ -237,7 +240,7 @@ def why_changed(A):
 <h2 class="h2">What changed</h2>
 <ul>
 <li><b>New standard weights:</b> {e(mix)}. Every one has a tested record since {since}.</li>
-<li><b>A new factor, Off the high:</b> 100 points at the stock's highest close of the last year, falling in a straight line to none at {round(OFFHIGH_FLOOR * 100)}% below it. It doesn't rank stocks against each other, so in a broad sell-off every stock loses points. On its own it was the best-tested factor: over a year, stocks it scored 60 or more beat their market {pct(off_r.get('buys_beat'))} of the time, against {pct(off_r.get('avoids_beat'))} for those it scored 40 or less ({pts(off_r.get('edge', 0))}).</li>
+<li><b>A new factor, Off the high:</b> 100 points at the stock's highest close of the last year, falling in a straight line to none at {round(OFFHIGH_FLOOR * 100)}% below it. It doesn't rank stocks against each other, so in a broad sell-off every stock loses points. {"On its own it has the best record of any factor" if off_best else "Its record"}: over a year, stocks it scored 60 or more beat their market {pct(off_r.get('buys_beat'))} of the time, against {pct(off_r.get('avoids_beat'))} for those it scored 40 or less ({pts(off_r.get('edge', 0))}).</li>
 <li><b>Trend</b> (the price against its 200-day average) carries the rest of the exit side: {pts(tr_r.get('edge', 0))} over a year.</li>
 <li><b>Analysts' upside is capped</b> at {UPSIDE_CAP} points while a stock is below its 200-day average, wherever you use it, so a broken trend can't be talked up by a stale target.</li>
 <li><b>Every signal says how much of it is tested.</b> Under the score on each stock page: "Every factor in this score has a tested record", or how much doesn't.</li>
@@ -247,14 +250,14 @@ def why_changed(A):
 <tr><td>Before: plays 50, analysts' upside 50</td><td class="r">{pct(old_r.get('buys_beat'))}</td><td class="r">{pct(old_r.get('avoids_beat'))}</td><td class="r">{pts(old_r.get('edge', 0))}</td><td>Only the plays half ({gp.get('analysts', {}).get('graded_weight', 50)}%)</td></tr>
 <tr><td><b>Now: {e(mix)}</b></td><td class="r">{pct(new_r.get('buys_beat'))}</td><td class="r">{pct(new_r.get('avoids_beat'))}</td><td class="r"><b>{pts(new_r.get('edge', 0))}</b></td><td>All of it</td></tr>
 </tbody></table></div>
-<p class="small muted">Each month since {since}, every stock got its points from numbers public at the time; a Buy (60 or more) or an Avoid (40 or less) was then checked against the stock's market over the next year. The "before" row can only be graded on its plays half. Edges this size are normal and small: a better default tilts the odds a few points, it doesn't remove risk. The test uses today's list of covered stocks, which flatters every rule alike.</p>
+<p class="small muted">Each month since {since}, every stock got its points from numbers public at the time; a Buy (60 or more) or an Avoid (40 or less) was then checked against the stock's market over the next year. Since October 27, 2026 the market includes dividends (SPY, or XIU for Canadian names), which lowered every edge here (<a href="{h('articles/old-vs-new-signal/')}#measuring-stick">a fairer measuring stick</a>). The "before" row can only be graded on its plays half. Edges this size are normal and small: a better default tilts the odds a few points, it doesn't remove risk. The test uses today's list of covered stocks, which flatters every rule alike.</p>
 <h2 class="h2">What it did to the signals tonight</h2>
 <div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th>Signal</th><th class="r">Old standard</th><th class="r">New standard</th></tr></thead><tbody>{tbl}</tbody></table></div>
 <p>{len(moved)} of {len(rows)} names changed signal with the {s.asof.strftime('%b %-d')} close. {why_moved(s, down, up_)}</p>
 {f'<p class="eyebrow">Moved down the most</p><ul class="flip-list">{lst(down)}</ul>' if down else ''}
 {f'<p class="eyebrow">Moved up the most</p><ul class="flip-list">{lst(up_)}</ul>' if up_ else ''}
 <h2 class="h2">October 21: two rules on top of the weights</h2>
-<p>A week later, two of the refinements <a href="{h('articles/old-vs-new-signal/')}">tested month by month since 2006</a> went into the standard (model version 3). The <b>market guard</b>: while a stock's own market is 15% or more below its 1-year high, Off the high, Trend and 1-year momentum stand down and the rest of the weights decide, so the exit rule doesn't sell a whole market at its bottom; it lifted the 20-year edge from {pts(mc_edge("new"))} to {pts(mc_edge("guard"))} and changed nothing in calm years. <b>Sticky calls</b>, on the standard weights with every play counted: a Buy holds until the score drops below 50, a Sell until it rises above 50, which cut the flips from {mc_flips("guard"):.1f} to {mc_flips("guardsticky"):.1f} a year for a small cost in edge ({pts(mc_edge("guardsticky"))} for the two together). The stock page says when either rule is deciding, and the <a href="{h('articles/calls-graded/')}">weekly scorecard</a> grades each day by the rules in force that day.</p>
+<p>A week later, two of the refinements <a href="{h('articles/old-vs-new-signal/')}">tested month by month since 2006</a> went into the standard (model version 3). The <b>market guard</b>: while a stock's own market is 15% or more below its 1-year high, Off the high, Trend and 1-year momentum stand down and the rest of the weights decide, so the exit rule doesn't sell a whole market at its bottom; it {"lifted" if mc_edge("guard") > mc_edge("new") else "moved"} the 20-year edge from {pts(mc_edge("new"))} to {pts(mc_edge("guard"))}. <b>Sticky calls</b>, on the standard weights with every play counted: a Buy holds until the score drops below 50, a Sell until it rises above 50, which cut the flips from {mc_flips("guard"):.1f} to {mc_flips("guardsticky"):.1f} a year, with an edge of {pts(mc_edge("guardsticky"))} for the two together. The stock page says when either rule is deciding, and the <a href="{h('articles/calls-graded/')}">weekly scorecard</a> grades each day by the rules in force that day.</p>
 <h2 class="h2">If you set your own weights</h2>
 <p>Nothing you chose has changed. If you were simply on the old standard, you've been moved to the new one, and the weights panel says so; the old mix is still there as <b>Plays + analysts</b>. The market guard applies to your weights too; the sticky rule only to the standard setup. Alerts reset quietly with each change, so nobody gets an email about a "flip" that was really just the new rules.</p>
 <p>Your signal is a summary of the numbers you choose to weight, not a recommendation, and it knows nothing about your account. <a href="{h('articles/when-to-sell/')}">When to sell</a> and <a href="{h('articles/one-stock-too-many/')}">One stock too many</a> cover the two things it can't do for you.</p>
@@ -315,7 +318,7 @@ def when_to_sell(A):
     body = f"""<div class="prose">
 <p>Most trading rules, and most of what people read about stocks, are about when to buy. The harder call is when to get out, and a Buy signal doesn't make it for you. This piece looks at what actually happened after sharp drops in the {df.sym.nunique() if len(df) else 0} stocks Be The Puck covers, and at the exit rules your signal now carries.</p>
 <h2 class="h2">After a 10% week</h2>
-<p>Since 2006 the covered stocks had {len(df):,} weeks in which they fell 10% or more. Here is how each kind did against its market (the S&amp;P 500, or the TSX for Canadian names) afterwards:</p>
+<p>Since 2006 the covered stocks had {len(df):,} weeks in which they fell 10% or more. Here is how each kind did against its market with dividends (SPY, or XIU for Canadian names) afterwards:</p>
 <div class="tbl-wrap"><table class="tbl" data-nosort><thead><tr><th>The drop</th><th class="r">Times</th><th class="r">Beat the market, 3 months</th><th class="r">Beat it, 1 year</th><th class="r">Median vs market, 1 year</th><th class="r">Fell further in 3 months</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p>Three things stand out.</p>
 <ul>
@@ -400,6 +403,75 @@ def _times(r):
     return "twice" if 1.8 <= r < 2.2 else "three times" if 2.8 <= r < 3.2 else f"{r:.1f} times"
 
 
+def _stick(J, M, h):
+    """October 27, 2026 (AUD-46): what the fairer measuring stick changed, and the record for U.S. and TSX stocks apart."""
+    B = (J.get("before_aud46") or {}).get("models") or {}
+    if not J.get("bench"):
+        return ""
+    lab = {"guardsticky": "Today's standard (guard and sticky calls)", "new": "The October 13 weights", "plays": "Plays only"}
+    before = ""
+    for k in ("guardsticky", "new", "plays"):
+        a, b = (M.get(k) or {}).get("all") or {}, B.get(k) or {}
+        if a and b.get("edge12") is not None:
+            before += (f'<tr><td>{e(lab[k])}</td><td class="r">{pts(b["edge12"])}</td><td class="r"><b>{pts(a.get("edge12") or 0)}</b></td>'
+                       f'<td class="r">{pct(b.get("buy_beat12"))} / {pct(b.get("sell_beat12"))}</td><td class="r">{pct((a.get("buy") or {}).get("beat12"))} / {pct((a.get("sell") or {}).get("beat12"))}</td></tr>')
+    gs = M.get("guardsticky") or {}
+    a0, b0 = (gs.get("all") or {}).get("edge12"), (B.get("guardsticky") or {}).get("edge12")
+    moved = (f"The standard's edge since {J['since'][:4]} is now {pts(a0)}, against {pts(b0)} as first published. " if a0 is not None and b0 is not None else "")
+    bt_old = (B.get("guardsticky") or {}).get("buy_beat12")
+    bt_new = ((gs.get("all") or {}).get("buy") or {}).get("beat12")
+    beat = (f"The share of Buys that beat their market fell from {pct(bt_old)} to {pct(bt_new)}: much of the old figure was dividends. " if bt_old and bt_new and bt_new < bt_old - 0.02 else "")
+    still = ("The year-ahead edge is still positive overall; the next section shows where it comes from." if a0 is not None and a0 > 0 else
+             "The next section shows how it splits between U.S. and TSX stocks.")
+    fix = f"""<h2 class="h2" id="measuring-stick">October 27: a fairer measuring stick</h2>
+<p>Three faults in these tests were found and fixed on October 27, 2026, and every number on this page has been rerun with the fixes. None of them changes a call: the weights and rules are the same, only the measuring changed.</p>
+<ul>
+<li><b>The market now includes dividends.</b> The stocks' prices here include their dividends, but they were measured against the S&amp;P 500 and TSX indexes, which leave dividends out. That flattered every Buy and every Sell alike, by about two points a year for U.S. stocks and three for Canadian ones. Each stock is now measured against SPY or the iShares S&amp;P/TSX 60 fund (XIU), whose prices include dividends.</li>
+<li><b>Broken price files are caught.</b> A few histories had a reverse split the price feed never adjusted, or one-day bad prices; one micro cap's closes ran into the billions. Those are now cleaned, or the stock is left out of the tests (<a href="{h('method/')}#prices">how prices are checked</a>).</li>
+<li><b>Company numbers from before a stock split</b> are put on today's share basis, so the P/E, price to sales and the other company ratios in the refinements below compare like with like.</li>
+</ul>
+{f'<div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Signal, since {J["since"][:4]}</th><th class="r">Edge, as first published</th><th class="r">Edge now</th><th class="r">Buys / Sells beat market, before</th><th class="r">Now</th></tr></thead><tbody>{before}</tbody></table></div>' if before else ''}
+<p>{moved}{beat}{still}</p>"""
+    mk = J.get("markets") or {}
+
+    def yr(r):
+        return f'{pts(r["mean"])} ± {abs(r["pm"]) * 100:.1f}' if r else "–"
+    rows = ""
+    for k in ("guardsticky", "new", "plays"):
+        m = M.get(k) or {}
+        if not m.get("us"):
+            continue
+        rows += (f'<tr><td>{e(lab[k])}</td><td class="r">{pts((m.get("all") or {}).get("edge12") or 0)}</td>'
+                 f'<td class="r">{pts((m.get("us") or {}).get("edge12") or 0)}</td><td class="r">{pts((m.get("tsx") or {}).get("edge12") or 0)}</td>'
+                 f'<td class="r nowrap">{yr(m.get("us_yr"))}</td><td class="r nowrap">{yr(m.get("tsx_yr"))}</td></tr>')
+    eras = ""
+    for ek, el in (("e1", "2006–2010"), ("e2", "2011–2018"), ("e3", "2019–2025")):
+        u, t_ = (gs.get("us_" + ek) or {}).get("edge12"), (gs.get("tsx_" + ek) or {}).get("edge12")
+        eras += f'<tr><td>{el}</td><td class="r">{pts(u) if u is not None else "–"}</td><td class="r">{pts(t_) if t_ is not None else "–"}</td></tr>'
+    us, tsx = (gs.get("us") or {}).get("edge12"), (gs.get("tsx") or {}).get("edge12")
+    uy, ty = gs.get("us_yr") or {}, gs.get("tsx_yr") or {}
+    if us is not None and tsx is not None and us <= 0 < tsx:
+        read = (f"Split by market, the record is a Canadian one. On U.S. stocks, the standard's Buys have beaten the market no more often than its Sells since {J['since'][:4]} "
+                f"(an edge of {pts(us)}); on TSX stocks the edge is {pts(tsx)}.")
+    elif us is not None and tsx is not None:
+        read = f"Split by market, the standard's edge is {pts(us)} on U.S. stocks and {pts(tsx)} on TSX stocks."
+    else:
+        read = ""
+    te = {ek: (gs.get("tsx_" + ek) or {}).get("edge12") for ek in ("e1", "e2", "e3")}
+    if all(v is not None for v in te.values()) and tsx and te["e2"] > tsx:
+        read += f" Most of the TSX edge comes from calls made in 2011–2018 ({pts(te['e2'])}); since 2019 it is {pts(te['e3'])}."
+    luck = ""
+    if uy and ty:
+        luck = (f" Year by year, the U.S. edge averaged {yr(uy)} and was positive in {uy['pos']} of {uy['n']} years; the TSX edge averaged {yr(ty)}, positive in {ty['pos']} of {ty['n']}. "
+                "The ± is a rough 95% range from how much the yearly edges vary. A range that takes in zero means the record could be luck; calls a year apart overlap, so the real range is wider still.")
+    split = f"""<h2 class="h2" id="by-market">U.S. and TSX stocks apart</h2>
+<p>The covered list has {mk.get('us', 0)} U.S. stocks and {mk.get('tsx', 0)} TSX stocks in these tests, each measured against its own market. {read}{luck}</p>
+<div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Signal, since {J['since'][:4]}</th><th class="r">Edge, all</th><th class="r">U.S. stocks</th><th class="r">TSX stocks</th><th class="r">U.S., year by year</th><th class="r">TSX, year by year</th></tr></thead><tbody>{rows}</tbody></table></div>
+<div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Today's standard, calls made in</th><th class="r">U.S. stocks</th><th class="r">TSX stocks</th></tr></thead><tbody>{eras}</tbody></table></div>
+<p>This is what the tests show, not a forecast for either market. Two tests that could change the picture are next: a version of the test that includes stocks that no longer trade, and the daily record of the sticky rule, which changes its mind more often day to day than at month-ends.</p>"""
+    return fix + split
+
+
 def old_vs_new(A):
     from .modelcompare import load
     s = A.s
@@ -471,12 +543,21 @@ def old_vs_new(A):
                 f'<td class="r">{pct((a.get("sell") or {}).get("fell30"))}</td><td class="r">{m_.get("flips", 0):.1f}</td></tr>')
     t_ref = "".join(rrow(k, lab) for k, lab in order)
     up15, rv15 = g("upside15", "an"), g("rev15", "an")
+    edge_of = lambda k: ((M.get(k) or {}).get("all") or {}).get("edge12") or 0
+    std_e = edge_of("guardsticky")
+    fast_e = [edge_of(k) for k in ("trend50", "trendx", "off20x", "off3m", "halfhalf")]
+    nf = (M.get("new") or {}).get("flips") or 1
+    fast_fl = [100 * (((M.get(k) or {}).get("flips") or nf) / nf - 1) for k in ("trend50", "trendx", "off20x", "off3m", "halfhalf")]
+    fast_f = (max(0, min(fast_fl)), max(fast_fl))
+    small_gap = max(abs(edge_of(k) - edge_of("new")) for k in ("off20", "off40", "offvol", "mom121", "quality", "mktfilter"))
+    small_gap = max(0.1, round(small_gap * 100 + 0.05, 1))
     gd, gs = M.get("guard") or {}, M.get("guardsticky") or {}
     body = f"""<div class="prose">
 <p>On October 13 the standard Buy, Hold and Sell changed: from half the plays and half analysts' upside to the plays, an exit rule (<b>Off the high</b>) and the trend (<a href="{h('articles/why-your-signal-changed/')}">what changed and why</a>). The case for it was a test of how often each signal's Buys beat the market. This piece tests the change harder: back to {since}, on how badly things went as well as how often, and against the old signal itself, rebuilt from analysts' price targets for the stretch where we have them. Not all of it flatters the new signal. On October 21 the two best ideas from the tests at the end, a <b>market guard</b> and <b>sticky calls</b>, went into the standard (model version 3); the <a href="{h('articles/calls-graded/')}">weekly scorecard</a> grades every day's calls from here.</p>
 {live}
+{_stick(J, M, h)}
 <h2 class="h2">Since {since}: how often, and how badly</h2>
-<p>At every month-end since {since}, each covered stock was scored exactly as the signal would have scored it then, from prices and the plays' calls up to that close. Each Buy and Sell was then checked against the stock's market (the S&amp;P 500, or the TSX for Canadian names) over the next year, and against how far the stock fell in that year. "Plays only" is the half of the old signal that can be tested this far back. "Fell 30%+" means the stock was 30% or more below the day of the call at some point in the following year; "flips a year" is how often a stock's call changed, per stock per year.</p>
+<p>At every month-end since {since}, each covered stock was scored exactly as the signal would have scored it then, from prices and the plays' calls up to that close. Each Buy and Sell was then checked against the stock's market with dividends (SPY, or XIU for Canadian names) over the next year, and against how far the stock fell in that year. "Plays only" is the half of the old signal that can be tested this far back. "Fell 30%+" means the stock was 30% or more below the day of the call at some point in the following year; "flips a year" is how often a stock's call changed, per stock per year.</p>
 <div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Signal</th><th class="r">Buys beat market</th><th class="r">Sells beat it</th><th class="r">Edge</th><th class="r">Buys fell 30%+</th><th class="r">Sells fell 30%+</th><th class="r">Flips a year</th></tr></thead><tbody>{t_all}</tbody></table></div>
 <ul>
 <li><b>The exit rule does its main job.</b> A stock the October 13 weights called Sell was {_times(nw['sell']['fell30'] / nw['buy']['fell30'])} as likely as a Buy to fall 30% or more at some point in the following year ({pct(nw['sell']['fell30'])} against {pct(nw['buy']['fell30'])}). The worst tenth of its Sells trailed the market by {pct(-nw['sell']['p10'])} or more over the year; the worst tenth of its Buys by {pct(-nw['buy']['p10'])} or more.</li>
@@ -486,7 +567,7 @@ def old_vs_new(A):
 <h2 class="h2">It depends on the market</h2>
 <div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Calls made in</th><th class="r">New signal's edge</th><th class="r">Plays only</th></tr></thead><tbody>{eras}</tbody></table></div>
 {_year_chart(yrs, "The new signal's edge over the following year, by the year the calls were made")}
-<p>Calls made in {_and([f"{y} ({pts(yrs[y])})" for y in ("2008", "2020", "2022", "2025") if yrs.get(y) is not None])} did badly: in each of those years a sharp, broad fall was followed by a fast rebound. An exit rule turns stocks to Sell after they've fallen, so when the whole market falls and snaps back, it sells close to the bottom and misses the bounce. In years with a steadier trend it did well. Since 2019 its edge on how often it's right has been about zero, though its Sells were still the ones more likely to fall hard ({pct(M['new']['e3']['sell']['fell30'])} against {pct(M['new']['e3']['buy']['fell30'])} for Buys).</p>
+<p>Calls made in {_and([f"{y} ({pts(yrs[y])})" for y in ("2008", "2020", "2022", "2025") if yrs.get(y) is not None])} did badly: in each of those years a sharp, broad fall was followed by a fast rebound. An exit rule turns stocks to Sell after they've fallen, so when the whole market falls and snaps back, it sells close to the bottom and misses the bounce. In years with a steadier trend it did well. Since 2019 its edge on how often it's right has been {pts(M['new']['e3']['edge12'])}{"" if abs(M['new']['e3']['edge12']) < 0.01 else ", below zero" if M['new']['e3']['edge12'] < 0 else ""}, though its Sells were still the ones more likely to fall hard ({pct(M['new']['e3']['sell']['fell30'])} against {pct(M['new']['e3']['buy']['fell30'])} for Buys).</p>
 <h2 class="h2">The old signal, rebuilt</h2>
 <p>There's no stored history of analysts' consensus targets, which is why the old signal couldn't be tested. But rating changes with price targets are on file from late 2023, so from {an_from} we rebuilt it: each firm's latest target in the past year, averaged over three or more firms{f", for {J['an_stocks']} stocks" if J.get('an_stocks') else ""}. It's an approximation: on tonight's numbers the rebuilt upside and the published consensus agree closely (correlation {uc.get('corr', 0):.2f}, a median gap of {pct(uc.get('med_gap'))}), but not exactly. Year-ahead results run to calls made in {to12}; three-month results to {an_to}.</p>
 <div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Signal, {an_from} on</th><th class="r">Buys beat market</th><th class="r">Sells beat it</th><th class="r">Edge</th><th class="r">Buys fell 30%+</th><th class="r">Sells fell 30%+</th></tr></thead><tbody>{t_an}</tbody></table></div>
@@ -500,15 +581,15 @@ def old_vs_new(A):
 <p>Each idea below was scored the same way, month by month since {since}. "Crash years" is the average edge for calls made in 2008, 2020 and 2022. The first two are now the standard: since October 21 the signal carries the market guard and sticky calls (model version 3).</p>
 <div class="tbl-wrap"><table class="tbl ovn" data-nosort><thead><tr><th>Change</th><th class="r">Edge since {since}</th><th class="r">Since 2019</th><th class="r">Crash years</th><th class="r">Sells fell 30%+</th><th class="r">Flips a year</th></tr></thead><tbody>{t_ref}</tbody></table></div>
 <ul>
-<li><b>The market guard (in the standard since October 21).</b> When the stock's whole market is 15% or more below its own high, the exit rule and the trend stand down and the plays decide. It lifts the edge to {pts(gd.get('all', {}).get('edge12') or 0)} by doing less damage in 2008, 2020 and 2022, and changes nothing in calmer years. It applies to every set of weights: Off the high, Trend and 1-year momentum carry no weight while it's on, and the stock page says so.</li>
+<li><b>The market guard (in the standard since October 21).</b> When the stock's whole market is 15% or more below its own high, the exit rule and the trend stand down and the plays decide. It lifts the edge to {pts(gd.get('all', {}).get('edge12') or 0)} by doing less damage in 2008, 2020 and 2022, and changes little in calmer years. It applies to every set of weights: Off the high, Trend and 1-year momentum carry no weight while it's on, and the stock page says so.</li>
 <li><b>Sticky calls (in the standard since October 21).</b> A Buy stays a Buy until the score falls below 50 (and a Sell until it rises above 50), so signals change {gs.get('flips', 0):.1f} times a year instead of {gd.get('flips', 0):.1f} with the guard alone, for {pts((gs.get('all', {}).get('edge12') or 0) - (gd.get('all', {}).get('edge12') or 0))} of edge. Fewer flips means fewer alerts that reverse a month later. The rule needs a day-by-day history of the score, which only the standard setup has (the standard weights with every play counted); a stock page with its own weights uses the plain Buy and Sell lines.</li>
 <li><b>Analysts' upside, capped, at a small weight</b> was the best of the additions in the rebuilt stretch over three months ({pts(up15.get('edge3') or 0)}, against {pts(g('new', 'an').get('edge3') or 0)} for the new signal), but two years is too short to put it back. Analysts' target revisions (raised or cut in the last 90 days) added nothing ({pts(rv15.get('edge3') or 0)}). We keep collecting targets so both can be graded properly.</li>
-<li><b>Faster exits don't pay over the long run.</b> After the week of October 13–19, when a stock that had quadrupled sat at Hold while it fell 25% from its high (its 200-day average was still far below), we tested five faster versions: trend on the 50-day average, trend capped once the price breaks its 50-day, a 20% exit floor, an exit off the 3-month high, and a half-and-half. Each would have called that stock Sell a week sooner. Over 20 years every one has a lower edge than today's standard ({pts((M.get("trend50") or {}).get("all", {}).get("edge12") or 0)} to {pts((M.get("trendx") or {}).get("all", {}).get("edge12") or 0)}) and 5–25% more flips: they leave the stocks that keep falling sooner and get whipsawed on the ones that bounce. Each stock page now shows the price at which the signal would turn instead.</li>
-<li><b>Small or mixed:</b> moving the exit rule's floor to 20% or 40%, scaling it to each stock's volatility, using 12-month momentum (skipping the latest month) for the trend, adding return on equity and debt, or asking for a 70 to Buy while the S&amp;P 500 is below its 200-day average each land within half a point of today's standard over the whole period; some do better in one stretch and worse in another. Measuring the fall against the market's own fall raised the overall edge but made the crash years worse.</li>
+<li><b>Faster exits don't pay over the long run.</b> After the week of October 13–19, when a stock that had quadrupled sat at Hold while it fell 25% from its high (its 200-day average was still far below), we tested five faster versions: trend on the 50-day average, trend capped once the price breaks its 50-day, a 20% exit floor, an exit off the 3-month high, and a half-and-half. Each would have called that stock Sell a week sooner. Over 20 years {"every one has a lower edge than today's standard" if max(fast_e) < std_e else "none beats today's standard by much"} ({pts(min(fast_e))} to {pts(max(fast_e))}, against {pts(std_e)}) and {fast_f[0]:.0f}–{fast_f[1]:.0f}% more flips than the October 13 weights they speed up: they leave the stocks that keep falling sooner and get whipsawed on the ones that bounce. Each stock page now shows the price at which the signal would turn instead.</li>
+<li><b>Small or mixed:</b> moving the exit rule's floor to 20% or 40%, scaling it to each stock's volatility, using 12-month momentum (skipping the latest month) for the trend, adding return on equity and debt, or asking for a 70 to Buy while the S&amp;P 500 is below its 200-day average each land within {small_gap:.1f} points of the October 13 weights they change, over the whole period; some do better in one stretch and worse in another. Measuring the fall against the market's own fall raised the overall edge but made the crash years worse.</li>
 </ul>
 <p>Two things would make every one of these tests more honest, and both are on the list: <b>stocks that no longer trade</b> (the test uses today's list, which flatters buying dips and hides the cases an exit rule exists for), and a <b>longer record of analysts' targets</b> and of companies' guidance, which the site has started keeping. Any change to the standard will be published here with its record first.</p>
 <h2 class="h2">The fine print</h2>
-<p class="small muted">Study run {J.get('built')} on {J.get('stocks')} covered stocks, month-ends {since} to {an_to}, with each stock scored from data public at the time. "Beat the market" compares the stock's return over the next year with its market's. Edges of a few points are normal and noisy; a year can swing by twenty. The rebuilt old signal uses targets that aren't split-adjusted, so any target more than double or less than half the price on its day is dropped. None of this knows anything about an individual account, and a better signal doesn't make one stock a safe place for most of one (<a href="{h('articles/one-stock-too-many/')}">one stock too many</a>).</p>
+<p class="small muted">Study run {J.get('built')} on {J.get('stocks')} covered stocks, month-ends {since} to {an_to}, with each stock scored from data public at the time. "Beat the market" compares the stock's return over the next year with its market's, both with dividends (SPY or XIU; before October 27, 2026, the S&amp;P 500 and TSX indexes). Edges of a few points are normal and noisy; a year can swing by twenty. The rebuilt old signal uses targets that aren't split-adjusted, so any target more than double or less than half the price on its day is dropped. None of this knows anything about an individual account, and a better signal doesn't make one stock a safe place for most of one (<a href="{h('articles/one-stock-too-many/')}">one stock too many</a>).</p>
 </div>"""
     A.shell(path, "risk", PIECES[4][1], PIECES[4][2], body, live=True, free=True,
             related=A.related(depth, [PIECES[3][0]] + [p for p, _, _ in PIECES[:3]]))

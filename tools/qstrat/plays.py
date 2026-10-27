@@ -8,6 +8,7 @@ rule needed a choice its author never made, the choice is listed under
 """
 from . import plays_fn as F
 from . import plays_fn_mr as FM, plays_fn_tb as FT, plays_fn_vcp as FV  # the plays added in October 2026
+from . import plays_fn_classic as FC  # the trial plays from the Classics (October 27, 2026)
 
 FAMILIES = [
     ("trend", "Trend following", "Hold while price stays above a moving average or trend line; step aside when it breaks."),
@@ -817,7 +818,72 @@ for _p in PLAYS:
     _p["core"] = not _p.get("benchmark")
     _p["starter"] = _p["slug"] in STARTER_SLUGS
 
-PLAY = {p["slug"]: p for p in PLAYS}
+# ------------------------------------------------------------ being graded (AUD-49 step 3)
+# Forgotten rules from the Classics (classics.json, "new_play_candidate"), coded from that research. They run on
+# every stock and get their own pages and records, but stay out of PLAYS: not in Your signal's plays factor, the
+# play counts, the stock pages' play lists, the screener or the guides, until their records are in and Dave adds
+# them (a new play joins the signal only after it's graded, like a new factor).
+TRIAL = [
+    P("livermore-market-key", "Livermore Market Key", "Livermore's Market Key (six columns, 6% and 3% stand-ins for his points)", "breakout",
+      ["jesse-livermore"], "D", FC.livermore,
+      "Jesse Livermore's 1940 bookkeeping for a stock's swings: each close goes in one of six columns, from Upward Trend to Downward Trend, and the points where it switches columns are the levels that matter.",
+      ["Each close is written in one of six columns: Upward Trend, Natural Rally, Secondary Rally, Secondary Reaction, Natural Reaction or Downward Trend.",
+       "A drop of 6% from the high of an up column moves recording to a reaction column, and that high becomes a pivot; a rise of 6% from the low of a down column moves it to a rally column, and that low becomes a pivot.",
+       "In when recording enters Upward Trend: a close above the last Upward Trend pivot, or 3% above the last Natural Rally pivot.",
+       "Out when recording enters Downward Trend: a close below the last Downward Trend pivot, or 3% below the last Natural Reaction pivot.",
+       "The four rally and reaction columns never change the call."],
+      ["Livermore counted in points on stocks priced near $100. Be The Puck uses 6% and 3% of the price so the rule works at any price; a volatility-scaled version is the alternative.",
+       "The column rules come from a secondary summary of How to Trade in Stocks (1940), not from the book itself.",
+       "The first column is Upward Trend if the first close is above its 50-day average, otherwise Downward Trend (Be The Puck's choice).",
+       "A reaction from Upward Trend always starts a Natural Reaction, and a rally from Downward Trend a Natural Rally. Once the trend changes, rally and reaction pivots from before the change no longer count (Be The Puck's reading; the summary doesn't say).",
+       "Livermore read the Key on two leading stocks of a group and their sum. Be The Puck reads one stock at a time."],
+      "Jesse Livermore, How to Trade in Stocks (1940)", trial=True, classic="livermore-market-key", warm=1000,
+      sources=[("Bauman Rare Books: How to Trade in Stocks (1940), bibliographic listing", "https://www.baumanrarebooks.com/rare-books/livermore-jesse-l/how-to-trade-in-stocks/82199.aspx"),
+               ("Livermore Market Key rule summary (secondary; reproduces the six-column and six/three-point rules)", "https://www.andlil.com/forum/download/file.php?id=100249"),
+               ("Wikipedia: Jesse Livermore", "https://en.wikipedia.org/wiki/Jesse_Livermore")]),
+    P("gann-swing-trend", "Gann Swing Trend", "Gann's two-bar swing chart trend", "breakout", ["w-d-gann"], "D", FC.gann_swing,
+      "W. D. Gann's swing chart: the swing turns after two straight bars the other way, and the trend turns when price passes the last swing top or bottom.",
+      ["An up bar has a higher high and no lower low; a down bar has a lower low and no higher high. Inside and outside bars are skipped.",
+       "The swing turns down after two down bars in a row, fixing the swing top, and up after two up bars in a row, fixing the swing bottom.",
+       "In on a close above the latest swing top.",
+       "Out on a close below the latest swing bottom. Otherwise the rule keeps its last call."],
+      ["Gann's 1933 course was for grain futures and used intraday prices. Using daily bars and closes on stocks is Be The Puck's adaptation.",
+       "The two-bar wording comes from later interpreters; the first printed source for it is not well documented.",
+       "The first swing's direction is set by the first two closes (Be The Puck's choice). A three-bar version is the natural check."],
+      "W. D. Gann, The Mechanical Method and Trend Indicator for Trading Grains (1933), as read by later interpreters", trial=True, classic="gann", warm=600,
+      sources=[("Traders.com: Hartle, 'Gann Swings and Intraday Trading' (S&C, October 1999)", "https://www.traders.com/Documentation/FEEDbk_docs/1999/10/Abstracts_new/Hartle/Hartle9910.html"),
+               ("The Right Trader: Gann swing chart (two-bar rule, inside and outside bars)", "https://therighttrader.com/learn/elliott-wave-and-cycles/gann-swing-chart"),
+               ("Wikipedia: William Delbert Gann", "https://en.wikipedia.org/wiki/William_Delbert_Gann")]),
+    P("positive-volume-index", "Positive Volume Index", "Fosback's Positive Volume Index above its one-year average", "volume", ["norman-fosback", "paul-dysart"], "D", FC.pvi,
+      "The busy-day twin of the Negative Volume Index: a price index that moves only on days when volume rises. Hold the stock while it is above its one-year average.",
+      ["The index starts at 1,000. On a day when volume is higher than the day before, it moves by that day's percentage price change. On other days it stays put.",
+       "In when the index closes above its 255-day exponential average (Fosback's one-year average, as in the NVI play).",
+       "Out when it closes below that average."],
+      ["Fosback studied the index for the whole market (1941 to 1975). Running it on one stock's own price and volume follows modern charting practice.",
+       "Dysart judged the busy-day line the weaker of his two; part of its use here is as the NVI play's control.",
+       "The rule needs about a year of history before its first call."],
+      "Paul Dysart (1936); Norman Fosback, Stock Market Logic (1976)", trial=True, classic="dysart-volume-indexes", warm=1500,
+      sources=[("Fidelity Learning Center: Positive Volume Index", "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/positive-volume-index"),
+               ("Wikipedia: Negative volume index (history, with the positive index)", "https://en.wikipedia.org/wiki/Negative_volume_index")]),
+    P("ease-of-movement", "Ease of Movement", "Arms' Ease of Movement zero-line switch (14-day average)", "volume", ["richard-arms"], "D", FC.emv,
+      "Richard Arms' measure of how far price moves for the volume it takes. Positive means the stock is rising easily, on light volume.",
+      ["Each day's distance is the change in the middle of the day's range ((high + low) / 2) from the day before.",
+       "The box ratio is the day's volume (in hundreds of millions) divided by the day's range; one-day Ease of Movement is the distance divided by the box ratio.",
+       "In when its 14-day average is above zero.",
+       "Out when it is below zero."],
+      ["Arms built the measure to read his Equivolume charts; the zero-line rule is the conventional modern reading, not his.",
+       "A day with no range or no volume counts as zero.",
+       "The volume scale changes only the size of the number, never its sign, so it doesn't change the call."],
+      "Richard W. Arms Jr., Volume Cycles in the Stock Market (1983)", trial=True, classic="arms-index-and-ease-of-movement",
+      sources=[("The Right Trader: Ease of Movement (formula, 14-period default)", "https://therighttrader.com/learn/indicators/ease-of-movement"),
+               ("StockCharts: Bruce Fraser, 'Richard W. Arms Jr., Wyckoffian' (2018)", "https://articles.stockcharts.com/article/articles-wyckoff-2018-05-richard-w-arms-jr-wyckoffian/")]),
+]
+for _p in TRIAL:
+    _p["core"] = False
+    _p["starter"] = False
+
+PLAY = {p["slug"]: p for p in PLAYS + TRIAL}
+ENGINE_PLAYS = PLAYS + TRIAL      # what the engine runs: every play, plus the ones being graded
 TIMED = [p for p in PLAYS if not p.get("benchmark")]
 STARTER = [next(p for p in TIMED if p["slug"] == s) for s in STARTER_SLUGS]
 assert len(STARTER) == 20

@@ -116,4 +116,9 @@ PLAIN = {
     "lunar-cycle": ("New moon, full moon", "Owns it around the new moon and steps aside for the 15 days around each full moon."),
     # ---------------------------------------------------------------- the benchmark
     "buy-and-hold": ("Buy and hold", "Owns it and never sells. Every other play is measured against this one."),
+    # ---------------------------------------------------------------- being graded (plays.TRIAL)
+    "livermore-market-key": ("Livermore's six columns", "Jesse Livermore's 1940 notebook method: owns it once the price breaks into his Upward Trend column, sells when it breaks into Downward Trend."),
+    "gann-swing-trend": ("Gann's swing trend", "Follows the swings: owns it when the price tops the last swing high, sells when it drops below the last swing low."),
+    "positive-volume-index": ("What busy days say", "Tracks the price only on busier days, the twin of the quiet-day play; owns it above its yearly average."),
+    "ease-of-movement": ("Rising with ease", "Owns it while the price has been climbing easily, without needing heavy volume to move it."),
 }

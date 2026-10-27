@@ -85,3 +85,75 @@ class Gate:
         held = sum(1 for x in self.items if x["action"] == "held back")
         fixed = len(self.items) - held
         return f"data quality: {held} numbers held back, {fixed} corrected (data/quality.json)"
+
+
+# --------------------------------------------------------------------------
+# Price files (AUD-46): checked once, as they're read (engine.load_all), so every
+# play, factor and test sees the same cleaned history.
+# --------------------------------------------------------------------------
+JUMP = 5            # a one-day rise of 5x or more...
+JUMP_LEVEL = 0.6    # ...that holds (the next month's median is at least 60% of the jump over the last month's)...
+JUMP_CALM = 0.2     # ...with a quiet next day (within 20%)...
+JUMP_VOL = 10       # ...and no burst of trading (median volume up less than 10x) is a reverse split Yahoo left unadjusted
+TICK = 2            # a close at least double, or at most half, the sessions either side...
+TICK_BACK = 1.25    # ...that is back within 25% the next day is a bad tick
+TICK_FLOOR = 0.5    # under 50 cents, a cent's tick can be a real halving
+PENNY = 0.01        # last close under a cent: too thin to test
+DEAD_SHARE = 0.25   # more than a quarter of the last two years' sessions with no trades: too thin to test
+
+
+def price_check(sym, d, crypto=False, index=False):
+    """Clean one price history. Returns (d, notes, unreliable): the history with bad
+    ticks flattened and anything before an unadjusted reverse split left out, a
+    plain-words line per change, and a reason when the stock is too thin to test
+    (it keeps its page but stays out of every graded record)."""
+    import numpy as np
+    notes = []
+    if len(d) < 3:
+        return d, notes, None
+    c = d["close"].to_numpy()
+    v = d["volume"].to_numpy()
+    # one-day bad ticks: put the session back at the previous close
+    bad = []
+    for i in range(1, len(c) - 1):
+        a, b = c[i] / c[i - 1], c[i + 1] / c[i]
+        back = c[i + 1] / c[i - 1]
+        if c[i - 1] >= TICK_FLOOR and ((a >= TICK and b <= 1 / TICK) or (a <= 1 / TICK and b >= TICK)) and 1 / TICK_BACK <= back <= TICK_BACK:
+            bad.append(i)
+    if bad:
+        d = d.copy()
+        for i in bad:
+            prev = d["close"].iat[i - 1]
+            for col in ("open", "high", "low", "close"):
+                d.iat[i, d.columns.get_loc(col)] = prev
+        days = ", ".join(d.index[i].strftime("%b %-d, %Y") for i in bad[:3]) + (" and others" if len(bad) > 3 else "")
+        notes.append(f"{len(bad)} one-day bad price{'s' if len(bad) > 1 else ''} ({days}) replaced with the previous session's close")
+        c = d["close"].to_numpy()
+    # an unadjusted reverse split: keep the history from the jump on
+    cut = None
+    for i in range(1, len(c)):
+        r = c[i] / c[i - 1]
+        if r < JUMP:
+            continue
+        pre = np.median(c[max(0, i - 20):i])
+        post = np.median(c[i:i + 20])
+        nxt = c[i + 1] / c[i] if i + 1 < len(c) else 1.0
+        pv = np.median(v[max(0, i - 20):i])
+        qv = np.median(v[i:i + 20])
+        burst = pv > 0 and qv / pv >= JUMP_VOL
+        if post / pre >= JUMP_LEVEL * r and abs(nxt - 1) <= JUMP_CALM and not burst:
+            cut = i
+    if cut is not None:
+        notes.append(f"history before {d.index[cut].strftime('%b %-d, %Y')} left out: prices jumped {c[cut] / c[cut - 1]:,.0f}x overnight and stayed there "
+                     "without a rush of trading, usually a reverse split the price feed didn't adjust")
+        d = d.iloc[cut:]
+    why = None
+    if not crypto and not index:
+        last = float(d["close"].iat[-1])
+        tail = d["volume"].iloc[-504:]
+        dead = float((tail == 0).mean()) if len(tail) else 0.0
+        if last < PENNY:
+            why = f"last close under a cent (${last:.4f})"
+        elif dead > DEAD_SHARE:
+            why = f"no trades on {dead:.0%} of the last two years' sessions"
+    return d, notes, why

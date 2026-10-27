@@ -2831,5 +2831,111 @@
   "books": [],
   "confidence": "high",
   "notes": "Research confidence: high."
+ },
+ {
+  "slug": "jesse-livermore",
+  "name": "Jesse Livermore",
+  "role": "Speculator; author of How to Trade in Stocks (1940)",
+  "bio": "Jesse Lauriston Livermore (1877–1940) started in Boston bucket shops as a teenager and became the best-known speculator of the 1920s. Edwin Lefevre's Reminiscences of a Stock Operator (1923) tells his story under the name Larry Livingston, so many famous anecdotes come from a fictionalised book rather than records. He went bankrupt more than once, and accounts differ on the years. In 1940 he published his only book, How to Trade in Stocks, with a ledger of closing prices he called the Market Key.",
+  "argues": [
+   "Follow the stock's own action: buy when it confirms an uptrend by passing a pivotal point, and step aside when it breaks one.",
+   "Record closes in columns and switch columns only after a set move, so small swings don't change the reading.",
+   "Watch two leading stocks of a group together; a move both of them confirm is worth more than one."
+  ],
+  "books": [
+   {
+    "title": "How to Trade in Stocks",
+    "year": 1940
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: Jesse Livermore",
+    "https://en.wikipedia.org/wiki/Jesse_Livermore"
+   ],
+   [
+    "Bauman Rare Books: How to Trade in Stocks (1940), bibliographic listing",
+    "https://www.baumanrarebooks.com/rare-books/livermore-jesse-l/how-to-trade-in-stocks/82199.aspx"
+   ],
+   [
+    "Wikipedia: Reminiscences of a Stock Operator",
+    "https://en.wikipedia.org/wiki/Reminiscences_of_a_Stock_Operator"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "Dates and bankruptcies from Wikipedia (secondary). The often-repeated $100 million 1929 profit has no primary record and is left out. The Market Key's column rules come from a secondary summary, not the 1940 text. Research confidence: medium."
+ },
+ {
+  "slug": "w-d-gann",
+  "name": "W. D. Gann",
+  "role": "Trader, forecaster and course seller",
+  "bio": "William Delbert Gann (1878–1955), from Lufkin, Texas, became famous after a December 1909 article in Richard Wyckoff's Ticker and Investment Digest reported 286 trades in a month, 264 of them winners, a record relayed second-hand and never audited. He sold forecasts, courses and books, among them Truth of the Stock Tape and 45 Years in Wall Street (1949). Most of his methods (angles, the square of nine, time and planetary cycles) can't be stated as objective rules; the swing chart from his 1933 grain course can.",
+  "argues": [
+   "A trend changes when price breaks the last swing top or bottom, not before.",
+   "Time and price move in cycles that can be forecast (the part of his work that can't be tested as written)."
+  ],
+  "books": [
+   {
+    "title": "Truth of the Stock Tape",
+    "year": 1923
+   },
+   {
+    "title": "How to Make Profits in Commodities",
+    "year": 1941
+   },
+   {
+    "title": "45 Years in Wall Street",
+    "year": 1949
+   }
+  ],
+  "sources": [
+   [
+    "Wikipedia: William Delbert Gann",
+    "https://en.wikipedia.org/wiki/William_Delbert_Gann"
+   ],
+   [
+    "Traders.com: Hartle, 'Gann Swings and Intraday Trading' (S&C, October 1999)",
+    "https://www.traders.com/Documentation/FEEDbk_docs/1999/10/Abstracts_new/Hartle/Hartle9910.html"
+   ],
+   [
+    "The Right Trader: Gann swing chart",
+    "https://therighttrader.com/learn/elliott-wave-and-cycles/gann-swing-chart"
+   ]
+  ],
+  "confidence": "low",
+  "notes": "Bio from Wikipedia (secondary); the 1909 record and the accounts of his son are second-hand. That the two-bar swing rule is Gann's own wording is not confirmed; it comes from later interpreters of his 1933 course. Truth of the Stock Tape is dated 1923 or 1924 in different sources. Research confidence: low."
+ },
+ {
+  "slug": "richard-arms",
+  "name": "Richard Arms",
+  "role": "Technical analyst; creator of TRIN, Equivolume and Ease of Movement",
+  "bio": "Richard W. Arms Jr. (1935–2018) studied geology at Brown before turning to markets. He introduced his Trading Index (TRIN, also called the Arms index) in Barron's in the late 1960s, invented Equivolume charts, whose bars widen with volume, and in Volume Cycles in the Stock Market (1983) described Ease of Movement, which asks how far a stock's price moves for the volume it takes.",
+  "argues": [
+   "Volume and price belong on one chart: a wide, short bar means heavy trading that went nowhere.",
+   "A rise on light volume is easy movement, a sign few sellers stand in the way.",
+   "Market breadth read through volume (TRIN) shows when a whole market is oversold or overbought."
+  ],
+  "books": [
+   {
+    "title": "Volume Cycles in the Stock Market",
+    "year": 1983
+   }
+  ],
+  "sources": [
+   [
+    "StockCharts: Bruce Fraser, 'Richard W. Arms Jr., Wyckoffian' (2018)",
+    "https://articles.stockcharts.com/article/articles-wyckoff-2018-05-richard-w-arms-jr-wyckoffian/"
+   ],
+   [
+    "BNN Bloomberg: Larry Berman, 'Paying tribute to the Arms Index' (2018)",
+    "https://www.bnn.ca/larry-berman-paying-tribute-to-the-arms-index-1.1031339"
+   ],
+   [
+    "AAII Journal: 'Using the Arms Index (TRIN) for Market Breadth Analysis' (2025)",
+    "https://www.aaii.com/journal/article/322803-using-the-arms-index-trin-for-market-breadth-analysis"
+   ]
+  ],
+  "confidence": "medium",
+  "notes": "TRIN's first year is given as 1967 in most accounts and 1968 in one. That Ease of Movement first appeared in the 1983 book rests on one secondary source. Research confidence: medium."
  }
 ]
