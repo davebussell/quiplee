@@ -369,6 +369,36 @@ picture heads which page (`PAGE_ART`, `ARTICLE_ART`, `WEATHER_IMG`).
 
 **Owner numbers.** `/owner/` (noindex, not in the sitemap) lists every account, newest first, with totals, for the members'-password cookie only (`netlify/functions/owner.mjs`, `/api/owner/stats`). The same endpoint answers a bearer token whose SHA-256 is in the function (or `QM_STATS_TOKEN`); `?consume=1` returns the sign-ups since the last call, once each, for the hourly phone notification. With `RESEND_API_KEY` and `QM_OWNER_EMAIL` set, each new account also emails the owner with the running total.
 
+## For AI tools
+
+Claude, ChatGPT and other assistants can read Be The Puck directly (`/developers/` explains how to connect):
+
+- **MCP server** `https://bethepuck.com/mcp` (`netlify/functions/mcp.mjs`): Streamable HTTP, stateless JSON-RPC over POST
+  (initialize for 2025-06-18 / 2025-03-26, ping, tools/list, tools/call; GET gets 405). Six read-only tools:
+  `get_stock_signal`, `search_stocks`, `screen_stocks`, `explain_play`, `list_plays`, `market_conditions`.
+- **Read API** `/api/v1/` (`netlify/functions/api.mjs`, described in `/openapi.json` for ChatGPT Actions): `stock/{ticker}`
+  (with `?w=&buy=&sell=&plays=` for members), `search?q=`, `screen`, `plays`, `plays/{slug}`, `market`. GET only, CORS open.
+- Both answer from `netlify/lib/agentdata.mjs`, which reads the site's own `data/reads.json`, `playset.json`, `screen.json`
+  and `api.json` (the plays in full and the market guard, written by `tools/qstrat/agents.py`), so an answer matches the
+  stock page. Every answer carries `DISCLAIMER`; private (reader-requested) names are never returned or searched; the
+  three excluded companies are answered like any unknown ticker and never echoed (its `BANNED_RE` mirrors `content.py`).
+- **Tiers** (`netlify/lib/agentkeys.mjs`): without a key, a free sample (stock and search, no factor points, flip prices or
+  custom weights; 30 calls a day per address), ending with a line on how to get the full data. Members make a personal key
+  on the account page (the API key card, `POST /api/account/apikey {action: create|revoke}`); only its SHA-256 is kept
+  (`u/<name>.apikey` and `k/<hash>` in the `paper` store). Sent as `Authorization: Bearer <key>`, or in the URL
+  `/mcp/k/<key>` for MCP clients that can't set headers (claude.ai custom connectors); 2,000 calls a day per key. A key
+  whose account isn't a member (`membership()`) gets the free sample with a note; a revoked key gets 401 from the API and
+  the free sample with a note over MCP (a 401 would send MCP clients into an OAuth flow).
+- **Discovery**: `/llms.txt`, `/llms-full.txt` (every factor, play and public name) and `/openapi.json` are written by
+  `build_strategies.write_agent_files`; every page's head links llms.txt; the footer links `/developers/`.
+- **Test**: `node tools/test_api.mjs .cache/prev` runs both functions and the key routes against a local build's data with
+  fetch and Blobs stubbed (`tools/stubs/`); render with `PRIVATE=AMD,COST` so the private-name tests have one.
+  `tools/dev_serve.mjs` serves `/api/v1/` and `/mcp` for real on an in-memory store, and an API key made on the local
+  account page works with them. `tools/smoke.py` checks the files and one free call to each endpoint.
+- The stance in every doc and tool description: the assistant reads the signal and can draft an order; nothing is placed
+  until the person approves it in their own broker, paper trading first; Be The Puck is not a broker or adviser and never
+  places trades.
+
 ## Live desk (`/desk/`)
 
 **News breaks. We tell you what it's worth.**

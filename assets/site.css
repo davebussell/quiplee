@@ -2194,3 +2194,17 @@ html[data-view="full"] .adv-cols-note, .adv-tap[hidden] { display: none !importa
 .classic-ppl { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 12px; }
 .classic-unv ul { margin: 6px 0; }
 .classic-src li { margin: 0 0 6px; }
+
+/* ---------- AI tools: /developers/ (qstrat/agents.py) and the account page's API key card (me.js) ---------- */
+.dev-tiers { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 860px) { .dev-tiers { grid-template-columns: 1fr; } }
+.dev code, .me-key code { font: 13px/1.5 var(--data); background: var(--panel-2); border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
+.dev-code { margin: 10px 0; padding: 12px 14px; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; max-width: 100%; }
+.dev-code code { background: none; padding: 0; white-space: pre; overflow-wrap: normal; color: var(--ink-2); }
+.dev-tools td { vertical-align: top; }
+@media (min-width: 900px) { .dev-tools td:first-child, .dev-tools td:nth-child(2) { white-space: nowrap; } }
+#claude, #chatgpt, #others, #key { scroll-margin-top: 80px; }
+.me-key-new { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--violet); border-radius: 10px; background: rgba(124, 108, 245, .08); }
+.me-key-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.me-key-row input { width: 100%; min-width: 0; font: 13px/1.4 var(--data); color: var(--ink); background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; }
+.me-key-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

@@ -4,7 +4,7 @@ pages you're working on, in about a minute.
     python tools/dev_render.py engine                  # every play on every ticker, cached in .cache/
     python tools/dev_render.py render MU,SHOP.TO       # those stock pages + the data files, into .cache/prev/
     python tools/dev_render.py render ALL              # every stock page
-    PAGES=home,stocks,watchlist,me,guide,strategies python tools/dev_render.py render SPY
+    PAGES=home,stocks,watchlist,me,guide,strategies,developers python tools/dev_render.py render SPY
     python tools/dev_render.py render SPY --report     # also print each play's accuracy by family
     python tools/dev_render.py full                    # the whole site from the cache, as Netlify would build it (~10 min)
 
@@ -145,6 +145,9 @@ def main():
         ways_to_invest_page(site)
     if "method" in extra:
         site.method_page()
+    if "developers" in extra:              # /developers/ (llms.txt, openapi.json and data/api.json are always written)
+        from qstrat.agents import developers_page
+        developers_page(site)
     if "guide" in extra:
         from qstrat.playset import guide_page
         guide_page(site)

@@ -630,6 +630,7 @@ class Site:
 <title>{e(full_title)}</title>
 <meta name="description" content="{e(desc)}">
 <link rel="canonical" href="{BASE}{path}">
+<link rel="alternate" type="text/plain" href="{BASE}llms.txt" title="Be The Puck for AI tools">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{BASE}{path}">
@@ -661,7 +662,7 @@ class Site:
 <div class="foot-brand"><a class="logo" href="{h('')}">be<span class="logo-the">the</span>puck<span class="logo-tick">▲</span></a>
 <p>{len(TIMED)} published trading plays run on real prices after every U.S. close, with the price that would change each one's mind. It takes no positions in the names it covers.</p></div>
 <div><p class="foot-h">Stocks</p><a href="{h('stocks/')}">All stocks</a><a href="{h('watchlist/')}">Watchlist</a><a href="{h('markets/')}">Markets</a><a href="{h('desk/')}">Live desk</a></div>
-<div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('me/')}" data-nav-me>Login</a></div>
+<div><p class="foot-h">Tools</p><a href="{h('theory/')}">Theory tester</a><a href="{h('')}#screen">Stock screener</a><a href="{h('alerts/')}">Free email alerts</a><a href="{h('developers/')}">For AI tools</a><a href="{h('me/')}" data-nav-me>Login</a></div>
 <div><p class="foot-h">Learn</p><a href="{h('guides/')}">Which predictions work?</a><a href="{h('guides/your-plays/')}">Pick your plays</a><a href="{h('guides/news-that-moves-stocks/')}">News that moves stocks</a><a href="{h('strategies/')}">All {len(TIMED)} plays</a><a href="{h('learn/')}">Learn</a><a href="{h('method/')}">How we test</a></div>
 <div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
 </div>
@@ -945,6 +946,8 @@ class Site:
         ways_to_invest_page(self)
         from .accountplan import guide_page as plan_page
         plan_page(self)
+        from .agents import developers_page     # AI tools: /developers/ (agents.py; llms.txt, openapi.json and data/api.json are build_strategies.write_data)
+        developers_page(self)
         self.learn.build()
         self.method_page()
         return self.pages

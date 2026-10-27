@@ -121,6 +121,12 @@ refuse; `picks.scrub` and `top10.scrub` keep excluded companies out of them.
 - `netlify/functions/` is the live API (accounts, alerts, watchlist queue, PayPal).
 - Readers' choices (plays counted, signal weights) live in `localStorage` and, when signed
   in, in their account (`/api/account/plays`).
+- AI tools: the MCP server `/mcp` (`netlify/functions/mcp.mjs`) and the read API `/api/v1/` (`api.mjs`) answer from
+  `netlify/lib/agentdata.mjs` (the site's own data files plus `data/api.json` from `tools/qstrat/agents.py`, which also
+  writes `/llms.txt`, `/llms-full.txt`, `/openapi.json` and `/developers/`). A free sample without a key; everything with a
+  member's API key (`netlify/lib/agentkeys.mjs`, made on the account page, stored only as a hash). Any answer must carry
+  the disclaimer, never return a private name, never echo an excluded one, and say Be The Puck never places trades.
+  `node tools/test_api.mjs .cache/prev` tests it all (README, For AI tools).
 
 ## Fast local work
 

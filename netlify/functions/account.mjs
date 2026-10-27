@@ -17,6 +17,9 @@
  *   POST /api/account/password {old, password}
  *   POST /api/account/delete  {password}
  *   GET|POST /api/account/unsubscribe?t=                         -> stop the emails (POST = one-click from mail apps)
+ *   POST /api/account/apikey  {action: "create"|"revoke"}        -> a member's key for the AI-tools API and MCP server
+ *                              (netlify/lib/agentkeys.mjs): create returns the key once and replaces any old one;
+ *                              only its hash is kept
  *
  * Each new account is emailed to the owner (QM_OWNER_EMAIL) with the running total; the owner's
  * numbers and every sign-up are at /owner/ (netlify/functions/owner.mjs).
@@ -24,7 +27,7 @@
  * without it, sign-up still works and the confirm link goes out on the first hourly run
  * after the key is set (alerts-nightly.mjs).
  */
-import { env, now, hashId, readBody } from "../lib/qm.mjs";
+import { env, now, hashId, readBody, siteUrl } from "../lib/qm.mjs";
 import * as mail from "../lib/mail.mjs";
 import { sendOne } from "../lib/freealerts.mjs";
 import {
@@ -35,6 +38,7 @@ import {
 import { checkPassword } from "../lib/qm.mjs";
 import { confirmMsg, resetMsg, ownerMsg } from "../lib/accountmail.mjs";
 import { enqueue, VALID, EXCLUDED } from "../lib/watchq.mjs";
+import { createKey, revokeKey } from "../lib/agentkeys.mjs";
 
 let READS = { at: 0, data: null, origin: "" };
 const MAX_ASKED = 50;
@@ -63,7 +67,7 @@ function view(acct) {
     signed_in: true, name: acct.name, created: acct.created, email: acct.email || null, email_ok: !!acct.email_ok,
     confirm_sent: acct.confirm_sent || null, follow: acct.follow || [], follow_was: acct.follow_was || null, asked: acct.asked || [], alerts: acct.alerts || { on: false, level: "all" },
     rules: acct.rules || null, plays: acct.plays || null, signal: acct.signal || null, member: membership(acct), free_until: FREE_UNTIL_LABEL, mail_on: mail.configured(),
-    last_sent: acct.last_sent || null,
+    last_sent: acct.last_sent || null, apikey: acct.apikey ? { pre: acct.apikey.pre, at: acct.apikey.at } : null,
   };
 }
 
@@ -256,6 +260,22 @@ async function plays(req, s, sess) {
   return reply({ ok: true, plays: out.acct.plays || null, signal: out.acct.signal || null });
 }
 
+/** The AI-tools API key (agentkeys.mjs): members only; the key itself is in this reply and nowhere else. */
+async function apikey(req, s, sess) {
+  const b = await readBody(req);
+  if (b.action === "revoke") {
+    const out = await revokeKey(s, sess.u, updateAccount);
+    if (out.error) return reply({ error: out.error }, out.status || 400);
+    return reply({ ok: true, apikey: null });
+  }
+  if (b.action !== "create") return reply({ error: 'Send {"action": "create"} or {"action": "revoke"}.' }, 400);
+  if (!membership(sess.acct).active) return reply({ error: "API keys come with a Be The Puck membership ($5 a month).", member: false }, 403);
+  if (await overLimit(s, "rl/" + hashId("apikey:" + sess.u, env("QM_SECRET")), 10, 86400)) return reply({ error: "That's ten new keys today. Try again tomorrow." }, 429);
+  const out = await createKey(s, sess.u, updateAccount);
+  if (out.error) return reply({ error: out.error }, out.status || 400);
+  return reply({ ok: true, key: out.key, mcp_url: siteUrl() + "/mcp/k/" + out.key, apikey: out.apikey });
+}
+
 async function changeEmail(req, s, sess) {
   const b = await readBody(req);
   const email = String(b.email || "").trim();
@@ -339,6 +359,7 @@ async function remove(req, s, sess) {
   if (!(await checkPassword(String(b.password || ""), sess.acct.pw))) return reply({ error: "That password doesn't match." }, 401);
   await Promise.all(["u/", "p/", "h/", "as/"].map((k) => s.delete(k + sess.u).catch(() => {})));
   if (sess.acct.email) await s.delete(emailKey(sess.acct.email)).catch(() => {});
+  if (sess.acct.apikey && sess.acct.apikey.h) await s.delete("k/" + sess.acct.apikey.h).catch(() => {});
   return reply({ ok: true }, 200, signOutCookies(req));
 }
 
@@ -390,6 +411,7 @@ export default async (req, context) => {
     if (route === "resend") return await resend(req, context, s, sess);
     if (route === "password") return await changePassword(req, s, sess);
     if (route === "delete") return await remove(req, s, sess);
+    if (route === "apikey") return await apikey(req, s, sess);
     return reply({ error: "not found" }, 404);
   } catch (e) {
     console.error("account", route, e);

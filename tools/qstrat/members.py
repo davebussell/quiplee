@@ -68,7 +68,8 @@ def lock_card(site, depth, next_path, what="report"):
     h = lambda x: site.href(depth, x)
     perks = "".join(f"<li>{x}</li>" for x in (
         "The top-picks tracker, reviewed every Friday", "Every report and plain-English stock brief",
-        "Portfolio limits checked against your own rules", "Play-by-play emails on the stocks you follow"))
+        "Portfolio limits checked against your own rules", "Play-by-play emails on the stocks you follow",
+        f'Be The Puck\'s full data in Claude, ChatGPT and other AI tools (<a href="{h("developers/")}">how</a>)'))
     return f"""<section class="card lock-card" id="lock" aria-labelledby="lock-h">
 <div class="lock-top">{member_tag()}<h2 class="h2" id="lock-h">This {e(what)} is for members, and it's free until {FREE_UNTIL}</h2>
 <p class="muted">Create a free Be The Puck account and it opens straight away. From {FREE_UNTIL}, membership is {PRICE} a month; nothing is charged unless you choose to subscribe.</p></div>

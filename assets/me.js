@@ -418,6 +418,56 @@
     }
     return '<section class="card me-card" id="alerts"><div class="me-card-h"><h2 class="h3">Email alerts</h2></div>' + body + '<p class="pt-msg" data-al-msg role="status"></p></section>';
   }
+  // ---------------------------------------------------------------- the API key for AI tools (/developers/; account.mjs apikey)
+  var NEWKEY = null;                               // the key just made: shown until the page is left, never again
+  function apiKeyCard() {
+    var m = A.member || {}, k = A.apikey, body;
+    var how = '<a class="small" href="/developers/">How to connect Claude, ChatGPT and others</a>';
+    if (!m.active) {
+      body = '<p class="small muted">A personal key lets Claude, ChatGPT and other AI tools read Be The Puck\'s full data for you: the screener, factor points, every play and market conditions. Keys come with a Be The Puck membership ($5 a month).</p>' +
+        '<p class="small"><a class="btn sm" href="/members/">Membership</a> ' + how + '</p>';
+    } else {
+      body = '<p class="small muted">Let Claude, ChatGPT and other AI tools read Be The Puck\'s full data for you: the screener, factor points, every play, market conditions and your own weights, 2,000 calls a day. ' +
+        (m.kind === 'free' ? 'Included free until ' + esc(FREE) + '.' : 'Included with your membership.') + '</p>';
+      if (NEWKEY) {
+        body += '<div class="me-key-new" role="status"><p class="small"><b>Copy your key now.</b> It is shown once: Be The Puck keeps only a fingerprint of it.</p>' +
+          '<label class="small muted" for="me-key-v">API key (send as Authorization: Bearer)</label><div class="me-key-row"><input id="me-key-v" readonly value="' + esc(NEWKEY.key) + '"><button type="button" class="btn sm" data-key-copy="me-key-v">Copy</button></div>' +
+          '<label class="small muted" for="me-key-u">Secret MCP address (for a claude.ai custom connector; keep it private)</label><div class="me-key-row"><input id="me-key-u" readonly value="' + esc(NEWKEY.url) + '"><button type="button" class="btn sm" data-key-copy="me-key-u">Copy</button></div></div>';
+      }
+      if (k) {
+        body += '<p class="small">Your key <code>' + esc(k.pre) + '…</code> was made ' + esc(new Date(k.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) + '.</p>' +
+          '<div class="me-key-acts"><button type="button" class="btn sm" data-key-create="replace">Replace it</button><button type="button" class="btn sm" data-key-revoke>Revoke</button> ' + how + '</div>';
+      } else {
+        body += '<div class="me-key-acts"><button type="button" class="btn primary sm" data-key-create>Create a key</button> ' + how + '</div>';
+      }
+    }
+    return '<section class="card me-card me-key" id="apikey"><div class="me-card-h"><h2 class="h3">API key for AI tools</h2>' + (k ? '<span class="tag">On</span>' : '') + '</div>' + body +
+      '<p class="small muted">Assistants read the signal and can draft orders; nothing is placed until you approve it in your own broker, and paper trading comes first. Be The Puck never places trades.</p></section>';
+  }
+  function keyAction(b) {
+    if (b.hasAttribute('data-key-copy')) {
+      var inp = document.getElementById(b.getAttribute('data-key-copy'));
+      if (!inp) return;
+      var done = function () { toast('Copied.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(inp.value).then(done, function () { inp.select(); });
+      else { inp.select(); try { document.execCommand('copy'); done(); } catch (e) { /* selected for the reader to copy */ } }
+      return;
+    }
+    var revoke = b.hasAttribute('data-key-revoke');
+    if (revoke && !confirm('Revoke this key? Anything using it stops working at once.')) return;
+    if (!revoke && b.getAttribute('data-key-create') === 'replace' && !confirm('Make a new key? The old one stops working at once.')) return;
+    b.disabled = true;
+    BP.post('apikey', { action: revoke ? 'revoke' : 'create' }).then(function (j) {
+      b.disabled = false;
+      if (!j.ok) return toast(j.error || "That didn't work. Try again.", 'warn');
+      A.apikey = j.apikey || null;
+      NEWKEY = revoke ? null : { key: j.key, url: j.mcp_url };
+      draw();
+      var el = document.getElementById('apikey');
+      if (el) el.scrollIntoView({ block: 'nearest' });
+      toast(revoke ? 'Key revoked.' : 'Key made. Copy it now: it is shown once.');
+    });
+  }
   function theoryCard() {
     var list = (A.follow || []).filter(function (s) { return R.t[s]; });
     var opts = list.map(function (s) { return '<option value="' + esc(R.t[s].u) + '">' + esc(R.t[s].s) + ' · ' + esc(R.t[s].n) + '</option>'; }).join('');
@@ -531,7 +581,7 @@
       '<p class="small muted me-add-msg" data-add-msg hidden></p>' +
       (local.length ? '<p class="small"><button type="button" class="linkish" data-import>Add the ' + local.length + ' stock' + (local.length === 1 ? '' : 's') + ' on this browser\'s watchlist to My stocks</button></p>' : '') +
       '<div data-rows>' + followRows() + '</div></section>' +
-      '<div class="me-grid me-grid2">' + alertsCard() + theoryCard() + '</div>' +
+      '<div class="me-grid me-grid2">' + alertsCard() + apiKeyCard() + theoryCard() + '</div>' +
       toolsCard() + accountCard();
     box.hidden = false;
     wire(box, local);
@@ -659,6 +709,8 @@
       }
     });
     box.addEventListener('click', function (e) {
+      var kb = e.target.closest ? e.target.closest('[data-key-create],[data-key-revoke],[data-key-copy]') : null;
+      if (kb) { keyAction(kb); return; }
       var tb = e.target.closest ? e.target.closest('[data-tab],[data-fadd],[data-fmore]') : null;
       if (tb) {
         if (tb.hasAttribute('data-tab')) { setTab(tb.getAttribute('data-tab')); if (tb.getAttribute('role') !== 'tab') { var st = document.getElementById('stocks'); if (st) st.scrollIntoView({ block: 'start' }); } }

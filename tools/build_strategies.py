@@ -35,9 +35,11 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
 GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "classics", "stocks", "method", "learn", "markets", "watchlist", "articles",
-             "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
+             "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner",
+             "developers", "llms.txt", "llms-full.txt", "openapi.json"}           # AI tools (qstrat/agents.py)
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
-                  "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec", "px", "articles.json"}   # data/events/ (earnings and rating history) is only read at build time
+                  "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec", "px", "articles.json",
+                  "api.json"}   # data/events/ (earnings and rating history) is only read at build time; api.json: AI tools (qstrat/agents.py)
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json", "CLAUDE.md", ".cache"}
@@ -303,6 +305,7 @@ def write_data(site, out, quick=False):
         print(gate.summary())
     from qstrat.accountplan import write_px
     print("weekly price files for the account check:", write_px(site, out))
+    write_agent_files(site, out, put)
     if quick:
         return
     t2 = time.time()
@@ -312,6 +315,18 @@ def write_data(site, out, quick=False):
         put(os.path.join("theory", slug + ".json"), js)
     print(f"theory tester: {len(tfiles)} stocks in {time.time() - t2:.0f}s")
     print("weekly call history files:", write_hist(site, out))
+
+
+def write_agent_files(site, out, put):
+    """AI tools (qstrat/agents.py): data/api.json for the read API and the MCP server, and llms.txt, llms-full.txt and
+    openapi.json at the site root, each checked for a company the site never names like every other file."""
+    from qstrat import agents
+    put("api.json", agents.api_json(site))
+    for name, text in (("llms.txt", agents.llms_txt(site)), ("llms-full.txt", agents.llms_txt(site, full=True)),
+                       ("openapi.json", agents.openapi_json(site))):
+        note_banned(name, text)
+        with open(os.path.join(out, name), "w", encoding="utf-8") as f:
+            f.write(text)
 
 
 def build_json(site):

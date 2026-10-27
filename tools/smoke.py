@@ -7,7 +7,8 @@ widths and fail on anything a reader would notice.
 
 Fails on: a page that doesn't load, a script error, a failed request to the site itself, sideways
 scroll, a page with no headline, a stock page whose signal never draws, a retired address that
-doesn't forward, or data older than MAX_AGE_DAYS. Needs `pip install playwright` and
+doesn't forward, data older than MAX_AGE_DAYS, or an AI-tools file or endpoint (llms.txt, openapi.json,
+/api/v1/, /mcp) that doesn't answer with the disclaimer. Needs `pip install playwright` and
 `python -m playwright install chromium` (already set up in the cloud sessions).
 """
 import argparse
@@ -23,9 +24,13 @@ PAGES = [
     "/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/mstr/", "/stocks/spy/", "/stocks/btc-usd/",
     "/stocks/spy/mayer-multiple/", "/strategies/", "/strategies/mayer-multiple/", "/thinkers/", "/watchlist/", "/markets/",
     "/learn/", "/guides/", "/guides/your-plays/", "/guides/news-that-moves-stocks/", "/guides/ways-to-invest/", "/method/", "/articles/", "/theory/",
-    "/me/", "/alerts/",
+    "/me/", "/alerts/", "/developers/",
 ]
-LOCAL_PAGES = ["/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/spy/", "/watchlist/", "/me/", "/guides/your-plays/", "/guides/ways-to-invest/"]
+LOCAL_PAGES = ["/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/spy/", "/watchlist/", "/me/", "/guides/your-plays/", "/guides/ways-to-invest/",
+               "/developers/"]
+# the AI-tools files and endpoints (qstrat/agents.py, netlify/functions/api.mjs and mcp.mjs): each answers, carries the
+# disclaimer and names no excluded company
+AGENT_FILES = ["/llms.txt", "/llms-full.txt", "/openapi.json"]
 # retired addresses -> where they must end up
 FORWARDS = {
     "/stocks/mu/rsi-30-70/": "/stocks/mu/?play=rsi-30-70",
@@ -45,6 +50,40 @@ def get_json(url):
     req = urllib.request.Request(url, headers={"User-Agent": "bethepuck-smoke", "Cache-Control": "no-cache"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read().decode())
+
+
+def agent_checks(base):
+    """The AI-tools layer: llms.txt, llms-full.txt and openapi.json load, the read API and the MCP server answer
+    (the free sample: one call each), and every answer carries the disclaimer and names no excluded company."""
+    import re
+    fails = []
+
+    def fetch(path, body=None):
+        data = None if body is None else json.dumps(body).encode()
+        req = urllib.request.Request(base + path, data=data, method="GET" if body is None else "POST",
+                                     headers={"User-Agent": "bethepuck-smoke", "Content-Type": "application/json",
+                                              "Accept": "application/json, text/event-stream"})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.status, r.read().decode("utf-8", "replace")
+    init = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "bethepuck-smoke", "version": "1"}}}
+    for path, body in [(p, None) for p in AGENT_FILES] + [("/api/v1/stock/SPY", None), ("/mcp", init)]:
+        try:
+            status, text = fetch(path, body)
+            bad = [] if status == 200 else [f"status {status}"]
+            if DISCLAIMER_KEY not in text:
+                bad.append("no disclaimer")
+            hit = re.search(BANNED_RE, text, re.I)
+            if hit:
+                bad.append(f"names an excluded company: {hit.group(0)!r}")
+            if path == "/mcp" and '"protocolVersion"' not in text:
+                bad.append("no initialize result")
+        except Exception as ex:
+            bad = [str(ex)[:160]]
+        for x in bad:
+            fails.append(f"{path}: {x}")
+        print(f"{'FAIL' if bad else 'ok  '} {path}")
+    return fails
 
 
 def wait_for_commit(base, sha, minutes):
@@ -179,6 +218,7 @@ def main():
             fails.append(f"stale data: prices as of {b['asof']}, {age} days ago")
     except Exception as ex:
         fails.append(f"no build.json: {ex}")
+    fails += agent_checks(base)
     fails += asyncio.run(run(base, args.local))
     print()
     gha = os.environ.get("GITHUB_ACTIONS") == "true"
