@@ -307,9 +307,27 @@
     M.toggle(t.getAttribute('data-mine-star'), null, tr ? label(tr) : null);
   }, true);
 
+  // an article (not the hub, not a stock brief), signed in: "Your stocks in this piece" under its headline
+  function artLine() {
+    var p = location.pathname.replace(/^\//, '');
+    if (!acct || !/^articles\/./.test(p) || /^articles\/stocks\//.test(p)) return;
+    fetch('/data/articles.json', { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+      var a = (j.a || []).filter(function (x) { return x[0] === p; })[0];
+      var hit = a ? a[5].filter(function (s) { return mine[s] && j.n && j.n[s]; }) : [];
+      var h1 = document.querySelector('main h1') || document.querySelector('h1');
+      if (!hit.length || !h1 || document.querySelector('.art-yours')) return;
+      var el = document.createElement('p');
+      el.className = 'art-yours small';
+      el.innerHTML = '\u2605 Your stocks in this piece: ' + hit.map(function (s) {
+        return '<a href="/' + esc(j.bf.replace('{u}', j.n[s][1])) + '">' + esc(j.n[s][0]) + '</a>';
+      }).join(', ') + ' <span class="muted">(their briefs)</span>';
+      h1.parentNode.insertBefore(el, h1.nextSibling);
+    }).catch(function () { /* the page as it was */ });
+  }
   function start() {
     [].forEach.call(document.querySelectorAll('[data-mine]'), enhance);
     load();
+    M.ready(artLine);
   }
   if (location.protocol === 'file:') return;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);

@@ -55,6 +55,13 @@ def main():
     with open(CACHE, "rb") as f:
         results = pickle.load(f)
     meta = {k[0]: results.pop(k) for k in [k for k in results if k[1] == "__meta"]}
+    # names added to the universe after the cache was made (a reader's request overnight) have no results in it:
+    # leave them out of this preview rather than fail (a real build runs the engine on every name)
+    have = {k[0] for k in results}
+    late = [t["sym"] for t in TICKERS if t["sym"] not in have]
+    if late:
+        TICKERS[:] = [t for t in TICKERS if t["sym"] in have]
+        print("not in the engine cache, left out of this preview:", ", ".join(late))
     # a cache from an earlier close than data/prices: cut the prices to the engine's close, so the
     # pages, the signal and its day-by-day path (callpath.py) all see the same day, as a real build does
     asof = max(r["asof"] for r in results.values())
@@ -113,7 +120,7 @@ def main():
                     site.pair_page(t, s)
     if "articles" in extra:
         from qstrat.articles import Articles
-        Articles(site).build()
+        Articles(site).build()            # its data/articles.json is written by B.write_data below
     if "watchlist" in extra:
         from qstrat.watchlist import watchlist_page
         watchlist_page(site)

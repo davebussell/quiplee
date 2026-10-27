@@ -183,6 +183,24 @@ class Articles:
                 self.stock_brief(t)
         self.hub()
 
+    # ================================================================ index for signed-in readers
+    def index_json(self):
+        """data/articles.json: every article with the stocks it links to, so the hub (assets/artmine.js) can show a
+        signed-in reader only the pieces about their stocks, and a brief per stock. Stock briefs live at bf with each
+        name's slug (reads.json u)."""
+        import re as _re
+        from html import unescape
+        plain = lambda x: unescape(_re.sub(r"<[^>]+>", "", str(x or ""))).strip()
+        by_slug = {t["slug"]: t["sym"] for t in TICKERS}
+        arts, seen = [], set()
+        for b, sp, title, dek, kind, _ in self.list:
+            syms = sorted({by_slug[x] for x in self.s.art_links.get(sp, ()) if x in by_slug})
+            seen.update(syms)
+            arts.append([sp, plain(title), plain(dek), b, kind, syms, 1 if sp in FREE_PIECES else 0])
+        names = {t["sym"]: [t["short"], t["slug"]] for t in TICKERS if t["sym"] in seen}     # for the "your stocks in this piece" line (mine.js)
+        return json.dumps({"asof": self.s.asof.strftime("%Y-%m-%d"), "bf": "articles/stocks/{u}/", "b": [[k, n] for k, n, _ in BUCKETS], "a": arts, "n": names},
+                          ensure_ascii=False, separators=(",", ":"))
+
     # ================================================================ hub
     def hub(self):
         path, depth = "articles/", 1
@@ -223,12 +241,16 @@ class Articles:
         body = f"""<section class="pair-head has-art">{page_art(h, PAGE_ART["articles/"], "50% 45%")}<p class="eyebrow">Articles and stories</p><h1 class="h1">Read the market, then the stock</h1>
 <p class="lede">Plain-English pieces built on the same numbers as the rest of Be The Puck. The live ones rebuild every night with the latest close, so they never go stale.</p>
 <p class="mem-note">{member_tag()} <span>The reports are for <a href="{h('members/')}">Be The Puck Members</a>: {PRICE} a month, with the top-picks tracker and alerts on your stocks. The Hertz story stays free.</span></p>
-<div class="chips fam-chips">{''.join(f'<a href="#{k}">{e(n)}</a>' for k, n, _ in BUCKETS)}</div></section>
+<div class="chips fam-chips" data-art-all>{''.join(f'<a href="#{k}">{e(n)}</a>' for k, n, _ in BUCKETS)}</div></section>
+<section class="art-mine" id="yours" data-art-mine data-src="{e(h('data/articles.json'))}?v={self.s.ver}" data-reads="{e(h('data/reads.json'))}?v={self.s.ver}" data-root="{e(h(''))}" hidden></section>
+<div data-art-all>
 <section aria-labelledby="new-h"><div class="sec-head"><h2 class="h2" id="new-h">Start with these</h2><p>The long reads: bubbles, crashes, debt, positioning and the names the plays agree on.</p></div>
 <div class="grid grid-3">{feat}</div></section>
-{secs}"""
+{secs}
+</div>"""
         self.s.add(path, self.s.shell(path, "Articles and stories", "Long reads on bubbles, crashes, debt and positioning, stock briefs for every covered name, and strategy and sector pieces, rebuilt nightly.",
-                                      body, active="articles/"))
+                                      body, active="articles/", scripts=("assets/plays.js", "assets/artmine.js")))
+        self.s.__dict__["_articles_json"] = self.index_json()
 
     # ================================================================ macro
     def bubble(self):

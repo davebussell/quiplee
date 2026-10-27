@@ -266,6 +266,12 @@ of the 17 factors as columns (Columns picker with quick picks; values from data/
 40 or less), filters by signal, group, name and "favours buying"/"counts against" on any factor, sorts by any header
 (sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`).
 
+**Articles, signed in (`assets/artmine.js`).** The hub leads with "About your stocks": a brief per stock in
+My stocks (your signal on it and where it would change) and every piece that links to them, from
+`data/articles.json` (`articles.index_json`: each article with the stocks it links to, recorded as pages are
+made in `Site.add`). An "All articles" switch shows the rest (kept per browser, `bp.art.view`). Any article page
+says "Your stocks in this piece" under its headline (mine.js). Signed out, the hub is unchanged.
+
 **My stocks: one list everywhere (`assets/mine.js`, `BPMine`).** Signed in, it's the stocks the account follows (the
 ones its signal emails are about); signed out, it's this browser's watchlist (`quiplee.watch.v1`). Any table or list
 marked `data-mine` whose rows carry `data-sym` (the stock list, the home board, the play pages' tables, the benchmark

@@ -2145,3 +2145,11 @@ p.sig-flip [data-sig-flip] { color: var(--ink); font-weight: 500; }
 .me-asked li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 2px 10px; min-height: 32px; }
 .me-asked .me-x-in { position: static; width: 28px; height: 28px; font-size: 16px; }
 .warn-ink { color: var(--band); }
+/* articles hub, signed in: only what's about My stocks (assets/artmine.js) */
+.art-mine { scroll-margin-top: 80px; }
+.art-mine .mine-bar { margin: 0 0 14px; }
+.art-mine .art-sub { margin: 18px 0 10px; }
+.art-brief .name .muted { font-weight: 400; font-size: .85em; }
+.art-sig { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 2px 0; }
+.art-hits { color: var(--violet-ink); }
+.art-yours { margin: 8px 0 0; padding: 8px 12px; border: 1px solid rgba(124, 108, 245, .35); border-radius: 10px; background: rgba(124, 108, 245, .07); }

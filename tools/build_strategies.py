@@ -37,7 +37,7 @@ STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.j
 GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
-                  "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec", "px"}   # data/events/ (earnings and rating history) is only read at build time
+                  "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec", "px", "articles.json"}   # data/events/ (earnings and rating history) is only read at build time
 NOT_PUBLISHED = {".git", ".github", ".ship", ".netlify", "netlify", "tools", "node_modules", "_site", "__pycache__",
                  "netlify.toml", "requirements.txt", "README.md", "BRAND.md", ".gitignore", "SHIP-QUIPLEE.cmd",
                  "package.json", "package-lock.json", "CLAUDE.md", ".cache"}
@@ -292,6 +292,8 @@ def write_data(site, out, quick=False):
     put("tickers.json", screen.tickers_json(site))
     put("screen.json", screen.screen_json(site))
     put("watch.json", watch_json(site))
+    if site.__dict__.get("_articles_json"):
+        put("articles.json", site.__dict__["_articles_json"])      # the articles hub's "your stocks" view (articles.index_json)
     put("build.json", build_json(site))
     from qstrat.factorgrade import grade_json
     put("factorgrade.json", grade_json(site))

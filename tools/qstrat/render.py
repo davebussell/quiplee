@@ -8,6 +8,7 @@ import html
 import json
 import math
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -108,6 +109,7 @@ FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://cl
 def foot_disclaim(guide_href):
     """The disclaimer that closes every page, with a link to who can advise, country by country."""
     return (f'<p class="foot-disclaim"><b>Not financial advice.</b> {DISCLAIMER} '
+            f'Be The Puck is not a broker or an adviser and never places trades: to buy or sell, use a registered broker. '
             f'<a href="{guide_href}">Ways to invest in your country, and how to check an advisor</a>.</p>')
 
 
@@ -531,6 +533,7 @@ class Site:
         self.irx = irx
         self.asof = max(r["asof"] for r in results.values())
         self.pages = {}   # path -> html (or None once written to self.out)
+        self.art_links = {}   # article path -> slugs of the stocks it links to (articles.index_json: the hub's "your stocks" view)
         self.on_page = None   # called with (path, html) for every page as it is made
         self.out = None   # set to a folder to write each page as it is made (keeps memory flat)
         self.ver = self.asof.strftime("%Y%m%d")
@@ -660,6 +663,8 @@ class Site:
         page = annotate(html_, path)
         if self.on_page:                     # the build's per-page check (build_strategies.note_banned)
             self.on_page(path, page)
+        if path.startswith("articles/") and not path.startswith("articles/stocks/"):
+            self.art_links[path] = set(re.findall(r'href="[^"]*?\bstocks/([a-z0-9][a-z0-9.-]*)/', page))
         if self.out:
             d = os.path.join(self.out, path)
             os.makedirs(d, exist_ok=True)

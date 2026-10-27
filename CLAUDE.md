@@ -14,7 +14,8 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **Disclaimer wording**, exactly: "This analysis does not constitute trading advice. Please meet
   with an advisor or independently review sources before making any decision." (`DISCLAIMER` in render.py.)
   It is on **every page** (the footer, and the site's own 404). The build refuses to publish a page
-  without it and smoke.py checks it, so a new page type must use `Site.shell`.
+  without it and smoke.py checks it, so a new page type must use `Site.shell`. The footer also says Be The
+  Puck is not a broker or an adviser and never places trades: to buy or sell, use a registered broker (Oct 27).
 - Financial content states facts and evidence, never a recommendation addressed to the reader.
 - **Never label any ticker as Dave's own holding** on the site.
 - **WSC, Transcat (TRNS) and McGrath RentCorp (MGRC) are never on the site**, in any form: a conflict
