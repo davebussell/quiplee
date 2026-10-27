@@ -39,7 +39,7 @@ def play_meta():
     out = []
     for p in TIMED:
         r = p.get("rules") or []
-        out.append({"p": p["slug"], "name": p["name"], "f": p["family"], "idea": p["short"],
+        out.append({"p": p["slug"], "name": p.get("plain") or p["name"], "tech": p["name"], "f": p["family"], "idea": p.get("oneline") or p["short"],
                     "rin": r[0] if r else "", "rout": r[1] if len(r) > 1 else "", "by": credit(p)})
     return out
 
@@ -201,7 +201,7 @@ def roll_html(D, theory, meta, depth, h):
 
 
 def theory_page(site):
-    from .render import dlong
+    from .render import dlong, play_label
     path, depth = "theory/", 1
     h = lambda x: site.href(depth, x)
     meta = play_meta()
@@ -209,7 +209,7 @@ def theory_page(site):
     D = stock_data(site, t0) if t0 and (t0["sym"], "buy-and-hold") in site.R else None
     names = [[t["slug"], t["short"], t["name"], t["sym"]] for t in TICKERS if (t["sym"], "buy-and-hold") in site.R]
     fam_opts = "".join(f'<option value="fam:{k}">{e(name)} ({len([p for p in TIMED if p["family"] == k])} plays)</option>' for k, name, _ in FAMILIES)
-    play_groups = "".join(f'<optgroup label="{e(name)}">' + "".join(f'<option value="play:{p["slug"]}">{e(p["name"])}</option>' for p in TIMED if p["family"] == k) + "</optgroup>"
+    play_groups = "".join(f'<optgroup label="{e(name)}">' + "".join(f'<option value="play:{p["slug"]}">{e(play_label(p))}</option>' for p in TIMED if p["family"] == k) + "</optgroup>"
                           for k, name, _ in FAMILIES)
     chips = ('<button type="button" class="chip-btn" data-theory="all" aria-pressed="true">All 100</button>'
              + "".join(f'<button type="button" class="chip-btn" data-theory="fam:{k}" aria-pressed="false">{e(name)}</button>' for k, name, _ in FAMILIES))

@@ -488,7 +488,7 @@
       ix.forEach(function (i) {
         var p = D.plays[i], hh = hereOf(i);
         html += '<li><label class="ps-row' + (sel[i] ? ' on' : '') + '"><input type="checkbox" data-ps-play="' + p.s + '"' + (sel[i] ? ' checked' : '') + '>' +
-          '<span class="ps-nm">' + esc(p.n) + (p.t ? ' <span class="ps-top">Top</span>' : '') + (p.e ? '' : ' <span class="ps-few" title="Fewer than ' + D.min + ' calls, or calls on fewer than half the stocks">few calls</span>') + '</span>' +
+          '<span class="ps-nm">' + esc(p.n) + (p.tn && p.tn.toLowerCase() !== String(p.n).toLowerCase() ? ' <span class="ps-tn">' + esc(p.tn) + '</span>' : '') + (p.t ? ' <span class="ps-top">Top</span>' : '') + (p.e ? '' : ' <span class="ps-few" title="Fewer than ' + D.min + ' calls, or calls on fewer than half the stocks">few calls</span>') + '</span>' +
           '<span class="ps-acc"><span class="ps-accbar" aria-hidden="true"><i style="width:' + Math.round(100 * (p.a || 0)) + '%"></i></span><b>' + pc(p.a) + '</b></span>' +
           '<span class="ps-calls">' + num(p.c) + ' calls</span>' +
           (hh ? '<span class="ps-here" title="On ' + esc(here.s) + ': right ' + hh.r + ' of ' + hh.n + '">' + esc(here.s) + ' <b>' + pc(hh.a) + '</b> <span>' + hh.r + '/' + hh.n + '</span></span>' : '') +

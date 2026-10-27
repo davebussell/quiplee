@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from .content import TICKERS, TIMED, PLAY, FAMILIES, FAMILY, THINKER, GROUP_ORDER, credit
-from .render import universe, pct, fill_bar, dlong, DISCLAIMER
+from .render import universe, pct, fill_bar, dlong, DISCLAIMER, play_label, play_name_html
 from .media import page_art, PAGE_ART
 from .icons import icon
 
@@ -389,7 +389,7 @@ class Guides:
         top_cut = sorted(allp, key=lambda z: -(z[1]["cut"] / z[1]["n"]))[:10]
 
         def plist(lst, key):
-            return "".join(f'<li><a href="{h("guides/" + p["slug"] + "/")}">{e(p["name"])}</a> <span class="muted small">· {e(FAMILY[p["family"]][0])}</span>'
+            return "".join(f'<li><a href="{h("guides/" + p["slug"] + "/")}">{e(play_label(p))}</a> <span class="muted small">· {e(FAMILY[p["family"]][0])}</span>'
                            f'<span class="g-li">{self.share(m[key], m["n"])}</span></li>' for p, m in lst)
         refs = "".join(f"<li><b>{e(a)}</b>, {e(b)}. <i>{e(c)}</i>.</li>" for a, b, c in BOOKS)
         body = f"""
@@ -436,7 +436,7 @@ class Guides:
         for p, m in sorted(zip(fm["plays"], fm["ms"]), key=lambda z: -((z[1]["beat_sh"] / z[1]["n"]) if z[1]["n"] else 0)):
             if not m["n"]:
                 continue
-            rows += (f'<tr><td><a href="{h("guides/" + p["slug"] + "/")}">{e(p["name"])}</a><span class="sym-sub">{e(credit(p))}</span></td>'
+            rows += (f'<tr><td><a class="play-nm" href="{h("guides/" + p["slug"] + "/")}">{play_name_html(p)}</a><span class="sym-sub">{e(credit(p))}</span></td>'
                      f'<td data-v="{m["beat_sh"] / m["n"]:.4f}">{self.share(m["beat_sh"], m["n"])}</td><td data-v="{m["cut"] / m["n"]:.4f}">{self.share(m["cut"], m["n"])}</td>'
                      f'<td data-v="{m["beat_cg"] / m["n"]:.4f}">{self.share(m["beat_cg"], m["n"])}</td><td class="r">{pct(m["bat"], sign=False, d=0)}</td>'
                      f'<td class="r">{m["sw"]:.1f}</td><td class="r">{pct(m["inv"], sign=False, d=0)}</td><td class="r">{m["in_now"]}/{len(self.univ)}</td></tr>')

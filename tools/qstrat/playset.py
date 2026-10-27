@@ -21,7 +21,8 @@ import html
 import json
 
 from .content import TICKERS, TIMED, FAMILIES, FAMILY
-from .render import (universe, is_stock, n_stocks, rankable, pct, dlong, fill_bar, GRADE_YEAR, TOP_MIN_CALLS, DISCLAIMER, ps_bar)
+from .render import (universe, is_stock, n_stocks, rankable, pct, dlong, fill_bar, GRADE_YEAR, TOP_MIN_CALLS, DISCLAIMER, ps_bar,
+                     play_label, play_name_html)
 from .icons import icon
 
 e = html.escape
@@ -34,7 +35,7 @@ def playset_json(site):
     plays = []
     for p in TIMED:
         a = site.play_accuracy(p)
-        d = {"s": p["slug"], "n": p["name"], "f": p["family"], "a": None if a["bat"] is None else round(a["bat"], 4),
+        d = {"s": p["slug"], "n": p.get("plain") or p["name"], "tn": p["name"], "f": p["family"], "a": None if a["bat"] is None else round(a["bat"], 4),
              "c": a["calls"], "k": a["stocks"], "e": 1 if rankable(a, ns) else 0}
         if p["slug"] in top:
             d["t"] = 1
@@ -141,7 +142,7 @@ def guide_page(site):
     for fk, p, a in site.top_plays():
         fa = [x for q, x in acc if q["family"] == fk]
         r, c = sum(x["right"] for x in fa), sum(x["calls"] for x in fa)
-        fam_rows += (f'<tr><td>{icon(fk)} {e(FAMILY[fk][0])}</td><td><a href="{h("guides/" + p["slug"] + "/")}"><b>{e(p["name"])}</b></a></td>'
+        fam_rows += (f'<tr><td>{icon(fk)} {e(FAMILY[fk][0])}</td><td><a class="play-nm" href="{h("guides/" + p["slug"] + "/")}">{play_name_html(p)}</a></td>'
                      f'<td class="r" data-v="{a["bat"]:.4f}"><b>{pct(a["bat"], sign=False, d=0)}</b></td><td class="r" data-v="{r / c if c else 0:.4f}">{pct(r / c if c else None, sign=False, d=0)}</td>'
                      f'<td class="r">{len(fa)}</td></tr>')
 
@@ -151,8 +152,8 @@ def guide_page(site):
         ok = rankable(a, ns)
         tag = '<span class="tag">Top in family</span>' if p["slug"] in top else ("" if ok else '<span class="tag muted-tag" title="Fewer than '
                                                                                    f'{TOP_MIN_CALLS} calls, or calls on fewer than half the stocks">Too few calls to rank</span>')
-        rows += (f'<tr data-ps-row-play="{p["slug"]}"><td><span class="ps-pickrow"><input type="checkbox" data-ps-toggle="{p["slug"]}" checked aria-label="Count {e(p["name"])}">'
-                 f'<a href="{h("guides/" + p["slug"] + "/")}"><b>{e(p["name"])}</b></a></span> {tag}</td><td class="small">{icon(p["family"])} {e(FAMILY[p["family"]][0])}</td>'
+        rows += (f'<tr data-ps-row-play="{p["slug"]}"><td><span class="ps-pickrow"><input type="checkbox" data-ps-toggle="{p["slug"]}" checked aria-label="Count {e(play_label(p))}">'
+                 f'<a class="play-nm" href="{h("guides/" + p["slug"] + "/")}">{play_name_html(p)}</a></span> {tag}</td><td class="small">{icon(p["family"])} {e(FAMILY[p["family"]][0])}</td>'
                  f'<td class="r nowrap" data-v="{a["bat"] if a["bat"] is not None else ""}"><span class="ps-accbar" aria-hidden="true"><i style="width:{round(100 * (a["bat"] or 0))}%"></i></span> '
                  f'<b>{pct(a["bat"], sign=False, d=0)}</b></td><td class="r" data-v="{a["calls"]}">{a["calls"]:,}</td><td class="r" data-v="{a["stocks"]}">{a["stocks"]}</td></tr>')
 

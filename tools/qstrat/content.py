@@ -452,8 +452,11 @@ with open(_os.path.join(_os.path.dirname(__file__), "analysts.json"), encoding="
 for _a in THINKERS:
     _a["sources"] = [tuple(x) for x in _a["sources"]]
     _a["strategies"] = [p["slug"] for p in PLAYS if _a["slug"] in p["analysts"]]
+from .plain import PLAIN as _PLAIN  # noqa: E402
 for _p in PLAYS:
     _p["thinker"] = _p["analysts"][0]
+    # the everyday name and one-line explanation (plain.py); the technical name stays as p["name"]
+    _p["plain"], _p["oneline"] = _PLAIN.get(_p["slug"], (_p["name"], _p.get("short", "")))
 THINKER = {t["slug"]: t for t in THINKERS}
 _missing = {a for p in PLAYS for a in p["analysts"]} - set(THINKER)
 assert not _missing, f"plays credit unknown analysts: {_missing}"

@@ -37,6 +37,18 @@ def universe():
 PRIVATE_SLUGS = {t["slug"] for t in TICKERS if t.get("requested")}
 
 
+def play_label(p):
+    """A play's everyday name with its technical name in brackets when they differ: "Buy the oversold bounce (RSI 30/70)"."""
+    plain, tech = p.get("plain") or p["name"], p["name"]
+    return plain if plain.lower() == tech.lower() else f"{plain} ({tech})"
+
+
+def play_name_html(p, cls="play-tech"):
+    """The everyday name in bold, the technical name under it (plain.py)."""
+    plain, tech = p.get("plain") or p["name"], p["name"]
+    return f'<b>{e(plain)}</b>' + ("" if plain.lower() == tech.lower() else f'<span class="{cls}">{e(tech)}</span>')
+
+
 def private_path(path):
     """True for any page of a private (reader-requested) name: its stock page, its play rows, its brief."""
     parts = path.split("/")
@@ -760,7 +772,8 @@ class Site:
             here = (f'On {e(t["short"])}: right {b["right"]} of {b["n"]}' if b["n"] else f'No finished calls on {e(t["short"])} yet')
             since = (f'{"In" if x["state"] == 1 else "Out"} since {dlong(x["since"])}' if x["state"] is not None and x.get("since") is not None else "")
             cards += (f'<a class="card tp" data-fam="{fk}" href="{h(self.pair_path(t, p))}"><span class="tp-fam">{icon(fk)}{e(FAMILY[fk][0])}</span>'
-                      f'<span class="tp-name"><b>{e(p["name"])}</b>{pill(x["state"])}</span>'
+                      f'<span class="tp-name"><span class="tp-nm">{play_name_html(p)}</span>{pill(x["state"])}</span>'
+                      f'<span class="tp-line">{e(p.get("oneline") or "")}</span>'
                       f'<span class="tp-acc"><b>{pct(a["bat"], sign=False, d=0)}</b> of {a["calls"]:,} calls right</span>'
                       f'<span class="tp-here">{here}{" · " + since if since else ""}</span></a>')
         return f"""<section class="top-plays" id="top-plays" aria-labelledby="tp-h"><div class="sec-head"><h2 class="h2" id="tp-h">The most accurate play in each family</h2>
@@ -834,7 +847,7 @@ class Site:
         out = ""
         for fk, fname, _ in FAMILIES:
             opts = "".join(f'<option value="{e(value(p) if value else p["slug"])}"{CORE_ATTR if p.get("core") else ""}'
-                           f'{" selected" if p["slug"] == selected else ""}>{e(p["name"])} · {e(credit(p))}</option>'
+                           f'{" selected" if p["slug"] == selected else ""}>{e(play_label(p))} · {e(credit(p))}</option>'
                            for p in TIMED if p["family"] == fk and (p.get("core") or not core_only))
             if opts:
                 out += f'<optgroup label="{e(fname)}">{opts}</optgroup>'
@@ -860,7 +873,7 @@ class Site:
 
     def plays_json(self):
         """Every play by family for the jump-to-play selects on pair pages, in names.json's shape."""
-        groups = [[fname, [[p["slug"], f'{p["name"]} · {credit(p)}', 0] for p in TIMED if p["family"] == fk]]
+        groups = [[fname, [[p["slug"], f'{play_label(p)} · {credit(p)}', 0] for p in TIMED if p["family"] == fk]]
                   for fk, fname, _ in FAMILIES if any(p["family"] == fk for p in TIMED)]
         return json.dumps({"groups": groups}, ensure_ascii=False, separators=(",", ":"))
 
@@ -1031,8 +1044,8 @@ class Site:
             rows = ""
             for s in [p for p in TIMED if p["family"] == k]:
                 sm = self.strat_summary(s)
-                rows += (f'<tr><td><a href="{h("strategies/" + s["slug"] + "/")}"><b>{e(s["name"])}</b></a>{flag_tag(s)}'
-                         f'<span class="sym-sub">{e(credit(s))}</span></td>'
+                rows += (f'<tr><td><a class="play-nm" href="{h("strategies/" + s["slug"] + "/")}">{play_name_html(s)}</a>{flag_tag(s)}'
+                         f'<span class="play-line">{e(s.get("oneline") or "")}</span><span class="sym-sub">{e(credit(s))}</span></td>'
                          f'<td class="nowrap">{BAR_WORD[s["bar"]].capitalize()}</td>'
                          f'<td class="r" data-v="{sm["in_now"]}">{sm["in_now"]} of {sm["n"]}</td><td class="r">{pct(sm["bat"], sign=False, d=0)}</td>'
                          f'<td class="r" data-v="{sm["beat_sharpe"] / sm["graded"] if sm["graded"] else ""}">{sm["beat_sharpe"]} of {sm["graded"]}</td>'
@@ -1104,9 +1117,11 @@ class Site:
 <nav class="crumbs"><a href="{h('strategies/')}">Plays</a><span>/</span><a href="{h('strategies/')}#fam-{s['family']}">{e(fam)}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head">
   <p class="eyebrow">{e(fam)} · {e(BAR_WORD[s['bar']])} rule{" · " + e(s['flag']) if s.get('flag') else ""}</p>
-  <h1 class="h1">{e(s['long'])}</h1>
+  <h1 class="h1">{e(s.get('plain') or s['long'])}</h1>
+  {"" if (s.get('plain') or s['long']).lower() == s['long'].lower() else f'<p class="h1-tech">Known as {e(s["long"])}</p>'}
   <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}<span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Guide: does it work?</a></div>
-  <p class="lede">{e(s['short'])}</p>
+  <p class="lede">{e(s.get('oneline') or s['short'])}</p>
+  {"" if not s.get('oneline') else f'<p class="muted">{e(s["short"])}</p>'}
 </section>
 <section><div class="tiles">
   <div class="card tile"><span class="tile-label">In right now</span><span class="tile-value">{sm['in_now']} of {sm['n']}</span><span class="tile-note">As of the {dlong(self.asof)} close.</span></div>
@@ -1179,7 +1194,7 @@ class Site:
             rows = ""
             for s in TIMED:
                 sm = self.strat_summary(s)
-                rows += (f'<tr><td><a href="{h("strategies/" + s["slug"] + "/")}">{e(s["name"])}</a><span class="sym-sub">{e(credit(s))}</span></td>'
+                rows += (f'<tr><td><a class="play-nm" href="{h("strategies/" + s["slug"] + "/")}">{play_name_html(s)}</a><span class="sym-sub">{e(credit(s))}</span></td>'
                          f'<td>{e(FAMILY[s["family"]][0])}</td>'
                          f'<td class="r" data-v="{sm["beat_cagr"] / max(1, sm["graded"])}">{sm["beat_cagr"]} of {sm["graded"]}</td>'
                          f'<td class="r" data-v="{sm["beat_sharpe"] / max(1, sm["graded"])}">{sm["beat_sharpe"]} of {sm["graded"]}</td>'
@@ -1200,9 +1215,9 @@ class Site:
                 chips = "".join(f'<a href="{h(self.pair_or_stock(t, s))}">{e(t["short"])}{pill(self.r(t["sym"], slug)["state"])}</a>' for t in best)
                 co = [a for a in s["analysts"] if a != th["slug"]]
                 with_ = (" · with " + ", ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in co)) if co else ""
-                extra += f"""<section><div class="sec-head"><h2 class="h2">{e(s['long'])}</h2><a class="btn" href="{h('strategies/' + slug + '/')}">Rule and full record</a></div>
-<p class="muted small">{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])}{with_}</p>
-<p>{e(s['short'])}</p>
+                extra += f"""<section><div class="sec-head"><h2 class="h2">{e(s.get('plain') or s['long'])}</h2><a class="btn" href="{h('strategies/' + slug + '/')}">Rule and full record</a></div>
+<p class="muted small">{"" if (s.get('plain') or s['long']).lower() == s['long'].lower() else e(s['long']) + " · "}{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])}{with_}</p>
+<p><b>{e(s.get('oneline') or '')}</b> {e(s['short'])}</p>
 <div class="tiles">
 <div class="card tile"><span class="tile-label">Calls right</span><span class="tile-value">{pct(sm['bat'], sign=False, d=0)}</span><span class="tile-note">{sm['calls']:,} closed calls on {sm['n']} stocks.</span></div>
 <div class="card tile"><span class="tile-label">Beat buy and hold (Sharpe)</span><span class="tile-value">{sm['beat_sharpe']} of {sm['graded']}</span><span class="tile-note">On raw return: {sm['beat_cagr']} of {sm['graded']}.</span></div>
@@ -1328,8 +1343,9 @@ class Site:
                 nxt = nm["short"] + (f' <span class="muted">({pct(nm["dist"])})</span>' if nm["dist"] is not None else "")
                 a, b = x["stats"]["full"]["strat"] or {}, x["stats"]["full"]["bh"] or {}
                 band = BAND_MARK if s.get("band") and x["trigger"].get("extra", {}).get("zone") == "between" else ""
-                name = (f'<a href="{h(self.pair_path(t, s))}"><b>{e(s["name"])}</b></a>' if s["slug"] in own_pages
-                        else f'<a href="{h("strategies/" + s["slug"] + "/")}"><b>{e(s["name"])}</b></a>')
+                tip = e(s.get("oneline") or "")
+                name = (f'<a class="play-nm" href="{h(self.pair_path(t, s))}" title="{tip}">{play_name_html(s)}</a>' if s["slug"] in own_pages
+                        else f'<a class="play-nm" href="{h("strategies/" + s["slug"] + "/")}" title="{tip}">{play_name_html(s)}</a>')
                 rows += (f'<tr id="play-{s["slug"]}" data-ps-play="{s["slug"]}" data-fam="{fk}"><td>{name}<span class="sym-sub">{e(credit(s))} · {BAR_WORD[s["bar"]]}</span></td>'
                          f'<td>{pill(x["state"])}{band}</td><td class="nowrap" data-v="{pd.Timestamp(x["since"]).strftime("%Y-%m-%d") if x["since"] is not None else ""}">{dlong(x["since"])} <span class="{dir_cls(since_move)}">{pct(since_move)}</span></td>'
                          f'<td class="nowrap" data-v="{sortv(dv)}">{nxt}</td>{right_here}<td class="r nowrap" data-v="{sortv(a.get("cagr"))}">{pct(a.get("cagr"))} <span class="muted">/ {pct(b.get("cagr"))}</span></td>'
@@ -1601,14 +1617,15 @@ class Site:
 
         by = " &amp; ".join(f'<a href="{h("thinkers/" + a + "/")}">{e(THINKER[a]["name"])}</a>' for a in s["analysts"])
         # ships with the current play only; site.js fills in the rest from data/plays.json
-        play_sel = f'<option value="{e(s["slug"])}" selected>{e(s["name"])} · {e(credit(s))}</option>'
+        play_sel = f'<option value="{e(s["slug"])}" selected>{e(play_label(s))} · {e(credit(s))}</option>'
         plays_src = h("data/plays.json") + "?v=" + self.ver
         stock_sel = self.stock_select("jump-stock", e(h("stocks/{v}/" + s["slug"] + "/")), t, depth, full_only=not s.get("core"))
         play_tmpl = e(h("stocks/" + t["slug"] + "/{v}/"))
         body = f"""
 <nav class="crumbs"><a href="{h('stocks/')}">Stocks</a><span>/</span><a href="{h('stocks/' + t['slug'] + '/')}">{e(t['short'])}</a><span>/</span><span>{e(s['name'])}</span></nav>
 <section class="pair-head"><p class="eyebrow">{e(FAMILY[s['family']][0])} · {e(BAR_WORD[s['bar']])} rule · {e(t['group'])}</p>
-<h1 class="h1">{e(s['name'])} on {e(t['name'])}</h1>
+<h1 class="h1">{e(s.get('plain') or s['name'])} on {e(t['name'])}</h1>
+{"" if (s.get('plain') or s['name']).lower() == s['name'].lower() else f'<p class="h1-tech">{e(s["name"])} · {e(s.get("oneline") or "")}</p>'}
 <div class="byline"><span>Play from {by}</span><span>·</span><a href="{h('strategies/' + s['slug'] + '/')}">How it works</a><span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Does it work?</a><span>·</span><a href="{h('learn/reading-a-page/')}">How to read this page</a>{flag_tag(s)}</div></section>
 {verdict}
 {pchart}
