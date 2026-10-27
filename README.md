@@ -266,6 +266,15 @@ of the 17 factors as columns (Columns picker with quick picks; values from data/
 40 or less), filters by signal, group, name and "favours buying"/"counts against" on any factor, sorts by any header
 (sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`).
 
+**The classics (`/classics/`, `tools/qstrat/classics.py` + `classics.json`).** Fifteen strategies people stopped
+talking about (Dow Theory, Livermore's Market Key, Gann, Gould's three steps and a stumble, Zweig, Granville, Darvas,
+Donchian and the Turtles, Coppock, Graham, Dogs of the Dow, the Hindenburg Omen, the odd-lot theory, Arms, Dysart),
+researched and sourced Oct 27, 2026: the story, the original rule, whether it can be tested on the site's data (and
+what's missing if not), the plays and people it leads to with their records, what couldn't be confirmed, and sources.
+Play pages and analyst pages link back ("The history behind it", "Their story in the Classics"). Codable classics
+not yet on the site (Livermore's Market Key, Graham's defensive test, the Positive Volume Index, Gann's swing trend,
+Ease of Movement) are the next plays to test, kept out of the signal until graded.
+
 **Friendly by default.** Every play has an everyday name and a one-line explanation (`tools/qstrat/plain.py`,
 copied onto each play as `plain` / `oneline`; `render.play_label` and `play_name_html` show the technical name with
 it). Your signal's reason reads in everyday words (`factors.friendly` / `factors.why`, mirrored word for word in

@@ -49,6 +49,12 @@ def play_name_html(p, cls="play-tech"):
     return f'<b>{e(plain)}</b>' + ("" if plain.lower() == tech.lower() else f'<span class="{cls}">{e(tech)}</span>')
 
 
+def classic_links(h, kind, slug, lead):
+    """Links to the classics (classics.py) that mention this play or person: the history behind the rule."""
+    from .classics import see_also, links_html
+    return links_html(h, see_also(kind, slug), lead)
+
+
 def private_path(path):
     """True for any page of a private (reader-requested) name: its stock page, its play rows, its brief."""
     parts = path.split("/")
@@ -186,6 +192,7 @@ def nav_menus():
                         ("guides/", "Which predictions work?", "Guides to every family and every play, from the backtests"),
                         ("articles/the-core-20/", "The 20 to learn first", "Where a newcomer should start"),
                         ("thinkers/", "Analysts", f"The {n_people()} people behind the plays"),
+                        ("classics/", "The classics", "Forgotten strategies, the people behind them and the plays they led to"),
                         ("learn/call-it/", "Practise: Call it", "Read the plays on real charts")],
         "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
                    ("guides/plan-an-account/", "Planning an account", "How many stocks, a core and caps: what mixes did since 2006"),
@@ -917,6 +924,8 @@ class Site:
         self.thinkers_index()
         for th in THINKERS:
             self.thinker_page(th)
+        from . import classics
+        classics.build(self)
         self.stocks_index()
         for t in TICKERS:
             self.stock_page(t)
@@ -1125,6 +1134,7 @@ class Site:
   <div class="byline"><span>From {by}</span>{"<span>·</span><span>" + e(s["origin"]) + "</span>" if s.get("origin") else ""}<span>·</span><a href="{h('guides/' + s['slug'] + '/')}">Guide: does it work?</a></div>
   <p class="lede">{e(s.get('oneline') or s['short'])}</p>
   {"" if not s.get('oneline') else f'<p class="muted">{e(s["short"])}</p>'}
+  {classic_links(h, "play", s["slug"], "The history behind it")}
 </section>
 <section><div class="tiles">
   <div class="card tile"><span class="tile-label">In right now</span><span class="tile-value">{sm['in_now']} of {sm['n']}</span><span class="tile-note">As of the {dlong(self.asof)} close.</span></div>
@@ -1229,7 +1239,7 @@ class Site:
 <p class="muted small">Best risk-adjusted results against buy and hold:</p><div class="chips">{chips}<a href="{h('strategies/' + slug + '/')}">All {len(universe())} stocks →</a></div></section>"""
         body = f"""
 <nav class="crumbs"><a href="{h('thinkers/')}">Analysts</a><span>/</span><span>{e(th['name'])}</span></nav>
-<section class="pair-head"><p class="eyebrow">{e(th['role'])}</p><h1 class="h1">{e(th['name'])}</h1><p class="lede">{e(th['bio'])}</p></section>
+<section class="pair-head"><p class="eyebrow">{e(th['role'])}</p><h1 class="h1">{e(th['name'])}</h1><p class="lede">{e(th['bio'])}</p>{classic_links(h, "thinker", th["slug"], "Their story in the Classics")}</section>
 <section class="split"><div class="card prose"><p class="eyebrow">What they argue</p><ul>{argues}</ul></div>
 <div class="card prose"><p class="eyebrow">Sources</p><div class="sources">{srcs}</div>
 <p class="muted small">Summaries are Be The Puck's paraphrase of public material. Be The Puck has no affiliation with the people listed.</p></div></section>

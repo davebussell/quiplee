@@ -34,7 +34,7 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
-GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "stocks", "method", "learn", "markets", "watchlist", "articles",
+GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "classics", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner"}
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
                   "playset.json", "events.json", "events", "build.json", "quality.json", "factorgrade.json", "sec", "px", "articles.json"}   # data/events/ (earnings and rating history) is only read at build time

@@ -1,0 +1,1113 @@
+[
+ {
+  "slug": "dow-theory",
+  "name": "Dow Theory",
+  "people": [
+   {
+    "name": "Charles H. Dow",
+    "dates": "1851-1902",
+    "role": "First editor of The Wall Street Journal; his editorials are the source"
+   },
+   {
+    "name": "William Peter Hamilton",
+    "dates": "died 9 Dec 1929",
+    "role": "WSJ editor 1908-1929; turned Dow's ideas into a forecasting method"
+   },
+   {
+    "name": "Robert Rhea",
+    "dates": "died 1939",
+    "role": "Codified the tenets in The Dow Theory (1932)"
+   },
+   {
+    "name": "Richard Russell",
+    "dates": "died 21 Nov 2015, aged 91",
+    "role": "Published Dow Theory Letters 1958-2015"
+   }
+  ],
+  "years_active": "1900-1929 (Dow and Hamilton editorials); codified 1932; newsletters to 2015",
+  "hook": "The first market-timing rule: a bull market counts only when the industrial and the railroad (now transportation) averages both confirm it.",
+  "story": "Charles Dow, the first editor of The Wall Street Journal, wrote editorials about prices moving in three overlapping waves; after his death in 1902, S.A. Nelson's The ABC of Stock Speculation labelled the ideas Dow's theory. William Peter Hamilton, the Journal's editor from 1908, made them a forecasting method: the industrial and the railroad averages had to confirm each other's new highs or new lows. His editorial of 25 October 1929, usually remembered as The Turn of the Tide, declared a bear market days before the crash; he died that December. Robert Rhea, bedridden for years, codified the tenets in The Dow Theory (1932) and sold Dow Theory comments to thousands of subscribers. In 1933 Alfred Cowles tested Hamilton's calls and concluded they did not beat the market; Brown, Goetzmann and Kumar re-tested them in 1998 with risk adjustment and found real timing value from 1902 to 1929, with the edge eaten by trading costs later on. Richard Russell kept the method alive in Dow Theory Letters until 2015. Its rules were never fixed: Rhea rejected simple percentage cut-offs, and Dow theorists still disagree about what counts as a secondary reaction, so a call depends on who is making it.",
+  "quote": {
+   "text": "together the averages gave the signal for a bear market in stocks",
+   "by": "William Peter Hamilton, Wall Street Journal editorial, 25 Oct 1929 (as quoted in Reason, May 1974)"
+  },
+  "original_rule": "Three movements: primary (a year or more), secondary reactions, daily noise. A primary bull trend is signalled when both the Dow Industrials and the Dow Transports (Rails before 1970) close above the highs of their last rally after a secondary reaction that held above the prior reaction low; a bear trend when both close below the lows of their last secondary reaction after a failed rally. Rhea: a normal secondary reaction lasts 3 to 12 weeks and retraces one-third to two-thirds of the primary move since the last important reaction; a 'line' is both averages moving within about 5% for two to three weeks or longer, and a break out of a line in both averages is also a signal. Only the averages' closes count; one average alone never confirms.",
+  "data_needed": [
+   "an index"
+  ],
+  "related_plays": [
+   "ten-month-sma",
+   "200-day-rule",
+   "stage-analysis",
+   "golden-cross",
+   "zweig-four-percent",
+   "market-state-momentum"
+  ],
+  "related_thinkers": [
+   "meb-faber",
+   "paul-tudor-jones",
+   "stan-weinstein",
+   "martin-zweig",
+   "cooper-gutierrez-hameed",
+   "market-tradition"
+  ],
+  "lineage_note": "Every 'own it only in a primary uptrend' rule on the site descends from Hamilton's primary trend. The site's own market guard (factors.GUARD), which stands price factors down when the index is well off its high, applies the same idea: a market-level state gating single-stock calls.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Hamilton, William Peter. The Stock Market Barometer. New York: Harper & Brothers, 1922.",
+    "url": "https://www.ifa.com/book-library/3658/The_Stock_Market_Barometer",
+    "verified": "yes (bibliographic listing)"
+   },
+   {
+    "citation": "Rhea, Robert. The Dow Theory: An Explanation of Its Development and an Attempt to Define Its Usefulness as an Aid in Speculation. New York: Barron's, 1932.",
+    "url": "https://shapero.com/products/robert-rhea-dow-theory-1932-109816",
+    "verified": "yes (bibliographic listing); definitions as quoted by M. Blay, thedowtheory.com, from the 1993 Fraser edition p. 76"
+   },
+   {
+    "citation": "Brown, Stephen J., William N. Goetzmann and Alok Kumar. 'The Dow Theory: William Peter Hamilton's Track Record Reconsidered.' Journal of Finance, August 1998 (vol. 53 no. 4, pp. 1311-1333: volume and pages from memory, not checked). SSRN abstract 58690.",
+    "url": "https://viking.som.yale.edu/the-dow-theory-william-peter-hamiltons-track-record-re-considered",
+    "verified": "partly (title, journal, date; findings via CXO Advisory summary https://www.cxoadvisory.com/technical-trading/classic-research-dow-theory-long-dead/)"
+   },
+   {
+    "citation": "Cowles, Alfred, 3rd. 'Can Stock Market Forecasters Forecast?' Econometrica 1(3), July 1933, pp. 309-324.",
+    "url": "https://econometricsociety.org/publications/econometrica/1933/07/01/can-stock-market-forecasters-forecast",
+    "verified": "citation yes; findings only via secondary summaries"
+   }
+  ],
+  "extra_sources": [
+   "'The Dow Theory Revisited', Reason, 1 May 1974 (history; Nelson's naming; Rhea's line definition; the 1929 editorial): https://reason.com/1974/05/01/the-dow-theory-revisited/",
+   "Blay, Manuel. 'Did Rhea really tell that secondary reactions had to last three weeks? (II)', thedowtheory.com, 2020: https://thedowtheory.com/dow-theory-special-issue-did-rhea-really-tell-that-secondary-reactions-had-to-last-three-weeks-ii/",
+   "'Richard Russell, publisher of Dow Theory Letters, dies at 91', Financial Advisor, Nov 2015: https://www.fa-mag.com/news/richard-russell--publisher-of-dow-theory-letters--dies-at-91-23996.html"
+  ],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "Daily Dow Jones Transportation Average (one extra index series), plus a stated swing definition. With both, it is a market-level switch applied to every stock, like the January Barometer play."
+  },
+  "unverified": [
+   "Editorial title: Reason gives 'A Turn in the Tide'; it is usually cited as 'The Turn of the Tide'.",
+   "Nelson's book: Reason dates it 1902; many sources say 1903.",
+   "Journal of Finance volume/issue/pages for Brown, Goetzmann & Kumar."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": {
+   "missing": "daily Dow Jones Transportation Average (one series)",
+   "note": "Best Classic once one series is added; needs a stated swing definition."
+  }
+ },
+ {
+  "slug": "livermore-market-key",
+  "name": "Livermore's Market Key and pivotal points",
+  "people": [
+   {
+    "name": "Jesse L. Livermore",
+    "dates": "26 Jul 1877 - 28 Nov 1940",
+    "role": "Speculator; author of How to Trade in Stocks (1940)"
+   }
+  ],
+  "years_active": "1890s-1940",
+  "hook": "The most famous speculator of the 1920s left one book, and in it a hand-kept ledger of closing prices that is a mechanical trend rule.",
+  "story": "Jesse Livermore started in Boston bucket shops as a teenager and became the best-known speculator of the 1920s. Edwin Lefevre's Reminiscences of a Stock Operator (1923) tells his story under the name Larry Livingston, so many famous anecdotes come from a fictionalised book rather than records. He went bankrupt more than once; accounts differ on the years. The figure most often repeated, about $100 million made shorting the 1929 crash, comes from later retellings, not published account records; when he filed in 1934 he listed debts of about $2.5 million. In 1940 he published his only book, How to Trade in Stocks, with a ledger he called the Market Key: daily closes sorted into six columns, moving between them only after a set move, with pivotal points marking where a trend is confirmed or broken. The book sold poorly, and he died later that year. The Key faded because it is written in points for 1930s share prices, takes pages to explain and was meant for pairs of leading stocks, but its core is objective and works like the reversal filters behind point & figure charts.",
+  "quote": null,
+  "original_rule": "Six columns of closing prices: Secondary Rally, Natural Rally, Upward Trend, Downward Trend, Natural Reaction, Secondary Reaction. Six-point rule: a move of about 6 points against the current column moves recording to the opposite column (Upward Trend -> Natural Reaction, Downward Trend -> Natural Rally, and so on); a rebound or decline of 6 points that fails to pass the last price in the prior column of the same kind goes in a Secondary column. Pivotal points are the last prices of a column when recording switches, marked with red (tops) or black (bottoms) lines. Three-point rule: a Natural Rally that rises 3 or more points above its last marked pivot moves to Upward Trend; a Natural Reaction that falls 3 or more points below its last marked pivot moves to Downward Trend; a trend resumes when price passes the last trend-column pivot. Livermore applied the Key to two leading stocks of a group and to their sum (the 'key price').",
+  "data_needed": [
+   "daily prices of one stock"
+  ],
+  "related_plays": [
+   "darvas-box",
+   "pf-double-top-breakout",
+   "zweig-four-percent",
+   "four-week-rule"
+  ],
+  "related_thinkers": [
+   "nicolas-darvas",
+   "a-w-cohen",
+   "thomas-dorsey",
+   "martin-zweig",
+   "richard-donchian"
+  ],
+  "lineage_note": "The six-point switch is a reversal filter, the same family as A.W. Cohen's three-box point & figure reversal and the filtered-wave idea behind Zweig's 4% model; the pivotal-point breakout is a cousin of the Darvas box top.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Livermore, Jesse L. How to Trade in Stocks: The Livermore Formula for Combining Time Element and Price. New York: Duell, Sloan & Pearce, 1940.",
+    "url": "https://www.baumanrarebooks.com/rare-books/livermore-jesse-l/how-to-trade-in-stocks/82199.aspx",
+    "verified": "yes (bibliographic listing); primary text not read"
+   },
+   {
+    "citation": "Lefevre, Edwin. Reminiscences of a Stock Operator. 1923 (fictionalised account; serialised first in The Saturday Evening Post). Annotated ed., John Wiley & Sons, 2009.",
+    "url": "https://en.wikipedia.org/wiki/Reminiscences_of_a_Stock_Operator",
+    "verified": "partly (1923 and fictionalised status yes; original publisher and serial year not checked)"
+   },
+   {
+    "citation": "Wikipedia: Jesse Livermore (dates, bankruptcies 1908/1915/1934, 1934 filing figures, 1940 book publication and sales).",
+    "url": "https://en.wikipedia.org/wiki/Jesse_Livermore",
+    "verified": "yes (secondary)"
+   },
+   {
+    "citation": "'Livermore Market Key' rule summary (French trading forum file, reproducing the six-column and six/three-point rules).",
+    "url": "https://www.andlil.com/forum/download/file.php?id=100249",
+    "verified": "secondary only; check against the 1940 text before coding"
+   }
+  ],
+  "extra_sources": [
+   "CFI.co, 'Jesse Lauriston Livermore: The Boy Plunger', Feb 2014 (gives 1912 and 1934 bankruptcies; $100m 1929 figure unsourced): https://cfi.co/banking/2014/02/jesse-lauriston-livermore-the-boy-plunger",
+   "Business Today review of Reminiscences, March 2007 ('rumoured' $100m): https://businesstoday.in/magazine/books/story/the-man-who-caused-the-crash-12423-2007-03-08",
+   "Nagy, Andras. The Secret of Livermore: Analyzing the Market Key System (2007), listed by Wikipedia; not seen."
+  ],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "Daily closes only. The point thresholds need a percentage or ATR stand-in, which is an assumption."
+  },
+  "unverified": [
+   "The ~$100 million 1929 profit (repeated in journalism; no primary record found).",
+   "Bankruptcy years conflict (1908/1915/1934 vs 1912/1934).",
+   "Exact ink-line rules (Livermore's numbered rules) taken from a secondary summary, not the 1940 book."
+  ],
+  "new_play_candidate": {
+   "rank": 1,
+   "slug": "livermore-market-key",
+   "name": "Livermore Market Key",
+   "family": "breakout",
+   "data": "daily closes of one stock",
+   "spec": "Daily closes. R = 6% and C = 3% of the reference price stand in for Livermore's six and three points (Be The Puck's assumption; an ATR-scaled version is the alternative). Keep six columns and the last marked pivots. Start in Upward Trend if the first close is above its 50-day average, otherwise Downward Trend (our choice). Upward Trend records each higher close; a close R or more below the column's high moves recording to Natural Reaction and marks that high as the Upward Trend pivot. Natural Reaction records each lower close; a close R or more above its low moves to Natural Rally (marking that low as the Natural Reaction pivot), and a close below the last Downward Trend pivot moves straight to Downward Trend. Natural Rally records each higher close; a close R or more below its high moves to Natural Reaction (or to Secondary Reaction if it holds above the last Natural Reaction pivot) and marks the Natural Rally pivot. A rally that stays below the last Natural Rally pivot goes in Secondary Rally. Mirror rules apply from Downward Trend. The call: In when recording enters Upward Trend, which happens on a close above the last Upward Trend pivot or C or more above the last Natural Rally pivot; Out when recording enters Downward Trend, on a close below the last Downward Trend pivot or C or more below the last Natural Reaction pivot. The four rally and reaction columns never change the call. Act at the close. Variant: require the stock's group ETF (or a second leading stock in its group) to be in Upward Trend too, as Livermore did with pairs. Check the transitions against Livermore's numbered rules in the 1940 book before shipping: the summary used here is secondary."
+  },
+  "unlocked_by": null
+ },
+ {
+  "slug": "gann",
+  "name": "W.D. Gann's angles, cycles and swing charts",
+  "people": [
+   {
+    "name": "William Delbert Gann",
+    "dates": "6 Jun 1878 - 18 Jun 1955",
+    "role": "Trader, forecaster and course seller from Lufkin, Texas"
+   }
+  ],
+  "years_active": "1900s-1955",
+  "hook": "The most mythologised name in technical analysis: a few objective swing rules wrapped in geometry, astrology and a trading record nobody audited.",
+  "story": "W.D. Gann, from Lufkin, Texas, became famous after a December 1909 article in Richard Wyckoff's Ticker and Investment Digest reported that an observer had watched him make 286 trades in a month, 264 of them winners. That record was relayed second-hand and never audited. Gann went on to sell forecasts, courses and books, among them Truth of the Stock Tape (1923), How to Make Profits in Commodities (1941) and 45 Years in Wall Street (1949), plus a novel, Tunnel Thru the Air (1927). His methods are said to rest on geometry, time cycles and astrology, and a 1954 letter shows him using planetary cycles to forecast coffee. Later authors report that his son said Gann could not support the family by trading and lived on course sales, and that his estate was worth a little over $100,000; these are second-hand interviews, not records. Gann's angles, square of nine and cycle dates faded from serious study because they can be fitted to any chart after the fact. One piece is objective: the swing chart from his 1933 grain course, which turns the trend when price breaks the last swing top or bottom.",
+  "quote": null,
+  "original_rule": "Angles (1x1 and others drawn from highs and lows), the square of nine and planetary/time cycles: no objective rule can be stated from the sources. Swing chart (from the course 'The Mechanical Method and Trend Indicator for Trading Grains', June 1933, as read by later interpreters): the swing turns up after two consecutive bars with higher highs, and down after two consecutive bars with lower lows; the trend turns up when price exceeds the last swing top and down when it breaks the last swing bottom.",
+  "data_needed": [
+   "daily prices of one stock"
+  ],
+  "related_plays": [
+   "darvas-box",
+   "turtle-system-1",
+   "four-week-rule"
+  ],
+  "related_thinkers": [
+   "nicolas-darvas",
+   "richard-donchian"
+  ],
+  "lineage_note": "The swing-chart trend change, a break of the last swing high, is the same breakout logic as the Darvas box top and the Turtles' prior-high entry, with the 'recent high' defined by swings instead of a fixed look-back.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Wikipedia: William Delbert Gann (dates, book list, 1954 coffee letter, accounts by Alexander Elder and Larry Williams of conversations with his son).",
+    "url": "https://en.wikipedia.org/wiki/William_Delbert_Gann",
+    "verified": "yes (secondary)"
+   },
+   {
+    "citation": "Wyckoff, Richard D. 'William D. Gann: An Operator Whose Science and Ability Place Him in the Front Rank.' The Ticker and Investment Digest 5(2), December 1909.",
+    "url": "https://informit.com/articles/article.aspx?p=1952808",
+    "verified": "cited by a FT Press/InformIT page (promotional); primary not seen"
+   },
+   {
+    "citation": "Hartle, Thom. 'Gann Swings and Intraday Trading.' Technical Analysis of Stocks & Commodities, October 1999 (cites Gann's June 1933 course 'The Mechanical Method and Trend Indicator for Trading Grains' and Robert Krausz's A W.D. Gann Treasure Discovered).",
+    "url": "https://www.traders.com/Documentation/FEEDbk_docs/1999/10/Abstracts_new/Hartle/Hartle9910.html",
+    "verified": "yes (abstract)"
+   },
+   {
+    "citation": "The Right Trader, 'Gann swing chart' (two-bar rule, inside/outside bars; notes the first printed source of the two-bar formula is not well documented).",
+    "url": "https://therighttrader.com/learn/elliott-wave-and-cycles/gann-swing-chart",
+    "verified": "secondary"
+   }
+  ],
+  "extra_sources": [
+   "Elder, Alexander. Trading for a Living (Wiley, 1993) is the usual source of the son interview; not seen, attribution via Wikipedia."
+  ],
+  "testability": {
+   "verdict": "not objective",
+   "detail": "Angles, square of nine and cycles cannot be coded without inventing rules. The swing-chart trend indicator is codable now from daily bars, with the caveat that its precise wording comes from later interpreters."
+  },
+  "unverified": [
+   "The 1909 record (286 trades, 264 winners): second-hand, unaudited.",
+   "The son's statement and the estate value: second-hand interviews reported by Elder and Williams.",
+   "Truth of the Stock Tape: 1923 or 1924 (Wikipedia gives both).",
+   "That the two-bar swing rule is Gann's own wording."
+  ],
+  "new_play_candidate": {
+   "rank": 4,
+   "slug": "gann-swing-trend",
+   "name": "Gann Swing Trend",
+   "family": "breakout",
+   "data": "daily high, low and close of one stock",
+   "spec": "Classify each daily bar against the one before: an up bar has a higher high and no lower low; a down bar has a lower low and no higher high; inside bars (within the prior range) and outside bars (beyond both ends) are skipped and neither count nor reset the run. The swing turns up after two consecutive up bars while in a down swing, and down after two consecutive down bars while in an up swing. At each turn, fix the swing just ended: a swing top is the highest high of an up swing, a swing bottom the lowest low of a down swing. In on a close above the latest swing top; Out on a close below the latest swing bottom; otherwise keep the last call. Gann's 1933 course was for grain futures and broke on intraday prices; using closes and stocks is Be The Puck's adaptation, and the two-bar wording comes from later interpreters rather than a printed Gann rule. A three-bar version is the natural sensitivity check."
+  },
+  "unlocked_by": null
+ },
+ {
+  "slug": "three-steps-and-a-stumble",
+  "name": "Three steps and a stumble",
+  "people": [
+   {
+    "name": "Edson Gould",
+    "dates": "not verified (active 1940s-1970s)",
+    "role": "Market analyst (Anametrics Inc.; Findings & Forecasts letter)"
+   }
+  ],
+  "years_active": "1940s-1970s",
+  "hook": "When the Fed tightens three times in a row, stocks stumble: a rule that flagged some tops, missed others, and relies on Fed tools that have gone quiet.",
+  "story": "Edson Gould was one of the most quoted market technicians of the 1960s and 1970s, writing long reports for Anametrics and a letter called Findings & Forecasts. The Christian Science Monitor credited him in 1981 with calling the 1972 top and the 1974 bottom. His best-known rule says that when the Federal Reserve raises any one of three rates three times in a row (the discount rate, bank reserve requirements or stock margin requirements), stocks are likely to have a sizable setback. A Ned Davis Research study counted 16 signals, with the Dow lower afterwards in 14, but the rule gave false alarms in 1989 and 1994 and did not fire before the 1987 crash, the 2008 bear market or the 2020 drop. Martin Pring found the lead from the third hike to the market top ranged from 14 months early to 37 months late, about six months on average, with stocks gaining just under 9% on average after a third hike. The rule faded partly because two of its three tools went quiet: margin requirements have sat at 50% since the 1970s, and reserve requirements were cut to zero in March 2020.",
+  "quote": null,
+  "original_rule": "Caution (a 'stumble' is likely) after the Fed raises the rediscount rate, bank reserve requirements or stock margin requirements three consecutive times without an intervening cut. No exit or re-entry rule is part of the original. Modern tests (SentimenTrader, 2022) use the fed funds target since 1989 and the discount rate before.",
+  "data_needed": [
+   "interest rates"
+  ],
+  "related_plays": [
+   "pre-fomc-drift"
+  ],
+  "related_thinkers": [
+   "lucca-moench",
+   "martin-zweig"
+  ],
+  "lineage_note": "The site's only Fed-linked play is the Pre-FOMC Drift. Gould's rule and Zweig's Fed indicator are the 1970s-80s ancestors of every 'don't fight the Fed' argument.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "McClellan, Tom. 'Edson Gould's Daily Point Index.' McClellan Financial Publications (weekly chart article; states the three-step rule and the margin-requirement history).",
+    "url": "https://www.mcoscillator.com/learning_center/weekly_chart/edson_goulds_daily_point_index/",
+    "verified": "yes"
+   },
+   {
+    "citation": "Pring, Martin J. 'Three Steps And A Stumble?' StockCharts.com, 16 December 2016.",
+    "url": "https://articles.stockcharts.com/article/members-articles-pring-2016-12-three-steps-and-trumpble/",
+    "verified": "yes"
+   },
+   {
+    "citation": "Dorfman, John. 'What Edson Gould would say about stocks if he were alive.' Syndicated column (TribLive), c. June 2021 (reports the Ned Davis Research study).",
+    "url": "https://triblive.com/business/john-dorfman-what-edson-gould-would-say-about-stocks-if-he-were-alive",
+    "verified": "yes (date inferred from the page)"
+   },
+   {
+    "citation": "Scherer, Ron. ''Pied Pipers' call the tune on Wall Street.' The Christian Science Monitor, 9 January 1981.",
+    "url": "https://www.csmonitor.com/1981/0109/010934.html",
+    "verified": "yes"
+   }
+  ],
+  "extra_sources": [
+   "Christians, Dean. 'The third Federal Reserve target rate increase.' SentimenTrader, 16 June 2022: https://sentimentrader.com/blog/the-third-federal-reserve-target-rate-increase"
+  ],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "A small FRED fetch would supply the dates, but since 2005 only two tightening cycles produced a third hike inside the test window (March 2017 and June 2022), so a backtest on the site's window rests on two events and says little."
+  },
+  "unverified": [
+   "Gould's birth and death dates (not found).",
+   "Exact margin-requirement date (McClellan: 50% from 1973/74 onward).",
+   "FRED series IDs."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": {
+   "missing": "Fed policy-rate change history (FRED)",
+   "note": "Only two events since 2005, so mostly a story, not a test."
+  }
+ },
+ {
+  "slug": "zweig-fed-and-breadth-thrust",
+  "name": "Zweig's 'Don't fight the Fed' and the Breadth Thrust",
+  "people": [
+   {
+    "name": "Martin Zweig",
+    "dates": "1942-2013",
+    "role": "Newsletter writer (The Zweig Forecast, 1971-1997), fund manager"
+   }
+  ],
+  "years_active": "1971-2013",
+  "hook": "Two rules from the Wall $treet Week regular who warned of a vicious decline three days before Black Monday.",
+  "story": "Martin Zweig published The Zweig Forecast from 1971 to 1997 and was a regular on PBS's Wall $treet Week, where on 16 October 1987 he warned of a brief but vicious decline; the Dow fell 23% on the next trading day. Louis Rukeyser was already crediting him with two rules, don't fight the tape and don't fight the Fed, in 1983. In Winning on Wall Street (1986) Zweig turned the second into scoring systems: a Fed indicator that adds points for cuts and subtracts them for hikes in the discount rate and reserve requirements, and a prime-rate indicator keyed to the bank prime rate. His Breadth Thrust is rarer: the 10-day average share of NYSE issues that are rising jumps from below 40% to above 61.5% within ten trading days. Tom McClellan's study of every signal since 1928 found many strong ones and some poor ones, and the thrust still makes headlines when it fires, as in late 2023. Both rules need data the site lacks, and the Fed indicator lost an input when reserve requirements went to zero in 2020. The site already tests his Four Percent Model, the price-only part of his toolkit.",
+  "quote": {
+   "text": "I only look for a brief decline, but a vicious one.",
+   "by": "Martin Zweig on Wall Street Week, 16 Oct 1987 (as quoted by The Boston Globe, 20 Feb 2013)"
+  },
+  "original_rule": "Breadth Thrust: compute a 10-day exponential average (smoothing 2/11) of NYSE advances / (advances + declines); a buy signal fires when it rises from below 0.40 to above 0.615 within 10 trading days. Zweig gave no exit; tests measure returns over set horizons. Fed indicator (from third-party notes of the book): each hike in the discount rate or the reserve requirement scores -1 and expires after six months; a first cut wipes out negative points and scores +2, losing a point after six months; +2 or more is extremely bullish, -3 or worse extremely bearish. Prime-rate indicator: buy and sell triggers keyed to cuts and hikes, with an 8% dividing line between 'high' and 'low' rates.",
+  "data_needed": [
+   "market breadth",
+   "interest rates"
+  ],
+  "related_plays": [
+   "zweig-four-percent"
+  ],
+  "related_thinkers": [
+   "martin-zweig"
+  ],
+  "lineage_note": "Zweig's toolkit had three legs: monetary (Fed, prime rate), tape (4% model, breadth thrust) and sentiment. Only the 4% model is on the site.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "Zweig, Martin. Winning on Wall Street. New York: Warner Books, 1986 (revised 1990, 1994). Publisher from memory.",
+    "url": "https://hedgefundalpha.com/?p=808365",
+    "verified": "partly (rules via third-party book notes that warn they may contain errors)"
+   },
+   {
+    "citation": "McClellan, Tom. 'Watching for a Zweig Breadth Thrust Signal.' McClellan Financial Publications, Nov-Dec 2025.",
+    "url": "https://www.mcoscillator.com/learning_center/weekly_chart/watching_for_a_zweig_breadth_thrust_signal/",
+    "verified": "yes"
+   },
+   {
+    "citation": "Popik, Barry. 'Don't fight the Fed' (earliest citation: Louis Rukeyser column, Gazette Telegraph, 17 July 1983, crediting Zweig).",
+    "url": "https://barrypopik.com/blog/dont_fight_the_fed",
+    "verified": "yes"
+   },
+   {
+    "citation": "'Martin Zweig, 70; analyst predicted 1987 stocks crash.' The Boston Globe, 20 February 2013.",
+    "url": "https://www.bostonglobe.com/metro/obituaries/2013/02/20/martin-zweig-who-predicted-market-crash-dies/yGHUXaNeFDEQjoDciVam3H/story.html",
+    "verified": "yes"
+   }
+  ],
+  "extra_sources": [
+   "Hill, Arthur. 'The Zweig Breadth Thrust triggers', StockCharts, Nov 2023: https://stockcharts.com/articles/arthurhill/2023/11/the-zweig-breadth-thrust-trigg-609.html (title from search result; not opened)"
+  ],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "Market breadth for the thrust; Fed and prime-rate histories for the monetary indicators."
+  },
+  "unverified": [
+   "Fed-indicator and prime-rate point rules (third-party notes, not the book).",
+   "Publisher of Winning on Wall Street."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": {
+   "missing": "daily NYSE breadth (advances, declines, new highs/lows, up/down volume)",
+   "note": "One breadth feed unlocks three classics."
+  }
+ },
+ {
+  "slug": "granville-obv-1981",
+  "name": "Granville's On-Balance Volume and the 1981 'sell everything' call",
+  "people": [
+   {
+    "name": "Joseph E. Granville",
+    "dates": "20 Aug 1923 - 7 Sep 2013",
+    "role": "Market-letter writer (The Granville Market Letter)"
+   }
+  ],
+  "years_active": "1960-2013",
+  "hook": "The newsletter writer whose late-night sell call moved the whole market in 1981, then missed the bull market that followed.",
+  "story": "Joseph Granville wrote early books on the 200-day average and daily market timing, and in 1963 set out On-Balance Volume: a running total that adds a day's volume when the close rises and subtracts it when the close falls. By 1980 his Granville Market Letter had more than 10,000 subscribers. On the evening of 6 January 1981 his staff phoned about 3,000 premium clients with a recorded message to sell everything, days after he had told them to buy aggressively. The next day the Dow fell 23.80 points to 980.89 on what was then record volume of about 92.9 million shares. Granville was a showman: he was carried into a seminar in a coffin, walked across a pool on a hidden plank, and forecast earthquakes from planetary alignments. He stayed bearish as the great bull market began in 1982, and Mark Hulbert later found that his recommendations lost almost 1% a year from 1980 to January 2005 while the market gained about 12%. On-Balance Volume outlived its author's reputation: it is a standard line on every charting platform, usually read by eye for divergences between volume and price.",
+  "quote": {
+   "text": "sell everything",
+   "by": "Granville's recorded message to subscribers, 6 Jan 1981 (as reported by Ben Carlson, 2020)"
+  },
+  "original_rule": "OBV = running sum of +volume on up-close days and -volume on down-close days; Granville read its trend and divergences by eye (rising OBV with flat price = accumulation). 200-day rules: buy when price crosses above a 200-day average that has flattened or turned up; sell when it breaks below a flattening or falling one (his first and fifth of eight rules).",
+  "data_needed": [
+   "daily prices of one stock",
+   "volume"
+  ],
+  "related_plays": [
+   "on-balance-volume",
+   "granville-200-day-rules",
+   "chaikin-money-flow",
+   "klinger-oscillator",
+   "volume-flow-indicator",
+   "force-index"
+  ],
+  "related_thinkers": [
+   "joseph-granville",
+   "marc-chaikin",
+   "stephen-klinger",
+   "markos-katsanos",
+   "alexander-elder"
+  ],
+  "lineage_note": "Every volume-flow line on the site (Chaikin, Klinger, Katsanos, Elder's Force Index) refines OBV's idea of signing volume by the day's direction.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "Scherer, Ron. ''Pied Pipers' call the tune on Wall Street.' The Christian Science Monitor, 9 January 1981.",
+    "url": "https://www.csmonitor.com/1981/0109/010934.html",
+    "verified": "yes (the article prints 'Jan. 17', evidently a typo for the 6-7 January events)"
+   },
+   {
+    "citation": "Carlson, Ben. 'Joe Granville: The Original Dave Portnoy.' A Wealth of Common Sense, 25 June 2020 (adapted from his book Don't Fall For It: A Short History of Financial Scams).",
+    "url": "https://awealthofcommonsense.com/2020/06/joe-granville-the-original-dave-portnoy/",
+    "verified": "yes (Hulbert figures relayed by Carlson)"
+   },
+   {
+    "citation": "Brown, Joshua M. 'A man and his signals.' The Reformed Broker, 11 March 2014.",
+    "url": "https://thereformedbroker.com/2014/03/11/a-man-and-his-signals/",
+    "verified": "yes (commentary)"
+   },
+   {
+    "citation": "Wikipedia: Joseph Granville (dates; cites Granville's New Strategy of Daily Stock Market Timing for Maximum Profit, Prentice-Hall, 1976, and the NYT obituary by Christopher Drew, 18 Sep 2013).",
+    "url": "https://en.wikipedia.org/wiki/Joseph_Granville",
+    "verified": "yes (secondary)"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "Already two plays on the site."
+  },
+  "unverified": [
+   "Subscriber counts vary by source (11,000 in April 1980 per CSM; over 20,000 by 1982 per Wikipedia)."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": null
+ },
+ {
+  "slug": "darvas-box-story",
+  "name": "The Darvas box",
+  "people": [
+   {
+    "name": "Nicolas Darvas",
+    "dates": "1920-1977",
+    "role": "Hungarian-born dancer and self-taught stock trader"
+   }
+  ],
+  "years_active": "1950s-1977",
+  "hook": "A touring dancer who traded by telegram, wrote a bestseller about his $2 million, and was then accused by New York's attorney general of exaggerating it.",
+  "story": "Nicolas Darvas was a Hungarian-born dancer who, touring the world in a dance act with his half-sister, traded American stocks by cable and telegram. He said he made about $2.45 million in 18 months in the 1957-58 market, and Time magazine wrote up his system in May 1959. His book How I Made $2,000,000 in the Stock Market (1960) explained his boxes: a rising stock climbs in a stack of trading ranges, and he bought only when price broke out of the top of the latest box, preferably on rising volume and in a stock already at new highs, with a stop just under the box bottom. In December 1960 Time reported that New York Attorney General Louis Lefkowitz had called the story false, saying investigators could find only about $216,000 of profit. A court then blocked the inquiry as an unwarranted invasion of the free press, and investigators conceded they had not traced all his brokerage accounts. Darvas called the charges book burning by publicity. Whatever he really made, his core idea, buying strength as it breaks out to new highs and cutting losses fast, runs through most of the breakout and new-high plays on the site.",
+  "quote": {
+   "text": "book burning by publicity",
+   "by": "Nicolas Darvas on the attorney general's charges (Time, 19 Dec 1960, via Wikipedia)"
+  },
+  "original_rule": "A box top is a high not exceeded for three days; the bottom is a low that holds for three days after that (the usual reading of the book). Buy on a break above the top; stop just below the bottom, raised as new boxes form. He also required new highs and volume confirmation, judged by eye.",
+  "data_needed": [
+   "daily prices of one stock",
+   "volume"
+  ],
+  "related_plays": [
+   "darvas-box",
+   "52-week-high",
+   "trend-template",
+   "turtle-system-2"
+  ],
+  "related_thinkers": [
+   "nicolas-darvas",
+   "george-hwang",
+   "mark-minervini"
+  ],
+  "lineage_note": "George & Hwang's 52-week-high effect (2004) is the academic version of Darvas's insistence on stocks already at new highs.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "Darvas, Nicolas. How I Made $2,000,000 in the Stock Market. 1960 (first publisher not verified; current edition Harriman House).",
+    "url": "https://www.panmacmillan.com/authors/nicolas-darvas/how-i-made-2-million-in-the-stock-market/9780857191410",
+    "verified": "partly"
+   },
+   {
+    "citation": "'Wall Street: $216,000 or $2,000,000?' Time, 19 December 1960; follow-up 13 January 1961 (as summarised by Wikipedia).",
+    "url": "https://en.wikipedia.org/wiki/Nicolas_Darvas",
+    "verified": "secondary (Time text not read)"
+   },
+   {
+    "citation": "Time, 25 May 1959, pp. 84-85 (profile of the Darvas system; via Wikipedia).",
+    "url": "https://en.wikipedia.org/wiki/Nicolas_Darvas",
+    "verified": "secondary"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "Already a play."
+  },
+  "unverified": [
+   "His profits: his $2.45m claim vs the attorney general's $216,000; never settled.",
+   "Original publisher of the 1960 book."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": null
+ },
+ {
+  "slug": "donchian-and-the-turtles",
+  "name": "Donchian's four-week rule and the Turtles",
+  "people": [
+   {
+    "name": "Richard Donchian",
+    "dates": "1905-1993",
+    "role": "Managed-futures pioneer; Commodity Trend Timing letter 1960-1979"
+   },
+   {
+    "name": "Richard Dennis",
+    "dates": "born 1949",
+    "role": "Chicago commodities trader who ran the Turtle experiment"
+   },
+   {
+    "name": "William Eckhardt",
+    "dates": "not verified",
+    "role": "Dennis's partner; the other side of the bet"
+   }
+  ],
+  "years_active": "1949-1990s",
+  "hook": "The plainest trend rule there is, buy a four-week high and sell a four-week low, and the experiment that taught it to 23 strangers.",
+  "story": "Richard Donchian started Futures, Inc. in 1949, described by CME Group as the first public managed-futures fund, and wrote the Commodity Trend Timing letter from 1960 to 1979. His best-known rule is the simplest: own a market after it closes above its highest price of the past four weeks, and get out, or go short, when it breaks its four-week low. Test results published as early as 1970 reportedly ranked it the most profitable system then known. In 1983 and 1984 the Chicago trader Richard Dennis, settling a bet with his partner William Eckhardt over whether trading could be taught, recruited 23 trainees through newspaper ads and taught them breakout rules built on the same idea: 20- and 55-day breakouts, position sizes set by volatility and stops two average true ranges away. The Turtles reportedly made about $175 million in five years. Dennis himself lost heavily in 1987-88, and the rules stayed private until former Turtles published them in 2003. Breakout trading lost its glamour as returns faded; one widely cited back-test shows the Turtle rules going flat from 1996 to 2009. The same logic still sits inside many trend-following funds.",
+  "quote": null,
+  "original_rule": "Four-week rule: long on a close above the prior 20-day high; reverse (or exit) on a close below the prior 20-day low. Turtle System 1: 20-day breakout entry (skipped if the previous breakout would have won), 10-day low exit or 2N stop. System 2: 55-day breakout, 20-day low exit or 2N stop. N = 20-day average true range; position size scaled to N.",
+  "data_needed": [
+   "daily prices of one stock"
+  ],
+  "related_plays": [
+   "four-week-rule",
+   "turtle-system-1",
+   "turtle-system-2",
+   "clenow-trend-following",
+   "chandelier-exit",
+   "time-series-momentum",
+   "turtle-soup-plus-one"
+  ],
+  "related_thinkers": [
+   "richard-donchian",
+   "richard-dennis-william-eckhardt",
+   "andreas-clenow",
+   "chuck-lebeau",
+   "moskowitz-ooi-pedersen",
+   "linda-bradford-raschke",
+   "larry-connors"
+  ],
+  "lineage_note": "Moskowitz, Ooi & Pedersen's time-series momentum (2012) is the academic restatement of what Donchian and the Turtles traded; Raschke and Connors's Turtle Soup is built to fade the Turtles' failed breakouts.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "CME Group. 'The miraculous growth of managed futures.'",
+    "url": "https://www.cmegroup.com/education/articles-and-reports/the-miraculous-growth-of-managed-futures.html",
+    "verified": "via THINKERS sources (not re-opened)"
+   },
+   {
+    "citation": "Hultman, Todd. 'Donchian Rules.' DTN/The Progressive Farmer, 26 July 2016 (citing Michael Carr, Investopedia, 5 Aug 2014, for the 1970 test results).",
+    "url": "https://www.dtnpf.com/agriculture/web/ag/news/article/2016/07/26/donchian-rules",
+    "verified": "yes"
+   },
+   {
+    "citation": "Wikipedia: Richard Dennis (Turtle dates and numbers, $175m 'reportedly', 1987-88 losses, 1990 settlement, back-test flat 1996-2009).",
+    "url": "https://en.wikipedia.org/wiki/Richard_Dennis",
+    "verified": "yes (secondary)"
+   },
+   {
+    "citation": "Faith, Curtis M. Way of the Turtle. New York: McGraw-Hill, 2007; and The Original Turtle Trading Rules, OriginalTurtles.org, 2003.",
+    "url": "https://books.apple.com/book/isbn9780071486644",
+    "verified": "via THINKERS sources"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "Already three plays."
+  },
+  "unverified": [
+   "Who published the 1970 test (often said to be Dunn & Hargitt; not confirmed).",
+   "The $175m Turtle total ('reportedly').",
+   "Eckhardt's birth year (1955 per a Wikipedia disambiguation page)."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": null
+ },
+ {
+  "slug": "coppock-curve-story",
+  "name": "The Coppock curve",
+  "people": [
+   {
+    "name": "Edwin S. C. 'Sedge' Coppock",
+    "dates": "not verified",
+    "role": "Economist; Trendex Research, San Antonio"
+   }
+  ],
+  "years_active": "1960s",
+  "hook": "A bear-market-bottom detector whose look-back periods reportedly came from how long churchmen said grief lasts.",
+  "story": "Sedge Coppock, an economist who ran Trendex Research in San Antonio, designed a slow monthly momentum line to spot the start of major bull markets after deep declines. As the story is usually told, the 11- and 14-month look-backs came from Episcopal clergy's estimate of how long people take to recover from a bereavement, on the idea that investors grieve their losses too. Accounts differ on the details: one says he managed money for an Episcopal church, another that church authorities asked him for a low-risk long-term signal. They differ on the date too: 1962 in most sources, 1965 for the Barron's article StockCharts cites, even 1945 in one glossary. He reportedly preferred to call it a Very Long Term Momentum Index. Coppock defined only a buy, when the curve turns up from below zero, and meant it for broad indexes. Signals are so rare that its often-quoted high win rate rests on a handful of cases, and it did not trigger for the fast 2020 bottom. It never quite vanished: British investing magazines still explain it, and on the FTSE 100 from 1985 to 2014 five of seven buy signals moved quickly into profit.",
+  "quote": null,
+  "original_rule": "Monthly: sum of the 14-month and 11-month rates of change of a broad index, smoothed with a 10-month weighted moving average. Buy when the curve is below zero and turns up. No sell rule.",
+  "data_needed": [
+   "an index"
+  ],
+  "related_plays": [
+   "coppock-curve",
+   "know-sure-thing",
+   "keller-13612w",
+   "time-series-momentum"
+  ],
+  "related_thinkers": [
+   "edwin-coppock",
+   "martin-pring",
+   "keller-keuning"
+  ],
+  "lineage_note": "Summing several look-back rates of change is the shared idea behind Pring's Know Sure Thing and Keller & Keuning's 13612W momentum.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "Barton, D.R., Jr. 'A Long-Term Indicator with a Surprising Following.' Van Tharp Institute (undated).",
+    "url": "https://vantharp.com/a-long-term-indicator-with-a-surprising-following-by-d-r-barton-jr/",
+    "verified": "yes"
+   },
+   {
+    "citation": "'How to understand charts' (Coppock indicator). Shares magazine / AJ Bell, January 2014.",
+    "url": "https://www.sharesmagazine.co.uk/news/shares/how-to-understand-charts-7",
+    "verified": "yes"
+   },
+   {
+    "citation": "MoneyWeek glossary: 'Coppock indicator'.",
+    "url": "https://moneyweek.com/glossary/coppock-indicator",
+    "verified": "yes (gives 1945, conflicting with other sources)"
+   },
+   {
+    "citation": "StockCharts ChartSchool: Coppock Curve (Barron's, October 1965).",
+    "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/coppock-curve",
+    "verified": "via THINKERS sources"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "Already a play."
+  },
+  "unverified": [
+   "Coppock's life dates.",
+   "Date of first publication (1945 / 1962 / 1965).",
+   "Which version of the church story is right."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": null
+ },
+ {
+  "slug": "graham-net-nets-and-defensive-rules",
+  "name": "Graham's net-nets and the defensive investor's rules",
+  "people": [
+   {
+    "name": "Benjamin Graham",
+    "dates": "1894-1976",
+    "role": "Investor, Columbia lecturer, author of Security Analysis and The Intelligent Investor"
+   },
+   {
+    "name": "David L. Dodd",
+    "dates": "not checked",
+    "role": "Co-author of Security Analysis"
+   }
+  ],
+  "years_active": "1934-1976",
+  "hook": "The father of value investing left two mechanical screens: buy a business for less than its working capital, or buy a sound one at no more than 22.5 times earnings-times-book.",
+  "story": "Benjamin Graham ran the Graham-Newman partnership and wrote Security Analysis (1934, with David Dodd) and The Intelligent Investor (1949). Two of his rules are mechanical. The net-net: buy a company whose share price is below two-thirds of its net current asset value, current assets minus every liability, so the buyer pays less than the working capital and gets the factories for nothing. Henry Oppenheimer's 1986 study found such stocks beat the market from 1970 to 1983. The defensive investor's screen asks for a large company with current assets at least twice current liabilities, profits in each of the past ten years, twenty years of unbroken dividends, earnings per share up by a third over a decade, and a price no more than 15 times average earnings and 1.5 times book value, or a product of the two no higher than 22.5. That product is the source of the modern Graham number, a name he never used. Shortly before he died, Graham said he had lost most of his interest in detailed security analysis and favoured buying groups of stocks that pass simple tests. Later value research moved to ranking stocks on single ratios such as price to book.",
+  "quote": {
+   "text": "a few techniques and simple principles",
+   "by": "Benjamin Graham, interview with Hartman L. Butler Jr., March 1976 (in Kahn & Milne, 1977)"
+  },
+  "original_rule": "Net-net: buy when price < 2/3 x (current assets - total liabilities, including preferred) per share; Graham suggested a diversified group of such issues. Defensive investor (Intelligent Investor, 1973 ed., ch. 14): (1) adequate size (sales of at least $100 million in 1973 dollars); (2) current ratio >= 2 and long-term debt <= net current assets; (3) positive earnings in each of the past 10 years; (4) uninterrupted dividends for at least 20 years; (5) EPS growth of at least one-third over 10 years, using three-year averages at each end; (6) price <= 15 x average EPS of the past three years; (7) price <= 1.5 x book value, or P/E x P/B <= 22.5.",
+  "data_needed": [
+   "fundamentals",
+   "daily prices of one stock"
+  ],
+  "related_plays": [],
+  "related_thinkers": [
+   "john-bogle"
+  ],
+  "lineage_note": "No value play exists on the site. The signal's P/E, P/B and dividend-yield factors (factors.py, 'value' group) rank current numbers; a Graham play would be the first graded, point-in-time valuation rule, and would sit in a new 'value' play family (plays.py FAMILIES has none).",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Graham, Benjamin, and David L. Dodd. Security Analysis: Principles and Technique. New York: Whittlesey House / McGraw-Hill, 1934.",
+    "url": "https://www.baumanrarebooks.com/rare-books/benjamin-graham-david-l-dodd/security-analysis-principles-and-technique/90971.aspx",
+    "verified": "yes (bibliographic listing)"
+   },
+   {
+    "citation": "Graham, Benjamin. The Intelligent Investor. New York: Harper & Brothers, 1949; defensive criteria in ch. 14 of the 4th revised ed. (1973).",
+    "url": "https://www.baumanrarebooks.com/rare-books/graham-benjamin/intelligent-investor/106053.aspx",
+    "verified": "first edition yes; criteria via secondary summaries (Wikipedia 'Graham number'; Winvesta; Motley Fool 2004)"
+   },
+   {
+    "citation": "Oppenheimer, Henry R. 'Ben Graham's Net Current Asset Values: A Performance Update.' Financial Analysts Journal 42(6), November 1986, pp. 40-47. doi:10.2469/faj.v42.n6.40.",
+    "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/1986/ben-grahams-net-current-asset-values-a-performance-update",
+    "verified": "yes"
+   },
+   {
+    "citation": "Kahn, Irving, and Robert D. Milne. Benjamin Graham, The Father of Financial Analysis. Occasional Paper No. 5, Financial Analysts Research Foundation, Charlottesville, VA, 1977 (includes the March 1976 Butler interview).",
+    "url": "https://rpc.cfainstitute.org/research/foundation/1977/benjamin-graham-the-father-of-financial-analysis-full-pdf",
+    "verified": "yes (listing; quote via albertbridgecapital.com)"
+   }
+  ],
+  "extra_sources": [
+   "Merani, Gaurang. 'An Analysis of Graham's Net-Nets: Outdated or Outstanding?' Alpha Architect, 8 Oct 2019 (Montier's 'less than two-thirds' quote; Oppenheimer returns): https://alphaarchitect.com/an-analysis-of-grahams-net-nets-outdated-or-outstanding/"
+  ],
+  "testability": {
+   "verdict": "codable now (Graham number and record tests, SEC filers only); net-net needs data we lack",
+   "detail": "The 10-year earnings and 20-year dividend tests are capped by the XBRL history (about 2009 on), so early years of a backtest would use shorter records. Expect very few net-nets among large companies (not checked: the site lacks current-asset data)."
+  },
+  "unverified": [
+   "Whether the P/E test in the 1973 edition uses three-year (most summaries) or five-year (one summary) average earnings: three-year used here.",
+   "Whether net-net subtracts preferred stock (commonly stated)."
+  ],
+  "new_play_candidate": {
+   "rank": 2,
+   "slug": "graham-number",
+   "name": "Graham Defensive Value",
+   "family": "value (new family)",
+   "data": "SEC fundamentals (data/sec) and price; US SEC filers only",
+   "spec": "At each month-end, using only filings dated on or before that day (data/sec 'filed' dates): EPS3 = average of the last three fiscal years' diluted EPS (each year = four quarterly rows); BVPS = latest equity / latest shares outstanding; G = sqrt(22.5 x EPS3 x BVPS) when both are positive. In when the month-end close is at or below G, net income was positive in every fiscal year on file (up to Graham's ten), and dividends per share were paid in every year on file (up to his twenty); Out when the close rises above G or either record test fails; no call when EPS3 or BVPS is not positive or the company has no SEC data (TSX-only names, funds, crypto). Compare G with the unadjusted close of the day, or adjust G by the same dividend/split factor as data/prices, using the point-in-time handling secfund.py already applies to P/E. Acted on the first trading day of the next month. Graham meant these screens for building a diversified basket and holding it; a per-stock in/out signal is Be The Puck's adaptation. Implemented as a play, not a new score, so it is graded like every other play before it can matter to the signal. Net-net variant once fetch_sec.py adds AssetsCurrent and Liabilities: In when market value < 2/3 x (current assets - total liabilities)."
+  },
+  "unlocked_by": {
+   "missing": "XBRL current assets / liabilities",
+   "note": "Completes the net-net and current-ratio tests."
+  }
+ },
+ {
+  "slug": "dogs-of-the-dow",
+  "name": "Dogs of the Dow, the Foolish Four and Beating the TSX",
+  "people": [
+   {
+    "name": "Michael B. O'Higgins",
+    "dates": "not checked",
+    "role": "Money manager; Beating the Dow (1991, with John Downes)"
+   },
+   {
+    "name": "David and Tom Gardner (The Motley Fool)",
+    "dates": "",
+    "role": "Promoted, then retired, the Foolish Four"
+   },
+   {
+    "name": "David Stanley",
+    "dates": "not checked",
+    "role": "Retired professor in Rockwood, Ont.; Beating the TSX (Canadian MoneySaver, 1996)"
+   }
+  ],
+  "years_active": "1988-2000s",
+  "hook": "Buy the ten highest-yielding blue chips every January: a rule that worked on paper, was data-mined into the Foolish Four, and was publicly retired by its loudest promoter.",
+  "story": "The idea was in The Wall Street Journal by 1988, and Michael O'Higgins made it famous in Beating the Dow (1991, with John Downes): each January buy equal amounts of the ten Dow Jones Industrial stocks with the highest dividend yields and hold them for a year. A high yield served as a marker for out-of-favour blue chips. A 1997 study of 1946-1995 found the Dow-10 beat the Dow-30 before, but not after, its extra risk, trading costs and taxes. In the 1990s the Motley Fool pushed it further with the Foolish Four, a weighted pick of the lowest-priced Dogs that it said had earned about 25% a year from 1973 to 1993. Grant McQueen and Steven Thorley showed the refinements were data mining, with the edge fading out of sample; on 11 December 2000 the Gardners told readers they would no longer advocate the strategy, citing a smaller edge, taxes and fees, and a Dow with fewer big dividend payers. In Canada, David Stanley's Beating the TSX, first published in 1996 in Canadian MoneySaver, applies the same rule to what is now the S&P/TSX 60, and is still tracked there.",
+  "quote": {
+   "text": "no longer going to advocate use of this strategy",
+   "by": "David and Tom Gardner, 'Farewell, Foolish Four', The Motley Fool, 11 Dec 2000"
+  },
+  "original_rule": "At each year-end, rank the 30 Dow stocks by dividend yield (indicated annual dividend / price); buy the top 10 in equal dollar amounts; hold one year; repeat. Small Dogs: the 5 lowest-priced of the 10. Foolish Four: of the 5 lowest-priced, drop the lowest, put 40% in the second-lowest and 20% in each of the other three. Beating the TSX: the 10 highest yielders in the S&P/TSX 60, equal weight, a holding that cuts its dividend replaced by the next on the list, rebuilt every 31 December.",
+  "data_needed": [
+   "fundamentals",
+   "an index"
+  ],
+  "related_plays": [
+   "short-term-reversal",
+   "buy-and-hold"
+  ],
+  "related_thinkers": [
+   "jegadeesh-lehmann",
+   "john-bogle"
+  ],
+  "lineage_note": "A buy-the-unloved rule, related in spirit to the site's 1-Month Reversal; and the cleanest public example of data mining, which the site's own graded record and model comparison are designed to guard against.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "O'Higgins, Michael B., with John Downes. Beating the Dow. New York: HarperCollins, 1991 (revised ed. 2000).",
+    "url": "https://www.bnains.org/livres/bouquins/ohiggi01.php",
+    "verified": "yes (bibliographic)"
+   },
+   {
+    "citation": "McQueen, Grant, Kay Shields and Steven R. Thorley. 'Does the Dow-10 Investment Strategy Beat the Dow Statistically and Economically?' Financial Analysts Journal 53(4), 1997, pp. 66-72. doi:10.2469/faj.v53.n4.2101.",
+    "url": "https://ideas.repec.org/a/taf/ufajxx/v53y1997i4p66-72.html",
+    "verified": "yes"
+   },
+   {
+    "citation": "McQueen, Grant, and Steven Thorley. 'Mining Fools' Gold.' Financial Analysts Journal 55(2), 1999, pp. 61-72; updated as 'Investment Strategy Claims: Don't Fall Into the Data Mine', AAII Journal, February 2000.",
+    "url": "https://www.aaii.com/journal/article/investment-strategy-claims-don-t-fall-into-the-data-mine",
+    "verified": "yes (AAII update read; FAJ citation from RePEc handle)"
+   },
+   {
+    "citation": "Gardner, David, and Tom Gardner. 'Farewell, Foolish Four.' The Motley Fool, 11 December 2000.",
+    "url": "https://g.foolcdn.com/ddow/2000/ddow001211.htm",
+    "verified": "yes"
+   }
+  ],
+  "extra_sources": [
+   "Finiki: Beating the TSX (Stanley, 1996; rules; 1987-2017 record from back-tests): https://finiki.org/wiki/BTSX",
+   "The Globe and Mail, 'Beating the Dow, Canadian style' (Stanley, Rockwood, Ont.): https://www.theglobeandmail.com/report-on-business/beating-the-dow-canadian-style/article22510503",
+   "Wikipedia: Dogs of the Dow (1988 WSJ article by John R. Dorfman, 11 Aug 1988): https://en.wikipedia.org/wiki/Dogs_of_the_Dow"
+  ],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "Point-in-time membership and dividend histories for every member of the Dow 30 or TSX 60. The Canadian version is the better fit for the site once dividend history is added."
+  },
+  "unverified": [
+   "The 1988 WSJ origin rests on Wikipedia's citation only.",
+   "Stanley's start year: 1996 (Finiki) while his record is reported from 1986/1987 (back-tested)."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": {
+   "missing": "dividend history and point-in-time TSX 60 / Dow 30 membership",
+   "note": "Beating the TSX fits the site's Canadian coverage."
+  }
+ },
+ {
+  "slug": "hindenburg-omen",
+  "name": "The Hindenburg Omen",
+  "people": [
+   {
+    "name": "Jim Miekka",
+    "dates": "not verified",
+    "role": "Creator; described in press accounts as a blind mathematician"
+   },
+   {
+    "name": "Kennedy Gammage",
+    "dates": "not verified",
+    "role": "Newsletter writer who publicised and possibly named it"
+   }
+  ],
+  "years_active": "1990s-2010s",
+  "hook": "A crash warning named after a burning airship: it fires when a rising market is making many new highs and many new lows at the same time.",
+  "story": "Jim Miekka built the Omen from one observation: a healthy rising market should not be printing many new 52-week highs and many new 52-week lows on the same day, because that split shows the market fracturing under the surface. The newsletter writer Kennedy Gammage helped publicise it, and the two left conflicting accounts of who suggested naming it after the 1937 airship disaster. The earliest press mention found dates from December 1997, though StockCharts places its creation in the 1980s. It became famous in August 2010, when a signal on 12 August made The Wall Street Journal and Britain's Daily Telegraph; no crash followed. Signals cluster before some big declines, including February 2020, but StockCharts puts its false-alarm rate as high as 80%, saying it tends not to miss big declines while most single signals come to nothing. Even the rule is unsettled: Miekka's own version and the widely copied Wikipedia version use different thresholds, and Tom McClellan showed the famous August 2010 signal met one set of rules but not the other. It still resurfaces whenever new highs and new lows spike together.",
+  "quote": null,
+  "original_rule": "Miekka's version (per McClellan, 2010): on the same day, NYSE new 52-week highs and new 52-week lows each exceed 2.8% of advances plus declines; the NYSE Composite is above its level 50 trading days earlier; the McClellan Oscillator is negative. A signal stays valid for 30 trading days and is active only while the oscillator is negative. Wikipedia version: both above 2.2% of NYSE issues, the smaller at least 69, a rising 10-week average of the NYSE Composite, a negative McClellan Oscillator, and new highs no more than twice new lows.",
+  "data_needed": [
+   "market breadth",
+   "an index"
+  ],
+  "related_plays": [],
+  "related_thinkers": [],
+  "lineage_note": "No breadth plays exist on the site. Its nearest relatives are the site's market guard and the Crash Watch gauges (tools/qstrat/macro.py), which also describe market fragility without timing a crash.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "StockCharts ChartSchool: Hindenburg Omen.",
+    "url": "https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/hindenburg-omen",
+    "verified": "yes"
+   },
+   {
+    "citation": "McClellan, Tom. 'Hindenburg Omen Signaled, But Also Not.' The McClellan Market Report, 13 August 2010.",
+    "url": "https://mcoscillator.com/learning_center/kb/special_market_reports/hindenburg_omen_signaled_but_also_not/",
+    "verified": "yes"
+   },
+   {
+    "citation": "Popik, Barry. 'Hindenburg Omen' (citations from 1997; Gammage's 2005 account of the naming; WSJ, 13 Aug 2010).",
+    "url": "https://barrypopik.com/blog/hindenburg_omen",
+    "verified": "yes"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "NYSE breadth (new highs/lows, advances/declines)."
+  },
+  "unverified": [
+   "Who named it (Gammage says he did; other accounts say Miekka).",
+   "Creation date (1980s per StockCharts vs mid-1990s; earliest print 1997).",
+   "Miekka's and Gammage's life dates."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": {
+   "missing": "daily NYSE breadth (advances, declines, new highs/lows, up/down volume)",
+   "note": "One breadth feed unlocks three classics."
+  }
+ },
+ {
+  "slug": "odd-lot-theory",
+  "name": "The odd-lot theory",
+  "people": [
+   {
+    "name": "Garfield A. Drew",
+    "dates": "not verified",
+    "role": "Economist; New Methods for Profit in the Stock Market (1941)"
+   }
+  ],
+  "years_active": "1940s-1970s",
+  "hook": "Watch the small investor and do the opposite: a contrarian gauge that died when small investors stopped buying shares a few at a time.",
+  "story": "Before mutual funds and discount brokers, investors who could not afford a 100-share round lot bought odd lots through specialist dealers, and the exchange published their daily purchases, sales and short sales. The odd-lot theory, associated with the economist Garfield Drew, whose New Methods for Profit in the Stock Market appeared in 1941 and is cited in the academic odd-lot literature, held that these least-informed traders tend to be wrong at turning points: heavy odd-lot selling, and above all odd-lot short selling, marked bottoms. It was widely studied in the 1960s and 1970s, but the data drifted. A 1978 Financial Analysts Journal article noted that stock dividends, mergers and dividend reinvestment plans had put large numbers of odd-lot shares into investors' hands without showing up as purchases, so odd-lotters had been net buyers in only two of the previous 17 years. Tests found odd-lotters did only slightly worse than the averages, and as small savers moved into mutual funds the theory fell out of use by the 1990s. Today odd lots are mostly slices of algorithmic orders, and US regulators only added them to the public consolidated tape in December 2013.",
+  "quote": null,
+  "original_rule": "Track the odd-lot balance (odd-lot sales / purchases) and the odd-lot short-sales ratio (odd-lot short sales / total odd-lot sales); treat surges in odd-lot selling and short selling as bullish, heavy odd-lot buying in a rising market as bearish. I did not find verified numeric thresholds in a primary source, so a fixed rule cannot be stated.",
+  "data_needed": [
+   "volume"
+  ],
+  "related_plays": [],
+  "related_thinkers": [],
+  "lineage_note": "The ancestor of every 'fade the crowd' sentiment gauge (put/call ratios, advisor surveys). The site has no sentiment play.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Drew, Garfield A. New Methods for Profit in the Stock Market. Boston: Metcalf, 1941 (revised 1948; 1954 ed.).",
+    "url": "https://baumanrarebooks.com/rare-books/drew-ga/new-methods-for-profit-in-the-stock-market/53735.aspx",
+    "verified": "yes (bibliographic); his odd-lot rules not read"
+   },
+   {
+    "citation": "West, S., and T. T. Murphy. 'New Caveats in Relying on Traditional Stock Market Statistics.' Financial Analysts Journal 34(5), 1978, pp. 42-48. doi:10.2469/faj.v34.n5.42.",
+    "url": "https://rpc.cfainstitute.org/research/financial-analysts-journal/1978/new-caveats-in-relying-on-traditional-stock-market-statistics",
+    "verified": "yes"
+   },
+   {
+    "citation": "Wu, Hsiu-Kwang. 'Odd-Lot Trading in the Stock Market and Its Market Impact.' Journal of Financial and Quantitative Analysis 7(1), 1972 (reference list cites Drew; Kewley & Stevenson; Kaish). doi:10.2307/2330066.",
+    "url": "https://www.cambridge.org/core/product/006397270B9083E252F50FF0079B6687",
+    "verified": "yes (abstract; page numbers as listed, 1321-1341, look odd and were not checked)"
+   },
+   {
+    "citation": "Yao, Chen, Maureen O'Hara and Mao Ye. 'What's Not There: The Odd-Lot Bias in TAQ Data.' Journal of Finance, 2014 (odd lots added to the consolidated tape 9 Dec 2013).",
+    "url": "https://www.sciencedaily.com/releases/2013/12/131209090937.htm",
+    "verified": "yes (press summary)"
+   }
+  ],
+  "extra_sources": [
+   "Wikipedia: Odd lotter (fell out of use by the 1990s, citing The New York Times, 21 July 1996; Malkiel, A Random Walk Down Wall Street, 9th ed., pp. 140-41): https://en.wikipedia.org/wiki/Odd_lotter"
+  ],
+  "testability": {
+   "verdict": "needs data we lack",
+   "detail": "And the data that would be needed no longer means what it did, so even a reconstructed series would test a different thing."
+  },
+  "unverified": [
+   "That Drew originated the theory (he is the name usually attached and is cited in the literature; his text was not read).",
+   "Any numeric thresholds."
+  ],
+  "new_play_candidate": null,
+  "unlocked_by": null
+ },
+ {
+  "slug": "arms-index-and-ease-of-movement",
+  "name": "The Arms index (TRIN) and Ease of Movement",
+  "people": [
+   {
+    "name": "Richard W. Arms Jr.",
+    "dates": "1935 - March 2018",
+    "role": "Technical analyst; creator of TRIN, Equivolume and Ease of Movement"
+   }
+  ],
+  "years_active": "1967-2018",
+  "hook": "One of volume's great inventors: one index that needs the whole exchange's breadth, and one that works on a single stock.",
+  "story": "Richard Arms, who studied geology at Brown before turning to markets, introduced his Trading Index in Barron's in the late 1960s (1967 in most accounts, 1968 in one). TRIN divides the ratio of advancing to declining NYSE stocks by the ratio of their volumes: below 1 means volume is crowding into rising stocks, above 1 into falling ones. Arms suggested reading a 10-day average, with above 1.2 as oversold and below 0.8 as overbought. Data feeds still carry it under the symbols TRIN or ARMS and day traders watch it intraday, but as a timing tool it has faded; a 2008 study found its predictive power had weakened sharply over the previous decade. Arms, who called himself a Wyckoffian first, also invented Equivolume charts, whose bars widen with volume, and in Volume Cycles in the Stock Market (1983) the Ease of Movement indicator, which asks how far a stock's midpoint moves for each unit of volume. A rise on light volume counts as easy movement, a sign few sellers stand in the way. Because Ease of Movement needs only one stock's high, low and volume, it is the half of his work the site can test today.",
+  "quote": null,
+  "original_rule": "TRIN = (advancing issues / declining issues) / (advancing volume / declining volume) for the NYSE; single-day readings above 2 to 3 are extreme oversold; 10-day average above 1.2 oversold (bullish), below 0.8 overbought (bearish), as Arms initially recommended (AAII). Ease of Movement: distance = change in the bar's midpoint (H+L)/2; box ratio = scaled volume / (H - L); EMV = distance / box ratio, smoothed (14 periods by convention); positive = price rising easily.",
+  "data_needed": [
+   "market breadth",
+   "volume",
+   "daily prices of one stock"
+  ],
+  "related_plays": [
+   "on-balance-volume",
+   "money-flow-index",
+   "chaikin-money-flow",
+   "force-index",
+   "volume-flow-indicator"
+  ],
+  "related_thinkers": [
+   "joseph-granville",
+   "quong-soudack",
+   "marc-chaikin",
+   "alexander-elder",
+   "markos-katsanos"
+  ],
+  "lineage_note": "EMV is the only common volume line that rewards a move on light volume; OBV, Chaikin and Force Index reward heavy volume. That contrast makes it a useful addition to the volume family.",
+  "new_to_site": true,
+  "sources": [
+   {
+    "citation": "Fraser, Bruce. 'Richard W. Arms Jr., Wyckoffian.' StockCharts.com, 12 May 2018.",
+    "url": "https://articles.stockcharts.com/article/articles-wyckoff-2018-05-richard-w-arms-jr-wyckoffian/",
+    "verified": "yes"
+   },
+   {
+    "citation": "Berman, Larry. 'Paying tribute to the Arms Index.' BNN Bloomberg, 19 March 2018.",
+    "url": "https://www.bnn.ca/larry-berman-paying-tribute-to-the-arms-index-1.1031339",
+    "verified": "yes (gives 1968)"
+   },
+   {
+    "citation": "Thorp, Wayne A. 'Using the Arms Index (TRIN) for Market Breadth Analysis.' AAII Journal, August 2025 (cites Qi & Zhao, Journal of Investing, Spring 2008).",
+    "url": "https://www.aaii.com/journal/article/322803-using-the-arms-index-trin-for-market-breadth-analysis",
+    "verified": "yes"
+   },
+   {
+    "citation": "Arms, Richard W., Jr. Volume Cycles in the Stock Market: Market Timing Through Equivolume Charting. Homewood, IL: Dow Jones-Irwin, 1983.",
+    "url": "https://libcat.library.tamu.edu/Record/in00000371617",
+    "verified": "bibliographic yes; that EMV first appears there rests on one secondary source (therighttrader.com)"
+   }
+  ],
+  "extra_sources": [
+   "The Right Trader, 'Ease of Movement' (formula, 14-period default): https://therighttrader.com/learn/indicators/ease-of-movement"
+  ],
+  "testability": {
+   "verdict": "needs data we lack (TRIN); EMV codable now",
+   "detail": "TRIN needs NYSE breadth and up/down volume. Ease of Movement runs on one stock's OHLCV."
+  },
+  "unverified": [
+   "TRIN's first year (1967 vs 1968).",
+   "EMV's first publication (1983 book per one secondary source)."
+  ],
+  "new_play_candidate": {
+   "rank": 5,
+   "slug": "ease-of-movement",
+   "name": "Ease of Movement",
+   "family": "volume",
+   "data": "daily high, low and volume of one stock",
+   "spec": "Distance = (H + L)/2 - (H(-1) + L(-1))/2. Box ratio = (V / 100,000,000) / (H - L). One-day EMV = distance / box ratio, set to 0 when H = L or V = 0. EMV = 14-day simple average of one-day EMV. In when EMV closes above zero; Out when below. The scale constant only changes the size of the number, never its sign. The zero-line reading is the conventional modern one (StockCharts, TradingView, The Right Trader); Arms presented the measure as a way to read Equivolume charts, so the trading rule is not his. Unlike OBV-style lines, it favours moves on light volume, which is the reason to add it."
+  },
+  "unlocked_by": {
+   "missing": "daily NYSE breadth (advances, declines, new highs/lows, up/down volume)",
+   "note": "One breadth feed unlocks three classics."
+  }
+ },
+ {
+  "slug": "dysart-volume-indexes",
+  "name": "Dysart's volume indexes (NVI and PVI)",
+  "people": [
+   {
+    "name": "Paul L. Dysart Jr.",
+    "dates": "not verified",
+    "role": "Published the weekly Trendway letter, 1933-1969"
+   },
+   {
+    "name": "Norman G. Fosback",
+    "dates": "not verified",
+    "role": "Stock Market Logic (1976); Institute for Econometric Research"
+   }
+  ],
+  "years_active": "1933-1976",
+  "hook": "A Chicago letter writer split the market into quiet days and busy days in 1936, and decided the quiet days told the truth.",
+  "story": "Paul Dysart, an Iowa native working on Chicago's LaSalle Street, published the weekly Trendway letter from 1933 to 1969. In 1936 he began keeping two cumulative advance-decline lines: one that moved only on days when exchange volume fell, which he named AMOMET, for A Measure Of Major Economic Trend, and one that moved only on days when volume rose, his majority curve. His view was that an informed minority acts on quiet days and the crowd follows on busy ones, with worse timing. He started out expecting the busy-day line to be the more useful, and by 1967 he said the quiet-day line had proved his most valuable breadth index. Norman Fosback rebuilt both as price indexes in Stock Market Logic (1976) and tested them on 1941-1975 data. With the Negative Volume Index above its one-year average, a bull market was under way about 96% of the time; for the Positive Volume Index the figure was 79%, while a PVI below its average pointed to a bear market 67% of the time. Both are now standard charting lines applied to single stocks, a long way from Dysart's whole-market breadth.",
+  "quote": null,
+  "original_rule": "Dysart: cumulative NYSE advances minus declines, counted only on days of falling volume (AMOMET, the ancestor of NVI) or rising volume (the majority curve, ancestor of PVI). Fosback: cumulate daily percentage price changes of the market index, only on falling-volume days (NVI) or rising-volume days (PVI); compare each index with its one-year moving average.",
+  "data_needed": [
+   "daily prices of one stock",
+   "volume"
+  ],
+  "related_plays": [
+   "negative-volume-index",
+   "on-balance-volume",
+   "buff-averages"
+  ],
+  "related_thinkers": [
+   "paul-dysart",
+   "norman-fosback",
+   "buff-dormeier",
+   "joseph-granville"
+  ],
+  "lineage_note": "The NVI play's 255-day average and compounding follow Fosback; PVI is its untested twin, and Fosback's own numbers make it a natural control: same idea, busy days instead of quiet ones.",
+  "new_to_site": false,
+  "sources": [
+   {
+    "citation": "Fosback, Norman G. Stock Market Logic. Fort Lauderdale: The Institute for Econometric Research, 1976.",
+    "url": "https://libcat.library.tamu.edu/Record/in00000348468",
+    "verified": "bibliographic yes (via THINKERS sources); figures via Wikipedia and StockCharts"
+   },
+   {
+    "citation": "Wikipedia: Negative volume index (history section on Dysart, AMOMET, the majority curve, 1967 remark, Fosback's 1941-1975 figures for NVI and PVI).",
+    "url": "https://en.wikipedia.org/wiki/Negative_volume_index",
+    "verified": "yes (secondary)"
+   },
+   {
+    "citation": "StockCharts ChartSchool: Negative Volume Index (NVI).",
+    "url": "https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/negative-volume-index-nvi",
+    "verified": "via THINKERS sources"
+   },
+   {
+    "citation": "Fidelity Learning Center: Positive Volume Index (formula; Fosback's 1941-1975 data summary).",
+    "url": "https://www.fidelity.com/learning-center/trading-investing/technical-analysis/technical-indicator-guide/positive-volume-index",
+    "verified": "yes"
+   }
+  ],
+  "extra_sources": [],
+  "testability": {
+   "verdict": "codable now",
+   "detail": "NVI is already a play; PVI needs only one stock's close and volume."
+  },
+  "unverified": [
+   "Dysart's and Fosback's life dates.",
+   "The type of one-year average in Fosback's original test (the NVI play uses a 255-day EMA, as StockCharts does)."
+  ],
+  "new_play_candidate": {
+   "rank": 3,
+   "slug": "positive-volume-index",
+   "name": "Positive Volume Index",
+   "family": "volume",
+   "data": "daily close and volume of one stock",
+   "spec": "PVI starts at 1,000. On a day when volume is higher than the previous day's, PVI moves by that day's percentage change in the close (compounding); on other days it is unchanged. In when PVI closes above its 255-day exponential average (Fosback's one-year average, matching the NVI play); Out when it closes below. About a year of history is needed before the first call. Fosback's 79% bull / 67% bear odds came from the whole market in 1941-1975, and Dysart judged the busy-day line the weaker of his two; part of its value on the site is as the NVI play's control, so the two can be shown side by side."
+  },
+  "unlocked_by": null
+ }
+]

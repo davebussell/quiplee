@@ -113,6 +113,9 @@ def main():
         site.strategies_index()
         for s in PLAYS:
             site.strategy_page(s)
+    if "classics" in extra:
+        from qstrat import classics
+        classics.build(site)
     if "pairs" in extra:
         for t in TICKERS:
             if t["sym"] in syms:
