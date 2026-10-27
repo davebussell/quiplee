@@ -36,3 +36,4 @@ _site/
 
 # Local engine cache and previews (tools/dev_render.py)
 .cache/
+.claude/
