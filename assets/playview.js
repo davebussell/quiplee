@@ -30,6 +30,40 @@
 
   // ------------------------------------------------------------ your signal
   var card = document.getElementById('your-signal');
+  // a factor's value as a plain phrase about the stock: the same words as factors.friendly (keep the two in step)
+  function numIn(v) {
+    var m = String(v == null ? '' : v).match(/([+\-\u2212]?)(\d[\d,]*\.?\d*)/);
+    if (!m) return null;
+    var x = parseFloat(m[2].replace(/,/g, ''));
+    return m[1] === '-' || m[1] === '\u2212' ? -x : x;
+  }
+  function friendly(k, v) {
+    v = v == null ? '' : String(v);
+    var x = numIn(v), ax = x == null ? null : Math.abs(x);
+    var a = ax == null ? null : (ax >= 10 || ax % 1 === 0 ? Math.round(ax).toLocaleString('en-US') : ax.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
+    var up = (x || 0) >= 0, word;
+    switch (k) {
+      case 'plays': return v + ' of the plays own it';
+      case 'offhigh': return v.indexOf('at ') === 0 ? 'it\u2019s at its high of the past year' : 'it\u2019s ' + (x != null && Math.abs(x) < 15 ? 'only ' : '') + a + '% below its high of the past year';
+      case 'trend': return !x ? 'it\u2019s right at its average price of the last 200 days' : 'it\u2019s ' + a + '% ' + (x > 0 ? 'above' : 'below') + ' its average price of the last 200 days';
+      case 'mom': return 'it\u2019s ' + (up ? 'up' : 'down') + ' ' + a + '% over the past year';
+      case 'upside': return x != null && Math.abs(x) < 3 ? 'analysts\u2019 average target is close to the price' : 'analysts\u2019 average target is ' + a + '% ' + ((x || 0) > 0 ? 'above' : 'below') + ' the price';
+      case 'rating': word = v.indexOf('\u00b7') >= 0 ? v.split('\u00b7').pop().trim() : v; return 'analysts rate it a ' + word + ' on average';
+      case 'pe': return v === 'loss' ? 'it\u2019s losing money' : 'it costs ' + a + ' times its yearly profit';
+      case 'fpe': return v.indexOf('loss') >= 0 ? 'it\u2019s expected to lose money next year' : 'it costs ' + a + ' times next year\u2019s expected profit';
+      case 'peg': return 'its price for its growth (PEG) is ' + v;
+      case 'ps': return 'it costs ' + a + ' times its yearly sales';
+      case 'pb': return v.indexOf('negative') >= 0 ? 'its book value is negative' : 'it costs ' + a + ' times its book value';
+      case 'dy': return v === 'none' ? 'it pays no dividend' : 'it pays a ' + v + ' dividend';
+      case 'eg': return (x || 0) <= -100 ? 'its profit fell sharply over the year (' + v + ')' : 'its profit ' + (up ? 'grew' : 'fell') + ' ' + a + '% over the year';
+      case 'rg': return 'its sales ' + (up ? 'grew' : 'fell') + ' ' + a + '% over the year';
+      case 'pm': return (x || 0) < 0 ? 'it loses money on its sales' : 'it keeps ' + a + ' cents of every sales dollar as profit';
+      case 'roe': return (x || 0) < 0 ? 'it loses money on its shareholders\u2019 equity' : 'it earns ' + a + '% a year on its shareholders\u2019 equity';
+      case 'de': return v.indexOf('negative') >= 0 ? 'its debts are bigger than its assets' : 'it carries ' + ((x || 0) < 0.5 ? 'little' : (x || 0) < 1.5 ? 'moderate' : 'heavy') + ' debt (' + v + ' its equity)';
+      case 'calm': word = v.indexOf('\u00b7') >= 0 ? v.split('\u00b7').pop().trim() : ''; return word ? 'its crash exposure is ' + word + ' (' + v.split('\u00b7')[0].trim() + ')' : 'its crash exposure is ' + v;
+    }
+    return k + ' is ' + v;
+  }
   function why(r, W) {
     var have = r.parts.filter(function (p) { return p.p != null && !p.stood; });
     if (r.s == null) {
@@ -41,11 +75,13 @@
     else {
       var where = r.sig === 1 ? 'at or above your Buy line of ' + W.buy : r.sig === -1 ? 'at or below your Sell line of ' + W.sell
         : 'between your Sell line (' + W.sell + ') and Buy line (' + W.buy + ')';
-      out = P.sigWord(r.sig) + ': ' + r.s + ' is ' + where + '.';
+      out = P.sigWord(r.sig) + ': ' + H.s + ' scores ' + r.s + ' out of 100, ' + where + '.';
     }
-    if (have.length === 1) return out + ' ' + have[0].n + ' (' + have[0].v + ') scores ' + have[0].p + '.';
+    if (have.length === 1) return out + ' It rests on one thing: ' + friendly(have[0].k, have[0].v) + '.';
+    // the same pick as factors.why: max/min keep the first of equal points
     var hi = have.reduce(function (a, b) { return b.p > a.p ? b : a; }), lo = have.reduce(function (a, b) { return b.p < a.p ? b : a; });
-    return out + ' ' + hi.n + ' (' + hi.v + ') scores ' + hi.p + ' and lifts it; ' + lo.n + ' (' + lo.v + ') scores ' + lo.p + ' and holds it back.';
+    var upw = hi.p >= 50 ? 'What helps most: ' : 'Even its best point is weak: ', dnw = lo.p < 50 ? 'What holds it back: ' : 'Its weakest point: ';
+    return out + ' ' + upw + friendly(hi.k, hi.v) + '. ' + dnw + friendly(lo.k, lo.v) + '.';
   }
   function drawSignal(D) {
     if (!card || !D.x[H.sym]) return;

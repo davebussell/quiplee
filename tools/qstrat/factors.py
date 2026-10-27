@@ -556,8 +556,77 @@ def flip_words(fl, cur, p0):
     return out[0].upper() + out[1:]
 
 
+def _num_in(v):
+    """The first number in a shown value ("−25% from its 1-year high" -> -25.0), or None."""
+    import re as _re
+    m = _re.search(r"([+\-−]?)(\d[\d,]*\.?\d*)", str(v or ""))
+    if not m:
+        return None
+    x = float(m.group(2).replace(",", ""))
+    return -x if m.group(1) in ("-", "−") else x
+
+
+def friendly(k, v):
+    """A factor's value as a plain phrase about the stock ("it’s 25% below its high of the past year").
+    assets/playview.js friendly() says the same; keep the two in step."""
+    return _friendly(k, v).replace("'", "\u2019")
+
+
+def _friendly(k, v):
+    v = "" if v is None else str(v)
+    x = _num_in(v)
+    a = None if x is None else (f"{abs(x):,.0f}" if abs(x) >= 10 or float(abs(x)).is_integer() else f"{abs(x):,.1f}")
+    if k == "plays":
+        return f"{v} of the plays own it"
+    if k == "offhigh":
+        return ("it's at its high of the past year" if v.startswith("at ") else
+                f"it's {'only ' if x is not None and abs(x) < 15 else ''}{a}% below its high of the past year")
+    if k == "trend":
+        return ("it's right at its average price of the last 200 days" if not x else
+                f"it's {a}% {'above' if x > 0 else 'below'} its average price of the last 200 days")
+    if k == "mom":
+        return f"it's {'up' if (x or 0) >= 0 else 'down'} {a}% over the past year"
+    if k == "upside":
+        return ("analysts' average target is close to the price" if x is not None and abs(x) < 3 else
+                f"analysts' average target is {a}% {'above' if (x or 0) > 0 else 'below'} the price")
+    if k == "rating":
+        word = v.split("·")[-1].strip() if "·" in v else v
+        return f"analysts rate it a {word} on average"
+    if k == "pe":
+        return "it's losing money" if v == "loss" else f"it costs {a} times its yearly profit"
+    if k == "fpe":
+        return "it's expected to lose money next year" if "loss" in v else f"it costs {a} times next year's expected profit"
+    if k == "peg":
+        return f"its price for its growth (PEG) is {v}"
+    if k == "ps":
+        return f"it costs {a} times its yearly sales"
+    if k == "pb":
+        return "its book value is negative" if "negative" in v else f"it costs {a} times its book value"
+    if k == "dy":
+        return "it pays no dividend" if v == "none" else f"it pays a {v} dividend"
+    if k == "eg":
+        if (x or 0) <= -100:
+            return f"its profit fell sharply over the year ({v})"
+        return f"its profit {'grew' if (x or 0) >= 0 else 'fell'} {a}% over the year"
+    if k == "rg":
+        return f"its sales {'grew' if (x or 0) >= 0 else 'fell'} {a}% over the year"
+    if k == "pm":
+        return "it loses money on its sales" if (x or 0) < 0 else f"it keeps {a} cents of every sales dollar as profit"
+    if k == "roe":
+        return "it loses money on its shareholders' equity" if (x or 0) < 0 else f"it earns {a}% a year on its shareholders' equity"
+    if k == "de":
+        if "negative" in v:
+            return "its debts are bigger than its assets"
+        return f"it carries {'little' if (x or 0) < 0.5 else 'moderate' if (x or 0) < 1.5 else 'heavy'} debt ({v} its equity)"
+    if k == "calm":
+        lvl = v.split("·")[-1].strip() if "·" in v else ""
+        return f"its crash exposure is {lvl} ({v.split('·')[0].strip()})" if lvl else f"its crash exposure is {v}"
+    return f"{k} is {v}"
+
+
 def why(short, s, sig, parts, buy=BUY, sell=SELL):
-    """One or two plain sentences on why the score lands where it does (assets/playview.js says the same)."""
+    """A few plain sentences on why the score lands where it does: the call and where the score sits, then the factor
+    that helps most and the one that holds it back, in everyday words (assets/playview.js says the same)."""
     have = [x for x in parts if x["p"] is not None and not x.get("stood")]
     if s is None:
         miss = [x["n"] for x in parts if x["p"] is None and not x.get("stood")]
@@ -568,12 +637,14 @@ def why(short, s, sig, parts, buy=BUY, sell=SELL):
     else:
         where = (f"at or above your Buy line of {buy}" if sig == 1 else f"at or below your Sell line of {sell}" if sig == -1
                  else f"between your Sell line ({sell}) and Buy line ({buy})")
-        out = f"{SIG_WORD[sig]}: {s} is {where}."
+        out = f"{SIG_WORD[sig]}: {short} scores {s} out of 100, {where}."
+    fw = lambda x: friendly(x.get("k"), x["v"])
     if len(have) == 1:
-        x = have[0]
-        return out + f" {x['n']} ({x['v']}) scores {x['p']}."
+        return out + f" It rests on one thing: {fw(have[0])}."
     hi, lo = max(have, key=lambda x: x["p"]), min(have, key=lambda x: x["p"])
-    return out + f" {hi['n']} ({hi['v']}) scores {hi['p']} and lifts it; {lo['n']} ({lo['v']}) scores {lo['p']} and holds it back."
+    up = f"What helps most: {fw(hi)}." if hi["p"] >= 50 else f"Even its best point is weak: {fw(hi)}."
+    down = f"What holds it back: {fw(lo)}." if lo["p"] < 50 else f"Its weakest point: {fw(lo)}."
+    return f"{out} {up} {down}"
 
 
 def signal_card(site, t, h):
