@@ -266,6 +266,13 @@ of the 17 factors as columns (Columns picker with quick picks; values from data/
 40 or less), filters by signal, group, name and "favours buying"/"counts against" on any factor, sorts by any header
 (sortable.js; the phone card view gets its Sort by menu) and keeps the view per browser (`bp.me.view.v1`).
 
+**Friendly by default.** Every play has an everyday name and a one-line explanation (`tools/qstrat/plain.py`,
+copied onto each play as `plain` / `oneline`; `render.play_label` and `play_name_html` show the technical name with
+it). Your signal's reason reads in everyday words (`factors.friendly` / `factors.why`, mirrored word for word in
+`assets/playview.js`). Pages open in **Simple** view (`<html data-view="simple">`, `assets/view.js`): anything
+marked `data-adv="what it holds"` hides behind a one-tap "Show the details" button and `.adv-col` table columns hide;
+the footer's "View: Simple · Detailed" switches for good (`bp.view`, set in each page's head before it paints).
+
 **Articles, signed in (`assets/artmine.js`).** The hub leads with "About your stocks": a brief per stock in
 My stocks (your signal on it and where it would change) and every piece that links to them, from
 `data/articles.json` (`articles.index_json`: each article with the stocks it links to, recorded as pages are

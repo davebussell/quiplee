@@ -2162,3 +2162,17 @@ p.sig-flip [data-sig-flip] { color: var(--ink); font-weight: 500; }
 .tp-line { display: block; font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
 .h1-tech { margin: -4px 0 8px; font: 500 13px var(--data); color: var(--muted); letter-spacing: .02em; }
 .ps-tn { display: block; font: 500 11px var(--data); color: var(--muted); }
+/* Simple / Detailed (assets/view.js): the details one tap away */
+html[data-view="simple"] [data-adv]:not(.adv-shown) { display: none !important; }
+html[data-view="simple"] table:not(.cols-shown) .adv-col { display: none !important; }
+html[data-view="full"] .adv-cols-note, .adv-tap[hidden] { display: none !important; }
+.adv-tap { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 14px 0; }
+.adv-open { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 10px;
+  border: 1px dashed var(--line-2); color: var(--ink-2); font: 500 14px var(--ui); background: var(--panel); }
+.adv-open:hover { color: var(--ink); border-color: var(--violet); }
+.adv-open:focus-visible { outline: 2px solid var(--violet-ink); outline-offset: 2px; }
+.adv-plus { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--panel-2); color: var(--violet-ink); font-weight: 700; }
+.adv-always { font-size: 12.5px; }
+.adv-cols-note { margin: 8px 0 0; color: var(--muted); }
+.foot-view { margin: 10px 0 0; color: var(--ink-2); }
+.foot-view [data-view-set].on { color: var(--ink); font-weight: 700; text-decoration: none; }

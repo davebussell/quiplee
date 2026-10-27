@@ -673,14 +673,15 @@ def signal_card(site, t, h):
 <div class="sig-scale" aria-hidden="true" data-sig-scale><span class="sig-zone sell" style="width:{SELL}%"></span><span class="sig-zone hold" style="width:{BUY - SELL}%"></span><span class="sig-zone buy" style="width:{100 - BUY}%"></span><i class="sig-dot" style="left:{pos}%"></i></div></div>
 <p class="sig-why" data-sig-why>{e(why(t["short"], s, sig, parts))}</p>
 {state_line}
-<p class="small sig-tested" data-sig-tested>{e(tested_line(site, parts))}</p>
 <p class="small sig-flip"><span data-sig-flip>{e(flip_words(flip_lines(site, t), t.get("cur", "$"), float(site.R[(t["sym"], "buy-and-hold")]["price"])))}</span> <span class="muted">With the plays and company numbers where they are; each play's own exit price is under Next move.</span></p>
-<div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
 <div class="sig-acts"><span class="ps-chips"><button type="button" class="ps-chip" data-ps-open="weights" aria-haspopup="dialog"><span class="ps-chip-k">Weights</span><b data-ps-wlabel>Plays + exit rules</b><span class="ps-caret" aria-hidden="true">▾</span></button>
 <button type="button" class="ps-chip" data-ps-open aria-haspopup="dialog"><span class="ps-chip-k">Plays counted</span><b data-ps-label>All {len(TIMED)}</b><span class="ps-caret" aria-hidden="true">▾</span></button></span>
 {alert}</div>
+<div class="sig-more" data-adv="How the score is worked out"><p class="small sig-tested" data-sig-tested>{e(tested_line(site, parts))}</p>
+<div class="tbl-wrap"><table class="tbl sig-tbl"><thead><tr><th>Factor you weight</th><th>{e(t["short"])}</th><th class="r">Points</th><th class="r">Weight</th><th class="r">Adds</th></tr></thead><tbody data-sig-rows>{rows}</tbody></table></div>
 <p class="small muted sig-note">Your signal is the one call Be The Puck makes on a stock, and you set it: weight the plays, analysts, P/E, growth, debt, trend and more, and move the Buy and Sell lines. Every page follows your choice. <a href="{h("guides/your-plays/")}#your-signal">How the score works</a></p>
 <details class="sig-all"><summary>All {len(FACTORS)} factors for {e(t["short"])}</summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Factor</th><th>{e(t["short"])}</th><th class="r">Points</th><th>What it is</th></tr></thead><tbody data-sig-all>{allrows}</tbody></table></div></details>
+</div>
 </section>"""
 
 

@@ -615,9 +615,10 @@ class Site:
         banner = free_bar(self, depth) if is_locked(path) and not path.startswith("locked/") else ""
         cta = "" if (not path or path.startswith(("me/", "locked/"))) else foot_cta(h, path)
         return f"""<!doctype html>
-<html lang="en">
+<html lang="en" data-view="simple">
 <head>
 <meta charset="utf-8">
+<script>try{{if(localStorage.getItem('bp.view')==='full')document.documentElement.setAttribute('data-view','full')}}catch(e){{}}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(full_title)}</title>
 <meta name="description" content="{e(desc)}">
@@ -658,6 +659,7 @@ class Site:
 <div><p class="foot-h">Members</p><a href="{h('members/')}">Membership</a><a href="{h('picks/')}">Top picks</a><a href="{h('rules/')}">Your own rules</a><a href="{h('articles/')}">Reports</a></div>
 </div>
 {foot_disclaim(h('guides/ways-to-invest/'))}
+<p class="foot-view small" role="group" aria-label="How much detail to show">View: <button type="button" class="linkish" data-view-set="simple">Simple</button> · <button type="button" class="linkish" data-view-set="full">Detailed</button> <span class="muted">Simple shows the call and why; Detailed shows every number.</span></p>
 <p class="foot-meta">Closes through {dlong(self.asof)} · Prices from Yahoo Finance, macro data from FRED and multpl · Rebuilt after each U.S. close</p>
 {FOOT_CREDITS}
 </div></footer>
@@ -666,6 +668,7 @@ class Site:
 <script src="{h('assets/glossary.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/account.js')}?v={self.ver}" defer></script>
 <script src="{h('assets/mine.js')}?v={self.ver}" defer></script>
+<script src="{h('assets/view.js')}?v={self.ver}" defer></script>
 {more}</body>
 </html>
 """
@@ -1131,7 +1134,7 @@ class Site:
 <section class="split">{rule_card}{self.against_card(depth)}</section>
 <section class="card practice-strip"><p><b>Practise this play.</b> See if you can read its call on real charts, or drill its rule on a flashcard.</p>
 <div class="chips"><a href="{h('learn/call-it/')}?play={s['slug']}">Call it: {e(s['name'])}</a><a href="{h('learn/flashcards/')}?deck=plays#{s['slug']}">Flashcard</a></div></section>
-<section><div class="sec-head"><h2 class="h2">What it says now</h2><p>The close that would flip each call on its next {BAR_WORD[s['bar']]} check.</p></div>
+<section data-adv="What it says on every stock now, and the price that would flip each call"><div class="sec-head"><h2 class="h2">What it says now</h2><p>The close that would flip each call on its next {BAR_WORD[s['bar']]} check.</p></div>
 <div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th>Next check</th></tr></thead><tbody>{now_rows}</tbody></table></div></section>
 <section><div class="sec-head"><h2 class="h2">The record</h2><p>Play / buy and hold over the same dates, since 2005 or the first date with enough history.</p></div>
 <div class="tbl-wrap"><table class="tbl" data-mine><thead><tr><th>Stock</th><th class="r">Annual return</th><th class="r">Worst drawdown</th><th class="r">Sharpe</th><th class="r">Calls right</th><th class="r">Switches / yr</th></tr></thead><tbody>{rec_rows}</tbody></table></div></section>
@@ -1271,14 +1274,14 @@ class Site:
             rows += (f'<tr data-group="{gslug}"{ndx_attr} data-sym="{e(t["sym"])}" data-upp="{upp}" data-sig="{"" if sig is None else sig}" data-share="{k / n if n else 0:.3f}" data-q="{e((t["short"] + " " + t["sym"] + " " + t["name"]).lower())}">'
                      f'<td class="stick"><a class="sym" href="{h("stocks/" + t["slug"] + "/")}">{e(t["short"])}</a><span class="sym-sub">{e(t["name"])}</span></td>'
                      f'<td class="nowrap" data-v="{score if score is not None else ""}" data-ps-signal data-with-score>{sig_pill(sig)}{f" <b class=sig-n>{score}</b>" if score is not None else ""}</td>'
-                     f'<td class="small muted grp-col">{e(t["group"])}</td>'
+                     f'<td class="small muted grp-col adv-col">{e(t["group"])}</td>'
                      f'<td class="r mono">{money(x["price"], t["cur"])}</td>'
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
                      f'<td class="r {dir_cls(y1)}" data-v="{sortv(y1)}">{pct(y1, d=0)}</td>'
-                     f'<td class="r {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
-                     f'<td data-v="{sortv(k / n if n else None)}" data-ps-plays>{count_in(k, n)}</td>'
-                     f'<td class="r {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
-                     f'<td data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
+                     f'<td class="r adv-col {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
+                     f'<td class="adv-col" data-v="{sortv(k / n if n else None)}" data-ps-plays>{count_in(k, n)}</td>'
+                     f'<td class="r adv-col {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
+                     f'<td class="adv-col" data-v="{rk.get("score", "")}">' + (f'<span class="lvl lvl-{sv.LEVEL_CLASS[lvl]}">{e(lvl)}</span>' if lvl else '<span class="muted">–</span>') + '</td></tr>')
         chips = ('<button type="button" class="chip-btn" aria-pressed="true" data-group="">All</button>'
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="ndx">Nasdaq-100</button>'
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="tsx">TSX</button>') + "".join(
@@ -1300,9 +1303,10 @@ class Site:
 <div class="chips st-groups">{chips}</div>
 </div>
 <div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl" data-mine><thead><tr>
-<th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th>Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r">vs 200-day</th>
-<th data-sort-first="desc">Plays in</th><th class="r" data-sort-first="desc">Analysts' target</th>
-<th data-sort-first="desc">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
+<th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th class="adv-col">Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r adv-col">vs 200-day</th>
+<th data-sort-first="desc" class="adv-col">Plays in</th><th class="r adv-col" data-sort-first="desc">Analysts' target</th>
+<th data-sort-first="desc" class="adv-col">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p class="adv-cols-note small"><button type="button" class="linkish" data-adv-cols>Show the other five columns</button>: group, vs 200-day, plays in, analysts' target and crash exposure.</p>
 <p class="muted small" id="st-count"></p>
 <p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. The standard weights are {e(default_words())}; change them to bring in P/E, growth, debt, analysts and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines; with the standard weights a Buy or Sell holds until the score crosses 50, and while a stock's market is 15% or more below its 1-year high the price factors stand down (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
@@ -1388,7 +1392,7 @@ class Site:
             out_tile = (f'<a class="card tile tile-link" href="{h("articles/green-across-the-board/")}" data-ps-score="{e(sym)}" data-upp="{upp:.4f}"><span class="tile-label">Plays + analysts\' upside</span>'
                         f'<span class="tile-value"><span data-v>{round(ol["score"] * 100)}</span><small> / 100</small></span>{fill_bar(round(ol["score"] * 100), 100)}'
                         f'<span class="tile-note">Target <b class="{dir_cls(ol["upside"])}">{pct(ol["upside"], d=0)}</b> from {ol["n_an"]} analysts; half the score is the plays.</span></a>')
-        summary = f"""<section class="sum-tiles">
+        summary = f"""<section class="sum-tiles" data-adv="Plays in, crash exposure and trend at a glance">
 <div class="card tile" data-ps-tile="{e(sym)}"><span class="tile-label">Plays in</span><span class="tile-value"><span data-k>{k}</span><small> / <span data-n>{n}</span></small></span>{fill_bar(k, n)}<span class="tile-note" data-note>Every play Be The Puck tests, in {len(FAMILIES)} families.</span></div>
 {crash_tile}{trend_tile}
 </section>"""
@@ -1411,7 +1415,7 @@ class Site:
         crash_html = sv.crash_card(t, rk, h) if rk else ""
         deep = ""
         if fund_html or crash_html:
-            deep = f'<section class="deep" id="crash">{crash_html}{fund_html}</section>'
+            deep = f'<section class="deep" id="crash" data-adv="Crash exposure and the company\'s numbers">{crash_html}{fund_html}</section>'
         exposed = self.index_exposed(t, depth) if t.get("index") else ""
         arts = self.articles_for(t, depth)
         watch_btn = (f'<button type="button" class="btn sm" data-watch-add="{e(sym)}" data-watch-href="{e(h("watchlist/"))}">+ Add to my watchlist</button>')
@@ -1443,7 +1447,7 @@ class Site:
 {chart}
 {moves_block(self, t, h)}
 {heat}
-<section id="every-play"><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p data-ps-all-sub>All {len(TIMED)} plays, by family.</p></div>
+<section id="every-play" data-adv="Every play on {e(t['short'])}: each call, its record and the price that would flip it"><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p data-ps-all-sub>All {len(TIMED)} plays, by family.</p></div>
 <div class="fam-tiles">{tiles}</div>
 <p class="muted small">Calls right: how often the play's calls on {e(t['short'])} went the right way since {GRADE_YEAR}. Record columns: play / buy and hold, annual return and worst drawdown since {start_y}. <span class="wide-only">Click a column to sort.</span><span class="narrow-only">Sort with the menu above the list.</span></p>
 <div class="tbl-wrap" id="plays-tbl"><table class="tbl"><thead><tr><th>Play</th><th>Call</th><th>Since</th><th data-sort-first="asc">Next move</th><th class="r" data-sort-first="desc">Calls right</th><th class="r">Annual return</th><th class="r">Worst drawdown</th></tr></thead><tbody>{rows}</tbody></table></div></section>

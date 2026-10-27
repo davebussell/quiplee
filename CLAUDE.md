@@ -78,6 +78,10 @@ for that isn't there, and move an issue to Done only once the change is live.
 - **My stocks never loses a stock.** Signed in, a browser's saved stocks join the account (`assets/mine.js`); no
   page deletes a browser's list or replaces an account's list without a tap, and a replace that drops 3+ stocks
   keeps `follow_was` so the account page can put them back.
+- **Friendly by default (Oct 27, 2026).** Every play is shown by its everyday name (`plain.py`) with the technical
+  name under it; a new play needs both. Pages open in Simple view: mark new detail sections `data-adv="..."` and
+  detail columns `.adv-col` (`assets/view.js`). Explanations use everyday words; `factors.friendly`/`why` and
+  `playview.js` must say the same thing.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.
