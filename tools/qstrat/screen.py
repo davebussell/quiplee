@@ -21,8 +21,9 @@ RISK = ["Low", "Moderate", "High", "Very high"]
 RISK_CLS = ["calm", "watch", "warning", "warning"]
 MARKETS = [("", "All"), ("us", "U.S."), ("ca", "Canada"), ("crypto", "Crypto"), ("fund", "Funds & indexes")]
 FUND_GROUPS = ("Market indexes", "Sectors", "Indexes & ETFs")
-SORTS = [("score", "Highest score (your weights)"), ("up", "Most analyst upside"), ("agree", "Most plays agree"), ("acc", "Most accurate plays agree"), ("day", "Biggest move today"), ("y1", "Best year"),
-         ("risk", "Least crash exposure"), ("az", "A to Z")]
+SORTS = [("score", "Highest score (your weights)"), ("earn", "Next earnings, soonest first"), ("up", "Most analyst upside"), ("agree", "Most plays agree"), ("acc", "Most accurate plays agree"),
+         ("day", "Biggest move today"), ("y1", "Best year"), ("risk", "Least crash exposure"), ("az", "A to Z")]
+NE_ORD = {"b": 0, "d": 1, "": 1, "a": 2}       # before the open, during the day, after the close (screen.js BPNext.key)
 DEFAULT_MIN = 60
 DEFAULT_SORT = "score"       # the screener opens on the score (the reader's weights; the standard ones before they choose)
 PAGE = 25
@@ -43,6 +44,8 @@ def rows(site):
     if cache is not None:
         return cache
     fams = [[p for p in TIMED if p["family"] == k] for k, _, _ in FAMILIES]
+    from .newsevents import next_reports
+    NX = next_reports(site)
     out = []
     for t in TICKERS:
         sym = t["sym"]
@@ -72,6 +75,7 @@ def rows(site):
             "up": round(float(ol["upside"]), 4) if ol["ok"] and ol["upside"] is not None else None,
             "since": pd.Timestamp(since).strftime("%Y-%m-%d") if since is not None else None,
             "sc": sc, "sg": sg,
+            "e": list(NX[sym][:2]) if sym in NX else None,
         })
     site.__dict__["_screen_rows"] = out
     return out
@@ -119,6 +123,8 @@ def ranked(site, st):
     if st["sort"] == "score":   # highest score first (lowest when selling); names with no score go last
         sgn = -1 if st["side"] == "buy" else 1
         got.sort(key=lambda r: (r["sc"] is None, sgn * (r["sc"] or 0), -agree(r, st["side"]) / r["o"], r["s"]))
+    elif st["sort"] == "earn":  # the next earnings report, soonest first; funds, coins and names with no date go last
+        got.sort(key=lambda r: (r["e"] is None, (r["e"][0], NE_ORD.get(r["e"][1], 1)) if r["e"] else ("", 0), r["s"]))
     elif st["sort"] == "up":    # most analyst upside first; names with no analyst target go last
         got.sort(key=lambda r: (r["up"] is None, -(r["up"] or 0), -agree(r, st["side"]) / r["o"], r["s"]))
     else:
@@ -127,6 +133,17 @@ def ranked(site, st):
 
 
 # ------------------------------------------------------------------ markup (screen.js draws the same)
+def ne_html(ne, year=None):
+    """The next earnings report in a screener row: 'Nov 2' over 'after close' (screen.js draws it with BPNext.html)."""
+    from .render import NEXT_SHORT
+    if not ne:
+        return '<span class="muted">–</span>'
+    import datetime as _dt
+    d = _dt.date.fromisoformat(ne[0])
+    day = d.strftime("%b %-d") + (d.strftime(", %Y") if year and d.year != year else "")
+    return f'<span class="ne-d">{day}</span>' + (f'<small class="ne-t">{NEXT_SHORT[ne[1]]}</small>' if ne[1] else "")
+
+
 def signal_html(r):
     """Your signal with the standard weights (screen.js redraws it with the reader's)."""
     from .factors import SIG_WORD, SIG_CLS
@@ -152,6 +169,7 @@ def row_html(site, r, side, depth):
             f'<span class="scr-fams {side}" aria-hidden="true">{fams}</span>'
             f'<span class="scr-px mono">{money(r["p"], r["c"])} <small class="{dir_cls(r["d"])}">{pct(r["d"])}</small></span>'
             f'<span class="scr-y1 {dir_cls(r["y"])}"><em>1 yr</em>{pct(r["y"], d=0)}</span>'
+            f'<span class="scr-ne{"" if r["e"] else " none"}"><em>Earnings</em>{ne_html(r["e"], site.asof.year)}</span>'
             f'<span class="scr-risk"><em>Crash</em>{risk}</span>'
             f'<span class="scr-up"><em>Analysts</em>{up}</span></a>'
             f'<button type="button" class="scr-star" aria-pressed="false" aria-label="Follow {e(r["s"])}" title="Follow {e(r["s"])}">☆</button></li>')
@@ -226,7 +244,7 @@ def preset_screen(site, kw):
 
 
 def screener(site, depth):
-    from .render import ps_bar
+    from .render import ps_bar, NEXT_HINT
     h = lambda x: site.href(depth, x)
     st = state()
     got = ranked(site, st)
@@ -277,11 +295,11 @@ def screener(site, depth):
   <div class="scr-head"><p class="scr-sum" id="scr-sum" aria-live="polite">{summary(len(got), st)}</p>
   <label class="scr-sort"><span class="small muted">Sort</span><select id="scr-sort">{sorts}</select></label>
   <button type="button" class="linkish scr-reset" id="scr-reset" hidden>Start over</button></div>
-  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Your signal</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span>Crash</span><span>Analysts</span><span></span></div>
+  <div class="scr-cols" aria-hidden="true"><span>Stock</span><span>Your signal</span><span>Plays that agree</span><span title="{e(fam_names)}">By family</span><span>Price · today</span><span>1 year</span><span title="{e(NEXT_HINT)}">Earnings</span><span>Crash</span><span>Analysts</span><span></span></div>
   <ol class="scr-list" id="scr-list">{first}</ol>
   <p class="scr-empty" id="scr-empty" hidden>No names match all of that. Try fewer plays in step 4, or a wider market in step 3.</p>
   <div class="scr-foot"><button type="button" class="btn" id="scr-more"{"" if len(got) > PAGE else " hidden"}>Show {PAGE} more</button>
-  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. Your signal is the one call on each name: Buy, Hold or Sell, scored 0 to 100 from the factors you weight (Weights, in step 4). Analysts is the gap to their average 12-month target. <span class="scr-wide">The seven bars are the plays by family: {e(fam_names)}.</span><span class="scr-narrow">The bar shows how many of the plays agree; each stock page splits them into seven families ({e(fam_names)}).</span> Tap ☆ to follow a name and get an email when your signal on it flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
+  <p class="small muted">A play agrees with buying when it holds the stock tonight, and with selling when it's out. Most accurate plays agree weighs each play by how often its calls were right. Your signal is the one call on each name: Buy, Hold or Sell, scored 0 to 100 from the factors you weight (Weights, in step 4). Analysts is the gap to their average 12-month target. Earnings is the next scheduled report, from Yahoo Finance's calendar (dates can move). <span class="scr-wide">The seven bars are the plays by family: {e(fam_names)}.</span><span class="scr-narrow">The bar shows how many of the plays agree; each stock page splits them into seven families ({e(fam_names)}).</span> Tap ☆ to follow a name and get an email when your signal on it flips. This analysis does not constitute trading advice. Please meet with an advisor or independently review sources before making any decision.</p></div>
 </div>
 </div>
 </section>"""

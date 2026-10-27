@@ -124,6 +124,23 @@ CS_MARK = ('<span class="cs-mark" role="img" aria-label="Click Shift"><span clas
 MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>')
 FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
                 '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
+NEXT_SHORT = {"b": "before open", "a": "after close", "d": "during day", "": ""}
+NEXT_HINT = ("Next earnings: the company's next scheduled report, from Yahoo Finance's calendar, with whether it comes before the open "
+             "or after the close. Dates can move, and some are estimates until the company confirms them. Funds, indexes and coins have none.")
+
+
+def next_cell(nx, year=None):
+    """The 'Next earnings' table cell for one next_reports entry (newsevents.py): 'Nov 2' over 'after close', sorting
+    soonest first; '–' (sorted last) when there's none."""
+    if not nx:
+        return '<td class="muted ne-cell" data-v="">–</td>'
+    import datetime as _dt
+    d = _dt.date.fromisoformat(nx[0])
+    day = d.strftime("%b %-d") + (d.strftime(", %Y") if year and d.year != year else "")
+    tm = f'<small class="ne-t">{NEXT_SHORT[nx[1]]}</small>' if nx[1] else ""
+    return f'<td class="nowrap ne-cell" data-v="{nx[2]}" title="{html.escape(d.strftime("%A %B %-d, %Y"))}"><span class="ne-d">{day}</span>{tm}</td>'
+
+
 def foot_disclaim(guide_href, broker_href=None):
     """The disclaimer that closes every page, with a link to who can advise, country by country, and the broker directory."""
     broker_href = broker_href or guide_href.replace("ways-to-invest/", "brokers/")
@@ -1268,6 +1285,8 @@ class Site:
 
     def stocks_index(self):
         from .factors import default_words
+        from .newsevents import next_reports
+        NX = next_reports(self)
         path, depth = "stocks/", 1
         h = lambda x: self.href(depth, x)
         groups = [g for g in GROUP_ORDER if any(t["group"] == g and not t.get("requested") for t in TICKERS)]
@@ -1297,6 +1316,7 @@ class Site:
                      f'<td class="r mono">{money(x["price"], t["cur"])}</td>'
                      f'<td class="r {dir_cls(day)}" data-v="{sortv(day)}">{pct(day)}</td>'
                      f'<td class="r {dir_cls(y1)}" data-v="{sortv(y1)}">{pct(y1, d=0)}</td>'
+                     + next_cell(NX.get(t["sym"]), self.asof.year) +
                      f'<td class="r adv-col {dir_cls(gap)}" data-v="{sortv(gap)}">{pct(gap, d=0)}</td>'
                      f'<td class="adv-col" data-v="{sortv(k / n if n else None)}" data-ps-plays>{count_in(k, n)}</td>'
                      f'<td class="r adv-col {dir_cls(up) if up is not None else "muted"}" data-v="{sortv(up)}">{pct(up, d=0) if up is not None else "–"}</td>'
@@ -1306,8 +1326,8 @@ class Site:
                  '<button type="button" class="chip-btn" aria-pressed="false" data-group="tsx">TSX</button>') + "".join(
             f'<button type="button" class="chip-btn" aria-pressed="false" data-group="{slugify_group(g)}">{e(g)}</button>' for g in groups)
         presets = "".join(f'<button type="button" class="chip-btn" aria-pressed="false" data-sort="{k}">{e(lab)}</button>'
-                          for k, lab in [("signal", "Highest signal"), ("score", "Your Buys only"), ("plays", "Most plays in"), ("upside", "Most analyst upside"),
-                                         ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
+                          for k, lab in [("signal", "Highest signal"), ("score", "Your Buys only"), ("earnings", "Reporting soonest"), ("plays", "Most plays in"),
+                                         ("upside", "Most analyst upside"), ("crash", "Most crash-exposed"), ("year", "Biggest 1-year gain")])
         n_names = len([t for t in TICKERS if (t["sym"], "buy-and-hold") in self.R and not t.get("requested")])
         body = f"""
 <section class="pair-head has-art">{page_art(h, PAGE_ART["stocks/"], "50% 55%")}<p class="eyebrow">Stocks</p><h1 class="h1">Every stock, and what your signal says</h1>
@@ -1322,12 +1342,13 @@ class Site:
 <div class="chips st-groups">{chips}</div>
 </div>
 <div class="tbl-wrap"><table class="tbl st-tbl" id="st-tbl" data-mine><thead><tr>
-<th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th class="adv-col">Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th><th class="r adv-col">vs 200-day</th>
+<th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th class="adv-col">Group</th><th class="r">Price</th><th class="r">Day</th><th class="r">1 year</th>
+<th data-sort-first="asc" title="{e(NEXT_HINT)}">Next earnings</th><th class="r adv-col">vs 200-day</th>
 <th data-sort-first="desc" class="adv-col">Plays in</th><th class="r adv-col" data-sort-first="desc">Analysts' target</th>
 <th data-sort-first="desc" class="adv-col">Crash exposure</th></tr></thead><tbody>{rows}</tbody></table></div>
 <p class="adv-cols-note small"><button type="button" class="linkish" data-adv-cols>Show the other five columns</button>: group, vs 200-day, plays in, analysts' target and crash exposure.</p>
 <p class="muted small" id="st-count"></p>
-<p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. The standard weights are {e(default_words())}; change them to bring in P/E, growth, debt, analysts and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines; with the standard weights a Buy or Sell holds until the score crosses 50, and while a stock's market is 15% or more below its 1-year high the price factors stand down (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
+<p class="muted small">Your signal: a score from 0 to 100 from the factors you weight. The standard weights are {e(default_words())}; change them to bring in P/E, growth, debt, analysts and more. Buy at 60 or more, Sell at 40 or less, unless you move the lines; with the standard weights a Buy or Sell holds until the score crosses 50, and while a stock's market is 15% or more below its 1-year high the price factors stand down (<a href="{h('guides/your-plays/')}#your-signal">how the score works</a>). Analysts' upside (needs 3+ analysts; <a href="{h('articles/green-across-the-board/')}">how it works</a>). Crash exposure comes from the <a href="{h('articles/debt-and-crashes/')}">storm test</a>. {e(NEXT_HINT)} Want your own list? <a href="{h('watchlist/')}">Use the watchlist</a>, including names Be The Puck doesn't cover yet.</p>
 </section>
 
 <section class="st-fams" id="families" hidden>

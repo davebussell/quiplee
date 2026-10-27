@@ -481,3 +481,29 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
+
+/* BPNext: the next earnings report as the lists show it, from a [date 'YYYY-MM-DD' (New York), timing] pair in
+ * reads.json, screen.json and the watchlist data (newsevents.next_reports; render.next_cell draws the same on /stocks/).
+ * timing: b before the open, a after the close, d during the day, '' date only. */
+(function () {
+  'use strict';
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var WORD = { b: 'before open', a: 'after close', d: 'during day' }, ORD = { b: 0, d: 1, a: 2 };
+  function parts(ne) { var p = String(ne[0]).split('-'); return [+p[0], +p[1] - 1, +p[2]]; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var N = {
+    // sorts reports in time order (before the open, then during the day, then after the close); '' sorts last
+    key: function (ne) { if (!ne) return ''; var p = parts(ne); return String(Date.UTC(p[0], p[1], p[2]) / 1000 + (ORD[ne[1]] == null ? 1 : ORD[ne[1]]) * 3600); },
+    day: function (ne) { var p = parts(ne); return MON[p[1]] + ' ' + p[2] + (p[0] !== new Date().getFullYear() ? ', ' + p[0] : ''); },
+    when: function (ne) { return WORD[ne[1]] || ''; },
+    // days from today (the reader's own date) to the report: 0 today, 1 tomorrow
+    days: function (ne) { var p = parts(ne), n = new Date(); return Math.round((Date.UTC(p[0], p[1], p[2]) - Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())) / 864e5); },
+    html: function (ne) {
+      if (!ne) return '<span class="muted">–</span>';
+      var w = N.when(ne);
+      return '<span class="ne-d">' + esc(N.day(ne)) + '</span>' + (w ? '<small class="ne-t">' + esc(w) + '</small>' : '');
+    },
+    title: 'Next earnings: the company’s next scheduled report, from Yahoo Finance’s calendar, with whether it comes before the open or after the close. Dates can move, and some are estimates until the company confirms them.'
+  };
+  window.BPNext = N;
+})();

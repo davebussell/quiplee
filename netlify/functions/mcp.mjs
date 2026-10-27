@@ -32,20 +32,20 @@ const WEIGHT_PROPS = {
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const TOOLS = [
   { name: "get_stock_signal", api: "stock", title: "Signal on one stock",
-    description: "Be The Puck's signal (Buy, Hold or Sell) on one stock, fund, index or coin it covers, from the latest U.S. close: the score out of 100, how many of its 100 published trading plays hold the name, and the plain-English read (trend, distance from the 1-year high, crash exposure, analysts' targets), with whether the call is held by the sticky rule or the market guard is on. Members also get the factor points behind the score, the closes at which the call would change, and scoring with their own weights. Facts, not advice.",
+    description: "Be The Puck's signal (Buy, Hold or Sell) on one stock, fund, index or coin it covers, from the latest U.S. close: the score out of 100, how many of its 100 published trading plays hold the name, and the plain-English read (trend, distance from the 1-year high, crash exposure, analysts' targets) and the date of its next earnings report, with whether the call is held by the sticky rule or the market guard is on. Members also get the factor points behind the score, the closes at which the call would change, and scoring with their own weights. Facts, not advice.",
     inputSchema: { type: "object", properties: { ticker: { type: "string", description: "Ticker or company name: MU, SHOP.TO (Toronto), BTC-USD, SPY, ^GSPC, Micron." }, ...WEIGHT_PROPS }, required: ["ticker"] } },
   { name: "search_stocks", api: "search", title: "Find a covered name",
     description: "Find the stocks, funds, indexes and coins Be The Puck covers by ticker or company name, with each one's signal and score. Use it when unsure of a ticker or to check coverage.",
     inputSchema: { type: "object", properties: { query: { type: "string", description: "Part of a ticker or company name, e.g. shop, Royal Bank, semiconductor." },
       limit: { type: "integer", minimum: 1, maximum: 25, description: "How many to return (default 10)." } }, required: ["query"] } },
   { name: "screen_stocks", api: "screen", title: "Screen every covered name",
-    description: "Filter and sort every public name Be The Puck covers by its signal, market, group and the share of plays that hold it, e.g. Canadian stocks that read Buy with at least 60% of plays in. Returns up to 50 rows with signal, score, plays in and close.",
+    description: "Filter and sort every public name Be The Puck covers by its signal, market, group and the share of plays that hold it, e.g. Canadian stocks that read Buy with at least 60% of plays in. Returns up to 50 rows with signal, score, plays in, close and next earnings report; sort by earnings for the soonest reports first.",
     inputSchema: { type: "object", properties: {
       signal: { type: "string", enum: ["buy", "hold", "sell"], description: "Only names with this signal." },
       market: { type: "string", enum: ["us", "ca", "crypto", "fund"], description: "us = U.S. stocks, ca = Toronto-listed, crypto = coins, fund = funds and indexes." },
       group: { type: "string", description: "A group as the site names it, e.g. Semiconductors, Big tech, Banks & insurers, Crypto." },
       min_plays: { type: "number", minimum: 0, maximum: 100, description: "Lowest share of plays in, in percent (60 = at least 60% of the plays hold it)." },
-      sort: { type: "string", enum: ["score", "plays"], description: "score (default; lowest first when signal is sell) or plays (share of plays in)." },
+      sort: { type: "string", enum: ["score", "plays", "earnings"], description: "score (default; lowest first when signal is sell), plays (share of plays in) or earnings (the next earnings report, soonest first)." },
       limit: { type: "integer", minimum: 1, maximum: 50, description: "Rows to return (default 20, at most 50)." }, ...WEIGHT_PROPS } } },
   { name: "explain_play", api: "play", title: "Explain one play",
     description: "One of Be The Puck's 100 published trading plays in full: what it reads, its exact in and out rules, its timeframe, the people and source behind it, Be The Puck's assumptions, and how often its calls have been right on real stocks since 2005.",

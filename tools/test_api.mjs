@@ -196,6 +196,19 @@ let key;
   const sell = await get("/api/v1/screen?signal=sell&limit=10", { key });
   const sc3 = sell.body.rows.map((x) => x.score);
   ok(sell.body.rows.every((x) => x.signal === "Sell") && sc3.every((v, i) => i === 0 || v >= sc3[i - 1]), "sells sorted lowest first");
+  // the next earnings report (reads.json ne): on the stock answer, on screen rows, and sort=earnings soonest first
+  const neSym = Object.keys(R.t).find((x) => R.t[x].ne && !R.t[x].pv && /^[A-Z]+$/.test(x));
+  ok(!!neSym, "the build carries a next earnings report for a public stock");
+  if (neSym) {
+    const st = await get("/api/v1/stock/" + neSym, { key });
+    ok(st.body.next_earnings && st.body.next_earnings.date === R.t[neSym].ne[0] && /Next earnings report: /.test(st.body.text), "stock answer has the next earnings report", st.body.next_earnings);
+  }
+  const fundAns = await get("/api/v1/stock/SPY", { key });
+  ok(fundAns.status === 200 && fundAns.body.next_earnings === null, "a fund has no next earnings report", fundAns.body.next_earnings);
+  const er = await get("/api/v1/screen?limit=50&sort=earnings", { key });
+  const ds = er.body.rows.map((x) => (x.next_earnings ? x.next_earnings.date : "~"));
+  ok(er.status === 200 && er.body.rows.length && ds.every((d, i) => i === 0 || ds[i - 1] <= d) && er.body.rows[0].next_earnings, "sort=earnings: soonest first, none last", ds.slice(0, 8));
+  ok(/next earnings/.test(er.body.text), "screen text names the next reports");
   const bg = await get("/api/v1/screen?signal=maybe", { key });
   ok(bg.status === 400 && hasDisc(bg.body), "bad screen filter: 400");
   const grp = await get("/api/v1/screen?group=" + encodeURIComponent(R.t.MU.g), { key });

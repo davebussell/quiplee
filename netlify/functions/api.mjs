@@ -6,7 +6,7 @@
  *   GET /api/v1/stock/{ticker}        the standard signal, score, plays in and the read     (free sample + members)
  *       ?w=plays40.offhigh30.trend30&buy=60&sell=40&plays=top1   members: scored with these weights (signal.mjs)
  *   GET /api/v1/search?q=             public names by ticker or name                         (free sample + members)
- *   GET /api/v1/screen?signal=buy|hold|sell&market=us|ca|crypto|fund&group=&min_plays=0-100&sort=score|plays&limit=1-50
+ *   GET /api/v1/screen?signal=buy|hold|sell&market=us|ca|crypto|fund&group=&min_plays=0-100&sort=score|plays|earnings&limit=1-50
  *   GET /api/v1/plays[?family=]       every play: family, the people behind it, calls right  (members)
  *   GET /api/v1/plays/{slug}          one play in full                                       (members)
  *   GET /api/v1/market                the market guard on the S&P 500 and the TSX, and the Buy/Hold/Sell count (members)

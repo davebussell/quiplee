@@ -25,7 +25,8 @@
     'Strip': 'One square per play, in family order: green means the play holds it, red means it is out.',
     'Signal': 'Your signal, the one call on each name: Buy, Hold or Sell from your score (0 to 100) on the factors you weight, and the nearest close that would change it (the plays and company numbers held where they are). Change the weights with the Weights button.',
     'Crash': 'The storm test: how hard a market crash would likely hit it, from market swings, past crashes, debt and recent run-up.',
-    'Weight': 'Its share of your list by value, from the quantities or values in your file.'
+    'Weight': 'Its share of your list by value, from the quantities or values in your file.',
+    'Next earnings': window.BPNext ? window.BPNext.title : ''
   };
   var st = { items: [], example: false, shared: false, mode: 'all', pick: [] };
   // signed in (mine.js): this list is My stocks; EXTRA holds covered names saved on this browser that the account doesn't have
@@ -337,10 +338,12 @@
 
     // rows
     var showW = W.byValue;
-    var head = ['Stock', 'Signal', 'Price', 'Day', '1 year', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var head = ['Stock', 'Signal', 'Price', 'Day', '1 year', 'Next earnings', 'vs 200-day', 'Plays in', 'Target', 'Strip', 'Crash', showW ? 'Weight' : null, ''].filter(function (x) { return x !== null; });
+    var RIGHT = { Price: 1, Day: 1, '1 year': 1, 'vs 200-day': 1, Target: 1, Weight: 1 }, NX = window.BPNext;
     var tbl = el('table', { 'class': 'tbl wl-tbl' });
     var thead = el('thead', {}, [el('tr', {}, head.map(function (hd, i) {
-      var at = { 'class': i >= 2 && i <= 5 || hd === 'Weight' || hd === 'Target' ? 'r' : '', text: hd };
+      var at = { 'class': RIGHT[hd] ? 'r' : '', text: hd };
+      if (hd === 'Next earnings') at['data-sort-first'] = 'asc';
       if (HINTS[hd]) at['data-hint'] = HINTS[hd];
       return el('th', at);
     }))]);
@@ -353,6 +356,12 @@
       var sa = sig(a.sym, A, sel).s, sb = sig(b.sym, B, sel).s;
       return (sb == null ? -1 : sb) - (sa == null ? -1 : sa);
     });
+    function neCell(ne) {     // the next earnings report (site.js BPNext): sorts soonest first, '–' last
+      if (!ne || !NX) return el('td', { 'class': 'muted', 'data-v': '', text: '–' });
+      var kids = [el('span', { 'class': 'ne-d', text: NX.day(ne) })];
+      if (NX.when(ne)) kids.push(el('small', { 'class': 'ne-t', text: NX.when(ne) }));
+      return el('td', { 'class': 'nowrap ne-cell', 'data-v': NX.key(ne) }, kids);
+    }
     function sigCell(sym, t) {
       var g = sig(sym, t, sel), w = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] }[g.sig];
       if (g.s == null) return el('td', { 'data-v': '' }, [el('span', { 'class': 'muted', text: '–' })]);
@@ -396,6 +405,7 @@
         el('td', { 'class': 'r mono', text: Q.money(t.p, t.cur) }),
         el('td', { 'class': 'r ' + cls(t.d1), text: Q.pct(t.d1) }),
         el('td', { 'class': 'r ' + cls(t.y1), text: Q.pct(t.y1, 0) }),
+        neCell(t.ne),
         el('td', { 'class': 'r ' + cls(t.ma), text: Q.pct(t.ma, 0) }),
         el('td', {}, [el('span', { 'class': 'consensus' }, [fill(kn[0], kn[1]), kn[0] + ' of ' + kn[1]])]),
         el('td', { 'class': 'r ' + (t.up == null ? 'muted' : t.up > 0.02 ? 'up' : t.up < 0 ? 'down' : ''), title: t.up == null ? 'Fewer than 3 analysts, or no target' : 'Average 12-month target from ' + t.na + ' analysts', text: t.up == null ? '–' : Q.pct(t.up, 0) }),

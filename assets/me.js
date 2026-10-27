@@ -303,11 +303,13 @@
     }).join('');
     return '<div class="me-colpick"><div class="me-presets"><span class="small muted">Quick picks</span>' + presets + '</div><div class="me-colgrid">' + groups + '</div></div>';
   }
+  var NX = window.BPNext;   // the next earnings report (site.js)
   function tableHtml(all, D) {
     var rows = all.filter(function (o) { return passes(o, D); }), cs = viewCols(D), F = TAB === 'find';
     if (F) lensSort(rows, VF.lens);
     var head = '<tr><th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th data-sort-first="desc">Plays in</th>' +
       '<th class="r" data-sort-first="desc" title="The latest close, and the change on the day; sorts by the day">Price</th><th class="r" data-sort-first="desc">1 year</th>' +
+      '<th data-sort-first="asc" title="' + esc(NX ? NX.title : '') + '">Next earnings</th>' +
       cs.map(function (k) {
         var f = D.fx[fxAt(D, k)];
         return '<th class="r" data-sort-first="desc" title="' + esc(f.n + '. ' + f.d + ' Sorts by points: most in favour of buying first.') + '">' + esc(SHORT[k] || f.n) + '</th>';
@@ -320,6 +322,7 @@
         '<td class="nowrap" data-v="' + (o.c[1] ? (o.c[0] / o.c[1]).toFixed(4) : '') + '" title="' + o.c[0] + ' of ' + o.c[1] + ' plays hold it">' + bar(o.c[0], o.c[1]) + ' <span class="mono small">' + (o.c[1] ? Math.round(100 * o.c[0] / o.c[1]) + '%' : '–') + '</span></td>' +
         '<td class="r nowrap" data-v="' + (t.d1 == null ? '' : t.d1) + '"><span class="mono">' + money(t.p, t.cur) + '</span>' + (t.d1 != null ? '<small class="me-d1 ' + cls(t.d1) + '">' + pct(t.d1) + '</small>' : '') + '</td>' +
         '<td class="r nowrap ' + cls(t.y1) + '" data-v="' + (t.y1 == null ? '' : t.y1) + '">' + pct(t.y1, 0) + '</td>' +
+        (NX && t.ne ? '<td class="nowrap ne-cell" data-v="' + NX.key(t.ne) + '">' + NX.html(t.ne) + '</td>' : '<td class="muted" data-v="">–</td>') +
         cs.map(function (k) {
           var j = fxAt(D, k), p = o.x ? o.x[j] : null, v = o.v ? o.v[j] : null;
           return '<td class="r nowrap fx' + ptsCls(p) + '" data-v="' + (p == null ? '' : p) + '" title="' + esc(v ? v + ' · ' + p + ' points' : 'No number for this stock') + '">' + esc(vshort(k, v)) + '</td>';

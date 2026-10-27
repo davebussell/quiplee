@@ -28,11 +28,11 @@ STANCE = ("Be The Puck is not a broker or an adviser and never places trades. An
           "but nothing is placed until you approve it in your own broker, and paper trading comes first.")
 BENCH = (("^GSPC", "S&P 500"), ("^GSPTSE", "TSX"))
 TOOLS = [
-    ("get_stock_signal", "GET /api/v1/stock/{ticker}", "free", "The signal (Buy, Hold or Sell), score, plays in and the plain-English read on one name. "
+    ("get_stock_signal", "GET /api/v1/stock/{ticker}", "free", "The signal (Buy, Hold or Sell), score, plays in, the plain-English read and the next earnings report on one name. "
      "Members also get the factor points, the closes that would change the call, and scoring with their own weights (w, buy, sell, plays)."),
     ("search_stocks", "GET /api/v1/search?q=", "free", "Covered names by ticker or company name, with each one's signal and score."),
     ("screen_stocks", "GET /api/v1/screen", "member", "Every public name filtered by signal (buy, hold, sell), market (us, ca, crypto, fund), group and "
-     "min_plays (percent of plays in), sorted by score or plays, up to 50 rows."),
+     "min_plays (percent of plays in), sorted by score, plays or the next earnings report, up to 50 rows."),
     ("list_plays", "GET /api/v1/plays", "member", "Every play by family, with the people behind it and how often it has been right."),
     ("explain_play", "GET /api/v1/plays/{slug}", "member", "One play in full: its rules, timeframe, source, Be The Puck's assumptions and its record."),
     ("market_conditions", "GET /api/v1/market", "member", "The market guard on the S&P 500 and the TSX, the crash gauges' verdict, and how many names read Buy, Hold and Sell."),
@@ -238,7 +238,8 @@ def openapi_json(site):
                                   {"name": "group", "in": "query", "required": False, "schema": {"type": "string"}, "example": "Semiconductors"},
                                   {"name": "min_plays", "in": "query", "required": False, "schema": {"type": "number", "minimum": 0, "maximum": 100},
                                    "description": "Lowest share of plays in, in percent."},
-                                  {"name": "sort", "in": "query", "required": False, "schema": {"type": "string", "enum": ["score", "plays"], "default": "score"}},
+                                  {"name": "sort", "in": "query", "required": False, "schema": {"type": "string", "enum": ["score", "plays", "earnings"], "default": "score"},
+                                   "description": "score, plays (share of plays in) or earnings (the next earnings report, soonest first)"},
                                   {"name": "limit", "in": "query", "required": False, "schema": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20}}] + weights, True),
             "/api/v1/plays": op("listPlays", "List the plays", "Every play by family, with the people behind it and how often its calls have been right.",
                                 [{"name": "family", "in": "query", "required": False,

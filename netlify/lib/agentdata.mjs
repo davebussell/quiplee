@@ -60,6 +60,13 @@ const num = (v, d) => Number(v).toLocaleString("en-US", { minimumFractionDigits:
 export const money = (v, cur) => (v == null ? "n/a" : (cur == null ? "$" : cur) + num(v, Math.abs(v) < 1 ? 4 : 2));   // cur "" for an index level
 export const pct = (v, d = 1) => (v == null ? "n/a" : (v > 0 ? "+" : v < 0 ? "-" : "") + num(Math.abs(v * 100), d) + "%");
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const NE_WORD = { b: "before the open", a: "after the close", d: "during the day" }, NE_ORD = { b: 0, d: 1, a: 2 };
+/** The next earnings report (reads.json ne: [New York date, b|a|d|""], from newsevents.next_reports) as the answers carry it. */
+export function nextEarnings(ne) {
+  if (!Array.isArray(ne) || !/^\d{4}-\d{2}-\d{2}$/.test(ne[0] || "")) return null;
+  return { date: ne[0], timing: NE_WORD[ne[1]] || null, source: "Yahoo Finance's earnings calendar; dates can move, and some are estimates until the company confirms them" };
+}
+const neKey = (ne) => (ne ? ne[0] + ":" + (NE_ORD[ne[1]] == null ? 1 : NE_ORD[ne[1]]) : null);
 export const day = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ""); return m ? `${MONTHS[+m[2] - 1]} ${+m[3]}, ${m[1]}` : String(iso || ""); };
 const r4 = (v) => (v == null ? null : Math.round(v * 10000) / 10000);
 const stockUrl = (u) => `${SITE}/stocks/${u}/`;
@@ -85,7 +92,7 @@ function index(D) {
     if (x.pv || bannedHit(sym + " " + x.n + " " + x.s)) continue;
     const row = rows.get(sym);
     const t = { sym, s: x.s, n: x.n, u: x.u, g: x.g, cur: x.cur, p: x.p, d1: x.d1, y1: x.y1, S: x.S, sc: x.sc, k: x.k, of: x.of,
-      read: x.read || [], hd: !!x.hd, gd: !!x.gd };
+      read: x.read || [], hd: !!x.hd, gd: !!x.gd, ne: Array.isArray(x.ne) ? x.ne : null };
     t.m = row ? row.m : marketOf(t);
     names.push(t);
   }
@@ -253,6 +260,7 @@ export function stock(D, q, { member = false, weights = null } = {}) {
     held: !!hd, held_words: hd ? heldWords(S, sc, W.buy, W.sell, P.mid == null ? 50 : P.mid) : null,
     guard: !!guard, guard_words: guard ? guardWords(P, t) : null,
     plays_in: { k, of, words: `${k} of the ${of} ${useCustom && custom.choice ? "chosen " : ""}plays hold ${t.s} right now.` },
+    next_earnings: nextEarnings(t.ne),
     read: useCustom && custom.choice ? read.slice(1) : read,     // the first line counts every play
     url: stockUrl(t.u), as_of: D.R.asof, tier,
   };
@@ -273,6 +281,7 @@ export function stock(D, q, { member = false, weights = null } = {}) {
   if (body.guard_words) L.push(body.guard_words);
   if (!body.read.length || (useCustom && custom.choice)) L.push(body.plays_in.words);     // otherwise the read's first line says it
   if (body.read.length) L.push("The read:\n" + body.read.map((l) => "- " + l).join("\n"));
+  if (body.next_earnings) L.push(`Next earnings report: ${day(body.next_earnings.date)}${body.next_earnings.timing ? ", " + body.next_earnings.timing : ""} (Yahoo Finance's calendar; dates can move).`);
   if (member && body.factors && body.factors.length) {
     const fmt = (f) => `${f.name} ${f.points == null ? "n/a" : f.points}${f.shown ? " (" + f.shown + ")" : ""}`;
     const on = body.factors.filter((f) => f.weight), off = body.factors.filter((f) => !f.weight && f.points != null);
@@ -331,7 +340,7 @@ export function screen(D, p = {}) {
   const minp = p.min_plays == null || p.min_plays === "" ? 0 : Number(p.min_plays);
   if (!(minp >= 0 && minp <= 100)) return errorAnswer(400, "min_plays is a share of plays in, 0 to 100 (60 means at least 60% of the plays hold it).", "member");
   const sort = p.sort == null || p.sort === "" ? "score" : String(p.sort).toLowerCase();
-  if (!["score", "plays"].includes(sort)) return errorAnswer(400, "sort is score or plays.", "member");
+  if (!["score", "plays", "earnings"].includes(sort)) return errorAnswer(400, "sort is score, plays or earnings.", "member");
   const limit = Math.max(1, Math.min(50, Math.round(Number(p.limit) || 20)));
   const grp = p.group == null ? "" : String(p.group).trim().toLowerCase().slice(0, 60);
   const slug = (g) => g.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -345,12 +354,14 @@ export function screen(D, p = {}) {
     return { t, S: r.sig, sc: r.s, k: c.k, of: c.n };
   }).filter((r) => (sig == null || r.S === SIGNAL_IN[sig]) && (!minp || (r.of && (100 * r.k) / r.of >= minp - 1e-9)));
   const down = sig === "sell" ? 1 : -1, share = (r) => (r.of ? r.k / r.of : 0);
-  rows.sort((a, b) => sort === "plays"
+  rows.sort((a, b) => sort === "earnings"          // the next report soonest first; names with none (funds, coins) last
+    ? (!a.t.ne) - (!b.t.ne) || (a.t.ne && b.t.ne ? neKey(a.t.ne).localeCompare(neKey(b.t.ne)) : 0) || a.t.s.localeCompare(b.t.s)
+    : sort === "plays"
     ? down * (share(a) - share(b)) || a.t.s.localeCompare(b.t.s)
     : (a.sc == null) - (b.sc == null) || down * ((a.sc || 0) - (b.sc || 0)) || down * (share(a) - share(b)) || a.t.s.localeCompare(b.t.s));
   const out = rows.slice(0, limit).map((r) => ({ ticker: r.t.s, symbol: r.t.sym, name: r.t.n, group: r.t.g, market: r.t.m,
     signal: sigWord(r.S), score: r.sc, plays_in: { k: r.k, of: r.of }, close: r.t.p, currency: curCode(r.t.cur),
-    change_1d: r4(r.t.d1), change_1y: r4(r.t.y1), url: stockUrl(r.t.u) }));
+    change_1d: r4(r.t.d1), change_1y: r4(r.t.y1), next_earnings: nextEarnings(r.t.ne), url: stockUrl(r.t.u) }));
   const filters = { signal: sig, market: mkt, group: p.group ? String(p.group).slice(0, 60) : null, min_plays: minp || null, sort, limit,
     weights: useCustom ? { w: custom.W.w, buy: custom.W.buy, sell: custom.W.sell } : "standard" };
   const body = { count: rows.length, shown: out.length, rows: out, filters, as_of: D.R.asof, tier: "member" };
@@ -359,9 +370,10 @@ export function screen(D, p = {}) {
   }
   const what = [sig ? sigWord(SIGNAL_IN[sig]) + "s" : "Names", mkt ? "in " + MARKET_WORD[mkt] : "", body.filters.group ? "in " + body.filters.group : "",
     minp ? `with at least ${minp}% of plays in` : ""].filter(Boolean).join(" ");
-  let text = `${what}: ${rows.length} match` + (rows.length > out.length ? `, the first ${out.length} by ${sort === "plays" ? "plays in" : "score"}` : "") +
+  let text = `${what}: ${rows.length} match` + (rows.length > out.length ? `, the first ${out.length} by ${sort === "plays" ? "plays in" : sort === "earnings" ? "next earnings report" : "score"}` : "") +
     ` (${useCustom ? "custom weights: " + wordsFor(P, custom.W.w) : "standard weights"}).`;
-  if (out.length) text += "\n" + out.map((x, i) => `${i + 1}. ${x.ticker}: ${x.name}, ${x.group}. ${x.signal}${x.score != null ? " " + x.score : ""}, ${x.plays_in.k} of ${x.plays_in.of} plays in, close ${money(x.close, x.currency === "CAD" ? "C$" : "$")}.`).join("\n");
+  if (out.length) text += "\n" + out.map((x, i) => `${i + 1}. ${x.ticker}: ${x.name}, ${x.group}. ${x.signal}${x.score != null ? " " + x.score : ""}, ${x.plays_in.k} of ${x.plays_in.of} plays in, close ${money(x.close, x.currency === "CAD" ? "C$" : "$")}` +
+    (x.next_earnings ? `, next earnings ${day(x.next_earnings.date)}${x.next_earnings.timing ? " " + x.next_earnings.timing : ""}` : "") + ".").join("\n");
   if (body.groups) text += "\nNo group by that name. Groups: " + body.groups.join(", ") + ".";
   text += `\nData as of the ${day(D.R.asof)} close.`;
   return done(200, body, text, "member");

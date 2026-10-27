@@ -91,12 +91,14 @@
       y1: function (a, b) { return cmpNum(a.y, b.y, true); },
       up: function (a, b) { return cmpNum(a.up, b.up, true) || agree(b) / b.o - agree(a) / a.o || (a.s < b.s ? -1 : 1); },
       risk: function (a, b) { return cmpNum(a.r, b.r, false) || agree(b) / b.o - agree(a) / a.o; },
+      earn: function (a, b) { var A = NX ? NX.key(a.e) : '', B = NX ? NX.key(b.e) : ''; return cmpNum(A === '' ? null : +A, B === '' ? null : +B, false) || (a.s < b.s ? -1 : 1); },
       az: function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; }
     }[S.sort] || null;
     return rows.slice().sort(by);
   }
 
   // ---------------------------------------------------------------- markup (as screen.py)
+  var NX = window.BPNext;      // the next earnings report (site.js)
   var SW = { '1': ['Buy', 'buy'], '0': ['Hold', 'hold'], '-1': ['Sell', 'sell'] };
   // your signal: the one call on each name, from the reader's weights (r.sc / r.sg, set in recount)
   function signal(r) {
@@ -120,6 +122,7 @@
       '<span class="scr-fams ' + side + '" aria-hidden="true">' + fams + '</span>' +
       '<span class="scr-px mono">' + money(r.p, r.c) + ' <small class="' + dir(r.d) + '">' + pct(r.d) + '</small></span>' +
       '<span class="scr-y1 ' + dir(r.y) + '"><em>1 yr</em>' + pct(r.y, 0) + '</span>' +
+      '<span class="scr-ne' + (r.e ? '' : ' none') + '"><em>Earnings</em>' + (NX ? NX.html(r.e) : '<span class="muted">–</span>') + '</span>' +
       '<span class="scr-risk"><em>Crash</em>' + risk + '</span>' +
       '<span class="scr-up"><em>Analysts</em>' + up + '</span></a>' +
       '<button type="button" class="scr-star' + (on ? ' on' : '') + '" aria-pressed="' + on + '" aria-label="' + (on ? 'Stop following ' : 'Follow ') + esc(r.s) + '" title="' + (on ? 'Following' : 'Follow') + ' ' + esc(r.s) + '">' + (on ? '★' : '☆') + '</button></li>';

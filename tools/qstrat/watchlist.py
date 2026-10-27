@@ -14,6 +14,7 @@ import math
 from .content import TICKERS, TIMED, FAMILIES
 from .render import next_move, ps_bar
 from . import stockview as sv
+from .newsevents import next_reports
 from .members import member_tag, PRICE
 
 e = html.escape
@@ -67,6 +68,9 @@ def watch_json(site):
             out[sym]["na"] = ol["n_an"]
         if t.get("requested"):
             out[sym]["req"] = t.get("since") or 1
+        nx = next_reports(site).get(sym)
+        if nx:
+            out[sym]["ne"] = [nx[0], nx[1]]      # the next earnings report (newsevents.next_reports)
         if t.get("core_only"):
             out[sym]["co"] = 1
         for a in {t["name"].upper(), t["short"].upper()}:

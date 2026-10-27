@@ -670,6 +670,59 @@ def recent_moves(site, t):
     return out
 
 
+NEXT_WORD = {"b": "before the open", "a": "after the close", "d": "during the day", "": ""}
+
+
+def _timing(d):
+    """b / a / d for a report time in New York. Yahoo lists scheduled reports at fixed UTC times (20:00 for after the
+    close, 12:00 for before the open) whatever the season, so after the clocks change in November an after-the-close
+    report shows as 3 pm: 3 pm or later counts as after the close."""
+    hr = d.hour + d.minute / 60
+    return "a" if hr >= 15 else "b" if hr < 9.5 else "d"
+
+
+def next_reports(site):
+    """{sym: (day, timing, key)}: every covered stock's next scheduled earnings report after the latest close, from Yahoo
+    Finance's calendar (data/events, tools/fetch_events.py). day is the New York date (YYYY-MM-DD); timing is "b" before
+    the open, "a" after the close, "d" during the day or "" when Yahoo gives a date only; key sorts reports in time
+    order. A report dated on the latest close's day or earlier is over (or late on Yahoo) and is left out. Funds, indexes
+    and coins have none. The /stocks/ list, the screener, the watchlist, the account page and the API all read this."""
+    got = site.__dict__.get("_next_reports")
+    if got is not None:
+        return got
+    last = site.asof.strftime("%Y-%m-%d")
+    out = {}
+    from .content import TICKERS
+    for t in TICKERS:
+        if not is_stock(t):
+            continue
+        best = None
+        for r in _load(os.path.join(EVENTS_DIR, t["slug"] + ".json")).get("earn") or []:
+            if r[2] is not None or r[3] is not None:
+                continue
+            s = _secs(r[0])
+            if not s:
+                continue
+            if r[0].endswith("T00:00:00Z"):          # a date with no time
+                day, tm, key = r[0][:10], "", s + 13 * 3600
+            else:
+                d = _et(s)
+                day, tm, key = d.strftime("%Y-%m-%d"), _timing(d), s
+            if day > last and (best is None or key < best[2]):
+                best = (day, tm, key)
+        if best:
+            out[t["sym"]] = best
+    site.__dict__["_next_reports"] = out
+    return out
+
+
+def next_words(nx, year_from=None):
+    """'Mon Nov 2, after the close' (the year added when it isn't year_from) for one next_reports entry."""
+    d = dt.date.fromisoformat(nx[0])
+    when = d.strftime("%a %b %-d") + (d.strftime(", %Y") if year_from is not None and d.year != year_from else "")
+    return when + (", " + NEXT_WORD[nx[1]] if nx[1] else "")
+
+
 def next_event(site, t):
     """The next scheduled earnings report and how reports have moved this stock and all stocks, or None."""
     if not is_stock(t):
@@ -839,8 +892,7 @@ def _next_card(nx, t, bench):
         timing = ""
     else:
         d = _et(nx["ts"])
-        hr = d.hour + d.minute / 60
-        timing = " after the close" if hr >= 16 else " before the open" if hr < 9.5 else ""
+        timing = {"a": " after the close", "b": " before the open"}.get(_timing(d), "")
     when = d.strftime("%a %b %-d, %Y")
     lines = []
     if nx["absmed"] is not None and nx["n_recent"] >= 4:

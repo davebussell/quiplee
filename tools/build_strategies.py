@@ -101,6 +101,7 @@ def reads_json(site):
     it with an account's own weights from data/playset.json)."""
     from qstrat import stockview as sv
     from qstrat.content import TICKERS
+    from qstrat.newsevents import next_reports
     out = {}
     for t in TICKERS:
         sym = t["sym"]
@@ -131,6 +132,9 @@ def reads_json(site):
             out[sym]["hd"] = 1              # held by the sticky rule (the plain call on the score differs)
         if guard_on(site, sym):
             out[sym]["gd"] = 1              # the market guard is on for this name
+        nx = next_reports(site).get(sym)
+        if nx:
+            out[sym]["ne"] = [nx[0], nx[1]]  # the next earnings report: New York date, b/a/d/"" (newsevents.next_reports)
         if t.get("requested"):
             out[sym]["pv"] = 1              # private: shown only to readers who follow it (the account page's Find skips it)
     from qstrat.factors import MODEL, default_words
