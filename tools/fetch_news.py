@@ -12,7 +12,12 @@ Two sources, both free and public:
 Each file is {"items": [{t, h, s, u, k, ty}]}: t = when it was published (ISO, UTC),
 h = headline, s = source, u = link, k = "sec" or "news", ty = story type. Items
 older than two years are dropped; a stock keeps its 40 latest filings and 60
-latest headlines. A source that fails leaves the old items in place.
+latest headlines, plus up to 25 headlines from around each earnings report
+(two hours before it to three days after; report times from data/events), so the
+coverage of every report stays for the earnings read on its stock page
+(tools/qstrat/earnreact.py). In the four days after a report, a second search for
+the company's earnings coverage ("<name>" earnings) adds up to 20 more headlines.
+A source that fails leaves the old items in place.
 
     python tools/fetch_news.py               # every stock, both sources
     python tools/fetch_news.py --no-google   # filings only
@@ -37,6 +42,10 @@ OUT = os.path.join(ROOT, "data", "news")
 UA = "Be The Puck news archive (bethepuck.com; dave@clickshift.ca)"
 KEEP_DAYS = 730
 MAX_SEC, MAX_NEWS = 40, 60
+EVENTS = os.path.join(ROOT, "data", "events")
+WIN_BEFORE, WIN_AFTER = 2 * 3600, 3 * 86400     # the coverage window around a report (as earnreact.NEWS_BEFORE / NEWS_AFTER)
+MAX_WIN = 25                                    # headlines kept from each report's window beyond the 60 latest
+COVER_DAYS = 4                                  # days after a report in which its earnings coverage is searched
 
 # 8-K items, most telling first. The lead item names the filing; filings with only
 # boilerplate items (exhibits, shareholder votes, bylaw changes) are skipped.
@@ -122,14 +131,14 @@ def field(block, tag):
     return html.unescape(re.sub(r"<[^>]+>", "", m.group(1))).strip() if m else ""
 
 
-def google_items(t):
-    q = f'"{t["query"]}" stock when:7d'
+def google_items(t, q=None, n=10, ty="News"):
+    q = q or f'"{t["query"]}" stock when:7d'
     url = "https://news.google.com/rss/search?" + urllib.parse.urlencode({"q": q, "hl": "en-US", "gl": "US", "ceid": "US:en"})
     xml = get(url, "application/rss+xml")
     if not xml:
         return None
     out = []
-    for b in re.findall(r"<item\b[\s\S]*?</item>", xml)[:10]:
+    for b in re.findall(r"<item\b[\s\S]*?</item>", xml)[:n]:
         title, src, link, pub = field(b, "title"), field(b, "source"), field(b, "link"), field(b, "pubDate")
         if src and title.endswith(" - " + src):
             title = title[: -len(src) - 3]
@@ -141,8 +150,29 @@ def google_items(t):
             continue
         if len(title) < 12:
             continue
-        out.append({"t": iso(when), "h": title, "s": src or "Google News", "u": link, "k": "news", "ty": "News"})
+        out.append({"t": iso(when), "h": title, "s": src or "Google News", "u": link, "k": "news", "ty": ty})
     return out
+
+
+def report_times(slug, since):
+    """Unix seconds of each earnings report (passed or scheduled) in data/events/<slug>.json since `since`."""
+    try:
+        earn = json.load(open(os.path.join(EVENTS, slug + ".json"))).get("earn") or []
+    except (OSError, ValueError):
+        return []
+    out = []
+    for row in earn:
+        try:
+            ts = dt.datetime.fromisoformat(row[0].replace("Z", "+00:00"))
+        except (TypeError, ValueError, AttributeError):
+            continue
+        if ts >= since:
+            out.append(ts.timestamp())
+    return out
+
+
+def _secs(t):
+    return dt.datetime.fromisoformat(t.replace("Z", "+00:00")).timestamp()
 
 
 # ------------------------------------------------------------------ merge
@@ -150,7 +180,9 @@ def key(it):
     return it["k"] + "|" + (it["u"] if it["k"] == "sec" else re.sub(r"[^a-z0-9]+", " ", it["h"].lower()).strip()[:100])
 
 
-def merge(old, new, since):
+def merge(old, new, since, reports=()):
+    """Old and new items, newest first, without repeats: the 40 latest filings, the 60 latest headlines, and up to 25
+    headlines from each earnings report's window (reports: unix seconds)."""
     seen, out = set(), []
     for it in sorted(new + old, key=lambda x: x["t"], reverse=True):
         k = key(it)
@@ -159,7 +191,17 @@ def merge(old, new, since):
         seen.add(k)
         out.append(it)
     sec = [x for x in out if x["k"] == "sec"][:MAX_SEC]
-    news = [x for x in out if x["k"] == "news"][:MAX_NEWS]
+    allnews = [x for x in out if x["k"] == "news"]
+    news = allnews[:MAX_NEWS]
+    kept = {id(x) for x in news}
+    for r in reports:
+        win = [x for x in allnews if r - WIN_BEFORE <= _secs(x["t"]) <= r + WIN_AFTER]
+        # earnings coverage first, then the rest, newest first within each
+        win.sort(key=lambda x: (x.get("ty") != "Earnings coverage", -_secs(x["t"])))
+        for x in win[:MAX_WIN]:
+            if id(x) not in kept:
+                kept.add(id(x))
+                news.append(x)
     return sorted(sec + news, key=lambda x: x["t"], reverse=True)
 
 
@@ -174,7 +216,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     since = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=KEEP_DAYS)
     todo = [t for t in TICKERS if not t.get("index") and (not args or t["sym"] in args or t["slug"] in args)]
-    n_sec = n_news = fails = 0
+    n_sec = n_news = n_cover = fails = 0
     for i, t in enumerate(todo):
         t = dict(t, short_name=short_name(t), query=short_name(t))
         path = os.path.join(OUT, t["slug"] + ".json")
@@ -193,6 +235,7 @@ def main():
                 fails += 1
                 print(f"  {t['sym']}: SEC failed ({ex.__class__.__name__})")
             time.sleep(0.15)           # SEC asks for no more than 10 requests a second
+        reports = report_times(t["slug"], since)
         if use_google:
             try:
                 got = google_items(t)
@@ -203,13 +246,25 @@ def main():
                 fails += 1
                 print(f"  {t['sym']}: Google News failed ({ex.__class__.__name__})")
             time.sleep(0.6)
-        items = merge(old, new, since)
+            # just reported: the earnings coverage, for the read of how the market took it (earnreact.py)
+            now = time.time()
+            if any(r - WIN_BEFORE <= now <= r + COVER_DAYS * 86400 for r in reports):
+                try:
+                    got = google_items(t, q=f'"{t["query"]}" earnings when:{COVER_DAYS}d', n=20, ty="Earnings coverage")
+                    if got:
+                        new += got
+                        n_cover += len(got)
+                except Exception as ex:  # noqa: BLE001
+                    fails += 1
+                    print(f"  {t['sym']}: earnings coverage search failed ({ex.__class__.__name__})")
+                time.sleep(0.6)
+        items = merge(old, new, since, reports)
         if items != old:
             with open(path, "w") as f:
                 json.dump({"items": items}, f, separators=(",", ":"), ensure_ascii=False)
         if (i + 1) % 50 == 0:
             print(f"{i + 1}/{len(todo)} stocks")
-    print(f"news archive: {len(todo)} stocks, {n_sec} filings and {n_news} headlines read, {fails} source failures")
+    print(f"news archive: {len(todo)} stocks, {n_sec} filings, {n_news} headlines and {n_cover} earnings-coverage headlines read, {fails} source failures")
 
 
 if __name__ == "__main__":

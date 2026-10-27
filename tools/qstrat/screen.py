@@ -25,7 +25,7 @@ SORTS = [("score", "Highest score (your weights)"), ("earn", "Next earnings, soo
          ("day", "Biggest move today"), ("y1", "Best year"), ("risk", "Least crash exposure"), ("az", "A to Z")]
 NE_ORD = {"b": 0, "d": 1, "": 1, "a": 2}       # before the open, during the day, after the close (screen.js BPNext.key)
 DEFAULT_MIN = 60
-DEFAULT_SORT = "score"       # the screener opens on the score (the reader's weights; the standard ones before they choose)
+DEFAULT_SORT = "earn"        # the screener opens on the next earnings report, soonest first (Dave, Oct 27)
 PAGE = 25
 FRESH_DAYS = 7
 

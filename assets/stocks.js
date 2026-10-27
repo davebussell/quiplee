@@ -1,7 +1,7 @@
 /* stocks.js — the /stocks/ list: search, group filter, one-click sorts and the
  * list / by-family switch. Column sorting itself comes from sortable.js; the
  * sort buttons press the right column header until it sorts high to low.
- * Supports ?sort=signal|score|earnings|plays|upside|crash|year (score: only your Buys, highest first; earnings: the next report, soonest first), ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
+ * Opens sorted by the next earnings report, soonest first. Supports ?sort=signal|score|earnings|plays|upside|crash|year (score: only your Buys, highest first; earnings: the next report, soonest first), ?group=<group> (or ndx for the Nasdaq-100, tsx for Toronto-listed names) and ?view=families. */
 (function () {
   'use strict';
   var tbl = document.getElementById('st-tbl');
@@ -64,8 +64,8 @@
     if (params.get('view') === 'families') view('families');
     var g = params.get('group');
     if (g) { var gb = document.querySelector('.st-groups [data-group="' + g + '"]'); if (gb) gb.click(); }
-    var s = params.get('sort');
-    if (s && COL[s] != null) sortBy(s);
+    var s = params.get('sort') || 'earnings';     // the list opens on the next earnings report, soonest first
+    if (COL[s] != null) sortBy(s);
     apply();
   }
   // the play filter (plays.js) recounts Plays in, the score and data-share; filter again after

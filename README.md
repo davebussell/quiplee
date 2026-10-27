@@ -399,6 +399,23 @@ Claude, ChatGPT and other assistants can read Be The Puck directly (`/developers
   until the person approves it in their own broker, paper trading first; Be The Puck is not a broker or adviser and never
   places trades.
 
+## Earnings: who reports next, and how the market read the last report
+
+- `newsevents.next_reports(site)`: each stock's next scheduled report after the latest close (Yahoo's calendar in
+  `data/events`), with before the open / after the close. Every list shows it and opens sorted by it, soonest first:
+  `/stocks/` (`?sort=earnings`), the screener (`?sort=earn`), the watchlist and the account page; `reads.json` `ne`,
+  `screen.json` `e`, `watch.json` `ne`; `site.js` `BPNext` draws it in the browser; the API returns `next_earnings`.
+- `tools/qstrat/earnreact.py`: for every report that has passed, the first session's move against the index (the
+  newsevents frame), against the result, the outlook (`data/earnings` release reads, else headline categories), the
+  20-session run-up before, the group's move, analysts' changes in the 3 sessions after, the open against the close,
+  the five sessions after, and the coverage (`data/news` headlines from 2 hours before to 3 days after). `reasons()`
+  writes one line per piece of evidence with the way it points; `verdict()` names the best fit or says nothing fits.
+  Shown on each stock page (`#earnings`), on `/earnings/` (reporting next, soonest first; just reported), on the
+  account page (your stocks reporting in 7 days, and how the ones that just did were read) and in the API
+  (`last_earnings`; `reads.json` `lr`).
+- `tools/fetch_news.py` keeps up to 25 headlines from each report's window beyond the 60 latest, and in the four days
+  after a report searches Google News for "<name> earnings" (up to 20 more, `ty: "Earnings coverage"`).
+
 ## Automating with Claude, and the broker directory
 
 `tools/qstrat/automate.py` (AUD-51, Oct 27, 2026) builds:

@@ -28,7 +28,7 @@ STANCE = ("Be The Puck is not a broker or an adviser and never places trades. An
           "but nothing is placed until you approve it in your own broker, and paper trading comes first.")
 BENCH = (("^GSPC", "S&P 500"), ("^GSPTSE", "TSX"))
 TOOLS = [
-    ("get_stock_signal", "GET /api/v1/stock/{ticker}", "free", "The signal (Buy, Hold or Sell), score, plays in, the plain-English read and the next earnings report on one name. "
+    ("get_stock_signal", "GET /api/v1/stock/{ticker}", "free", "The signal (Buy, Hold or Sell), score, plays in, the plain-English read, the next earnings report and how the market read the last one, on one name. "
      "Members also get the factor points, the closes that would change the call, and scoring with their own weights (w, buy, sell, plays)."),
     ("search_stocks", "GET /api/v1/search?q=", "free", "Covered names by ticker or company name, with each one's signal and score."),
     ("screen_stocks", "GET /api/v1/screen", "member", "Every public name filtered by signal (buy, hold, sell), market (us, ca, crypto, fund), group and "

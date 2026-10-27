@@ -138,6 +138,31 @@
         return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '"><b>' + esc(t.s) + '</b></a> ' + pillOnly(x.n.from) + ' → ' + pillOnly(x.n.to) + ' <span class="small">' + esc(nearWords(x.n, t.cur).replace(/^\S+ /, '')) + '</span></li>';
       }).join('') + '</ul>' + (more ? '<p class="small muted">And ' + more + ' more: sort the table by your signal to see them.</p>' : '') + '</div>';
   }
+  // your stocks' earnings: who reports in the next 7 days (soonest first), and how the market read the ones that just did
+  // (reads.json ne and lr: newsevents.next_reports, earnreact.last_json)
+  var EARN_DAYS = 7;
+  function earnHtml(list) {
+    var N = window.BPNext;
+    if (!N) return '';
+    var soon = list.filter(function (s) { var ne = R.t[s].ne; if (!ne) return false; var d = N.days(ne); return d >= 0 && d <= EARN_DAYS; })
+      .sort(function (a, b) { return +N.key(R.t[a].ne) - +N.key(R.t[b].ne); });
+    var just = list.filter(function (s) { var lr = R.t[s].lr; if (!lr) return false; var d = N.days([lr.d, '']); return d <= 0 && d >= -EARN_DAYS; })
+      .sort(function (a, b) { return R.t[b].lr.d < R.t[a].lr.d ? -1 : 1; });
+    if (!soon.length && !just.length) return '';
+    function when(ne) { var d = N.days(ne); return (d === 0 ? 'today' : d === 1 ? 'tomorrow' : N.day(ne)) + (N.when(ne) ? ', ' + N.when(ne) : ''); }
+    var out = '<div class="me-earn"><p class="h3">Earnings</p>';
+    if (soon.length) out += '<p class="small muted">Reporting in the next ' + EARN_DAYS + ' days</p><ul>' + soon.map(function (s) {
+      var t = R.t[s];
+      return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '#earnings"><b>' + esc(t.s) + '</b></a> <span class="small">' + esc(when(t.ne)) + '</span></li>';
+    }).join('') + '</ul>';
+    if (just.length) out += '<p class="small muted">Just reported: the first session against its index, and the best fit from the evidence</p><ul>' + just.map(function (s) {
+      var t = R.t[s], lr = t.lr;
+      return '<li><a href="' + esc(STOCK.replace('{u}', t.u)) + '#earnings"><b>' + esc(t.s) + '</b></a> <b class="' + cls(lr.ab) + '">' + pct(lr.ab) + '</b>' +
+        (lr.sur != null ? ' <span class="small muted">EPS ' + (lr.sur > 0 ? '+' : lr.sur < 0 ? '\u2212' : '') + Math.abs(Math.round(lr.sur)) + '%</span>' : '') +
+        ' <span class="small">' + esc(lr.lead) + '</span></li>';
+    }).join('') + '</ul>';
+    return out + '<p class="small"><a href="/earnings/">Every company\u2019s next report</a></p></div>';
+  }
   // names asked for that aren't covered yet (account.mjs asked): analysed tonight, then they join My stocks
   var REJ = {};
   function askedHtml() {
@@ -160,7 +185,7 @@
         '<div class="me-chips">' + POPULAR.filter(function (s) { return R.t[s]; }).map(function (s) { return '<button type="button" class="chip-btn" data-add="' + esc(s) + '">+ ' + esc(R.t[s].s) + '</button>'; }).join('') + '</div>' +
         '<p><button type="button" class="btn" data-tab="find">Find stocks to add</button></p></div>';
     }
-    var D = fxD(), all = rowsData(), w = changesHtml(list) + nearHtml(list);
+    var D = fxD(), all = rowsData(), w = changesHtml(list) + nearHtml(list) + earnHtml(list);
     return (w ? '<div class="me-watch">' + w + '</div>' : '') + askedHtml() + '<div data-vtools>' + toolsHtml(all, D) + '</div><div data-vtbl>' + tableHtml(all, D) + '</div>';
   }
   // ------------------------------------------------------------ find stocks to add: every covered stock you don't follow
@@ -307,6 +332,11 @@
   function tableHtml(all, D) {
     var rows = all.filter(function (o) { return passes(o, D); }), cs = viewCols(D), F = TAB === 'find';
     if (F) lensSort(rows, VF.lens);
+    else rows.sort(function (a, b) {       // My stocks: the next earnings report first, soonest first; then your signal
+      var ka = NX ? NX.key(a.t.ne) : '', kb = NX ? NX.key(b.t.ne) : '';
+      if (ka !== kb) return ka === '' ? 1 : kb === '' ? -1 : +ka - +kb;
+      return (b.r.s == null ? -1 : b.r.s) - (a.r.s == null ? -1 : a.r.s);
+    });
     var head = '<tr><th class="stick">Stock</th><th data-sort-first="desc">Your signal</th><th data-sort-first="desc">Plays in</th>' +
       '<th class="r" data-sort-first="desc" title="The latest close, and the change on the day; sorts by the day">Price</th><th class="r" data-sort-first="desc">1 year</th>' +
       '<th data-sort-first="asc" title="' + esc(NX ? NX.title : '') + '">Next earnings</th>' +
@@ -341,7 +371,7 @@
         (filtered() ? '<button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '')
       : (filtered() ? 'Showing ' + rows.length + ' of ' + all.length + ' · <button type="button" class="linkish" data-vreset>Clear filters</button> · ' : '')) +
       (D ? '<span class="fx-key fx-good">Green</span>: the factor favours buying (60+ points) · <span class="fx-key fx-bad">red</span>: it counts against (40 or fewer). ' : '') +
-      'Click a header to sort.</p>';
+      (F ? '' : 'Soonest earnings report first. ') + 'Click a header to sort.</p>';
     return (rows.length ? lim + '<div class="tbl-wrap me-tblwrap"><table class="tbl me-tbl' + (F ? ' me-ftbl" data-nocap' : '"') + '><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' : none) + foot;
   }
   function vRefresh(tools) {

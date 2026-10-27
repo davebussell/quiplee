@@ -66,6 +66,12 @@ export function nextEarnings(ne) {
   if (!Array.isArray(ne) || !/^\d{4}-\d{2}-\d{2}$/.test(ne[0] || "")) return null;
   return { date: ne[0], timing: NE_WORD[ne[1]] || null, source: "Yahoo Finance's earnings calendar; dates can move, and some are estimates until the company confirms them" };
 }
+/** The latest report and how the market read it (reads.json lr, from earnreact.last_json). */
+export function lastEarnings(lr) {
+  if (!lr || !/^\d{4}-\d{2}-\d{2}$/.test(lr.d || "")) return null;
+  return { date: lr.d, timing: NE_WORD[lr.tm] || null, eps_surprise_pct: lr.sur == null ? null : lr.sur, move_vs_index: lr.ab, move: lr.raw,
+    best_fit: lr.lead || null, why: lr.why || null };
+}
 const neKey = (ne) => (ne ? ne[0] + ":" + (NE_ORD[ne[1]] == null ? 1 : NE_ORD[ne[1]]) : null);
 export const day = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ""); return m ? `${MONTHS[+m[2] - 1]} ${+m[3]}, ${m[1]}` : String(iso || ""); };
 const r4 = (v) => (v == null ? null : Math.round(v * 10000) / 10000);
@@ -92,7 +98,7 @@ function index(D) {
     if (x.pv || bannedHit(sym + " " + x.n + " " + x.s)) continue;
     const row = rows.get(sym);
     const t = { sym, s: x.s, n: x.n, u: x.u, g: x.g, cur: x.cur, p: x.p, d1: x.d1, y1: x.y1, S: x.S, sc: x.sc, k: x.k, of: x.of,
-      read: x.read || [], hd: !!x.hd, gd: !!x.gd, ne: Array.isArray(x.ne) ? x.ne : null };
+      read: x.read || [], hd: !!x.hd, gd: !!x.gd, ne: Array.isArray(x.ne) ? x.ne : null, lr: x.lr && typeof x.lr === "object" ? x.lr : null };
     t.m = row ? row.m : marketOf(t);
     names.push(t);
   }
@@ -261,6 +267,7 @@ export function stock(D, q, { member = false, weights = null } = {}) {
     guard: !!guard, guard_words: guard ? guardWords(P, t) : null,
     plays_in: { k, of, words: `${k} of the ${of} ${useCustom && custom.choice ? "chosen " : ""}plays hold ${t.s} right now.` },
     next_earnings: nextEarnings(t.ne),
+    last_earnings: lastEarnings(t.lr),
     read: useCustom && custom.choice ? read.slice(1) : read,     // the first line counts every play
     url: stockUrl(t.u), as_of: D.R.asof, tier,
   };
@@ -281,6 +288,11 @@ export function stock(D, q, { member = false, weights = null } = {}) {
   if (body.guard_words) L.push(body.guard_words);
   if (!body.read.length || (useCustom && custom.choice)) L.push(body.plays_in.words);     // otherwise the read's first line says it
   if (body.read.length) L.push("The read:\n" + body.read.map((l) => "- " + l).join("\n"));
+  if (body.last_earnings) {
+    const le = body.last_earnings;
+    L.push(`Last earnings report: ${day(le.date)}${le.timing ? ", " + le.timing : ""}` + (le.eps_surprise_pct != null ? `; EPS ${le.eps_surprise_pct > 0 ? "+" : ""}${le.eps_surprise_pct}% against the estimate` : "") +
+      `; ${pct(le.move_vs_index)} against its index on the first session after. ${le.why || ""}`.trimEnd());
+  }
   if (body.next_earnings) L.push(`Next earnings report: ${day(body.next_earnings.date)}${body.next_earnings.timing ? ", " + body.next_earnings.timing : ""} (Yahoo Finance's calendar; dates can move).`);
   if (member && body.factors && body.factors.length) {
     const fmt = (f) => `${f.name} ${f.points == null ? "n/a" : f.points}${f.shown ? " (" + f.shown + ")" : ""}`;

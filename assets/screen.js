@@ -17,7 +17,7 @@
   var minIn = document.getElementById('scr-min'), minOut = document.getElementById('scr-min-out');
   var secSel = document.getElementById('scr-sec'), qIn = document.getElementById('scr-q'), sortSel = document.getElementById('scr-sort');
   var fresh = document.getElementById('scr-fresh'), goBtn = document.getElementById('scr-go');
-  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'score' };
+  var DEF = { side: 'buy', mkt: '', sec: '', risk: '', min: 60, fresh: false, q: '', sort: 'earn' };   // as screen.py DEFAULT_SORT
   var S = Object.assign({}, DEF), DATA = null, shown = PAGE, FAMS = [];
   var MKT = { '': '', us: 'U.S.', ca: 'Canada', crypto: 'Crypto', fund: 'Funds & indexes' };
   var RISK = ['Low', 'Moderate', 'High', 'Very high'], RISK_CLS = ['calm', 'watch', 'warning', 'warning'];

@@ -2240,3 +2240,34 @@ html[data-view="full"] .adv-cols-note, .adv-tap[hidden] { display: none !importa
 .auto-firm[open] summary::after { content: "Close"; }
 .auto-copy pre code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .dev-code.wrap code { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ---------- earnings: how the market read each report (tools/qstrat/earnreact.py, assets/earnings.js) ---------- */
+.er { display: flex; flex-direction: column; gap: 14px; }
+.er-last { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; }
+.er-last p { margin: 0; }
+.er-move { font-size: 15px; color: var(--ink-2); }
+.er-move b { font: 600 22px var(--ui); margin-right: 4px; }
+.er-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 14px; margin: 0; }
+.er-facts div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-2); min-width: 0; }
+.er-facts dt { font: 600 10.5px var(--data); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.er-facts dd { margin: 0; font-size: 14px; color: var(--ink); overflow-wrap: anywhere; }
+.er-verdict { font: 500 17px/1.45 var(--display); color: var(--ink); }
+.er-reasons { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.er-r { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 10px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+.er-tag { font: 600 10.5px/1.9 var(--data); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.er-r.fit .er-tag { color: var(--in); }
+.er-r.against .er-tag { color: var(--out); }
+.er-news summary { cursor: pointer; font-size: 14px; color: var(--violet-ink); }
+.er-news[open] summary { margin-bottom: 8px; }
+.er-news ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.45; }
+.er-why { font-size: 13.5px; line-height: 1.45; color: var(--ink-2); min-width: 260px; }
+.er-soon:not(.show-later) tr[data-later] { display: none; }
+@media (max-width: 640px) {
+  .er-r { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .er-why { min-width: 0; }
+}
+.me-earn { border: 1px solid var(--line-2); background: var(--panel); border-radius: 12px; padding: 12px 14px; }
+.me-earn .h3 { margin: 0 0 2px; }
+.me-earn > p.small { margin: 6px 0 0; }
+.me-earn ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.me-earn li { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }

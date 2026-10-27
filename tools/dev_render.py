@@ -145,6 +145,9 @@ def main():
         ways_to_invest_page(site)
     if "method" in extra:
         site.method_page()
+    if "earnings" in extra:                        # /earnings/ (earnreact.py)
+        from qstrat.earnreact import earnings_page
+        earnings_page(site)
     if "brokers" in extra or "invest" in extra:   # /guides/brokers/ (automate.py)
         from qstrat.automate import directory
         directory(site)

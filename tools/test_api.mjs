@@ -203,8 +203,15 @@ let key;
     const st = await get("/api/v1/stock/" + neSym, { key });
     ok(st.body.next_earnings && st.body.next_earnings.date === R.t[neSym].ne[0] && /Next earnings report: /.test(st.body.text), "stock answer has the next earnings report", st.body.next_earnings);
   }
+  const lrSym = Object.keys(R.t).find((x) => R.t[x].lr && !R.t[x].pv && /^[A-Z]+$/.test(x));
+  ok(!!lrSym, "the build carries a last earnings report for a public stock");
+  if (lrSym) {
+    const st2 = await get("/api/v1/stock/" + lrSym, { key });
+    ok(st2.body.last_earnings && st2.body.last_earnings.date === R.t[lrSym].lr.d && typeof st2.body.last_earnings.move_vs_index === "number" && /Last earnings report: /.test(st2.body.text),
+      "stock answer has the last report and how it was read", st2.body.last_earnings);
+  }
   const fundAns = await get("/api/v1/stock/SPY", { key });
-  ok(fundAns.status === 200 && fundAns.body.next_earnings === null, "a fund has no next earnings report", fundAns.body.next_earnings);
+  ok(fundAns.status === 200 && fundAns.body.next_earnings === null && fundAns.body.last_earnings === null, "a fund has no earnings reports", fundAns.body.next_earnings);
   const er = await get("/api/v1/screen?limit=50&sort=earnings", { key });
   const ds = er.body.rows.map((x) => (x.next_earnings ? x.next_earnings.date : "~"));
   ok(er.status === 200 && er.body.rows.length && ds.every((d, i) => i === 0 || ds[i - 1] <= d) && er.body.rows[0].next_earnings, "sort=earnings: soonest first, none last", ds.slice(0, 8));

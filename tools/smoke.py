@@ -24,10 +24,10 @@ PAGES = [
     "/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/mstr/", "/stocks/spy/", "/stocks/btc-usd/",
     "/stocks/spy/mayer-multiple/", "/strategies/", "/strategies/mayer-multiple/", "/thinkers/", "/watchlist/", "/markets/",
     "/learn/", "/guides/", "/guides/your-plays/", "/guides/news-that-moves-stocks/", "/guides/ways-to-invest/", "/method/", "/articles/", "/theory/",
-    "/me/", "/alerts/", "/developers/", "/guides/brokers/", "/articles/before-you-automate/",
+    "/me/", "/alerts/", "/developers/", "/guides/brokers/", "/articles/before-you-automate/", "/earnings/",
 ]
 LOCAL_PAGES = ["/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/spy/", "/watchlist/", "/me/", "/guides/your-plays/", "/guides/ways-to-invest/",
-               "/developers/", "/guides/brokers/", "/articles/before-you-automate/", "/articles/automate-with-claude/"]
+               "/developers/", "/guides/brokers/", "/articles/before-you-automate/", "/articles/automate-with-claude/", "/earnings/"]
 # the AI-tools files and endpoints (qstrat/agents.py, netlify/functions/api.mjs and mcp.mjs): each answers, carries the
 # disclaimer and names no excluded company
 AGENT_FILES = ["/llms.txt", "/llms-full.txt", "/openapi.json"]

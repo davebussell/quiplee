@@ -352,6 +352,9 @@
       var A = D.t[a.sym], B = D.t[b.sym];
       if (!!A !== !!B) return A ? -1 : 1;
       if (!A) return a.sym < b.sym ? -1 : 1;
+      // the next earnings report first, soonest first (names with none after, by weight or by score)
+      var ka = NX ? NX.key(A.ne) : '', kb = NX ? NX.key(B.ne) : '';
+      if (ka !== kb) return ka === '' ? 1 : kb === '' ? -1 : +ka - +kb;
       if (showW) return (W.w[b.sym] || 0) - (W.w[a.sym] || 0);
       var sa = sig(a.sym, A, sel).s, sb = sig(b.sym, B, sel).s;
       return (sb == null ? -1 : sb) - (sa == null ? -1 : sa);

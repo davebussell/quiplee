@@ -34,7 +34,7 @@ from qstrat.practice import build_practice, practice_json  # noqa: E402
 
 # Hand-written pages that also get glossary links (in the output copy only).
 STATIC_LINKED = {"stories": "/assets/glossary.js", "desk": "../assets/glossary.js"}
-GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "classics", "stocks", "method", "learn", "markets", "watchlist", "articles",
+GENERATED = {"index.html", "404.html", "sitemap.xml", "strategies", "thinkers", "classics", "earnings", "stocks", "method", "learn", "markets", "watchlist", "articles",
              "picks", "members", "locked", "theory", "alerts", "rules", "guides", "me", "owner",
              "developers", "llms.txt", "llms-full.txt", "openapi.json"}           # AI tools (qstrat/agents.py)
 GENERATED_DATA = {"signals.json", "glossary.json", "practice.json", "watch.json", "names.json", "plays.json", "tickers.json", "screen.json", "reads.json", "theory", "hist",
@@ -102,6 +102,7 @@ def reads_json(site):
     from qstrat import stockview as sv
     from qstrat.content import TICKERS
     from qstrat.newsevents import next_reports
+    from qstrat.earnreact import last_json as last_report
     out = {}
     for t in TICKERS:
         sym = t["sym"]
@@ -135,6 +136,9 @@ def reads_json(site):
         nx = next_reports(site).get(sym)
         if nx:
             out[sym]["ne"] = [nx[0], nx[1]]  # the next earnings report: New York date, b/a/d/"" (newsevents.next_reports)
+        lr = last_report(site, t)
+        if lr:
+            out[sym]["lr"] = lr              # the latest report and how the market read it (earnreact.last_json)
         if t.get("requested"):
             out[sym]["pv"] = 1              # private: shown only to readers who follow it (the account page's Find skips it)
     from qstrat.factors import MODEL, default_words

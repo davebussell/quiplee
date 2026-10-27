@@ -88,6 +88,13 @@ for that isn't there, and move an issue to Done only once the change is live.
   The directory is a plain list from `brokers.json` (each fact dated and sourced): no affiliation, no ranking, no
   referral links, no "best". `assets/downloads/bethepuck_drafts.py` only ever talks to Alpaca's paper address and sends
   an order only after a typed "yes"; keep it that way. Re-check a firm's facts on its own pages before changing them.
+- **Earnings (Oct 27, 2026, AUD-52/53).** Every stock list opens on the next earnings report, soonest first
+  (`newsevents.next_reports` is the one source: /stocks/, the screener, the watchlist, the account page, the API). After
+  each report, `earnreact.py` reads how the market took it: the first session against the index, set against the
+  result, the outlook (the release read by Claude, else headlines), the run-up before, the group, analysts after and the
+  coverage. It explains a move that happened from evidence the site has, names the best fit only when a piece of
+  evidence points the way the stock moved, says when nothing does, and never predicts the next report. `fetch_news.py`
+  keeps each report's headlines past the 60-headline cap and searches the earnings coverage for four days after.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.

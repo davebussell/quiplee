@@ -197,7 +197,8 @@ def nav_menus():
                      ("markets/#tops-h", "Today vs past market tops", "Each gauge at the 2000, 2007, 2020 and 2022 peaks"),
                      ("markets/#ex-h", "Who would feel a crash first", "Covered stocks ranked by crash exposure"),
                      ("markets/#positioning", "Cash, stay in, or buckets?", "Run your mix through real crashes")],
-        "stocks/": [("stocks/", "All stocks", "Every name: plays in, analysts' upside, score, crash exposure"),
+        "stocks/": [("stocks/", "All stocks", "Every name, soonest earnings report first: your signal, plays in, analysts' upside"),
+                    ("earnings/", "Earnings calendar", "Who reports next, and how the market read the last reports"),
                     ("stocks/?sort=score", "Strongest setups", "Most plays in, plus room to the analysts' targets"),
                     ("stocks/?sort=crash", "Most crash-exposed", "Market swings, past crashes, debt and run-up"),
                     ("stocks/?view=families", "By play family", "Trend, breakout, momentum, reversion, volume, calendar"),
@@ -965,6 +966,8 @@ class Site:
         rules_page(self, self.guides)
         from .waystoinvest import ways_to_invest_page
         ways_to_invest_page(self)
+        from .earnreact import earnings_page     # /earnings/: who reports next, and how the market read the last reports
+        earnings_page(self)
         from .automate import directory as broker_directory     # /guides/brokers/ (the automation articles are articles.py's)
         broker_directory(self)
         from .accountplan import guide_page as plan_page
@@ -1291,7 +1294,8 @@ class Site:
         h = lambda x: self.href(depth, x)
         groups = [g for g in GROUP_ORDER if any(t["group"] == g and not t.get("requested") for t in TICKERS)]
         rows = ""
-        for t in TICKERS:
+        # the list opens on the next earnings report, soonest first (Dave, Oct 27); names with none keep their order after
+        for t in sorted(TICKERS, key=lambda x: NX[x["sym"]][2] if x["sym"] in NX else float("inf")):
             if (t["sym"], "buy-and-hold") not in self.R or t.get("requested"):     # private names stay off the list
                 continue
             x = self.r(t["sym"], "buy-and-hold")
@@ -1471,6 +1475,7 @@ class Site:
                        f'<a class="btn sm primary" href="{e(h("theory/"))}?s={e(t["slug"])}">Test a theory</a></div>')
         from .factors import signal_card
         from .newsevents import moves_block
+        from .earnreact import section as er_section
         here_json = json.dumps({"sym": sym, "s": t["short"], "cur": t["cur"], "b": here, "upp": None if upp is None else round(upp, 4), "tw": sv.TREND_WEIGHT,
                                 "pair": h("stocks/" + t["slug"] + "/{s}/"), "keep": sorted(own_pages)}, separators=(",", ":")).replace("</", "<\\/")
         body = f"""
@@ -1486,6 +1491,7 @@ class Site:
 {self.top_plays_block(t, h)}
 {chart}
 {moves_block(self, t, h)}
+{er_section(self, t, h)}
 {heat}
 <section id="every-play" data-adv="Every play on {e(t['short'])}: each call, its record and the price that would flip it"><div class="sec-head"><h2 class="h2">Every play on {e(t['short'])}</h2><p data-ps-all-sub>All {len(TIMED)} plays, by family.</p></div>
 <div class="fam-tiles">{tiles}</div>
