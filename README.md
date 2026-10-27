@@ -399,6 +399,26 @@ Claude, ChatGPT and other assistants can read Be The Puck directly (`/developers
   until the person approves it in their own broker, paper trading first; Be The Puck is not a broker or adviser and never
   places trades.
 
+## Automating with Claude, and the broker directory
+
+`tools/qstrat/automate.py` (AUD-51, Oct 27, 2026) builds:
+
+- **`/guides/brokers/`** (free): 18 self-directed brokers in Canada and the U.S., 12 managed-account services and 11 copy,
+  follow and automation platforms, from `tools/qstrat/brokers.json` (each fact checked on the firm's or a regulator's own
+  pages, with its sources and what couldn't be confirmed). `SHORT` holds the table's one-line answers; the full record is
+  in each firm's card. A plain list: no affiliation, no ranking, no referral links. `assets/automate.js` filters by
+  country and by practice account, own program and AI assistant.
+- **The "Automate with Claude" articles** (the `automate` bucket on `/articles/`): *the careful way* (connect the Be The
+  Puck connector, write rules, the daily-check prompt, three ways to get drafts to a broker, the setups left out),
+  *build it* (the script), *copy, mirror and follow*, and *before you automate* (free: who answers for an order, U.S. and
+  Canadian trading rules, wash-sale and superficial-loss rules, scams, Anthropic's usage policy, a checklist).
+- **`assets/downloads/bethepuck_drafts.py`** with `bethepuck_rules.json`: standard-library Python that reads the signal on a
+  list (member key optional, from `BETHEPUCK_KEY`), applies the rules file, writes `drafts-YYYY-MM-DD.csv`, and offers each
+  U.S.-listed draft to an Alpaca **paper** account only after a typed `yes` at a terminal. It refuses any other broker
+  address (`ALPACA_PAPER_URL` may point at localhost for tests), skips a stock with an open order on the same side, and
+  tags each order with a per-day ID. Test: `BETHEPUCK_SITE=http://127.0.0.1:8792 python3 assets/downloads/bethepuck_drafts.py
+  --dry-run`. The build-it article prints the decision function straight from the file and a dry run from the latest close.
+
 ## Live desk (`/desk/`)
 
 **News breaks. We tell you what it's worth.**

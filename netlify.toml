@@ -90,3 +90,10 @@
   for = "/locked/*"
   [headers.values]
     X-Robots-Tag = "noindex"
+
+# The automation guide's downloads (assets/downloads/): readable in the browser, saved by the download links
+[[headers]]
+  for = "/assets/downloads/*"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    X-Content-Type-Options = "nosniff"

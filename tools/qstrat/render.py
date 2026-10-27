@@ -124,10 +124,12 @@ CS_MARK = ('<span class="cs-mark" role="img" aria-label="Click Shift"><span clas
 MAPLE = ('<svg class="maple" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>')
 FOOT_CREDITS = ('<div class="foot-credits"><a class="cs-credit" href="https://clickshift.ca/" rel="noopener">Created by ' + CS_MARK + '</a>'
                 '<a class="ca-credit" href="https://proudtowork.ca/" rel="noopener">Proudly Canadian ' + MAPLE + '</a></div>')
-def foot_disclaim(guide_href):
-    """The disclaimer that closes every page, with a link to who can advise, country by country."""
+def foot_disclaim(guide_href, broker_href=None):
+    """The disclaimer that closes every page, with a link to who can advise, country by country, and the broker directory."""
+    broker_href = broker_href or guide_href.replace("ways-to-invest/", "brokers/")
     return (f'<p class="foot-disclaim"><b>Not financial advice.</b> {DISCLAIMER} '
-            f'Be The Puck is not a broker or an adviser and never places trades: to buy or sell, use a registered broker. '
+            f'Be The Puck is not a broker or an adviser and never places trades: to buy or sell, use a registered broker '
+            f'(<a href="{broker_href}">find one</a>). '
             f'<a href="{guide_href}">Ways to invest in your country, and how to check an advisor</a>.</p>')
 
 
@@ -197,6 +199,7 @@ def nav_menus():
         "learn/": [("guides/", "Guides: which predictions work", "What each kind of play bets on, and how often it paid"),
                    ("guides/plan-an-account/", "Planning an account", "How many stocks, a core and caps: what mixes did since 2006"),
                    ("guides/ways-to-invest/", "Ways to invest, by country", "Who can advise you, what they must promise, how they've done"),
+                   ("guides/brokers/", "Brokers and platforms", "Who can place your trades, manage the money, or copy and follow"),
                    ("learn/#track-basics", "Track 1: Stock basics", "Shares, candlesticks, trends, P/E, debt and risk"),
                    ("learn/#track-plays", "Track 2: The plays", "How each family of trading rules works"),
                    ("learn/#track-markets", "Track 3: Markets and risk", "Indexes, bubbles, crashes and positioning"),
@@ -205,6 +208,7 @@ def nav_menus():
                       ("articles/#stocks", "Stock briefs", "A plain-English brief on every covered name"),
                       ("articles/#strategies", "Strategies and sectors", "The 20 to learn first, regimes, backtests, sector briefs"),
                       ("articles/#macro", "Macro", "The bubble question, crash history, cash vs invested"),
+                      ("articles/#automate", "Automate with Claude", "Claude drafts from your rules; you approve each order"),
                       ("members/", "Members", "The reports, the top picks and alerts on your stocks")],
     }
 CORE_ATTR = ' data-core="1"'
@@ -944,6 +948,8 @@ class Site:
         rules_page(self, self.guides)
         from .waystoinvest import ways_to_invest_page
         ways_to_invest_page(self)
+        from .automate import directory as broker_directory     # /guides/brokers/ (the automation articles are articles.py's)
+        broker_directory(self)
         from .accountplan import guide_page as plan_page
         plan_page(self)
         from .agents import developers_page     # AI tools: /developers/ (agents.py; llms.txt, openapi.json and data/api.json are build_strategies.write_data)

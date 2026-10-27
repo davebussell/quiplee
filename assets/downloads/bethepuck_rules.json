@@ -1,0 +1,21 @@
+{
+  "_about": "Rules for bethepuck_drafts.py (bethepuck.com/articles/automate-build-it/). Every number is a placeholder to replace with your own: none of it is a suggestion. Buy sizes are in each stock's own currency (U.S. dollars for U.S. listings, Canadian dollars for Toronto). Holdings use the same tickers as your list (SHOP.TO, not SHOP). The script drafts an order only when one of these rules says so, and sends nothing unless you type yes.",
+  "tickers": [
+    "SPY",
+    "MU",
+    "NVDA",
+    "SHOP.TO"
+  ],
+  "buy_when": "Buy",
+  "sell_when": "Sell",
+  "dollars_per_buy": 1000,
+  "max_share_of_account": 0.1,
+  "buys_when_market_guard_on": false,
+  "account_value": 10000,
+  "holdings": {
+    "NVDA": 5
+  },
+  "weights": "",
+  "buy_line": 60,
+  "sell_line": 40
+}

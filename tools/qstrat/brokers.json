@@ -1,0 +1,1541 @@
+{
+ "meta": {
+  "compiled": "2026-10-27",
+  "purpose": "Plain, unaffiliated directory research for Be The Puck. No endorsements. Facts as published by each provider (or its regulator) on the date checked.",
+  "method": "Each fact was checked on the provider's own site or a regulator's site with web search + fetch on 2026-10-27. Where a page could not be read or did not state the fact, the field says 'unverified'.",
+  "blocked_or_unreadable_pages": [
+   {
+    "url": "https://www.interactivebrokers.com/en/pricing/commissions-stocks.php",
+    "reason": "fetch permission not answered; used interactivebrokers.ca pricing pages instead"
+   },
+   {
+    "url": "https://www.interactivebrokers.com/en/trading/ib-api.php",
+    "reason": "fetch permission not answered; used IBKR docs/campus pages instead"
+   },
+   {
+    "url": "https://ibkrcampus.com/campus/trading-lessons/what-is-the-tws-api/",
+    "reason": "fetch permission not answered"
+   },
+   {
+    "url": "https://www.questrade.com/pricing",
+    "reason": "fetch permission not answered; used questrade.com/pricing-fees instead"
+   },
+   {
+    "url": "https://docs.tradier.com/docs/faq",
+    "reason": "fetch permission not answered; used docs.tradier.com overview instead"
+   },
+   {
+    "url": "https://www.nbc.ca/content/dam/shared/pdf/brokerage/19467-7-nbdb-fee-guide-commission-general-fee-schedule.pdf",
+    "reason": "redirect target not fetchable (provenance)"
+   },
+   {
+    "url": "https://www.nbc.ca/en/direct-brokerage/help/accounts/details.html",
+    "reason": "redirect target not fetchable (provenance)"
+   },
+   {
+    "url": "https://www.fidelity.com/accounts/services/investors_outside_US_faq.shtml",
+    "reason": "site error"
+   },
+   {
+    "url": "https://www.ciro.ca/newsroom/publications/guidance-order-execution-only-account-services-and-activities",
+    "reason": "robots disallowed"
+   },
+   {
+    "url": "https://demo.qtrade.ca/en/investor/accounts/registered.html",
+    "reason": "robots disallowed"
+   },
+   {
+    "url": "https://developer.schwab.com/products/trader-api--individual",
+    "reason": "page renders by script; no text returned"
+   },
+   {
+    "url": "https://support.tastytrade.com/support/s/solutions/folders/43000342967",
+    "reason": "page renders by script; no text returned"
+   },
+   {
+    "url": "https://help.etoro.com/s/article/is-etoro-blocked-in-my-country",
+    "reason": "page renders by script; no text returned"
+   }
+  ]
+ },
+ "brokers": [
+  {
+   "name": "Interactive Brokers (IBKR)",
+   "url": "https://www.interactivebrokers.com/ (US) / https://www.interactivebrokers.ca/ (Canada)",
+   "who_can_open": "Both. Canada and the US are both on IBKR's list of countries where accounts can be opened; Canadian clients are served by Interactive Brokers Canada Inc., US clients by Interactive Brokers LLC.",
+   "regulator": {
+    "canada": "Interactive Brokers Canada Inc.: member of CIRO; Member - CIPF. Order-execution-only dealer.",
+    "us": "Interactive Brokers LLC: member NYSE - FINRA - SIPC; regulated by the SEC (and CFTC)."
+   },
+   "commission_us_stocks": "IBKR Fixed: USD 0.005 per share, USD 1.00 minimum, maximum 1% of trade value (plus regulatory fees). IBKR Lite: US exchange-listed stocks and ETFs commission-free for US retail investors (with exceptions); Lite availability to Canadian residents unverified.",
+   "commission_cdn_stocks": "IBKR Canada Fixed: CAD 0.01 per share, CAD 1.00 minimum, maximum 0.5% of trade value (CAD-denominated). USD-denominated Canadian listings: USD 0.008/share, USD 0.80 min, 0.4% max.",
+   "registered_accounts": "Canada: TFSA, RRSP, FHSA, RRIF (RRIF launched Feb 3, 2026). US: Traditional, Traditional Rollover, Traditional Inherited, Roth, Roth Inherited, SEP and SIMPLE IRAs.",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "TWS API (runs through Trader Workstation / IB Gateway)",
+     "IBKR Web API (Client Portal Gateway for retail clients)"
+    ],
+    "requirements": "IBKR: 'Clients with fully open and funded accounts may use our Web API's Trading features to trade their accounts immediately.' Using a paper account with the Web API requires the linked live account to be fully open, funded and an IBKR Pro account. Unfunded trial accounts do not support the API. FIX for individuals: unverified.",
+    "ai_connection": "IBKR AI Integration connects ChatGPT, Claude, Grok, Perplexity and other MCP tools to the account via an IBKR-hosted MCP server; the client reviews and submits every order. Separately, IBKR Autonomous Trading (announced Oct 21, 2026) lets connected AI submit supported orders without per-order approval inside a dedicated 'AI Partition'; limited to individual, non-margin accounts (no joint, retirement, advisor, organizational or Lite accounts) and requires 10 trades of $100+ over two weeks in Review & Approve mode first; availability varies by IBKR entity and country (Canada not stated). AI Integration is not available in India or Japan."
+   },
+   "paper_trading": "Yes. 'All IBKR clients have the ability to open a paper trading account'; a paper account comes with every account, and can be used (with delayed data) before funding.",
+   "connect_own_program": "API",
+   "known_for": "Per-share pricing and access to many global markets from one account.",
+   "recent_changes": [
+    "RRIF launched in Canada (Feb 3, 2026)",
+    "AI Integration via MCP; IBKR Autonomous Trading announced Oct 21, 2026"
+   ],
+   "unverified": [
+    "IBKR Lite availability for Canadian residents",
+    "FIX access for individual accounts",
+    "Whether AI Integration works with paper accounts"
+   ],
+   "sources": [
+    {
+     "url": "https://www.interactivebrokers.ca/en/pricing/commissions-stocks.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.ca/en/index.php?f=49761",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/en/general/compare-lite-pro.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/en/accounts/open-account-country-list.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.ca/en/general/about/mediaRelations/2-3-26-ca.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/en/trading/ira-information.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/campus/ibkr-api-page/web-api-trading/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/docs/web-api/authentication/paper",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/docs/tws-api/doc/notes-limitations/limitations/paper-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/campus/trading-lessons/request-paper-trading-account/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/en/trading/ai-integrations.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.ca/en/trading/ai-hub.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.interactivebrokers.com/en/general/about/mediaRelations/10-21-26.php",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Questrade",
+   "url": "https://www.questrade.com/",
+   "who_can_open": "Canadian residents (Questrade's TFSA guide: 'you need to be a Canadian resident, 18 or older, with a valid Social Insurance Number'; a general residency rule for all accounts was not quoted on the pages read).",
+   "regulator": {
+    "canada": "Questrade, Inc.: registered investment dealer, member of CIRO and member of CIPF. (Questrade Wealth Management Inc. is not a CIRO or CIPF member.)"
+   },
+   "commission_us_stocks": "$0 to buy and sell US-listed stocks and ETFs.",
+   "commission_cdn_stocks": "$0 to buy and sell Canadian-listed stocks and ETFs. (Separate transaction/ECN fee schedule not checked.)",
+   "registered_accounts": "TFSA, RRSP, FHSA, RESP (plus margin and cash accounts).",
+   "public_api": {
+    "available_to_individuals": "partial",
+    "names": [
+     "Questrade API (REST, JSON)",
+     "Questrade MCP (for AI tools)"
+    ],
+    "requirements": "Questrade API is free for anyone with an account in good standing, but 'Executing trades using the API is available to Questrade partner developers only'; individuals get account and market data only.",
+    "ai_connection": "Questrade MCP (server https://mcp.questrade.com/v1/brokerage/mcp) connects Claude (web and desktop), Claude Code, ChatGPT, Cursor, VS Code (Copilot Chat) and Codex CLI. Read access is always allowed; trading only if you grant trade permission. The agent drafts an order preview and you approve or decline every order in the Questrade app (Push Approval, app v2.0.0+); it cannot place, change or cancel an order on its own and cannot move money. Commissions and fees unchanged. Trade journal Investment Executive reported the launch on Sept 7, 2026."
+   },
+   "paper_trading": "A practice site exists (mypractice.questrade.com); its terms (balance, duration, whether orders can be placed) unverified.",
+   "connect_own_program": "AI tool via MCP with in-app approval of every order; own code via API is read-only",
+   "known_for": "Canadian online broker with $0 stock and ETF commissions; also trades from TradingView charts (since May 28, 2024).",
+   "recent_changes": [
+    "Questrade MCP for AI agents (reported Sept 2026)"
+   ],
+   "unverified": [
+    "Practice account terms",
+    "Per-order transaction/ECN fees"
+   ],
+   "sources": [
+    {
+     "url": "https://www.questrade.com/pricing-fees",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/about-us/who-we-are/investor-protection/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/learning/how-to-open-a-tfsa-account-in-canada",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/api",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/api/documentation/getting-started",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/learning/using-questrade/connect-your-questrade-account-to-ai",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/learning/using-questrade/connect-questrade-to-your-ai-tool",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.investmentexecutive.com/news/industry/tech-roundup-questrade-offers-direct-links-for-agentic-ai-trading-agent/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.tradingview.com/blog/en/questrade-on-tradingview-44778/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Wealthsimple (self-directed investing)",
+   "url": "https://www.wealthsimple.com/en-ca",
+   "who_can_open": "Canadian residents only: 'You must live in Canada to open an account with Wealthsimple.' Minimum age 18 or 19 by province; SIN required.",
+   "regulator": {
+    "canada": "Wealthsimple Investments Inc.: member of CIRO; customer accounts protected by CIPF's Investment Dealer Fund."
+   },
+   "commission_us_stocks": "$0 for listed US securities. CAD accounts trading US-listed securities pay a 1.5% FX fee; USD accounts avoid it (USD account: $10/month on Core after 30-day trial, included on Premium and Generation). Pass-through exchange/regulatory fees may apply.",
+   "commission_cdn_stocks": "$0 for listed Canadian securities.",
+   "registered_accounts": "TFSA, RRSP, Spousal RRSP, FHSA, RESP, RRIF, LIRA, plus non-registered.",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "No public trading API found on wealthsimple.com (searched 2026-10-27).",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App-only",
+   "known_for": "App-first Canadian platform with $0 stock and ETF commissions and plan tiers (Core, Premium, Generation).",
+   "recent_changes": [],
+   "unverified": [
+    "Absence of an API is based on not finding one, not on a statement by Wealthsimple"
+   ],
+   "sources": [
+    {
+     "url": "https://www.wealthsimple.com/en-ca/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.wealthsimple.com/en-ca/legal/fees/trade",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://help.wealthsimple.com/hc/en-ca/articles/360056590614-How-we-keep-your-money-safe",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://help.wealthsimple.com/hc/en-ca/articles/4404721755287-Eligibility-requirements-to-open-an-account-with-Wealthsimple",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Qtrade Direct Investing",
+   "url": "https://www.qtrade.ca/",
+   "who_can_open": "Canadian investors (residency rule not quoted on pages read).",
+   "regulator": {
+    "canada": "Qtrade Direct Investing is a division of Aviso Financial Inc.; pricing page shows CIRO and CIPF member logos."
+   },
+   "commission_us_stocks": "$0 per equity and ETF trade (pricing table does not split Canadian/US). US SEC fee applies on US sells. Options: $0 + $0.75/contract.",
+   "commission_cdn_stocks": "$0 per equity and ETF trade.",
+   "registered_accounts": "Registered accounts offered (page not readable); specific types unverified.",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "No. Qtrade offers a 30-day trial account, but it is view-only and 'does not allow you to place orders or trades'.",
+   "connect_own_program": "App/web only",
+   "known_for": "Moved to $0 commissions and dropped quarterly administration fees (announced Oct 28, 2025).",
+   "recent_changes": [
+    "$0 commission trading and no quarterly admin fees, announced Oct 28, 2025"
+   ],
+   "unverified": [
+    "Registered account types list",
+    "Exact effective date of $0 pricing"
+   ],
+   "sources": [
+    {
+     "url": "https://www.qtrade.ca/en/investor/pricing.html",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.aviso.ca/en/news-media/qtrade-direct-investing-moves-to-0-commission-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.qtrade.ca/en/investor/about/news/Qtrade-moves-to-0-commission-trading.html",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.qtrade.ca/en/investor/faq/trial-account.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "TD Direct Investing",
+   "url": "https://www.td.com/ca/en/investing/direct-investing",
+   "who_can_open": "Canadian investors (residency rule not quoted).",
+   "regulator": {
+    "canada": "Division of TD Waterhouse Canada Inc. (subsidiary of The Toronto-Dominion Bank). The pricing page links to CIRO and CIPF but does not state membership in text; membership unverified from that page."
+   },
+   "commission_us_stocks": "$9.99 per online trade (under 150 trades/quarter); $7.00 for Active Trader (150+ trades/quarter). Options +$1.25/contract.",
+   "commission_cdn_stocks": "Same: $9.99, or $7.00 Active Trader. Select ETFs $0 online. $25 quarterly fee on accounts under $15,000 (waivable).",
+   "registered_accounts": "TFSA, RRSP, FHSA (plus cash, margin).",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "Yes: TD Active Trader practice account ('Try TD Active Trader risk-free with a practice account'). Eligibility not stated.",
+   "connect_own_program": "App/web only",
+   "known_for": "Big-bank discount broker with WebBroker, the TD app and TD Active Trader platform.",
+   "recent_changes": [],
+   "unverified": [
+    "CIRO/CIPF membership statement in text"
+   ],
+   "sources": [
+    {
+     "url": "https://www.td.com/ca/en/investing/direct-investing/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.td.com/ca/en/investing/direct-investing/trading/active-trader",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "RBC Direct Investing",
+   "url": "https://www.rbcdirectinvesting.com/",
+   "who_can_open": "Canadian investors (residency rule not quoted).",
+   "regulator": {
+    "canada": "RBC Direct Investing Inc.: member of CIRO and member of CIPF."
+   },
+   "commission_us_stocks": "$9.95 per online trade (under 150 trades/quarter); $6.95 in the Active Trader Program (150+/quarter; a footnote says 30+, so the page is inconsistent).",
+   "commission_cdn_stocks": "Same as US. 50+ ETFs at $0. GoSmart accounts (TFSA, FHSA, RRSP): 50 commission-free trades per year.",
+   "registered_accounts": "FHSA, TFSA, RRSP, RESP, RRIF (plus cash, margin, non-personal).",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "Yes: free Practice Account with $100,000 of practice money per account, for RBC Online Banking and RBC Direct Investing clients.",
+   "connect_own_program": "App/web only",
+   "known_for": "Big-bank discount broker with a free practice account and no account maintenance fee.",
+   "recent_changes": [],
+   "unverified": [],
+   "sources": [
+    {
+     "url": "https://www.rbcdirectinvesting.com/pricing/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.rbcdirectinvesting.com/learn/practice-accounts.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "BMO InvestorLine (Self-Directed)",
+   "url": "https://www.bmo.com/en-ca/main/personal/investments/direct-investing/investorline/self-directed/",
+   "who_can_open": "Canadian investors (residency rule not quoted).",
+   "regulator": {
+    "canada": "BMO InvestorLine Inc. (wholly owned subsidiary of Bank of Montreal): Member - CIPF and Member of CIRO."
+   },
+   "commission_us_stocks": "$0 online stock and ETF trades on American exchanges (charged in USD; FX fees may apply). Options $0 + $0.90/contract.",
+   "commission_cdn_stocks": "$0 online stock and ETF trades on Canadian exchanges.",
+   "registered_accounts": "TFSA, RRSP, RESP, FHSA, RRIF, RDSP (plus margin).",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App/web only",
+   "known_for": "Big-bank broker that moved to unlimited $0 stock and ETF commissions in September 2026.",
+   "recent_changes": [
+    "Unlimited $0 stock/ETF commissions, options fee cut to $0.90/contract, account admin fees dropped; announced Sept 9, 2026, effective Sept 14, 2026 (adviceDirect excluded)"
+   ],
+   "unverified": [
+    "Practice/paper account"
+   ],
+   "sources": [
+    {
+     "url": "https://newsroom.bmo.com/2026-09-09-BMO-Commission-Free-Stock-and-ETF-Trades-with-BMO-InvestorLine",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.bmoinvestorline.com/selfDirected/pdfs/SDFeeSchedule_EN.pdf",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.bmo.com/en-ca/main/personal/investments/direct-investing/investorline/self-directed/commission-free-trading/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "CIBC Investor's Edge",
+   "url": "https://www.investorsedge.cibc.com/",
+   "who_can_open": "Canadian investors (residency rule not quoted).",
+   "regulator": {
+    "canada": "Division of CIBC Investor Services Inc.; site shows 'CIPF Member' and 'Regulated by CIRO' logos."
+   },
+   "commission_us_stocks": "$6.95 per online stock or ETF trade; $4.95 for active investors (150+ trades/quarter). Options +$1.25/contract.",
+   "commission_cdn_stocks": "Same. 180+ ETFs commission-free. Young investors (under 25 with Smart Start account): $0 online stock/ETF trades. $100 annual fee if total balance is $10,000 or less.",
+   "registered_accounts": "TFSA, FHSA, RRSP, RESP, RRIF, locked-in accounts.",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App/web only",
+   "known_for": "Bank-owned broker with a $6.95 online trade fee and $0 online trades for investors under 25.",
+   "recent_changes": [],
+   "unverified": [
+    "Practice/paper account"
+   ],
+   "sources": [
+    {
+     "url": "https://www.investorsedge.cibc.com/en/pricing.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Scotia iTRADE",
+   "url": "https://www.scotiaitrade.com/",
+   "who_can_open": "Canadian investors (residency rule not quoted).",
+   "regulator": {
+    "canada": "Order-execution-only division of Scotia Capital Inc., regulated by CIRO and a member of CIPF."
+   },
+   "commission_us_stocks": "$9.99 per equities trade (under 150 trades/quarter); $4.99 at 150+ trades/quarter. US extended-hours web trades add $0.005/share ECN fee.",
+   "commission_cdn_stocks": "Same. Eligible ETFs commission-free online.",
+   "registered_accounts": "RRSP, RIF, LIRA, LIF, RESP, TFSA, FHSA.",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App/web only",
+   "known_for": "Bank-owned discount broker with a lower rate at 150+ trades a quarter.",
+   "recent_changes": [],
+   "unverified": [
+    "Practice/paper account"
+   ],
+   "sources": [
+    {
+     "url": "https://www.scotiaitrade.com/en/home/pricing.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "National Bank Direct Brokerage (NBDB)",
+   "url": "https://nbdb.ca/ (now redirects into https://www.nbc.ca/en/direct-brokerage/)",
+   "who_can_open": "Canadian investors (non-resident accounts exist at $100/year per account).",
+   "regulator": {
+    "canada": "Division of National Bank Financial Inc., member of CIRO and CIPF."
+   },
+   "commission_us_stocks": "$0 on all US stocks and ETFs (online).",
+   "commission_cdn_stocks": "$0 on all Canadian stocks and ETFs (online). Options $0 + $1.25/contract ($6.25 min). $100 annual admin fee unless exemption criteria are met.",
+   "registered_accounts": "RRSP, TFSA, LIF and other locked-in accounts listed; FHSA not shown on the pricing page (unverified).",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "None found.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App/web only",
+   "known_for": "Bank-owned broker with $0 online stock and ETF commissions.",
+   "recent_changes": [
+    "nbdb.ca pages now redirect to nbc.ca/en/direct-brokerage"
+   ],
+   "unverified": [
+    "FHSA availability",
+    "Fee schedule PDF effective date"
+   ],
+   "sources": [
+    {
+     "url": "https://nbdb.ca/en/pricing/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.nbc.ca/en/direct-brokerage/regulation.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Charles Schwab",
+   "url": "https://www.schwab.com/",
+   "who_can_open": "US residents (Schwab Global Account limited to 'U.S. residents living in the United States'; non-US residents face country-specific restrictions). Canadian eligibility unverified.",
+   "regulator": {
+    "us": "Charles Schwab & Co., Inc. (Member SIPC); FINRA BrokerCheck linked."
+   },
+   "commission_us_stocks": "$0 online for listed US stocks and ETFs; options $0.65/contract.",
+   "commission_cdn_stocks": "Canadian securities: $6.95 per online trade.",
+   "registered_accounts": "Traditional, Roth, rollover, inherited, SEP and SIMPLE IRAs.",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "Schwab Trader API - Individual (developer.schwab.com)"
+    ],
+    "requirements": "Schwab (Aug 14, 2026): traders can use the Trader API to connect thinkorswim market data, account information and functions to third-party AI applications, including to 'enter orders for stock, option, and ETF trades'; requests to add outside applications are reviewed and not all are approved. Registration steps unverified (developer portal page did not render).",
+    "ai_connection": "Via Trader API only (no Schwab MCP found)."
+   },
+   "paper_trading": "Yes: thinkorswim paperMoney, $100,000 virtual buying power, free to Schwab clients. Whether paperMoney works through the Trader API: unverified.",
+   "connect_own_program": "API",
+   "known_for": "U.S. broker; thinkorswim platform.",
+   "recent_changes": [],
+   "unverified": [
+    "Trader API approval steps and streaming",
+    "Canadian resident eligibility"
+   ],
+   "sources": [
+    {
+     "url": "https://www.schwab.com/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.schwab.com/global-trading/eligibility",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.schwab.com/learn/story/ways-ai-trading-tools-help-increase-efficiency",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.schwab.com/trading/thinkorswim/paper-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.schwab.com/learn/story/practice-trading-risk-free-with-papermoney",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Fidelity Investments",
+   "url": "https://www.fidelity.com/",
+   "who_can_open": "US only (site footer: 'This is for persons in the US only').",
+   "regulator": {
+    "us": "Fidelity Brokerage Services LLC, Member NYSE, SIPC (FINRA BrokerCheck linked)."
+   },
+   "commission_us_stocks": "$0 online US stock, ETF and options trades; options $0.65/contract.",
+   "commission_cdn_stocks": "Not published on the commissions page; $50 foreign settlement fee for foreign ordinary shares that are not DTC-eligible.",
+   "registered_accounts": "IRAs offered ($0 IRA fees listed, including SIMPLE IRA).",
+   "public_api": {
+    "available_to_individuals": false,
+    "names": [],
+    "requirements": "No public trading API for individual investors found on fidelity.com (only workplace and advisor/clearing APIs).",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "None found.",
+   "connect_own_program": "App/web only",
+   "known_for": "U.S. broker and fund company.",
+   "recent_changes": [],
+   "unverified": [
+    "Absence of an individual API is based on not finding one"
+   ],
+   "sources": [
+    {
+     "url": "https://www.fidelity.com/trading/commissions-margin-rates",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.fidelity.com/open-account/overview",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "E*TRADE from Morgan Stanley",
+   "url": "https://us.etrade.com/",
+   "who_can_open": "US investors (general residency rule unverified; promotions exclude non-US residents).",
+   "regulator": {
+    "us": "Morgan Stanley Smith Barney LLC, Member SIPC (FINRA BrokerCheck linked)."
+   },
+   "commission_us_stocks": "$0 online US-listed stock, ETF, mutual fund and options trades; options $0.65/contract (under 30 trades/quarter) or $0.50 (30+).",
+   "commission_cdn_stocks": "$0 does not apply to foreign stock transactions; 1% charge on non-US currency and foreign transactions. Canadian per-trade commission not published on the page.",
+   "registered_accounts": "IRAs offered (e.g., rollover to an E*TRADE IRA).",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "E*TRADE Developer Platform API"
+    ],
+    "requirements": "An individual key is tied to a single user ID; issued right away after the API Developer Agreement and User Intent Survey. Separate sandbox keys. Market Data Agreement needed for quotes. Functions: place, modify, cancel orders; balances and positions; quotes. OAuth 1.0-style authorization.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "Yes: Paper Trading on Power E*TRADE (platform and app); API sandbox for developers.",
+   "connect_own_program": "API",
+   "known_for": "U.S. online broker owned by Morgan Stanley; Power E*TRADE platform.",
+   "recent_changes": [],
+   "unverified": [
+    "Residency requirement for general accounts"
+   ],
+   "sources": [
+    {
+     "url": "https://us.etrade.com/what-we-offer/pricing-and-rates",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://us.etrade.com/frequently-asked-questions/open-an-account",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.etrade.com/getting-started",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://apisb.etrade.com/docs/api/authorization/authorize.html",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://us.etrade.com/platforms/power-etrade",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Robinhood",
+   "url": "https://robinhood.com/us/en/",
+   "who_can_open": "US only: 18+, valid SSN, legal US residential address (50 states, Puerto Rico, US Virgin Islands), US citizen, permanent resident or valid visa.",
+   "regulator": {
+    "us": "Robinhood Financial LLC, registered broker-dealer (member SIPC); clearing by Robinhood Securities, LLC (member SIPC). FINRA membership not stated on the page read."
+   },
+   "commission_us_stocks": "Commission-free stocks, ETFs and their options; $0.04/contract combined exchange/regulatory fee on options; SEC and FINRA sell-side fees passed through.",
+   "commission_cdn_stocks": "Not offered (US-listed securities).",
+   "registered_accounts": "Traditional and Roth IRAs (1% match; 3% with Robinhood Gold).",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "Robinhood Trading MCP (agentic trading, beta)",
+     "Robinhood Crypto Trading API (crypto only)"
+    ],
+    "requirements": "Announced May 27, 2026. Agent trades only in a separate 'Robinhood Agentic' self-directed account you fund; equities only at launch. Supported setups: Claude Code, Claude Desktop, ChatGPT, Codex, Cursor, Grok and others. Approval is configurable: if you tell the agent to act without asking, 'it can place trades without your confirmation.' Agent gets read access to all your Robinhood accounts.",
+    "ai_connection": "Yes (MCP)."
+   },
+   "paper_trading": "None found (a 'Simulated Returns' feature exists but is not paper trading).",
+   "connect_own_program": "AI agent via MCP into a dedicated account",
+   "known_for": "Commission-free U.S. trading app.",
+   "recent_changes": [
+    "Agentic Trading via MCP launched in beta May 27, 2026"
+   ],
+   "unverified": [
+    "A general public equities REST API (none found)"
+   ],
+   "sources": [
+    {
+     "url": "https://robinhood.com/us/en/support/articles/trading-fees-on-robinhood/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://robinhood.com/us/en/support/articles/what-you-need-to-get-started/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://robinhood.com/us/en/about/retirement/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://robinhood.com/newsroom/robinhood-is-now-open-to-agents/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://robinhood.com/us/en/support/articles/agentic-trading-overview/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Webull (Webull Financial LLC in the US; Webull Securities (Canada) Limited in Canada)",
+   "url": "https://www.webull.com/ (US) / https://www.webull.ca/ (Canada)",
+   "who_can_open": "Both, through separate entities.",
+   "regulator": {
+    "us": "Webull Financial LLC: SEC-registered broker-dealer; member FINRA, SIPC, NYSE, NASDAQ, Cboe EDGX.",
+    "canada": "Webull Securities (Canada) Limited: regulated by CIRO, member of CIPF (crypto not CIPF-covered)."
+   },
+   "commission_us_stocks": "US: $0 for self-directed cash/margin accounts and IRAs (US-listed). Canada: $0 per trade on US stocks and ETFs (regulatory/exchange fees may apply).",
+   "commission_cdn_stocks": "Canada: $0 per trade on Canadian stocks and ETFs. Canadian options: $0 for 3 months for clients activating on/after Aug 1, 2026, then US$0.99/contract.",
+   "registered_accounts": "US: IRAs. Canada: TFSA, RRSP (FHSA not listed).",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "Webull OpenAPI - Trading API (individual)",
+     "Webull Agent Skills (CLI for AI assistants)"
+    ],
+    "requirements": "Apply in Webull's Developer Management Center after opening an account; production review 'will take 1 to 2 working days at the earliest'; sandbox approved automatically. SDK handles signing/protocol; region code shown is 'us'. Covers stocks, options, futures, crypto, event contracts. Agent Skills can place orders, with optional preview and limits (symbol whitelist, max notional, max quantity).",
+    "ai_connection": "Agent Skills CLI (lists Claude Desktop)."
+   },
+   "paper_trading": "Yes: free paper trading in the US (unlimited virtual funds) and Canada (free simulator).",
+   "connect_own_program": "API (US confirmed; Canadian access to OpenAPI unverified)",
+   "known_for": "Commission-free app with active-trader charting, in both countries.",
+   "recent_changes": [
+    "Webull Canada options pricing change for activations from Aug 1, 2026"
+   ],
+   "unverified": [
+    "Whether Webull Canada accounts can use OpenAPI",
+    "API protocols"
+   ],
+   "sources": [
+    {
+     "url": "https://www.webull.com/help/faq/359-What-are-the-trading-fees-on-Webull-Are-you-commission-free",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.webull.ca/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.webull.ca/help/faq/361-What-types-of-accounts-may-I-open-with-Webull-Canada",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.webull.com/apis/docs/authentication/IndividualApplicationAPI/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.webull.com/apis/docs/trade-api/overview/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.webull.com/apis/docs/getting-started/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.webull.com/apis/docs/AI-friendly-Resources/skills/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.webull.com/paper-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.webull.ca/paper-trading",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Alpaca",
+   "url": "https://alpaca.markets/",
+   "who_can_open": "US residents and residents of many other countries for live accounts, but 'residents of Canada are not currently eligible to open an account' (updated Mar 11, 2026). Paper-only accounts exist; residency rules for them not stated.",
+   "regulator": {
+    "us": "FINRA and SIPC member broker (the support page names both Alpaca Clearing LLC and Alpaca Securities; entity naming inconsistent)."
+   },
+   "commission_us_stocks": "$0 commission for US equity trades in self-directed individual cash accounts via API; SEC and FINRA fees may apply.",
+   "commission_cdn_stocks": "Not offered.",
+   "registered_accounts": "Not offered: accounts are for individuals (non-retirement) and entities.",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "Alpaca Trading API",
+     "Alpaca MCP Server (official)"
+    ],
+    "requirements": "API-first broker; paper keys and live keys are separate. MCP server supports Claude Desktop and Claude Code (also Cursor, VS Code, ChatGPT and others), defaults to paper trading; orders 'execute directly against Alpaca's Trading API'.",
+    "ai_connection": "Yes (MCP)."
+   },
+   "paper_trading": "Yes: free, up to 3 simulated accounts; $100K simulated funds per Alpaca's agentic page.",
+   "connect_own_program": "API",
+   "known_for": "Broker built around an API for developers and algorithmic traders.",
+   "recent_changes": [],
+   "unverified": [
+    "Which Alpaca entity carries individual accounts"
+   ],
+   "sources": [
+    {
+     "url": "https://alpaca.markets/support/types-accounts-alpaca-offers",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://alpaca.markets/support/commission-clearing-fees",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://alpaca.markets/learn/live-trading-account-non-us",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://alpaca.markets/learn/start-paper-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://docs.alpaca.markets/us/docs/alpaca-mcp-server",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://alpaca.markets/agentic",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Tradier Brokerage",
+   "url": "https://tradier.com/",
+   "who_can_open": "US and permitted countries; Canada is on the blocked list for residents (Canadian citizens living in a permitted country can open accounts).",
+   "regulator": {
+    "us": "Tradier Brokerage Inc., Member FINRA/SIPC."
+   },
+   "commission_us_stocks": "Lite plan ($0/month): $0.35 per stock/ETF trade. Pro ($10/month) and Pro Plus ($35/month): $0.",
+   "commission_cdn_stocks": "Not offered (US equities, ETFs and options only).",
+   "registered_accounts": "IRAs ($30/year on Lite; $0 on Pro and Pro Plus).",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "Tradier Brokerage API (REST + WebSocket/HTTP streaming)"
+    ],
+    "requirements": "Included with every account at no extra charge; personal use needs only an API token from API Settings. Public/distributed apps need Tradier Partner status and OAuth 2.0.",
+    "ai_connection": "None found."
+   },
+   "paper_trading": "Yes: every account includes a paper-trading sandbox (15-minute delayed data).",
+   "connect_own_program": "API",
+   "known_for": "API-first U.S. broker that third-party trading apps connect to.",
+   "recent_changes": [],
+   "unverified": [],
+   "sources": [
+    {
+     "url": "https://tradier.com/individuals/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://docs.tradier.com/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://support.tradier.com/kb/guide/en/permitted-and-blocked-countries-CLzSa0D1rf/Steps/4997916",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "tastytrade",
+   "url": "https://tastytrade.com/",
+   "who_can_open": "US residents and customers in eligible countries; Canadian eligibility unverified (eligible-country list not readable).",
+   "regulator": {
+    "us": "tastytrade, Inc. (formerly tastyworks), member FINRA | SIPC | NFA."
+   },
+   "commission_us_stocks": "$0 to open and $0 to close stock and ETF trades. Stock/ETF options: $1/contract to open ($10 max per leg), $0 to close.",
+   "commission_cdn_stocks": "Unverified.",
+   "registered_accounts": "IRAs offered per tastytrade's accounts page title ('Individual, IRAs & More'); details unverified.",
+   "public_api": {
+    "available_to_individuals": true,
+    "names": [
+     "tastytrade Open API (REST + account streamer WebSocket)",
+     "tastytrade MCP option"
+    ],
+    "requirements": "Full read/write: submit, modify, cancel equity, options, futures and crypto orders. Eligibility and minimums not stated on the API page.",
+    "ai_connection": "MCP server option mentioned on the API page."
+   },
+   "paper_trading": "API sandbox only: simulated money, synthetic fills (market orders fill at $1), no market data, resets every 24 hours. In-platform paper trading not found.",
+   "connect_own_program": "API",
+   "known_for": "Options-focused U.S. broker with capped options commissions.",
+   "recent_changes": [],
+   "unverified": [
+    "Canadian eligibility",
+    "API eligibility/minimums",
+    "IRA details"
+   ],
+   "sources": [
+    {
+     "url": "https://tastytrade.com/pricing/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://tastytrade.com/api/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.tastytrade.com/docs/sandbox/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://tastytrade.com/learn/accounts/account-types/international-account/",
+     "checked": "2026-10-27"
+    }
+   ]
+  }
+ ],
+ "managers": [
+  {
+   "name": "Wealthsimple Managed Investing",
+   "url": "https://www.wealthsimple.com/en-ca/invest",
+   "country": "Canada",
+   "minimum": "$1 asset minimum (Core); Premium from $100,000; Generation from $500,000.",
+   "management_fee": "Core 0.5%; Premium 0.4%; Generation 0.2%-0.4% (0.4% at $500,000, 0.2% at $10,000,000+). Fund MERs extra.",
+   "regulator": "Wealthsimple Investments Inc.: member of CIRO; accounts covered by CIPF.",
+   "account_types": "TFSA, RRSP, Spousal RRSP, FHSA, RESP, RRIF, LIRA, non-registered.",
+   "known_for": "App-based managed portfolios; the fee falls as assets grow.",
+   "sources": [
+    {
+     "url": "https://www.wealthsimple.com/en-ca/invest",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.wealthsimple.com/en-ca/pricing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Questwealth Portfolios (Questrade)",
+   "url": "https://www.questrade.com/questwealth-portfolios",
+   "country": "Canada",
+   "minimum": "Not stated as a minimum; lowest fee tier starts at $250.",
+   "management_fee": "0.25% ($250-$99,999); 0.20% ($100,000+). Portfolio ETF MERs 0.09%-0.12% (SRI 0.20%-0.24%).",
+   "regulator": "Questrade Wealth Management Inc.: registered Portfolio Manager, Investment Fund Manager and Exempt Market Dealer; not a CIRO or CIPF member. Trades placed through Questrade, Inc. (CIRO and CIPF member).",
+   "account_types": "Unverified for Questwealth specifically (site lists TFSA, RRSP, FHSA, RESP, margin, cash).",
+   "known_for": "Managed ETF portfolios from a discount broker.",
+   "sources": [
+    {
+     "url": "https://www.questrade.com/pricing/questwealth-portfolios-fees",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "RBC InvestEase",
+   "url": "https://www.rbcinvestease.com/",
+   "country": "Canada",
+   "minimum": "Not stated on the pricing page (unverified).",
+   "management_fee": "0.50% per year + applicable sales tax. ETF MERs 0.12%-0.25% extra.",
+   "regulator": "RBC InvestEase Inc. (wholly owned by Royal Bank of Canada), a restricted portfolio manager; supervising commission not named on page.",
+   "account_types": "TFSA, FHSA, RRSP, non-registered.",
+   "known_for": "A big bank's online managed ETF portfolios.",
+   "sources": [
+    {
+     "url": "https://www.rbcinvestease.com/pricing-fees.html",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "BMO SmartFolio",
+   "url": "https://www.bmo.com/main/personal/investments/online-investing/smartfolio/",
+   "country": "Canada",
+   "minimum": "$1,000.",
+   "management_fee": "0.70% on first $100,000; 0.60% next $150,000; 0.50% next $250,000; 0.40% next $500,000. ETF MERs about 0.20%-0.35% extra.",
+   "regulator": "Product of BMO Nesbitt Burns, a member of CIRO.",
+   "account_types": "Registered and non-registered (specific types not listed on pricing page; RRIF supported per BMO learning page title).",
+   "known_for": "A big bank's online managed ETF portfolios.",
+   "sources": [
+    {
+     "url": "https://www.bmo.com/main/personal/investments/online-investing/smartfolio/pricing/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Justwealth",
+   "url": "https://www.justwealth.com/",
+   "country": "Canada",
+   "minimum": "$5,000 for most accounts; no minimum for RESP, FHSA, RDSP.",
+   "management_fee": "Tiers shown only as images (unverified); page example uses 0.50% per year. Minimum fee $4.99/month ($2.50/month for RESP/FHSA/RDSP). Fee includes trading, custody and account fees.",
+   "regulator": "Justwealth Financial Inc., registered Portfolio Manager in BC, AB, SK, MB, ON, QC, NB, PEI, NS, NL and Yukon.",
+   "account_types": "Registered and non-registered including RESP, FHSA, RDSP; CAD and USD accounts.",
+   "known_for": "Online portfolio manager; RESP, FHSA and RDSP accounts have no minimum.",
+   "sources": [
+    {
+     "url": "https://www.justwealth.com/pricing/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "CI Direct Investing",
+   "url": "https://www.cidirectinvesting.com/",
+   "country": "Canada",
+   "minimum": "$100.",
+   "management_fee": "0.60% under $150,000; 0.40% $150,001-$500,000; 0.35% over $500,000 (blended across accounts). 0.50% flat under a Representative Service Fee Agreement.",
+   "regulator": "Trade name of CI Investment Services Inc., a registered investment dealer in all provinces and territories; member of CIPF and CIRO.",
+   "account_types": "TFSA, RRSP, Spousal RRSP, LIRA, RIF, LIF, non-registered.",
+   "known_for": "Online managed portfolios from a Canadian fund company.",
+   "sources": [
+    {
+     "url": "https://help.cidirectinvesting.com/en_US/fees-and-minimums/fee-schedule",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://help.cidirectinvesting.com/fees-and-minimums/is-there-a-minimum-amount-needed-to-invest",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "TD Automated Investing (US)",
+   "url": "https://www.td.com/us/en/investing/automated",
+   "country": "United States (a Canadian TD robo-advisor could not be found on td.com/ca; unverified whether one is still offered)",
+   "minimum": "$1,000 to open; $900 minimum balance to keep the account open.",
+   "management_fee": "0.30% wrap fee per year, billed quarterly; $15 annual minimum for balances under $5,001. Fund expenses extra.",
+   "regulator": "TD Private Client Wealth LLC: SEC-registered investment adviser; also a broker-dealer, member FINRA/SIPC.",
+   "account_types": "Individual or joint taxable; Traditional and Roth IRAs.",
+   "known_for": "A bank-run US robo-advisor.",
+   "sources": [
+    {
+     "url": "https://www.td.com/us/en/investing/automated",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Betterment",
+   "url": "https://www.betterment.com/",
+   "country": "United States",
+   "minimum": "No minimum balance.",
+   "management_fee": "Digital: $5/month on balances $0-$24K, or 0.25%/year with $200+ monthly recurring deposits or a $24K-$1M balance. Premium: 0.65% (0.15% on $1M-$2M, 0.10% above $2M); Premium minimum unverified.",
+   "regulator": "Betterment LLC: SEC-registered investment adviser. Betterment Securities: SEC-registered broker-dealer, member FINRA/SIPC.",
+   "account_types": "Taxable; Traditional, Roth and SEP IRAs.",
+   "known_for": "U.S. robo-advisor.",
+   "sources": [
+    {
+     "url": "https://www.betterment.com/pricing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Wealthfront",
+   "url": "https://www.wealthfront.com/",
+   "country": "United States",
+   "minimum": "$500.",
+   "management_fee": "0.25% advisory fee per year.",
+   "regulator": "Wealthfront Advisers LLC: SEC-registered investment adviser. Wealthfront Brokerage LLC: member FINRA/SIPC.",
+   "account_types": "Investment (taxable) account, IRA; also cash account and automated bond portfolio.",
+   "known_for": "Automated investing with tax-loss harvesting.",
+   "sources": [
+    {
+     "url": "https://www.wealthfront.com/robo-advisor-investing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Schwab Intelligent Portfolios",
+   "url": "https://www.schwab.com/intelligent-portfolios",
+   "country": "United States",
+   "minimum": "$5,000 (Premium minimum unverified).",
+   "management_fee": "No advisory fee and no commissions. Premium: one-time $300 planning fee + $30/month.",
+   "regulator": "Portfolio management by Charles Schwab Investment Management, Inc., a registered investment adviser (affiliate of Charles Schwab & Co., Inc.).",
+   "account_types": "Individual, joint, custodial, trust and other taxable; Traditional, Roth, rollover, inherited, SEP and SIMPLE IRAs.",
+   "known_for": "Robo-advisor with no advisory fee (a cash allocation is part of the model).",
+   "sources": [
+    {
+     "url": "https://www.schwab.com/intelligent-portfolios",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.schwab.com/node/30961",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Vanguard Digital Advisor",
+   "url": "https://investor.vanguard.com/advice/robo-advisor",
+   "country": "United States",
+   "minimum": "$100 per Vanguard Brokerage Account ($5 for eligible 401(k)s).",
+   "management_fee": "Gross 0.20% (index portfolios) or 0.25% (active option), reduced by a credit for fund revenue; Vanguard cites about $15-$16 a year per $10,000 for the all-index option.",
+   "regulator": "Vanguard Advisers, Inc., a federally registered investment adviser.",
+   "account_types": "Individual/joint taxable; Traditional, Roth, rollover, inherited and single-participant SEP IRAs; eligible 401(k)s.",
+   "known_for": "Digital advice built on Vanguard funds.",
+   "sources": [
+    {
+     "url": "https://investor.vanguard.com/advice/robo-advisor",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Fidelity Go",
+   "url": "https://www.fidelity.com/managed-accounts/fidelity-go/overview",
+   "country": "United States",
+   "minimum": "$0 to open; $10 balance before investing starts.",
+   "management_fee": "No advisory fee under $25,000; 0.35% per year at $25,000 and above.",
+   "regulator": "Strategic Advisers LLC, a registered investment adviser.",
+   "account_types": "Taxable (individual/joint); Traditional, Roth, Rollover and SEP IRAs; HSA.",
+   "known_for": "Fidelity's robo-advisor, with no advisory fee under $25,000.",
+   "sources": [
+    {
+     "url": "https://www.fidelity.com/managed-accounts/fidelity-go/overview",
+     "checked": "2026-10-27"
+    }
+   ]
+  }
+ ],
+ "copy_platforms": [
+  {
+   "name": "eToro CopyTrader",
+   "url": "https://www.etoro.com/en-us/copytrader/",
+   "what_it_does": "Automatically mirrors other investors' portfolios in your eToro account, in proportion, in real time.",
+   "availability": {
+    "us": "Phased rollout to a select group of US users with a waitlist (announced Oct 29, 2025); copy US traders' stocks, ETFs and crypto. Crypto not available in HI, NV, PR, USVI.",
+    "canada": "Unverified (eToro's country page did not load)."
+   },
+   "price": "eToro: 'no management fees' for copying; other trading fees per eToro's fee schedule (not checked).",
+   "places_trades": true,
+   "regulator_or_broker": "Securities: eToro USA Securities Inc., member FINRA and SIPC. Crypto: eToro USA LLC / eToro NY LLC (not broker-dealers). eToro also announced public APIs (trading functions included) for select users on Oct 29, 2025.",
+   "sources": [
+    {
+     "url": "https://www.etoro.com/en-us/news-and-analysis/latest-news/press-release/etoro-brings-copytrader-to-the-u-s-empowering-investors-to-trade-smarter/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.etoro.com/news-and-analysis/press-releases/etoro-marks-15-years-of-social-investing-with-launch-of-public-apis-and-expansion-of-copytradertm-to-the-us/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Collective2",
+   "url": "https://www.collective2.com/",
+   "what_it_does": "Marketplace of published trading strategies; AutoTrade sends a strategy's trades into your own broker account.",
+   "availability": {
+    "us": "Yes.",
+    "canada": "Unverified generally; Interactive Brokers is a supported broker with 'Local country restrictions'."
+   },
+   "price": "Investor AutoTrade plans: Solo $49/mo ($390/yr, 1 strategy); Standard $99/mo ($795/yr, up to 3); Portfolio $199/mo ($1,599/yr, up to 5); Plus $299/mo ($2,399/yr, unlimited). Broker commissions extra.",
+   "places_trades": true,
+   "regulator_or_broker": "Collective2 LLC is a member of the NFA; it does not take custody. Trades go to supported brokers such as Tradier and Interactive Brokers (plus futures/forex brokers).",
+   "sources": [
+    {
+     "url": "https://www.collective2.com/autotrade-plans",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://trade.collective2.com/supported-brokers",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://trade.collective2.com/get-started-2-2",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Autopilot",
+   "url": "https://www.joinautopilot.com/",
+   "what_it_does": "Follow portfolios that track politicians' and investors' disclosed trades in your own linked brokerage account.",
+   "availability": {
+    "us": "Yes (New York-based; refers to Americans).",
+    "canada": "Unverified; its FAQ has an entry for international customers who cannot open a US brokerage account (answer not readable)."
+   },
+   "price": "Basic: no Autopilot fee (alerts only; no orders sent). Premium: $29.99-$199.99 per quarter or $99.99-$699.99 per year per Pilot; Autopilot's own portfolios $29.99/quarter or $99.99/year. AUM fee 0.00% (as of Oct 9, 2026).",
+   "places_trades": "Premium sends rebalancing instructions to your broker where the broker allows it; Basic does not.",
+   "regulator_or_broker": "Autopilot Advisers, LLC, an SEC-registered investment adviser (Autopilot Holdings Corp, formerly Iris Social Stock App Inc.). Brokers named as examples: Robinhood, Schwab.",
+   "sources": [
+    {
+     "url": "https://www.joinautopilot.com/pelosi-tracker",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://start.joinautopilot.com/journal/what-does-autopilot-cost",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.joinautopilot.com/faq",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Iris",
+   "url": "https://start.joinautopilot.com/journal/the-story-behind-autopilot",
+   "what_it_does": "Was a social investing app (2020). The company pivoted to Autopilot in 2023; the App Store seller is still 'Iris Social Stock App Inc.' and its only listed app is Autopilot.",
+   "availability": {
+    "us": "No longer a separate product.",
+    "canada": "No longer a separate product."
+   },
+   "price": "n/a",
+   "places_trades": "n/a (see Autopilot)",
+   "regulator_or_broker": "See Autopilot.",
+   "status": "Changed: folded into Autopilot (2023).",
+   "sources": [
+    {
+     "url": "https://start.joinautopilot.com/journal/the-story-behind-autopilot",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://apps.apple.com/ee/developer/iris-social-stock-app-inc/id894781335",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Composer (Composer by SoFi)",
+   "url": "https://www.composer.trade/",
+   "what_it_does": "Build, backtest and automate rules-based strategies without code (now with AI help); strategies execute automatically.",
+   "availability": {
+    "us": "Yes.",
+    "canada": "Unverified (FAQ question on non-US use has no visible answer)."
+   },
+   "price": "Starter $0; Advanced $10/month; Pro $32/month ($384/year); Business by quote.",
+   "places_trades": true,
+   "regulator_or_broker": "Composer Securities LLC, SEC-registered broker-dealer, member FINRA/SIPC; accounts carried by Alpaca Securities LLC and Apex Clearing Corporation. SoFi announced it acquired Composer Securities LLC on June 23, 2026.",
+   "status": "Changed: acquired by SoFi (announced June 23, 2026).",
+   "sources": [
+    {
+     "url": "https://www.composer.trade/pricing",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.composer.trade/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://investors.sofi.com/news/news-details/2026/Introducing-Composer-by-SoFi-AI-Powered-Investing-From-Idea-to-Execution/default.aspx",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Surmount",
+   "url": "https://surmount.ai/",
+   "what_it_does": "Connects to your existing brokerage and runs prebuilt or no-code/code/AI-built strategies; includes paper trading on paid tiers.",
+   "availability": {
+    "us": "Yes (US-registered adviser).",
+    "canada": "Unverified."
+   },
+   "price": "Free (tracking); Core $5/month; Plus $10/month; Pro $30/month.",
+   "places_trades": true,
+   "regulator_or_broker": "Surmount AI Inc. is not a registered investment adviser; advisory services by Quantbase, LLC (SEC-registered investment adviser), custodied by Alpaca Securities LLC. Supported external brokers not listed on pricing page.",
+   "sources": [
+    {
+     "url": "https://surmount.ai/pricing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Public.com (Individual API and MCP)",
+   "url": "https://public.com/api",
+   "what_it_does": "US broker whose free Individual API and MCP server let your own code or an AI assistant read your account and place trades (stocks, ETFs, options, bonds, crypto).",
+   "availability": {
+    "us": "Yes; MCP 'Currently limited to US securities markets'.",
+    "canada": "Unverified (Public notes restrictions on international accounts)."
+   },
+   "price": "API free; commission-free trading; regulatory fees apply. MCP included with a Public brokerage account.",
+   "places_trades": true,
+   "regulator_or_broker": "Open to the Public Investing, Inc. (brokerage); crypto via Zero Hash. MCP supports Claude, Perplexity, ChatGPT (setup also for Claude Code, Codex, Grok); trades 'may be executed by your AI agent without your direct input on each transaction' and are deemed authorized by you. API page says 'no approval required' while the June 2026 program terms say approval is at Public's discretion.",
+   "sources": [
+    {
+     "url": "https://public.com/api",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://public.com/disclosures/individual-api-program",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://public.com/mcp-trading",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Tickeron",
+   "url": "https://tickeron.com/",
+   "what_it_does": "AI pattern recognition, signals and 'AI trading robots/agents'.",
+   "availability": {
+    "us": "Unverified.",
+    "canada": "Unverified."
+   },
+   "price": "Unverified: pricing page lists plan types (Beginner, Intermediate one, Intermediate two) but no prices; site promotes a 14-day free trial.",
+   "places_trades": "Unverified.",
+   "regulator_or_broker": "Unverified.",
+   "sources": [
+    {
+     "url": "https://tickeron.com/app/generalinfo/pricing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "TradingView",
+   "url": "https://www.tradingview.com/",
+   "what_it_does": "Charts, screeners, alerts and paper trading; can trade from charts through 100+ connected brokers (including Questrade since May 28, 2024, and Webull).",
+   "availability": {
+    "us": "Yes.",
+    "canada": "Yes (Questrade integration for Canadian users)."
+   },
+   "price": "Billed annually: Basic $0; Essential $12.95/mo; Plus $29.95/mo; Premium $59.95/mo; Ultimate $199.95/mo (currency not named). Alerts: 3 / 20 / 100 / 400 / 1,000 price alerts by plan.",
+   "places_trades": "Only through your connected broker: 'TradingView doesn't process your trades and acts as an interface only.'",
+   "regulator_or_broker": "Not a broker ('We are not a broker'); the connected broker executes. Which plans include webhook alerts: unverified.",
+   "sources": [
+    {
+     "url": "https://www.tradingview.com/pricing/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.tradingview.com/trading/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.tradingview.com/support/solutions/43000756695-how-to-trade-on-tradingview/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.tradingview.com/blog/en/questrade-on-tradingview-44778/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Quiver Quantitative",
+   "url": "https://www.quiverquant.com/",
+   "what_it_does": "Alternative data: congressional trades, insider filings, government contracts, lobbying, institutional holdings; strategies and backtests; API with MCP access.",
+   "availability": {
+    "us": "Yes.",
+    "canada": "Unverified (web data service)."
+   },
+   "price": "Premium $25/month or $300/year; free tier for live dashboards; API plans 'Hobbyist and Trader' priced at api.quiverquant.com (unverified).",
+   "places_trades": "Mostly data; Premium's copytrading follows strategies 'through our partnership with Quantbase' (execution details unverified).",
+   "regulator_or_broker": "Copytrading via Quantbase (an SEC-registered adviser per Surmount's disclosures).",
+   "sources": [
+    {
+     "url": "https://www.quiverquant.com/premium-vs-api/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.quiverquant.com/congresstrading/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "Unusual Whales",
+   "url": "https://unusualwhales.com/",
+   "what_it_does": "Options flow, dark-pool data and congressional trading alerts.",
+   "availability": {
+    "us": "Yes.",
+    "canada": "Unverified (web data service)."
+   },
+   "price": "From $50/month; about $42/month billed annually (~$504/year). Higher tiers (Pro, Max) add API access; prices not listed.",
+   "places_trades": "No (appears data-only; not stated explicitly).",
+   "regulator_or_broker": "n/a (data provider).",
+   "sources": [
+    {
+     "url": "https://unusualwhales.com/lp/unusual-whales-pricing",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "name": "dub",
+   "url": "https://web.dubapp.com/",
+   "what_it_does": "Copy the portfolios of 400+ investors/creators (including politician-tracking portfolios) in a dub brokerage account.",
+   "availability": {
+    "us": "Yes (US-listed securities).",
+    "canada": "Unverified (not stated)."
+   },
+   "price": "Not listed on the page (a Premium tier is mentioned).",
+   "places_trades": true,
+   "regulator_or_broker": "dub Financial, LLC, SEC-registered broker-dealer, member FINRA (CRD 316477), clearing by Apex Clearing; affiliate dub Advisors, LLC is an SEC-registered investment adviser.",
+   "sources": [
+    {
+     "url": "https://web.dubapp.com/",
+     "checked": "2026-10-27"
+    }
+   ]
+  }
+ ],
+ "rules": [
+  {
+   "topic": "US: pattern day trader rule replaced by intraday margin",
+   "jurisdiction": "US (FINRA/SEC)",
+   "summary": "FINRA amended Rule 4210 to replace the day-trading margin rules, including the trade-count 'pattern day trader' designation and the $25,000 minimum equity, with intraday margin standards. SEC approved April 14, 2026 (Release 34-105226). Regulatory Notice 26-10 (Apr 20, 2026): effective June 4, 2026, but brokers may phase in until Oct 20, 2027, so a reader's broker may still apply the old PDT rule and $25,000 minimum. Under the new rule: no PDT label by trade count; 25% maintenance margin on long margin-eligible equities throughout the day (firms may require more); under $2,000 equity you can trade in a margin account but without leverage. FINRA tells investors to ask their own firm when it switches.",
+   "sources": [
+    {
+     "url": "https://www.finra.org/compliance-tools/weekly-archive/04152026",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.sec.gov/rule-release/34-105226",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.finra.org/rules-guidance/notices/26-10",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.finra.org/investors/insights/intraday-margin-requirements",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "US: cash accounts",
+   "jurisdiction": "US (FINRA)",
+   "summary": "In a cash account you must pay in full by settlement (generally one day after the trade for most securities); firms apply Regulation T and can restrict trading after a violation. Good-faith and freeriding specifics were not on the page read (unverified).",
+   "sources": [
+    {
+     "url": "https://www.finra.org/investors/insights/cash-accounts-what-they-are-and-how-avoid-problems",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "US: auto-trading services and AI claims",
+   "jurisdiction": "US (FINRA/SEC)",
+   "summary": "FINRA (July 29, 2025) warns about auto-trading services from unregistered entities: their trades may not fit your goals, losses can build before you notice, AI claims may be exaggerated, never hand over your brokerage username and password, check firms on BrokerCheck, and keep monitoring your account even with regulated services. The SEC has charged advisers for false claims about using AI ('AI washing', Mar 18, 2024).",
+   "sources": [
+    {
+     "url": "https://www.finra.org/investors/insights/auto-trading-unregistered-entities",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.sec.gov/newsroom/press-releases/2024-36",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "Canada: order-execution-only (discount) accounts",
+   "jurisdiction": "Canada (CIRO)",
+   "summary": "At order-execution-only (OEO) dealers, which include all the Canadian self-directed brokers listed, clients make their own investment decisions; the dealer gives no recommendations and no suitability assessment (CIRO's 'Recommendation Prohibition'). CIRO consulted (comments due Feb 26, 2025) on letting OEO dealers offer non-tailored tools and information. CIRO research (May 26, 2026) describes OEO investors as people comfortable making their own decisions and found concrete risk examples at decision points cut high-risk activity, while tick-box acknowledgements did not. CIRO's main OEO guidance page could not be read (robots).",
+   "sources": [
+    {
+     "url": "https://www.ciro.ca/newsroom/publications/non-tailored-advice-order-execution-only-channel",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.ciro.ca/new-ciro-research-offers-practical-insights-support-diy-investors",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "Canada: AI and securities law; AI-branded scams",
+   "jurisdiction": "Canada (CSA)",
+   "summary": "CSA Staff Notice and Consultation 11-348 (Dec 5, 2024) explains how existing securities law applies to AI systems in capital markets and does not create new legal requirements. CSA keeps investor alerts on AI-branded trading platforms (e.g., 'Quantum AI', 'Capital Market AI'). Whether Canada has a PDT-style rule: none found (unverified).",
+   "sources": [
+    {
+     "url": "https://www.securities-administrators.ca/news/canadian-securities-administrators-issue-guidance-and-consult-on-use-of-ai-systems-in-capital-markets/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.securities-administrators.ca/investor-alerts/quantum-ai-2/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.securities-administrators.ca/investor-alerts/capital-market-ai/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "You remain responsible for every order",
+   "jurisdiction": "Broker terms (US and Canada)",
+   "summary": "Brokers that let AI connect say the account holder owns the orders: IBKR says you are responsible for reviewing AI-generated instructions and deciding whether to turn them into orders; Questrade requires you to approve every order in its app; Public says trades submitted through its MCP server are 'deemed authorized by you'; Robinhood and IBKR Autonomous Trading allow orders without per-order approval if you set it up that way.",
+   "sources": [
+    {
+     "url": "https://www.interactivebrokers.ca/en/trading/ai-hub.php",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/learning/using-questrade/connect-questrade-to-your-ai-tool",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://public.com/mcp-trading",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://robinhood.com/us/en/support/articles/agentic-trading-overview/",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "API trading for your own account is usually allowed",
+   "jurisdiction": "Broker terms",
+   "summary": "Several brokers explicitly offer personal-use APIs that place orders in the holder's own account: IBKR (open and funded accounts can trade via Web API immediately), E*TRADE (individual key tied to one user), Tradier (personal API token), Public (personal, non-commercial use), Schwab (Trader API - Individual), Webull (individual Trading API after review), Alpaca (API-first). Exceptions: Questrade's API trading is for partner developers only (its MCP drafts orders you approve); no public API found at Wealthsimple, Fidelity or the Canadian bank-owned brokers. Distributing an app to other people generally needs partner/vendor approval (E*TRADE vendor keys, Tradier Partner status, Public bars offering apps to third parties).",
+   "sources": [
+    {
+     "url": "https://www.interactivebrokers.com/campus/ibkr-api-page/web-api-trading/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://developer.etrade.com/getting-started",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://docs.tradier.com/",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://public.com/disclosures/individual-api-program",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www.questrade.com/api",
+     "checked": "2026-10-27"
+    }
+   ]
+  }
+ ],
+ "anthropic": [
+  {
+   "topic": "Usage Policy in force now (effective Sept 15, 2025)",
+   "summary": "Anthropic's Usage Policy treats financial uses (with legal and employment uses) as high-risk use cases that need extra safeguards: a \"human in the loop\" to oversee outputs and disclosure that AI is involved. Anthropic's Aug 15, 2025 post says these requirements apply to outputs that reach consumers, not to business-to-business use.",
+   "sources": [
+    {
+     "url": "https://www.anthropic.com/news/usage-policy-update",
+     "checked": "2026-10-27"
+    }
+   ]
+  },
+  {
+   "topic": "2026 Usage Policy update (published Oct 8, 2026; effective Nov 12, 2026)",
+   "summary": "Finance is one of 11 high-risk areas. It covers personalized recommendations to buy, sell, hold or allocate among specific investment products (securities, funds, digital assets, annuities) and personal tax advice. For such a recommendation, a qualified person (with the relevant training or experience and any required licence) must review the output before it reaches the individual or is used to carry out a decision, must have authority to change it, and stays responsible for it; the individual must be told AI was used (naming Claude is not required). Not covered: general financial education not applied to someone's own situation, internal research and drafting. The requirements apply to anyone using Anthropic's products, not only businesses. The text does not say how they apply when the user and the person getting the advice are the same, and it does not specifically address an agent executing trades; users are responsible for actions their agents take through connected systems. Anthropic says the core high-risk requirements are unchanged in substance from the earlier policy.",
+   "relevance_to_be_the_puck": "A guide on using Claude with Be The Puck's data to draft orders the reader reviews and approves themselves sits closer to the education and drafting side, and keeps the reader as the decision-maker. If Be The Puck itself used Claude to send personalized buy/sell output to readers, the high-risk requirements (qualified human review and AI disclosure) would apply. This is a reading of the policy, not legal advice.",
+   "sources": [
+    {
+     "url": "https://www.anthropic.com/news/2026-usage-policy-update",
+     "checked": "2026-10-27"
+    },
+    {
+     "url": "https://www-cdn.anthropic.com/files/4zrzovbb/website/6ae2f5bb8675bcd9fac006125817ba1393b396e4.pdf",
+     "checked": "2026-10-27"
+    }
+   ]
+  }
+ ]
+}

@@ -82,6 +82,12 @@ for that isn't there, and move an issue to Done only once the change is live.
   name under it; a new play needs both. Pages open in Simple view: mark new detail sections `data-adv="..."` and
   detail columns `.adv-col` (`assets/view.js`). Explanations use everyday words; `factors.friendly`/`why` and
   `playview.js` must say the same thing.
+- **Automating means drafts you approve (Oct 27, 2026, AUD-51).** The automation guides (`automate.py`: the free
+  broker directory `/guides/brokers/` and the "Automate with Claude" articles) keep the reader approving every order
+  in their own broker, paper first. Setups that trade without asking are described factually, never walked through.
+  The directory is a plain list from `brokers.json` (each fact dated and sourced): no affiliation, no ranking, no
+  referral links, no "best". `assets/downloads/bethepuck_drafts.py` only ever talks to Alpaca's paper address and sends
+  an order only after a typed "yes"; keep it that way. Re-check a firm's facts on its own pages before changing them.
 - **Faster exits were tested (Oct 20, 2026) and rejected:** 50-day trend, trend capped under the
   50-day, 20% floor, 3-month-high exit, half-and-half all have a lower 20-year edge and more
   flips (`modelcompare.MODELS`). Don't speed the exit rule up on the strength of one week.

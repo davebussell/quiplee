@@ -227,7 +227,7 @@ def pages_without_disclaimer(out):
 # Filled as each page and data file is written (write_pages, write_data, copy_static), so the build never has
 # to read its own 300 MB of output back at the end, when its memory is highest. main() refuses to publish if any.
 BANNED_HITS = []
-TEXT_EXT = (".html", ".htm", ".json", ".xml", ".txt")
+TEXT_EXT = (".html", ".htm", ".json", ".xml", ".txt", ".py", ".csv")
 
 
 def note_banned(rel, text):
