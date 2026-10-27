@@ -52,7 +52,7 @@ export async function tierFor(req, context, fromPath = null) {
     return free(BUSY);
   }
   if (!acct || !acct.apikey || acct.apikey.h !== h) return { tier: "bad", note: BAD_KEY, rl: ipKey(req, context, "agentfree") };
-  if (!membership(acct).active) return free(LAPSED);
+  if (!membership(acct).active || !acct.email_ok) return free(LAPSED);   // a member with a confirmed email (account.mjs apikey)
   return { tier: "member", u: rec.u, note: null, rl: "rl/agentkey:" + h.slice(0, 32) };
 }
 

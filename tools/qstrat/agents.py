@@ -129,7 +129,7 @@ def _tier_lines():
         f"- Free sample, no key: get_stock_signal and search_stocks (signal, score, plays in and the read), {FREE_PER_DAY} calls a day from one address.",
         f"- Members, with a personal API key: every tool, including the screener, factor points, the plays, market conditions, flip prices and "
         f"custom weights, {KEY_PER_DAY:,} calls a day. A key comes with a Be The Puck membership ({PRICE} a month; member tools are free for every "
-        f"account until {FREE_UNTIL}). Make one on the account page ({SITE}/me/#apikey); it is shown once and can be revoked there.",
+        f"account until {FREE_UNTIL}). Make one on the account page ({SITE}/me/#apikey) once your email is confirmed; it is shown once and can be revoked there.",
         f"- Send the key as `Authorization: Bearer <key>`. For an MCP client that can't set headers (a claude.ai custom connector), use the "
         f"secret URL {MCP_URL}/k/<key> and keep it private like a password.",
     ]
@@ -293,7 +293,7 @@ def developers_page(site):
 </section>
 
 <section class="dev card prose" id="key"><p class="eyebrow">Your key</p><h2 class="h3">Get one, use it, revoke it</h2>
-<ol><li>Sign in and open <a href="{h('me/')}#apikey">your account page</a>. Under <b>API key</b>, choose <b>Create a key</b>.</li>
+<ol><li>Sign in, confirm your email if you haven't, and open <a href="{h('me/')}#apikey">your account page</a>. Under <b>API key</b>, choose <b>Create a key</b>.</li>
 <li>Copy the key (it starts <code>btp_</code>) and the secret MCP address. They are shown once: Be The Puck keeps only a fingerprint of the key, so it can't show it again.</li>
 <li>Send it as a header, <code>Authorization: Bearer btp_…</code>, or for an MCP client that can't set headers, use the secret address <code>{e(MCP_URL)}/k/btp_…</code>. Treat that address like a password.</li>
 <li>Lost it, or shared it by mistake? <b>Revoke</b> on the same card stops it at once; make a new one whenever you like. If your membership lapses, the key gets the free sample until you renew.</li></ol></section>

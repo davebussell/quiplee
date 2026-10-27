@@ -270,6 +270,8 @@ async function apikey(req, s, sess) {
   }
   if (b.action !== "create") return reply({ error: 'Send {"action": "create"} or {"action": "revoke"}.' }, 400);
   if (!membership(sess.acct).active) return reply({ error: "API keys come with a Be The Puck membership ($5 a month).", member: false }, 403);
+  // a confirmed email first, so free accounts can't be made in bulk for keys
+  if (!sess.acct.email || !sess.acct.email_ok) return reply({ error: "Confirm your email first: API keys need a confirmed address.", confirm: true }, 403);
   if (await overLimit(s, "rl/" + hashId("apikey:" + sess.u, env("QM_SECRET")), 10, 86400)) return reply({ error: "That's ten new keys today. Try again tomorrow." }, 429);
   const out = await createKey(s, sess.u, updateAccount);
   if (out.error) return reply({ error: out.error }, out.status || 400);
