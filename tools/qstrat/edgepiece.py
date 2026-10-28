@@ -195,6 +195,15 @@ def pts(v, d=1):
     return ("−" if v < 0 and float(s) else "+" if v > 0 and float(s) else "") + s
 
 
+def vs(v):
+    """'beat' or 'trailed', for a number against the average stock."""
+    return "beat" if (v or 0) >= 0 else "trailed"
+
+
+def num(v):
+    return "–" if v is None else f"{abs(v) * 100:.1f}"
+
+
 def pctx(v):
     return "–" if v is None else f"{round(100 * v)}%"
 
@@ -254,7 +263,7 @@ def _so_far(site, h):
     return f"""<h2 class="h2">What our own tests say so far</h2>
 <p>Be The Puck grades every rule it shows the same way: month by month, from the numbers public at the time, against the stock's market with dividends included (<a href="{h('articles/old-vs-new-signal/')}#measuring-stick">the fairer measuring stick</a>, October 27). Three results matter for what follows.</p>
 <ul>
-<li><b>The standard signal's edge is small, and it comes from Canada.</b> Since {J['since'][:4]} its Buys have beaten the market {pts(a.get('edge12'))} points more often than its Sells over the next year: {pts(us.get('edge12'))} on U.S. stocks and {pts(tsx.get('edge12'))} on TSX stocks, most of that in 2011–2018.</li>
+<li><b>The standard signal's edge is small, and it comes from Canada.</b> Since {J['since'][:4]} its Buys have beaten the market {num(a.get('edge12'))} points {"more" if (a.get('edge12') or 0) >= 0 else "less"} often than its Sells over the next year: {pts(us.get('edge12'))} on U.S. stocks and {pts(tsx.get('edge12'))} on TSX stocks, most of that in 2011–2018.</li>
 <li><b>Where it does earn its keep is getting out.</b> A stock it called Sell was {sf / bf:.1f} times as likely as a Buy to fall 30% or more within a year ({pctx(sf)} against {pctx(bf)}).</li>
 <li><b>Cheap didn't beat dear.</b> Ranked by P/E, price to book or dividend yield, the cheaper stocks did worse than the dearer ones (edges of {pts(min(value_edges))} to {pts(max(value_edges))} points). Revenue growth had the best record of any company number ({pts(fe('rg'))}), and the price measures, trend and momentum, came next ({pts(fe('trend'))} and {pts(fe('mom'))}).</li>
 </ul>
@@ -281,17 +290,17 @@ def _value_tests(site, h):
     if sp:
         sp_line = (f"<p><b>How far apart cheap and dear are now.</b> On the {sp['d'].strftime('%B %Y')} month-end, the cheapest fifth of these stocks earned {pctx(sp['hi'])} of their price a year "
                    f"(a P/E near {1 / sp['hi']:.0f}) and the dearest fifth {pctx(sp['lo'])}; the middle stock {pctx(sp['med'])}, a P/E near {1 / sp['med']:.0f}. "
-                   f"That gap, {pts(sp['gap'])} points, is {'narrower' if sp['gap'] < sp['gap_avg'] else 'wider'} than its average since {sp['since'].year} ({pts(sp['gap_avg'])}). "
+                   f"That gap, {num(sp['gap'])} points, is {'narrower' if sp['gap'] < sp['gap_avg'] else 'wider'} than its average since {sp['since'].year} ({num(sp['gap_avg'])}). "
                    "A wide gap is what value investors look for, because there's more room for cheap stocks to catch up; a narrow one means less of that cushion.</p>")
     return f"""<h2 class="h2">Value, tested on the stocks we cover</h2>
 <p>Every month-end from {first.strftime('%B %Y')} to {last_.strftime('%B %Y')}, each covered U.S. company that files with the SEC (about {n} a month) was ranked on value, growth, quality and price measures, using only filings and prices public that day. The best-ranked fifth on each measure, or on an equal mix of measures, was then followed for a month against <b>the average covered stock</b>, not the index, so that the list's own lean toward today's winners doesn't flatter every row. Positive means that fifth beat the average stock, in points a year. Rebuilt nightly with the {site.asof.strftime('%b %-d, %Y')} close.</p>
 {mix_table(site)}
-<p><b>What it shows.</b> The cheapest fifth by P/E trailed the average covered stock by {pts(abs(ey['top']['all']))} points a year, and the dearest fifth beat it by {pts(ey['bottom']['all'])}. Adding revenue and earnings growth to low P/E, the mix closest to "good value with solid growth", {'narrowed the gap' if k.get('all') is not None and k['all'] > ey['top']['all'] else 'did no better'} ({pts(k.get('all'))} a year), and {'has been ahead since 2021' if (k.get('2021 on') or 0) > 0 else 'has still trailed since 2021'} ({pts(k.get('2021 on'))}). The steadiest measure was the price trend: the fifth furthest above its 200-day average beat the average stock by {pts(tr.get('all'))} a year, ahead in {tr.get('up')} of {tr.get('n')} years. Revenue growth on its own: {pts(rg.get('all'))}.</p>
+<p><b>What it shows.</b> The cheapest fifth by P/E {vs(ey['top']['all'])} the average covered stock by {num(ey['top']['all'])} points a year, and the dearest fifth {vs(ey['bottom']['all'])} it by {num(ey['bottom']['all'])}. Adding revenue and earnings growth to low P/E, the mix closest to "good value with solid growth", {'narrowed the gap' if k.get('all') is not None and k['all'] > ey['top']['all'] else 'did no better'} ({pts(k.get('all'))} a year), and {'has been ahead since 2021' if (k.get('2021 on') or 0) > 0 else 'has still trailed since 2021'} ({pts(k.get('2021 on'))}). The steadiest measure was the price trend: the fifth furthest above its 200-day average {vs(tr.get('all'))} the average stock by {num(tr.get('all'))} points a year, ahead in {tr.get('up')} of {tr.get('n')} years. Revenue growth on its own: {pts(rg.get('all'))}.</p>
 <p>Two cuts help with the value-trap question, cheap for a reason or cheap by mistake:</p>
 {split_table(site)}
 <p>Among cheap stocks, the ones whose revenue was still growing did better than cheap stocks overall, and since 2021 they've been ahead of the average stock. A rising price didn't rescue cheap stocks in this list. Among fast growers, the dearer half did better than the cheaper half overall ({pts(garp_d.get('all'))} against {pts(garp_c.get('all'))}), though since 2021 the cheaper half has done about as well ({pts(garp_c.get('2021 on'))} against {pts(garp_d.get('2021 on'))}).</p>
 {sp_line}
-<p><b>Why not to read too much into it.</b> Look at the last row: companies <i>losing money</i> beat the average covered stock by {pts(loss.get('all'))} points a year. That isn't a strategy; it's hindsight. The list is today's names, so the money-losers in it are the ones that made it (a few became the market's biggest companies), while the ones that failed or were bought cheaply aren't here to count against them. The same lean hurts value: a company cheap in 2012 that stayed cheap shrank and was never added; one that was dear and kept growing is now a large cap we cover. A fair value test needs the companies that dropped out, and filings from before 2011, which is why <a href="{h('articles/old-vs-new-signal/')}#by-market">testing on a list that includes delisted stocks</a> is next on our list. Until then, these numbers describe one unusual stretch in U.S. large caps, value's worst on record, not a verdict on value.</p>
+<p><b>Why not to read too much into it.</b> Look at the last row: companies <i>losing money</i> {vs(loss.get('all'))} the average covered stock by {num(loss.get('all'))} points a year. {"That isn't a strategy; it's hindsight." if (loss.get('all') or 0) > 0 else "Even so, the list carries hindsight."} The list is today's names, so the money-losers in it are the ones that made it (a few became the market's biggest companies), while the ones that failed or were bought cheaply aren't here to count against them. The same lean hurts value: a company cheap in 2012 that stayed cheap shrank and was never added; one that was dear and kept growing is now a large cap we cover. A fair value test needs the companies that dropped out, and filings from before 2011, which is why <a href="{h('articles/old-vs-new-signal/')}#by-market">testing on a list that includes delisted stocks</a> is next on our list. Until then, these numbers describe one unusual stretch in U.S. large caps, value's worst on record, not a verdict on value.</p>
 <p>To see how every covered stock scores on low P/E, revenue growth and earnings growth together, <a href="{h('stocks/')}?w={weights}">open the stock list with that mix</a> (P/E 35, revenue growth 35, earnings growth 30). The weights panel on any page changes it, or puts back the standard weights.</p>"""
 
 
@@ -360,7 +369,7 @@ def _card(title, facts, touches, against):
 
 MACRO_HTML = (
     """<div class="prose"><h2 class="h2" id="shifts">The big shifts behind the market</h2>
-<p>These are the trends most likely to move whole groups of stocks over the next few years, as they stood on October 28, 2026. Each comes with dated facts, the kinds of company it touches and the strongest argument against it. They move quickly, so the dates matter. Both the Federal Reserve and the Bank of Canada announce rate decisions on October 28; the rates here are from before those announcements.</p></div>
+<p>These are the trends most likely to move whole groups of stocks over the next few years, as they stood on October 28, 2026. Each comes with dated facts, the kinds of company it touches and the strongest argument against it. They move quickly, so the dates matter. The Bank of Canada raised its rate on the morning of October 28; the Federal Reserve announces its decision that afternoon, so the U.S. rate here is from before it.</p></div>
 <div class="edge-trend">"""
     + _card("The AI build-out",
             ["In April, Alphabet, Microsoft, Amazon and Meta together guided to about $725 billion of capital spending for 2026, mostly data centres and chips (Yahoo Finance, Apr 29).",
@@ -376,7 +385,7 @@ MACRO_HTML = (
             "A price driven by a war can reverse quickly once ships move (the EIA's own path falls toward $74 by late 2027), and power-demand forecasts span a wide range.")
     + _card("Inflation and rates turned up again",
             ["The Fed raised its rate to 3.75–4.00% on September 16, its first increase since 2023. U.S. consumer prices rose 3.7% in the year to September; core prices, without food and energy, 2.6%. The 10-year Treasury yield was near 5% in late October.",
-             "The Bank of Canada's rate was 2.25%. Canadian prices rose 3.1% in the year to September, and the economy lost 68,000 jobs that month, taking unemployment to 6.5% (Statistics Canada)."],
+             "On October 28 the Bank of Canada raised its rate by a quarter point to 2.50%, its first increase since July 2023, to keep high energy prices from spilling into wider inflation, and said another increase may be needed (BNN Bloomberg). Canadian prices rose 3.1% in the year to September, even as the economy lost 68,000 jobs that month, taking unemployment to 6.5% (Statistics Canada)."],
             "banks, insurers, utilities, real estate, homebuilders and the highest-valued growth stocks, whose worth rests most on earnings far in the future.",
             "Core inflation is far below the headline. If oil falls as the EIA expects, the case for higher rates weakens.")
     + _card("Government debt",
@@ -493,7 +502,7 @@ MACRO_SOURCES = [
     ("Lawrence Berkeley National Laboratory: U.S. data center energy use (June 2026)", "https://eta-publications.lbl.gov/publications/united-states-data-center-energy-2025"),
     ("Federal Reserve FOMC statement (Sep 16, 2026)", "https://federalreserve.gov/newsevents/pressreleases/monetary20260916a.htm"),
     ("investingLive: U.S. September CPI (Oct 14, 2026)", "https://investinglive.com/news/us-september-cpi-vs-3-6-expected-0/"),
-    ("Canadian Mortgage Trends: Bank of Canada holds at 2.25% (Sep 2, 2026)", "https://www.canadianmortgagetrends.com/mortgage-wire/2026/09/02/bank-of-canada-holds-policy-rate-at-2-25"),
+    ("BNN Bloomberg: Bank of Canada raises key interest rate, says another hike possible (Oct 28, 2026)", "https://bnnbloomberg.ca/business/economics/2026/10/28/bank-of-canada-raises-key-interest-rate-says-another-hike-possible"),
     ("The Star (Xinhua): Canada's CPI rises 3.1% in September (Oct 20, 2026)", "https://www.thestar.com.my/news/world/2026/10/20/canada039s-cpi-rises-31-pct-in-september"),
     ("The Hub: Canada shed 68,000 jobs in September (Oct 9, 2026)", "https://thehub.ca/2026/10/09/canada-shed-68000-jobs-in-september-statistics-canada-reports/"),
     ("Congressional Budget Office, Monthly Budget Review (Oct 8, 2026)", "https://www.cbo.gov/system/files/2026-10/61985-MBR.pdf"),
