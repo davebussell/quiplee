@@ -1003,10 +1003,19 @@ class Site:
         more_img = {"theory/": "theory-board", "markets/": wx_img, "guides/": "puck-row", "alerts/": "phone-alert"}
         more_html = "".join(f'<a class="card more-card" href="{h(u)}"><span class="more-img">{pic(h, more_img[u], sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 280px", decorative=True)}</span>'
                             f'<span class="eyebrow">{e(k)}</span><b>{e(t)}</b><span class="muted small">{e(d)}</span></a>' for u, k, t, d in more)
+        # the newest written article, above the fold (Dave, Oct 28, 2026)
+        from .articles import newest
+        nw = newest(self)
+        new_html = ""
+        if nw:
+            new_html = (f'<a class="hero-new" href="{h(nw["path"])}"><span class="hero-new-tag">New{" · free" if nw["free"] else ""}</span>'
+                        f'<span class="hero-new-t">{nw["title"]}<span class="hero-new-d">{e(nw["date"].strftime("%b %-d"))} · Read the article</span></span>'
+                        f'<span class="hero-new-go" aria-hidden="true">→</span></a>')
         body = f"""
 <section class="hero hero-v3">
   <div class="hero-art" aria-hidden="true">{pic(h, "hero-trail", sizes="100vw", cls="hero-art-img", eager=True, decorative=True)}</div>
   <div class="hero-copy">
+    {new_html}
     <p class="eyebrow">Published trading rules, run on real prices every night</p>
     <h1 class="hero-h1">Don't chase where the stock is. Chase where it's <em>going</em>.</h1>
     <p class="lede">{len(TIMED)} trading plays from {n_an} named analysts, run after every close on {len(universe())} stocks, funds and coins. Two questions, four steps:</p>

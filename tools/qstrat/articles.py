@@ -58,6 +58,18 @@ def pc(v, d=0, sign=True):
     return ("−" + s) if v < 0 and round(abs(v) * 100, d) else (("+" + s) if sign and v > 0 else s)
 
 
+def newest(site):
+    """The most recent written piece, for the home page's "New" link: {"path", "title", "dek", "date", "free"}, or None.
+    Written pieces carry their date in the registry (Articles.plan); live ones are rebuilt nightly and have none."""
+    A = Articles(site)
+    A.plan()
+    got = [(d, i, sp, title, dek) for i, (b, sp, title, dek, kind, d) in enumerate(A.list) if kind == "written" and d is not None]
+    if not got:
+        return None
+    d, _, sp, title, dek = max(got)
+    return {"path": sp, "title": title, "dek": dek, "date": d, "free": sp in FREE_PIECES}
+
+
 class Articles:
     def __init__(self, site):
         self.s = site

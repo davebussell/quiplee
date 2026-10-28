@@ -241,7 +241,9 @@ Netlify Blobs behind `/api/picks-state` (token `PICKS_STATE_TOKEN`), not in this
 repo; only the production build writes it. Locally, set `QUIPLEE_PICKS_FILE` to a
 JSON file.
 
-**Home page and screener.** The home page answers two questions in four numbered
+**Home page and screener.** Above the headline, the hero links the newest written article
+(`articles.newest`: the latest dated piece in the articles registry, so a new written piece takes the
+spot by itself). The home page answers two questions in four numbered
 steps. Step 1, "Is the market about to crash?", is the nine crash gauges' verdict
 (`macro.py`) and the plays on the S&P 500. Steps 2 to 4 are a screener of every
 covered name (`screen.py`, `assets/screen.js`, data in `data/screen.json`): buying
