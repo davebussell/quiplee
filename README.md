@@ -213,7 +213,15 @@ and drop its `flag` in `plays.py` once confirmed.
 **Members.** `/picks/` (the top-picks tracker), `/rules/` (their own Start/Stop
 rules) and every report under `/articles/` (not the hub) are for members, except the free
 "Risk and selling" pieces (`tools/qstrat/riskpieces.py`, listed in its `FREE` and in
-`member-gate.js` `excludedPath`). `netlify/edge-functions/member-gate.js`
+`member-gate.js` `excludedPath`), `before-you-automate` and `what-has-an-edge`.
+
+**What has an edge** (`/articles/what-has-an-edge/`, `tools/qstrat/edgepiece.py`, free; Dave, Oct 28, 2026). Value
+investing tested on the site's own data: each month-end since SEC numbers start (2011), every covered U.S. SEC filer is
+ranked point-in-time on value (earnings, cash-flow, sales and book yields, P/E within its sector), growth, quality and
+price measures and equal mixes of them (`MIXES`), and the top fifth is followed a month against the average covered
+stock (which strips out the list's lean to today's winners), with value-trap and growth-at-a-reasonable-price cuts and
+the current gap between cheap and dear. Rebuilt nightly. The research on value and other edges, the macro trends and
+"where things are heading" are written and dated (`WRITTEN`, sources in `SOURCES`); update them when they go stale. `netlify/edge-functions/member-gate.js`
 serves the full page only with a signed member cookie; otherwise it serves the
 page's locked version (title, opening line, sign-in / join card) that
 `tools/qstrat/members.py` builds under `/locked/`. `netlify/functions/member.mjs`

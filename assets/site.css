@@ -2271,3 +2271,20 @@ html[data-view="full"] .adv-cols-note, .adv-tap[hidden] { display: none !importa
 .me-earn > p.small { margin: 6px 0 0; }
 .me-earn ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .me-earn li { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+
+/* what-has-an-edge (edgepiece.py): the value-and-growth mix row, and the "tie it together" steps */
+.tbl tr.em-row td { background: var(--panel-2); }
+.tbl tr.em-row td:first-child { box-shadow: inset 3px 0 0 var(--violet); }
+@media (max-width: 720px) {
+  .tbl tr.em-row td { background: none; }
+  .tbl tr.em-row td:first-child { box-shadow: none; color: var(--violet-ink); font-weight: 600; }
+}
+.edge-steps { counter-reset: edge; list-style: none; padding: 0; display: grid; gap: 12px; }
+.edge-steps > li { counter-increment: edge; position: relative; padding: 14px 16px 14px 52px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
+.edge-steps > li::before { content: counter(edge); position: absolute; left: 16px; top: 14px; width: 24px; height: 24px; border-radius: 50%; background: var(--violet); color: #fff; font: 600 13px/24px var(--ui); text-align: center; }
+.edge-steps > li b:first-child { display: block; margin-bottom: 2px; }
+.edge-trend { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin: 12px 0 20px; }
+.edge-trend .card { padding: 14px 16px; }
+.edge-trend .card h3 { margin: 0 0 6px; font: 600 16px/1.3 var(--ui); color: var(--ink); }
+.edge-trend .card p { margin: 0 0 6px; font-size: 14px; }
+.edge-trend .card .small { color: var(--muted); }

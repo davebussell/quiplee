@@ -26,7 +26,8 @@ e = html.escape
 WRITTEN = pd.Timestamp("2026-10-03")
 from .riskpieces import FREE as _RISK_FREE  # noqa: E402
 from . import automate  # noqa: E402
-FREE_PIECES = _RISK_FREE | automate.FREE     # free to read (netlify/edge-functions/member-gate.js excludedPath lists the same)
+from . import edgepiece  # noqa: E402
+FREE_PIECES = _RISK_FREE | automate.FREE | {edgepiece.PATH}     # free to read (netlify/edge-functions/member-gate.js excludedPath lists the same)
 FREE_TAG = '<span class="tag">Free</span>'
 BUCKETS = [("risk", "Risk and selling", "When to get out, how much to put in one name, and how the signal changed to carry an exit rule. Free to read."),
            ("stocks", "Stocks", "A brief on every covered name, rebuilt each night, plus the names the plays agree on and the ones a crash would hit hardest."),
@@ -160,6 +161,7 @@ class Articles:
         L.append(("strategies", "articles/what-backtests-say/", "What thousands of backtests say about timing the market",
                   "Every play on every stock against buying and holding: where timing earned its keep, where it didn't, and how not to fool yourself.", "live", None))
         automate.plan(self)
+        L.append((edgepiece.BUCKET, edgepiece.PATH, edgepiece.TITLE, edgepiece.DEK, "written", edgepiece.WRITTEN))
         for g in self.sector_groups():
             L.append(("strategies", f"articles/sectors/{slugify(g)}/", f"{e(g)}: what the plays say",
                       f"Every covered {e(g.lower())} name through the same lenses: plays, trend, run-up and crash exposure.", "live", None))
@@ -183,6 +185,7 @@ class Articles:
         for g in self.sector_groups():
             self.sector(g)
         automate.build(self)
+        edgepiece.build(self)
         for t in TICKERS:
             if (t["sym"], "buy-and-hold") in self.s.R:
                 self.stock_brief(t)

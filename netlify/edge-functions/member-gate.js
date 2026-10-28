@@ -92,12 +92,14 @@ export default async (req, context) => {
 
 export const config = {
   path: ["/picks", "/picks/*", "/articles/*", "/rules", "/rules/*"],
-  // the hub, the free pieces on risk and selling (tools/qstrat/riskpieces.py FREE) and before-you-automate (automate.py FREE)
+  // the hub, the free pieces on risk and selling (tools/qstrat/riskpieces.py FREE), before-you-automate (automate.py FREE)
+  // and what-has-an-edge (edgepiece.py)
   excludedPath: ["/articles/", "/articles/index.html",
     "/articles/why-your-signal-changed", "/articles/why-your-signal-changed/", "/articles/why-your-signal-changed/index.html",
     "/articles/when-to-sell", "/articles/when-to-sell/", "/articles/when-to-sell/index.html",
     "/articles/one-stock-too-many", "/articles/one-stock-too-many/", "/articles/one-stock-too-many/index.html",
     "/articles/old-vs-new-signal", "/articles/old-vs-new-signal/", "/articles/old-vs-new-signal/index.html",
     "/articles/calls-graded", "/articles/calls-graded/", "/articles/calls-graded/index.html",
-    "/articles/before-you-automate", "/articles/before-you-automate/", "/articles/before-you-automate/index.html"],
+    "/articles/before-you-automate", "/articles/before-you-automate/", "/articles/before-you-automate/index.html",
+    "/articles/what-has-an-edge", "/articles/what-has-an-edge/", "/articles/what-has-an-edge/index.html"],
 };
