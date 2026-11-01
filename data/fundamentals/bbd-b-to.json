@@ -14,7 +14,7 @@
  "equity": -889000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 377.77,
  "fiftyTwoWeekLow": 186.72,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2355000064,
  "operatingMargins": 0.10791001,
  "payoutRatio": 0.0,
- "pegRatio": 10.23,
+ "pegRatio": 9.66,
  "priceToBook": -23.14207,
  "priceToSalesTrailing12Months": 6.239983,
  "profitMargins": 0.095790006,
@@ -58,6 +58,6 @@
  "total_debt_bs": 5154000000.0,
  "trailingEps": 13.09,
  "trailingPE": 24.983957,
- "trailingPegRatio": 10.2259,
+ "trailingPegRatio": 9.6621,
  "website": "https://www.bombardier.com"
 }

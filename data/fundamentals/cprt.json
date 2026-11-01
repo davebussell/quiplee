@@ -14,7 +14,7 @@
  "equity": 9097295000.0,
  "equity_date": "2026-07-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 43.38,
  "fiftyTwoWeekLow": 25.72,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 1604492032,
  "operatingMargins": 0.32011002,
  "payoutRatio": 0.0,
- "pegRatio": 2.96,
+ "pegRatio": 3.02,
  "priceToBook": 3.0679157,
  "priceToSalesTrailing12Months": 5.981373,
  "profitMargins": 0.31809,
@@ -58,6 +58,6 @@
  "total_debt_bs": 88367000.0,
  "trailingEps": 1.55,
  "trailingPE": 19.43871,
- "trailingPegRatio": 2.9643,
+ "trailingPegRatio": 3.0225,
  "website": "https://www.copart.com"
 }

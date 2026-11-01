@@ -14,7 +14,7 @@
  "equity": 4428390000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 286.99,
  "fiftyTwoWeekLow": 85.68,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2016615040,
  "operatingMargins": -0.02259,
  "payoutRatio": 0.0,
- "pegRatio": 6.74,
+ "pegRatio": 6.46,
  "priceToBook": 50.256874,
  "priceToSalesTrailing12Months": 47.519848,
  "profitMargins": 0.00834,
@@ -58,6 +58,6 @@
  "total_debt_bs": 820077000.0,
  "trailingEps": 0.06,
  "trailingPE": 4173.8335,
- "trailingPegRatio": 6.7394,
+ "trailingPegRatio": 6.4627,
  "website": "https://www.crowdstrike.com"
 }

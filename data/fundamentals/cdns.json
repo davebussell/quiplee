@@ -14,7 +14,7 @@
  "equity": 5474181000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 416.69,
  "fiftyTwoWeekLow": 262.75,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 1967931008,
  "operatingMargins": 0.28927,
  "payoutRatio": 0.0,
- "pegRatio": 2.54,
+ "pegRatio": 2.43,
  "priceToBook": 13.085766,
  "priceToSalesTrailing12Months": 14.671351,
  "profitMargins": 0.22514999,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2616439000.0,
  "trailingEps": 5.03,
  "trailingPE": 65.18688,
- "trailingPegRatio": 2.537,
+ "trailingPegRatio": 2.427,
  "website": "https://www.cadence.com"
 }

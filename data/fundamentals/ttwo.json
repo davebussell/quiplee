@@ -14,7 +14,7 @@
  "equity": 3510900000.0,
  "equity_date": "2026-03-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 265.94,
  "fiftyTwoWeekLow": 183.86,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 500200000,
  "operatingMargins": 0.0051499996,
  "payoutRatio": 0.0,
- "pegRatio": 2.65,
+ "pegRatio": 2.61,
  "priceToBook": 9.855411,
  "priceToSalesTrailing12Months": 5.31789,
  "profitMargins": -0.04792,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2958300000.0,
  "trailingEps": -1.73,
  "trailingPE": null,
- "trailingPegRatio": 2.6492,
+ "trailingPegRatio": 2.6051,
  "website": "https://www.take2games.com"
 }

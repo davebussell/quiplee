@@ -14,7 +14,7 @@
  "equity": 11623000000.0,
  "equity_date": "2025-11-30",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 362.71,
  "fiftyTwoWeekLow": 190.12,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 6648000000.0,
  "trailingEps": 17.91,
  "trailingPE": 13.971524,
- "trailingPegRatio": 0.5995,
+ "trailingPegRatio": 0.6046,
  "website": "https://www.adobe.com"
 }

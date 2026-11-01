@@ -6,7 +6,7 @@
  "currency": "CAD",
  "currentRatio": 1.991,
  "debtToEquity": null,
- "dividendYield": 5.86,
+ "dividendYield": 6.01,
  "earningsGrowth": -0.595,
  "ebit": 123801000.0,
  "ebitda": null,
@@ -14,7 +14,7 @@
  "equity": 645208000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 31.97,
  "fiftyTwoWeekLow": 19.69,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 0,
  "totalRevenue": 153026000,
  "total_debt_bs": null,
- "trailingEps": 1.22,
- "trailingPE": 16.360655,
+ "trailingEps": 1.21,
+ "trailingPE": 16.495867,
  "trailingPegRatio": null,
  "website": "https://labradorironore.com"
 }

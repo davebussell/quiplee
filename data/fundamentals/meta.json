@@ -14,7 +14,7 @@
  "equity": 217243000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 779.82,
  "fiftyTwoWeekLow": 520.26,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 133087002624,
  "operatingMargins": 0.35414,
  "payoutRatio": 0.0716,
- "pegRatio": 0.82,
+ "pegRatio": 0.8,
  "priceToBook": 5.770923,
  "priceToSalesTrailing12Months": 6.508254,
  "profitMargins": 0.31145,
@@ -58,6 +58,6 @@
  "total_debt_bs": 83897000000.0,
  "trailingEps": 29.31,
  "trailingPE": 20.982258,
- "trailingPegRatio": 0.8159,
+ "trailingPegRatio": 0.8034,
  "website": "https://www.meta.com"
 }

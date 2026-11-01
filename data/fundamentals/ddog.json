@@ -14,7 +14,7 @@
  "equity": 3732206000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-10-31",
+ "fetched": "2026-11-01",
  "fiftyTwoWeekHigh": 300.68,
  "fiftyTwoWeekLow": 98.01,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 1229033984,
  "operatingMargins": 0.00666,
  "payoutRatio": 0.0,
- "pegRatio": 1.38,
+ "pegRatio": 1.22,
  "priceToBook": 19.33832,
  "priceToSalesTrailing12Months": 21.29706,
  "profitMargins": 0.044770002,
@@ -58,6 +58,6 @@
  "total_debt_bs": 1279005000.0,
  "trailingEps": 0.5,
  "trailingPE": 470.54,
- "trailingPegRatio": 1.3817,
+ "trailingPegRatio": 1.2228,
  "website": "https://www.datadoghq.com"
 }
