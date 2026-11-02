@@ -1,6 +1,6 @@
 {
  "beta": 1.001,
- "bookValue": 21.472,
+ "bookValue": 21.128,
  "cash_bs": 34287000.0,
  "country": "Canada",
  "currency": "CAD",
@@ -14,7 +14,7 @@
  "equity": 2532903000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "fiftyTwoWeekHigh": 23.36,
  "fiftyTwoWeekLow": 14.85,
  "financialCurrency": "CAD",
@@ -35,7 +35,7 @@
  "operatingMargins": 0.51161,
  "payoutRatio": 0.8121,
  "pegRatio": null,
- "priceToBook": 1.0306445,
+ "priceToBook": 1.0474252,
  "priceToSalesTrailing12Months": 4.265238,
  "profitMargins": 0.16422,
  "quickRatio": 0.431,
@@ -56,8 +56,8 @@
  "totalDebt": 2664698112,
  "totalRevenue": 715233024,
  "total_debt_bs": 2187596000.0,
- "trailingEps": 1.24,
- "trailingPE": 17.846773,
+ "trailingEps": 1.08,
+ "trailingPE": 20.49074,
  "trailingPegRatio": null,
  "website": "https://www.primarisreit.com"
 }

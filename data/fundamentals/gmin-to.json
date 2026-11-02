@@ -14,7 +14,7 @@
  "equity": 1418432000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "fiftyTwoWeekHigh": 58.74,
  "fiftyTwoWeekLow": 25.43,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 33019000,
  "totalRevenue": 650115968,
  "total_debt_bs": 141440000.0,
- "trailingEps": 2.23,
- "trailingPE": 16.973093,
+ "trailingEps": 2.17,
+ "trailingPE": 17.442394,
  "trailingPegRatio": null,
  "website": "https://www.gmin.gold"
 }

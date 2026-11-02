@@ -14,7 +14,7 @@
  "equity": 10282332000.0,
  "equity_date": "2025-09-30",
  "exchange": "TOR",
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "fiftyTwoWeekHigh": 131.97,
  "fiftyTwoWeekLow": 83.34,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 4465882112,
  "totalRevenue": 16441382912,
  "total_debt_bs": 4331319000.0,
- "trailingEps": 8.01,
- "trailingPE": 14.038701,
+ "trailingEps": 8.05,
+ "trailingPE": 13.968944,
  "trailingPegRatio": 1.1263,
  "website": "https://www.cgi.com"
 }

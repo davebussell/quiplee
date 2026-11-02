@@ -14,7 +14,7 @@
  "equity": 4818178000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-01",
+ "fetched": "2026-11-02",
  "fiftyTwoWeekHigh": 23.84,
  "fiftyTwoWeekLow": 18.26,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 4150603008,
  "totalRevenue": 740019008,
  "total_debt_bs": 3989738000.0,
- "trailingEps": 4.84,
- "trailingPE": 4.743801,
+ "trailingEps": 4.78,
+ "trailingPE": 4.803347,
  "trailingPegRatio": null,
  "website": "https://www.fcr.ca"
 }
