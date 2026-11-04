@@ -14,7 +14,7 @@
  "equity": 1618912000.0,
  "equity_date": "2026-01-31",
  "exchange": "TOR",
- "fetched": "2026-11-03",
+ "fetched": "2026-11-04",
  "fiftyTwoWeekHigh": 133.16,
  "fiftyTwoWeekLow": 85.26,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 305712992,
  "operatingMargins": 0.33181,
  "payoutRatio": 0.0,
- "pegRatio": 1.49,
+ "pegRatio": 1.5,
  "priceToBook": 4.7267284,
  "priceToSalesTrailing12Months": 14.099779,
  "profitMargins": 0.24254,
@@ -58,6 +58,6 @@
  "total_debt_bs": 8363000.0,
  "trailingEps": 2.98,
  "trailingPE": 42.872482,
- "trailingPegRatio": 1.4857,
+ "trailingPegRatio": 1.4985,
  "website": "https://www.descartes.com"
 }
