@@ -14,7 +14,7 @@
  "equity": -763352000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 102.46,
  "fiftyTwoWeekLow": 82.59,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 3231646976,
  "operatingMargins": 0.21445999,
  "payoutRatio": 0.0,
- "pegRatio": 1.71,
+ "pegRatio": 1.68,
  "priceToBook": -34.559784,
  "priceToSalesTrailing12Months": 3.8090148,
  "profitMargins": 0.14273,
@@ -58,6 +58,6 @@
  "total_debt_bs": 8491499000.0,
  "trailingEps": 3.26,
  "trailingPE": 27.57362,
- "trailingPegRatio": 1.7133,
+ "trailingPegRatio": 1.6834,
  "website": "https://www.oreillyauto.com"
 }

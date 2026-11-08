@@ -14,7 +14,7 @@
  "equity": 439640776.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 32.41,
  "fiftyTwoWeekLow": 19.79,
  "financialCurrency": "CAD",
@@ -33,7 +33,7 @@
  "numberOfAnalystOpinions": 8,
  "operatingCashflow": -103997192,
  "operatingMargins": 0.0,
- "payoutRatio": null,
+ "payoutRatio": 0.0,
  "pegRatio": null,
  "priceToBook": 11.131013,
  "priceToSalesTrailing12Months": null,
@@ -56,8 +56,8 @@
  "totalDebt": 0,
  "totalRevenue": null,
  "total_debt_bs": null,
- "trailingEps": -0.64,
- "trailingPE": null,
+ "trailingEps": 0.17,
+ "trailingPE": 127.94118,
  "trailingPegRatio": null,
  "website": "https://ngexminerals.com"
 }

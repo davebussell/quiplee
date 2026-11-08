@@ -14,7 +14,7 @@
  "equity": 81292000000.0,
  "equity_date": "2025-10-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 495.0,
  "fiftyTwoWeekLow": 289.767,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 65136000000.0,
  "trailingEps": 7.83,
  "trailingPE": 37.5083,
- "trailingPegRatio": 0.2881,
+ "trailingPegRatio": 0.2902,
  "website": "https://www.broadcom.com"
 }

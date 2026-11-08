@@ -14,7 +14,7 @@
  "equity": 12648000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 60.57,
  "fiftyTwoWeekLow": 50.14,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 19160000000.0,
  "trailingEps": 2.36,
  "trailingPE": 24.44068,
- "trailingPegRatio": 3.6669,
+ "trailingPegRatio": 3.672,
  "website": "https://www.hydroone.com"
 }

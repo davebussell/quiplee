@@ -14,7 +14,7 @@
  "equity": 31256900000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 991.73,
  "fiftyTwoWeekLow": 591.52,
  "financialCurrency": "USD",
@@ -23,7 +23,7 @@
  "freeCashflow": 2579912448,
  "fullTimeEmployees": 15410,
  "grossMargins": 0.46734002,
- "heldPercentInsiders": 0.0207,
+ "heldPercentInsiders": 0.02069,
  "industry": "Biotechnology",
  "interest_cover": 120.42237442922375,
  "interest_expense": 43800000.0,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2705900000.0,
  "trailingEps": 45.24,
  "trailingPE": 19.990051,
- "trailingPegRatio": 1.1006,
+ "trailingPegRatio": 1.1024,
  "website": "https://www.regeneron.com"
 }

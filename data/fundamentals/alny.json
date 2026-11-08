@@ -14,7 +14,7 @@
  "equity": 789176000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 479.79,
  "fiftyTwoWeekLow": 154.3,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 1278389000.0,
  "trailingEps": 19.8,
  "trailingPE": 7.875758,
- "trailingPegRatio": 0.2127,
+ "trailingPegRatio": 0.2118,
  "website": "https://www.alnylam.com"
 }

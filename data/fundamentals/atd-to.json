@@ -14,9 +14,9 @@
  "equity": 16178900000.0,
  "equity_date": "2026-04-30",
  "exchange": "TOR",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 95.15,
- "fiftyTwoWeekLow": 68.3,
+ "fiftyTwoWeekLow": 68.51,
  "financialCurrency": "USD",
  "forwardEps": 5.049152,
  "forwardPE": 16.478014,
@@ -58,6 +58,6 @@
  "total_debt_bs": 16446000000.0,
  "trailingEps": 4.77,
  "trailingPE": 17.442347,
- "trailingPegRatio": 2.0599,
+ "trailingPegRatio": 2.0254,
  "website": "https://corporate.couche-tard.com"
 }

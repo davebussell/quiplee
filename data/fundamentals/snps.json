@@ -14,7 +14,7 @@
  "equity": 28327602000.0,
  "equity_date": "2025-10-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 539.48,
  "fiftyTwoWeekLow": 362.55,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2938341120,
  "operatingMargins": 0.14521,
  "payoutRatio": 0.0,
- "pegRatio": 2.29,
+ "pegRatio": 2.34,
  "priceToBook": 2.7705781,
  "priceToSalesTrailing12Months": 9.167415,
  "profitMargins": 0.11432999,
@@ -58,6 +58,6 @@
  "total_debt_bs": 14293418000.0,
  "trailingEps": 5.66,
  "trailingPE": 79.58657,
- "trailingPegRatio": 2.2905,
+ "trailingPegRatio": 2.3433,
  "website": "https://www.synopsys.com"
 }

@@ -14,7 +14,7 @@
  "equity": 604100000.0,
  "equity_date": "2026-01-31",
  "exchange": "TOR",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 112.26,
  "fiftyTwoWeekLow": 67.11,
  "financialCurrency": "CAD",
@@ -41,7 +41,7 @@
  "quickRatio": 0.421,
  "quoteType": "EQUITY",
  "recommendationKey": "buy",
- "recommendationMean": 2.05,
+ "recommendationMean": 2.1,
  "returnOnAssets": 0.05888,
  "returnOnEquity": 0.2722,
  "revenueGrowth": 0.185,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2679700000.0,
  "trailingEps": 1.57,
  "trailingPE": 58.292988,
- "trailingPegRatio": 1.108,
+ "trailingPegRatio": 1.1097,
  "website": "https://www.brp.com"
 }

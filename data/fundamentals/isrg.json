@@ -14,7 +14,7 @@
  "equity": 17824000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 603.88,
  "fiftyTwoWeekLow": 328.57,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 4089499904,
  "operatingMargins": 0.33286,
  "payoutRatio": 0.0,
- "pegRatio": 2.11,
+ "pegRatio": 2.04,
  "priceToBook": 9.817227,
  "priceToSalesTrailing12Months": 13.816229,
  "profitMargins": 0.25542,
@@ -58,6 +58,6 @@
  "total_debt_bs": 87000000.0,
  "trailingEps": 8.27,
  "trailingPE": 54.752113,
- "trailingPegRatio": 2.1099,
+ "trailingPegRatio": 2.0391,
  "website": "https://www.intuitive.com"
 }

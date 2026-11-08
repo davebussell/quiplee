@@ -14,7 +14,7 @@
  "equity": 16273000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-07",
+ "fetched": "2026-11-08",
  "fiftyTwoWeekHigh": 334.03,
  "fiftyTwoWeekLow": 152.73,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 14048000000.0,
  "trailingEps": 7.71,
  "trailingPE": 35.974056,
- "trailingPegRatio": 0.8432,
+ "trailingPegRatio": 0.8408,
  "website": "https://www.ti.com"
 }
