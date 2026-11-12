@@ -26,6 +26,7 @@ PAGES = [
     "/learn/", "/guides/", "/guides/your-plays/", "/guides/news-that-moves-stocks/", "/guides/ways-to-invest/", "/method/", "/articles/", "/theory/",
     "/me/", "/alerts/", "/developers/", "/guides/brokers/", "/articles/before-you-automate/", "/earnings/",
     "/strategies/livermore-market-key/", "/articles/old-vs-new-signal/", "/articles/what-has-an-edge/",
+    "/articles/the-ai-sell-off/", "/articles/did-we-see-it-coming/",
 ]
 LOCAL_PAGES = ["/", "/stocks/", "/stocks/shop-to/", "/stocks/mu/", "/stocks/spy/", "/watchlist/", "/me/", "/guides/your-plays/", "/guides/ways-to-invest/",
                "/developers/", "/guides/brokers/", "/articles/before-you-automate/", "/articles/automate-with-claude/", "/earnings/"]

@@ -27,7 +27,8 @@ WRITTEN = pd.Timestamp("2026-10-03")
 from .riskpieces import FREE as _RISK_FREE  # noqa: E402
 from . import automate  # noqa: E402
 from . import edgepiece  # noqa: E402
-FREE_PIECES = _RISK_FREE | automate.FREE | {edgepiece.PATH}     # free to read (netlify/edge-functions/member-gate.js excludedPath lists the same)
+from . import selloff  # noqa: E402
+FREE_PIECES = _RISK_FREE | automate.FREE | {edgepiece.PATH} | set(selloff.PATHS)     # free to read (netlify/edge-functions/member-gate.js excludedPath lists the same)
 FREE_TAG = '<span class="tag">Free</span>'
 BUCKETS = [("risk", "Risk and selling", "When to get out, how much to put in one name, and how the signal changed to carry an exit rule. Free to read."),
            ("stocks", "Stocks", "A brief on every covered name, rebuilt each night, plus the names the plays agree on and the ones a crash would hit hardest."),
@@ -174,6 +175,9 @@ class Articles:
                   "Every play on every stock against buying and holding: where timing earned its keep, where it didn't, and how not to fool yourself.", "live", None))
         automate.plan(self)
         L.append((edgepiece.BUCKET, edgepiece.PATH, edgepiece.TITLE, edgepiece.DEK, "written", edgepiece.WRITTEN))
+        # the November 2026 sell-off: "did we see it coming" registered last, so the home page features it (newest())
+        L.append((selloff.BUCKET_WHAT, selloff.WHAT_PATH, selloff.WHAT_TITLE, selloff.WHAT_DEK, "written", selloff.WRITTEN))
+        L.append((selloff.BUCKET_SEEN, selloff.SEEN_PATH, selloff.SEEN_TITLE, selloff.SEEN_DEK, "written", selloff.WRITTEN))
         for g in self.sector_groups():
             L.append(("strategies", f"articles/sectors/{slugify(g)}/", f"{e(g)}: what the plays say",
                       f"Every covered {e(g.lower())} name through the same lenses: plays, trend, run-up and crash exposure.", "live", None))
@@ -198,6 +202,7 @@ class Articles:
             self.sector(g)
         automate.build(self)
         edgepiece.build(self)
+        selloff.build(self)
         for t in TICKERS:
             if (t["sym"], "buy-and-hold") in self.s.R:
                 self.stock_brief(t)
@@ -251,7 +256,7 @@ class Articles:
                 extra = f'<div class="card"><p class="h3">Sector briefs</p><div class="chips" style="margin-top:10px">{chips}</div></div>'
             secs += f'<section id="{key}"><div class="sec-head"><h2 class="h2">{e(name)}</h2><p>{e(desc)}</p></div>{extra}<div class="grid grid-3">{cards}</div></section>'
         feat = ""
-        for sp in ["articles/calls-graded/", "articles/automate-with-claude/", "articles/old-vs-new-signal/", "articles/why-your-signal-changed/", "articles/when-to-sell/", "articles/one-stock-too-many/", "articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
+        for sp in [selloff.SEEN_PATH, selloff.WHAT_PATH, "articles/calls-graded/", "articles/automate-with-claude/", "articles/old-vs-new-signal/", "articles/why-your-signal-changed/", "articles/when-to-sell/", "articles/one-stock-too-many/", "articles/top-10/", "articles/is-this-a-bubble/", "articles/bubbles-and-crashes/", "articles/cash-or-invested/",
                    "articles/debt-and-crashes/", "articles/green-across-the-board/"]:
             b, _, title, dek, kind, date = next(x for x in self.list if x[1] == sp)
             when = f"Updated with the {self.s.asof.strftime('%b %-d')} close" if kind == "live" else (date or WRITTEN).strftime("%b %-d, %Y")
