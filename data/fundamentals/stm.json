@@ -14,7 +14,7 @@
  "equity": 17828000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NYQ",
- "fetched": "2026-11-14",
+ "fetched": "2026-11-15",
  "fiftyTwoWeekHigh": 81.42,
  "fiftyTwoWeekLow": 21.11,
  "financialCurrency": "USD",
@@ -23,7 +23,7 @@
  "freeCashflow": 110000000,
  "fullTimeEmployees": 49000,
  "grossMargins": 0.35533002,
- "heldPercentInsiders": 0.00017000001,
+ "heldPercentInsiders": 0.0010800001,
  "industry": "Semiconductors",
  "interest_cover": 8.272727272727273,
  "interest_expense": 55000000.0,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2354000000.0,
  "trailingEps": 0.57,
  "trailingPE": 81.98246,
- "trailingPegRatio": 0.1801,
+ "trailingPegRatio": 0.1811,
  "website": "https://www.st.com/content/st_com/en.html"
 }

@@ -14,7 +14,7 @@
  "equity": 442387000000.0,
  "equity_date": "2026-06-30",
  "exchange": "NMS",
- "fetched": "2026-11-14",
+ "fetched": "2026-11-15",
  "fiftyTwoWeekHigh": 559.15,
  "fiftyTwoWeekLow": 349.2,
  "financialCurrency": "USD",
@@ -23,7 +23,7 @@
  "freeCashflow": 2994125056,
  "fullTimeEmployees": 223000,
  "grossMargins": 0.67657,
- "heldPercentInsiders": 0.00081,
+ "heldPercentInsiders": 0.00223,
  "industry": "Software - Infrastructure",
  "interest_cover": 55.38675843985578,
  "interest_expense": 3051000000.0,
@@ -58,6 +58,6 @@
  "total_debt_bs": 56826000000.0,
  "trailingEps": 19.16,
  "trailingPE": 27.34238,
- "trailingPegRatio": 1.5473,
+ "trailingPegRatio": 1.5499,
  "website": "https://www.microsoft.com"
 }

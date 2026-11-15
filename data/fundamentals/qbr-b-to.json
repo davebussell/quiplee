@@ -14,7 +14,7 @@
  "equity": 2625000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-14",
+ "fetched": "2026-11-15",
  "fiftyTwoWeekHigh": 79.39,
  "fiftyTwoWeekLow": 48.23,
  "financialCurrency": "CAD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2104600064,
  "operatingMargins": 0.28394,
  "payoutRatio": 0.3678,
- "pegRatio": 1.58,
+ "pegRatio": 1.56,
  "priceToBook": 5.9685535,
  "priceToSalesTrailing12Months": 2.9475605,
  "profitMargins": 0.17206,
@@ -58,6 +58,6 @@
  "total_debt_bs": 7203700000.0,
  "trailingEps": 4.35,
  "trailingPE": 17.714943,
- "trailingPegRatio": 1.5798,
+ "trailingPegRatio": 1.5601,
  "website": "https://www.quebecor.com"
 }
