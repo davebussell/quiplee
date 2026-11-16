@@ -1,6 +1,6 @@
 {
  "beta": 0.738,
- "bookValue": 15.301,
+ "bookValue": 13.977,
  "cash_bs": 71180000.0,
  "country": "Canada",
  "currency": "CAD",
@@ -14,7 +14,7 @@
  "equity": 10446407000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-15",
+ "fetched": "2026-11-16",
  "fiftyTwoWeekHigh": 16.87,
  "fiftyTwoWeekLow": 14.44,
  "financialCurrency": "CAD",
@@ -35,7 +35,7 @@
  "operatingMargins": 0.68884003,
  "payoutRatio": 0.9831,
  "pegRatio": null,
- "priceToBook": 0.99862754,
+ "priceToBook": 1.0932245,
  "priceToSalesTrailing12Months": 7.196876,
  "profitMargins": 0.37194002,
  "quickRatio": 0.355,
@@ -56,8 +56,8 @@
  "totalDebt": 12915240960,
  "totalRevenue": 1536754048,
  "total_debt_bs": 6804960000.0,
- "trailingEps": 0.79,
- "trailingPE": 19.341772,
+ "trailingEps": -0.1,
+ "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.choicereit.ca"
 }

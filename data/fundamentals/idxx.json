@@ -14,7 +14,7 @@
  "equity": 1605383000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-15",
+ "fetched": "2026-11-16",
  "fiftyTwoWeekHigh": 769.98,
  "fiftyTwoWeekLow": 500.61,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 972963008,
  "totalRevenue": 4662220800,
  "total_debt_bs": 976062000.0,
- "trailingEps": 14.84,
- "trailingPE": 47.45485,
+ "trailingEps": 14.97,
+ "trailingPE": 47.04275,
  "trailingPegRatio": 3.2715,
  "website": "https://www.idexx.com"
 }

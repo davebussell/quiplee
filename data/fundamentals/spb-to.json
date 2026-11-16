@@ -14,7 +14,7 @@
  "equity": 807000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-15",
+ "fetched": "2026-11-16",
  "fiftyTwoWeekHigh": 8.86,
  "fiftyTwoWeekLow": 5.11,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 1735000064,
  "totalRevenue": 2403899904,
  "total_debt_bs": 1860800000.0,
- "trailingEps": 0.25,
- "trailingPE": 22.68,
+ "trailingEps": 0.24,
+ "trailingPE": 23.625,
  "trailingPegRatio": null,
  "website": "https://www.superiorplus.com"
 }
