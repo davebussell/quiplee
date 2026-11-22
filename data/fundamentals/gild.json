@@ -14,7 +14,7 @@
  "equity": 22702000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 176.58,
  "fiftyTwoWeekLow": 116.88,
  "financialCurrency": "USD",
@@ -41,7 +41,7 @@
  "quickRatio": 1.08,
  "quoteType": "EQUITY",
  "recommendationKey": "buy",
- "recommendationMean": 1.67857,
+ "recommendationMean": 1.7037,
  "returnOnAssets": 0.13469,
  "returnOnEquity": -0.22445999,
  "revenueGrowth": 0.068,
@@ -58,6 +58,6 @@
  "total_debt_bs": 24936000000.0,
  "trailingEps": -3.13,
  "trailingPE": null,
- "trailingPegRatio": 2.2392,
+ "trailingPegRatio": 2.2379,
  "website": "https://www.gilead.com"
 }

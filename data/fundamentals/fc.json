@@ -14,7 +14,7 @@
  "equity": 51364000.0,
  "equity_date": "2026-08-31",
  "exchange": "NYQ",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 26.81,
  "fiftyTwoWeekLow": 11.16,
  "financialCurrency": "USD",
@@ -40,8 +40,8 @@
  "profitMargins": 0.01883,
  "quickRatio": 0.536,
  "quoteType": "EQUITY",
- "recommendationKey": "strong_buy",
- "recommendationMean": 1.33333,
+ "recommendationKey": "none",
+ "recommendationMean": null,
  "returnOnAssets": 0.041950002,
  "returnOnEquity": 0.08325,
  "revenueGrowth": -0.018,
@@ -58,6 +58,6 @@
  "total_debt_bs": 823000.0,
  "trailingEps": 0.42,
  "trailingPE": 31.404762,
- "trailingPegRatio": 0.57,
+ "trailingPegRatio": 0.5735,
  "website": "https://www.franklincovey.com"
 }

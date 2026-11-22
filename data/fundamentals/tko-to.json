@@ -14,9 +14,9 @@
  "equity": 778662000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 13.6,
- "fiftyTwoWeekLow": 5.85,
+ "fiftyTwoWeekLow": 5.94,
  "financialCurrency": "CAD",
  "forwardEps": 1.02286,
  "forwardPE": 7.4888053,
@@ -56,8 +56,8 @@
  "totalDebt": 755270016,
  "totalRevenue": 1153634944,
  "total_debt_bs": 746996000.0,
- "trailingEps": 0.23,
- "trailingPE": 33.304348,
+ "trailingEps": 0.21,
+ "trailingPE": 36.476192,
  "trailingPegRatio": null,
  "website": "https://www.trekormetals.com"
 }

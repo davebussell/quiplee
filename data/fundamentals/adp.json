@@ -10,11 +10,11 @@
  "earningsGrowth": 0.137,
  "ebit": 6189600000.0,
  "ebitda": 6547400192,
- "enterpriseValue": 121481625600,
+ "enterpriseValue": 121365168128,
  "equity": 6031200000.0,
  "equity_date": "2026-06-30",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 316.14,
  "fiftyTwoWeekLow": 188.16,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 5270800000.0,
  "trailingEps": 11.28,
  "trailingPE": 26.747341,
- "trailingPegRatio": 2.7691,
+ "trailingPegRatio": 2.7739,
  "website": "https://www.adp.com"
 }

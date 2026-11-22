@@ -14,7 +14,7 @@
  "equity": 1237500000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 197.13,
  "fiftyTwoWeekLow": 73.55,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 3686899968,
  "operatingMargins": 0.32911,
  "payoutRatio": 0.0,
- "pegRatio": 1.53,
+ "pegRatio": 1.45,
  "priceToBook": 40.71919,
  "priceToSalesTrailing12Months": 11.6123085,
  "profitMargins": 0.28959998,
@@ -58,6 +58,6 @@
  "total_debt_bs": 996300000.0,
  "trailingEps": 3.06,
  "trailingPE": 40.705883,
- "trailingPegRatio": 1.5345,
+ "trailingPegRatio": 1.454,
  "website": "https://www.fortinet.com"
 }

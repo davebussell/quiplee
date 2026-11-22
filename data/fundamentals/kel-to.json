@@ -14,7 +14,7 @@
  "equity": 1139639000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 13.18,
  "fiftyTwoWeekLow": 7.04,
  "financialCurrency": "CAD",
@@ -41,7 +41,7 @@
  "quickRatio": 0.614,
  "quoteType": "EQUITY",
  "recommendationKey": "buy",
- "recommendationMean": 1.58333,
+ "recommendationMean": 1.75,
  "returnOnAssets": 0.04882,
  "returnOnEquity": 0.07717,
  "revenueGrowth": 0.719,
@@ -56,8 +56,8 @@
  "totalDebt": 199352992,
  "totalRevenue": 651510016,
  "total_debt_bs": 180879000.0,
- "trailingEps": 0.46,
- "trailingPE": 26.086956,
+ "trailingEps": 0.45,
+ "trailingPE": 26.666668,
  "trailingPegRatio": null,
  "website": "https://www.keltexploration.com"
 }

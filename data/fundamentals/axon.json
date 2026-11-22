@@ -14,7 +14,7 @@
  "equity": 3242658000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 665.07,
  "fiftyTwoWeekLow": 289.685,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 225482000,
  "operatingMargins": 0.01538,
  "payoutRatio": 0.0,
- "pegRatio": 1.13,
+ "pegRatio": 1.07,
  "priceToBook": 6.2988687,
  "priceToSalesTrailing12Months": 6.9383197,
  "profitMargins": 0.07565,
@@ -58,6 +58,6 @@
  "total_debt_bs": 1909664000.0,
  "trailingEps": 3.11,
  "trailingPE": 93.61416,
- "trailingPegRatio": 1.1302,
+ "trailingPegRatio": 1.0719,
  "website": "https://www.axon.com"
 }

@@ -14,7 +14,7 @@
  "equity": 5139887000.0,
  "equity_date": "2026-05-31",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 233.46,
  "fiftyTwoWeekLow": 161.16,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2434129920,
  "operatingMargins": 0.23615,
  "payoutRatio": 0.3688,
- "pegRatio": 3.43,
+ "pegRatio": 3.45,
  "priceToBook": 16.88877,
  "priceToSalesTrailing12Months": 7.5567303,
  "profitMargins": 0.17824,
@@ -58,6 +58,6 @@
  "total_debt_bs": 2705957000.0,
  "trailingEps": 5.07,
  "trailingPE": 43.394474,
- "trailingPegRatio": 3.4313,
+ "trailingPegRatio": 3.4484,
  "website": "https://www.cintas.com"
 }

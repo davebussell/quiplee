@@ -14,7 +14,7 @@
  "equity": 579100000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 20.7,
  "fiftyTwoWeekLow": 8.005,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 252000000,
  "totalRevenue": 778899968,
  "total_debt_bs": 243800000.0,
- "trailingEps": 0.6,
- "trailingPE": 13.533333,
+ "trailingEps": 0.65,
+ "trailingPE": 12.492308,
  "trailingPegRatio": null,
  "website": "https://www.edrsilver.com"
 }

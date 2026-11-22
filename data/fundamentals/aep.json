@@ -14,7 +14,7 @@
  "equity": 31138000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-21",
+ "fetched": "2026-11-22",
  "fiftyTwoWeekHigh": 140.58,
  "fiftyTwoWeekLow": 112.54,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 49508000000.0,
  "trailingEps": 6.12,
  "trailingPE": 20.447712,
- "trailingPegRatio": 2.7071,
+ "trailingPegRatio": 2.7108,
  "website": "https://www.aep.com"
 }
