@@ -14,7 +14,7 @@
  "equity": 62999000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 658.52,
  "fiftyTwoWeekLow": 188.22,
  "financialCurrency": "USD",
@@ -41,7 +41,7 @@
  "quickRatio": 1.725,
  "quoteType": "EQUITY",
  "recommendationKey": "strong_buy",
- "recommendationMean": 1.35185,
+ "recommendationMean": 1.33333,
  "returnOnAssets": 0.05895,
  "returnOnEquity": 0.1196,
  "revenueGrowth": 0.447,
@@ -58,6 +58,6 @@
  "total_debt_bs": 3847000000.0,
  "trailingEps": 4.68,
  "trailingPE": 90.68163,
- "trailingPegRatio": 0.4376,
+ "trailingPegRatio": 0.3797,
  "website": "https://www.amd.com"
 }

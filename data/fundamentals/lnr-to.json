@@ -14,7 +14,7 @@
  "equity": 6097367000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 110.58,
  "fiftyTwoWeekLow": 76.95,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 1989040000,
  "totalRevenue": 11669671936,
  "total_debt_bs": 2098448000.0,
- "trailingEps": 11.14,
- "trailingPE": 7.2773786,
+ "trailingEps": 11.65,
+ "trailingPE": 6.9587984,
  "trailingPegRatio": null,
  "website": "https://www.linamar.com"
 }

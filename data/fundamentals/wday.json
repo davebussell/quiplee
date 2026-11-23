@@ -14,12 +14,12 @@
  "equity": 7805000000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 236.8,
  "fiftyTwoWeekLow": 110.36,
  "financialCurrency": "USD",
- "forwardEps": 13.23708,
- "forwardPE": 13.184177,
+ "forwardEps": 13.24296,
+ "forwardPE": 13.178323,
  "freeCashflow": 3046374912,
  "fullTimeEmployees": 20896,
  "grossMargins": 0.75795,
@@ -58,6 +58,6 @@
  "total_debt_bs": 3821000000.0,
  "trailingEps": 4.91,
  "trailingPE": 35.54379,
- "trailingPegRatio": 0.5218,
+ "trailingPegRatio": 0.5253,
  "website": "https://www.workday.com"
 }

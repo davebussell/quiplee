@@ -14,7 +14,7 @@
  "equity": 722038000.0,
  "equity_date": "2025-09-30",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 175.2,
  "fiftyTwoWeekLow": 95.0,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 1159352960,
  "totalRevenue": 1731218048,
  "total_debt_bs": 990949000.0,
- "trailingEps": 4.12,
- "trailingPE": 24.733011,
+ "trailingEps": 4.25,
+ "trailingPE": 23.97647,
  "trailingPegRatio": null,
  "website": "https://terravestindustries.com"
 }

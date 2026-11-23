@@ -14,7 +14,7 @@
  "equity": 21568000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 185.25,
  "fiftyTwoWeekLow": 128.05,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 23882000384,
  "totalRevenue": 18367000576,
  "total_debt_bs": 21630000000.0,
- "trailingEps": 7.96,
- "trailingPE": 22.032663,
+ "trailingEps": 8.01,
+ "trailingPE": 21.89513,
  "trailingPegRatio": 2.5286,
  "website": "https://www.cn.ca"
 }

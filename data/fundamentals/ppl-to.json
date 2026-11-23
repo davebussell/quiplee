@@ -14,7 +14,7 @@
  "equity": 16771000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 72.72,
  "fiftyTwoWeekLow": 50.15,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 13310000000.0,
  "trailingEps": 3.38,
  "trailingPE": 20.431952,
- "trailingPegRatio": 1.7217,
+ "trailingPegRatio": 1.6993,
  "website": "https://www.pembina.com"
 }

@@ -14,7 +14,7 @@
  "equity": 8761196000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 40.01,
  "fiftyTwoWeekLow": 29.56,
  "financialCurrency": "CAD",
@@ -56,7 +56,7 @@
  "totalDebt": 6150151168,
  "totalRevenue": 984235008,
  "total_debt_bs": 5996203000.0,
- "trailingEps": -2.16,
+ "trailingEps": -2.17,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.capreit.ca"

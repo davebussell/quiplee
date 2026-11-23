@@ -14,7 +14,7 @@
  "equity": 1140461000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 32.47,
  "fiftyTwoWeekLow": 14.17,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 1035292992,
  "totalRevenue": 2344049920,
  "total_debt_bs": 1054547000.0,
- "trailingEps": 1.29,
- "trailingPE": 22.449612,
+ "trailingEps": 1.26,
+ "trailingPE": 22.984127,
  "trailingPegRatio": null,
  "website": "https://www.mullen-group.com"
 }

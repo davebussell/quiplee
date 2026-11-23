@@ -14,7 +14,7 @@
  "equity": 25096000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 99.91,
  "fiftyTwoWeekLow": 55.72,
  "financialCurrency": "CAD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 9607000000.0,
  "trailingEps": 7.75,
  "trailingPE": 8.953548,
- "trailingPegRatio": 2.4592,
+ "trailingPegRatio": 2.3072,
  "website": "https://www.teck.com"
 }

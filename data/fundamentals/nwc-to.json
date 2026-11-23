@@ -14,7 +14,7 @@
  "equity": 799388000.0,
  "equity_date": "2026-01-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 59.76,
  "fiftyTwoWeekLow": 45.16,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 475004000,
  "totalRevenue": 2623459072,
  "total_debt_bs": 438950000.0,
- "trailingEps": 2.93,
- "trailingPE": 19.979523,
- "trailingPegRatio": 0.9982,
+ "trailingEps": 2.92,
+ "trailingPE": 20.047945,
+ "trailingPegRatio": 1.0015,
  "website": "https://www.northwest.ca"
 }

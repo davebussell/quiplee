@@ -14,7 +14,7 @@
  "equity": 25516000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 38.29,
  "fiftyTwoWeekLow": 24.88,
  "financialCurrency": "USD",
@@ -58,6 +58,6 @@
  "total_debt_bs": 16141000000.0,
  "trailingEps": 1.11,
  "trailingPE": 31.387386,
- "trailingPegRatio": 0.985,
+ "trailingPegRatio": 0.9973,
  "website": "https://www.keurigdrpepper.com"
 }

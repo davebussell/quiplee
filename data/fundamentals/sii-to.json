@@ -14,7 +14,7 @@
  "equity": 367245000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 230.43,
  "fiftyTwoWeekLow": 114.6,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 0,
  "totalRevenue": 409729984,
  "total_debt_bs": 24237000.0,
- "trailingEps": 6.15,
- "trailingPE": 21.630894,
+ "trailingEps": 6.34,
+ "trailingPE": 20.982649,
  "trailingPegRatio": null,
  "website": "https://www.sprott.com"
 }

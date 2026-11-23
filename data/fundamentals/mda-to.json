@@ -14,7 +14,7 @@
  "equity": 1355000000.0,
  "equity_date": "2025-12-31",
  "exchange": "TOR",
- "fetched": "2026-11-22",
+ "fetched": "2026-11-23",
  "fiftyTwoWeekHigh": 67.9,
  "fiftyTwoWeekLow": 22.66,
  "financialCurrency": "CAD",
@@ -56,8 +56,8 @@
  "totalDebt": 959400000,
  "totalRevenue": 1959900032,
  "total_debt_bs": 411100000.0,
- "trailingEps": 0.77,
- "trailingPE": 47.896107,
+ "trailingEps": 0.78,
+ "trailingPE": 47.282055,
  "trailingPegRatio": null,
  "website": "https://mda.space"
 }
