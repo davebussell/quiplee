@@ -14,7 +14,7 @@
  "equity": 3471720000.0,
  "equity_date": "2025-12-31",
  "exchange": "NCM",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 16.43,
  "fiftyTwoWeekLow": 4.92,
  "financialCurrency": "USD",
@@ -56,7 +56,7 @@
  "totalDebt": 3079822080,
  "totalRevenue": 716041984,
  "total_debt_bs": 3645353000.0,
- "trailingEps": -8.06,
+ "trailingEps": -8.05,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.mara.com"

@@ -14,7 +14,7 @@
  "equity": 8864000000.0,
  "equity_date": "2026-06-30",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 799.87,
  "fiftyTwoWeekLow": 151.42,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 4861000192,
  "operatingMargins": 0.40884998,
  "payoutRatio": 0.019299999,
- "pegRatio": 0.21,
+ "pegRatio": 0.24,
  "priceToBook": 10.90018,
  "priceToSalesTrailing12Months": 7.0421476,
  "profitMargins": 0.69196,
@@ -56,8 +56,8 @@
  "totalDebt": 922000000,
  "totalRevenue": 14481999872,
  "total_debt_bs": 1052000000.0,
- "trailingEps": 28.27,
- "trailingPE": 9.637425,
+ "trailingEps": 28.43,
+ "trailingPE": 9.583187,
  "trailingPegRatio": 0.3746,
  "website": "https://www.westerndigital.com"
 }

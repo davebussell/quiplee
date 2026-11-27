@@ -14,7 +14,7 @@
  "equity": 27492000000.0,
  "equity_date": "2026-07-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 432.33,
  "fiftyTwoWeekLow": 139.57,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 2712000000,
  "totalRevenue": 12451000320,
  "total_debt_bs": 2500000000.0,
- "trailingEps": 0.58,
- "trailingPE": 614.03455,
+ "trailingEps": 0.57,
+ "trailingPE": 624.80707,
  "trailingPegRatio": 1.8235,
  "website": "https://www.paloaltonetworks.com"
 }

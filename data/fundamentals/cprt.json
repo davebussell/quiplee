@@ -14,7 +14,7 @@
  "equity": 9097295000.0,
  "equity_date": "2026-07-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 41.79,
  "fiftyTwoWeekLow": 25.72,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 88367000,
  "totalRevenue": 4666208768,
  "total_debt_bs": 88367000.0,
- "trailingEps": 1.59,
- "trailingPE": 20.85849,
+ "trailingEps": 1.55,
+ "trailingPE": 21.396776,
  "trailingPegRatio": 3.1188,
  "website": "https://www.copart.com"
 }

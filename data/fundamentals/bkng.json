@@ -6,7 +6,7 @@
  "currency": "USD",
  "currentRatio": 1.115,
  "debtToEquity": null,
- "dividendYield": 1.15,
+ "dividendYield": 1.12,
  "earningsGrowth": 0.068,
  "ebit": 8449000000.0,
  "ebitda": 9831999488,
@@ -14,7 +14,7 @@
  "equity": -5578000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 220.806,
  "fiftyTwoWeekLow": 143.55,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 21319000064,
  "totalRevenue": 28125999104,
  "total_debt_bs": 19293000000.0,
- "trailingEps": 9.4,
- "trailingPE": 15.904256,
+ "trailingEps": 9.22,
+ "trailingPE": 16.21475,
  "trailingPegRatio": 0.54,
  "website": "https://www.bookingholdings.com"
 }

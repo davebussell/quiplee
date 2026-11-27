@@ -6,7 +6,7 @@
  "currency": "USD",
  "currentRatio": 4.084,
  "debtToEquity": 14.306,
- "dividendYield": 0.64,
+ "dividendYield": 0.67,
  "earningsGrowth": 1.077,
  "ebit": 141709000000.0,
  "ebitda": 243280003072,
@@ -14,7 +14,7 @@
  "equity": 157293000000.0,
  "equity_date": "2026-01-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 243.37,
  "fiftyTwoWeekLow": 124.5,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 38148001792,
  "totalRevenue": 361808003072,
  "total_debt_bs": 11040000000.0,
- "trailingEps": 8.95,
- "trailingPE": 16.681564,
+ "trailingEps": 9.31,
+ "trailingPE": 16.03652,
  "trailingPegRatio": 0.1519,
  "website": "https://www.nvidia.com"
 }

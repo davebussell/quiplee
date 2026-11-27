@@ -14,7 +14,7 @@
  "equity": 10033000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 239.0,
  "fiftyTwoWeekLow": 143.3,
  "financialCurrency": "USD",
@@ -23,7 +23,7 @@
  "freeCashflow": 6371375104,
  "fullTimeEmployees": 31400,
  "grossMargins": 0.52664,
- "heldPercentInsiders": 0.00611,
+ "heldPercentInsiders": 0.00598,
  "industry": "Internet Retail",
  "interest_cover": 362.5,
  "interest_expense": 2000000.0,
@@ -56,8 +56,8 @@
  "totalDebt": 3297999872,
  "totalRevenue": 17061000192,
  "total_debt_bs": 3290000000.0,
- "trailingEps": 2.5,
- "trailingPE": 66.56,
+ "trailingEps": 2.41,
+ "trailingPE": 69.04564,
  "trailingPegRatio": 0.9123,
  "website": "https://www.doordash.com"
 }

@@ -116,6 +116,10 @@
 718940,
 "BCE INC"
 ],
+"BIP-UN.TO": [
+2155396,
+"Brookfield Infrastructure Partners Inc."
+],
 "BKNG": [
 1075531,
 "Booking Holdings Inc."
@@ -853,7 +857,7 @@
 "XCEL ENERGY INC"
 ]
 },
-"map_date": "2026-11-19",
+"map_date": "2026-11-27",
 "no_cik": [
 "AAV.TO",
 "ABRA.TO",
@@ -996,5 +1000,5 @@
 "X.TO",
 "XOM"
 ],
-"run": "2026-11-26T19:42Z"
+"run": "2026-11-27T03:55Z"
 }

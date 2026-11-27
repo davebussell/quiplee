@@ -14,7 +14,7 @@
  "equity": -39275000.0,
  "equity_date": "2025-12-31",
  "exchange": "NGM",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 7.42,
  "fiftyTwoWeekLow": 0.532,
  "financialCurrency": "USD",
@@ -56,8 +56,8 @@
  "totalDebt": 7931000,
  "totalRevenue": 97048000,
  "total_debt_bs": 5183000.0,
- "trailingEps": 1.93,
- "trailingPE": 0.29559588,
+ "trailingEps": 2.0,
+ "trailingPE": 0.28525,
  "trailingPegRatio": null,
  "website": "https://www.namibminerals.com"
 }

@@ -14,7 +14,7 @@
  "equity": 10379000000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 89.77,
  "fiftyTwoWeekLow": 58.75,
  "financialCurrency": "USD",
@@ -34,7 +34,7 @@
  "operatingCashflow": 2415000064,
  "operatingMargins": 0.1375,
  "payoutRatio": 0.0296,
- "pegRatio": 27.96,
+ "pegRatio": 28.19,
  "priceToBook": 3.2440534,
  "priceToSalesTrailing12Months": 1.7413064,
  "profitMargins": 0.09951,
@@ -56,8 +56,8 @@
  "totalDebt": 10407000064,
  "totalRevenue": 21636999168,
  "total_debt_bs": 10463000000.0,
- "trailingEps": 4.78,
- "trailingPE": 17.433054,
+ "trailingEps": 4.73,
+ "trailingPE": 17.617336,
  "trailingPegRatio": 2.1603,
  "website": "https://www.gehealthcare.com"
 }

@@ -14,7 +14,7 @@
  "equity": 51042972000.0,
  "equity_date": "2025-12-31",
  "exchange": "NMS",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 198.4,
  "fiftyTwoWeekLow": 70.37,
  "financialCurrency": "USD",
@@ -56,7 +56,7 @@
  "totalDebt": 6776226816,
  "totalRevenue": 495083008,
  "total_debt_bs": 8236290000.0,
- "trailingEps": -53.96,
+ "trailingEps": -52.33,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.strategy.com"

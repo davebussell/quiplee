@@ -14,7 +14,7 @@
  "equity": -2238862000.0,
  "equity_date": "2025-12-31",
  "exchange": "NCM",
- "fetched": "2026-11-26",
+ "fetched": "2026-11-27",
  "fiftyTwoWeekHigh": 18.74,
  "fiftyTwoWeekLow": 1.11,
  "financialCurrency": "USD",
@@ -56,7 +56,7 @@
  "totalDebt": 686625984,
  "totalRevenue": 266467008,
  "total_debt_bs": 834408000.0,
- "trailingEps": -1.1,
+ "trailingEps": -1.07,
  "trailingPE": null,
  "trailingPegRatio": null,
  "website": "https://www.eose.com"
